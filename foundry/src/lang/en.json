@@ -1,0 +1,25 @@
+{
+  "INSPECTRES": {
+    "Skills": "Skills",
+    "Academics": "Academics",
+    "Athletics": "Athletics",
+    "Technology": "Technology",
+    "Contact": "Contact",
+    "Cool": "Cool Dice",
+    "Talent": "Talent",
+    "Characteristics": "Characteristics",
+    "MissionPool": "Mission Pool",
+    "Cards": "Cards",
+    "Library": "Library",
+    "Gym": "Gym",
+    "Credit": "Credit",
+    "Bank": "Bank Dice",
+    "MissionGoal": "Mission Goal",
+    "DebtMode": "Debt Mode",
+    "LoanAmount": "Loan Amount",
+    "SkillRoll": "Skill Roll",
+    "StressRoll": "Stress Roll",
+    "BankRoll": "Bank Roll",
+    "ClientRoll": "Client Roll"
+  }
+}
