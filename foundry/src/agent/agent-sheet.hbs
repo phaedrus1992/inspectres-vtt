@@ -1,0 +1,156 @@
+<form class="inspectres-sheet inspectres-agent-sheet" autocomplete="off">
+  <!-- Header -->
+  <header class="inspectres-header">
+    <div class="sheet-header">
+      <img src="{{actor.img}}" alt="{{actor.name}}" class="actor-portrait" />
+      <div class="actor-info">
+        <h1><input type="text" name="name" value="{{actor.name}}" placeholder="Agent Name" /></h1>
+        <p class="actor-type">Agent</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- Content -->
+  <div class="sheet-body">
+    <!-- Talent Section -->
+    <section class="inspectres-section">
+      <h2>{{localize "INSPECTRES.Talent"}}</h2>
+      <input
+        type="text"
+        name="system.talent"
+        value="{{system.talent}}"
+        placeholder="e.g., Theatre Major"
+        class="talent-input"
+      />
+    </section>
+
+    <!-- Skills Section -->
+    <section class="inspectres-section">
+      <h2>{{localize "INSPECTRES.Skills"}}</h2>
+      <div class="skills-grid">
+        {{#each system.skills as |skill skillName|}}
+          <div class="skill-row">
+            <label>{{localize (concat "INSPECTRES." (capitalize skillName))}}</label>
+            <div class="skill-controls">
+              <!-- Base dice pip input -->
+              <div class="skill-base">
+                <input
+                  type="number"
+                  name="system.skills.{{skillName}}.base"
+                  value="{{skill.base}}"
+                  min="0"
+                  max="4"
+                  class="skill-pip"
+                />
+                <span class="skill-label">base</span>
+              </div>
+
+              <!-- Penalty display -->
+              <div class="skill-penalty">
+                <span class="penalty-value">-{{skill.penalty}}</span>
+                <span class="skill-label">penalty</span>
+              </div>
+
+              <!-- Effective count -->
+              <div class="skill-effective">
+                <span class="effective-value">{{subtract skill.base skill.penalty}}</span>
+                <span class="skill-label">effective</span>
+              </div>
+
+              <!-- Roll button -->
+              <button
+                type="button"
+                class="inspectres-roll-button"
+                data-action="skillRoll"
+                data-skill="{{skillName}}"
+              >
+                Roll
+              </button>
+            </div>
+          </div>
+        {{/each}}
+      </div>
+    </section>
+
+    <!-- Cool & Weird Section -->
+    <section class="inspectres-section">
+      <h2>{{localize "INSPECTRES.Cool"}}</h2>
+      <div class="cool-toggle">
+        <label>
+          <input
+            type="checkbox"
+            name="system.isWeird"
+            {{#if system.isWeird}}checked{{/if}}
+            class="weird-checkbox"
+          />
+          Weird Agent
+        </label>
+      </div>
+
+      <div class="cool-tracker">
+        {{#if system.isWeird}}
+          <div class="cool-counter">
+            <span class="cool-label">Unlimited Cool</span>
+            <input
+              type="number"
+              name="system.cool"
+              value="{{system.cool}}"
+              min="0"
+              class="cool-input"
+            />
+          </div>
+        {{else}}
+          <div class="cool-pips">
+            <span class="cool-label">Cool Dice (0–3)</span>
+            <div class="pip-container">
+              {{#each (range 0 4) as |pip|}}
+                <button
+                  type="button"
+                  class="cool-pip {{#if (gte ../system.cool (add pip 1))}}filled{{/if}}"
+                  data-action="toggleCool"
+                  data-value="{{add pip 1}}"
+                >
+                  ●
+                </button>
+              {{/each}}
+            </div>
+          </div>
+        {{/if}}
+      </div>
+    </section>
+
+    <!-- Characteristics Section -->
+    <section class="inspectres-section">
+      <h2>{{localize "INSPECTRES.Characteristics"}}</h2>
+      <div class="characteristics-list">
+        {{#each system.characteristics as |characteristic idx|}}
+          <div class="characteristic-row">
+            <input
+              type="checkbox"
+              name="system.characteristics.{{idx}}.used"
+              {{#if characteristic.used}}checked{{/if}}
+              class="characteristic-used"
+            />
+            <input
+              type="text"
+              name="system.characteristics.{{idx}}.text"
+              value="{{characteristic.text}}"
+              placeholder="Characteristic text"
+              class="characteristic-text"
+            />
+            <button type="button" class="btn-remove" data-action="removeCharacteristic" data-idx="{{idx}}">
+              ✕
+            </button>
+          </div>
+        {{/each}}
+      </div>
+      <button type="button" class="btn-add" data-action="addCharacteristic">+ Add Characteristic</button>
+    </section>
+
+    <!-- Mission Pool Section -->
+    <section class="inspectres-section">
+      <h2>{{localize "INSPECTRES.MissionPool"}}</h2>
+      <p class="mission-pool-display">{{system.missionPool}} franchise {{plural system.missionPool "die" "dice"}}</p>
+    </section>
+  </div>
+</form>
