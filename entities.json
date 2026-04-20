@@ -1,0 +1,41 @@
+{
+  "people": [
+    "GM",
+    "Player"
+  ],
+  "projects": [
+    "Spec",
+    "VTT Plugin",
+    "Encounter Designer",
+    "Character Generator",
+    "Session Manager",
+    "Franchise Tracker"
+  ],
+  "game_concepts": [
+    "Agent",
+    "Franchise",
+    "Skill",
+    "Talent",
+    "Cool Dice",
+    "Franchise Dice",
+    "Stress",
+    "Weird Agent",
+    "Job",
+    "Confessional",
+    "Card",
+    "Bank",
+    "Teamwork"
+  ],
+  "mechanics": [
+    "Skill Roll",
+    "Stress Roll",
+    "Bank Roll",
+    "Client Roll",
+    "Augmentation",
+    "Taking 4",
+    "Requirements",
+    "Bankruptcy",
+    "Vacation"
+  ],
+  "playtest_sessions": []
+}
