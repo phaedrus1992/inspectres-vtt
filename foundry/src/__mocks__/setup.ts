@@ -53,9 +53,9 @@ const Hooks = {
     }
   },
   clearAll() {
-    Object.keys(hookHandlers).forEach((key) => {
+    for (const key of Object.keys(hookHandlers)) {
       hookHandlers[key] = [];
-    });
+    }
   },
 };
 

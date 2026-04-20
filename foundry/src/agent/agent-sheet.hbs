@@ -30,7 +30,7 @@
       <div class="skills-grid">
         {{#each system.skills as |skill skillName|}}
           <div class="skill-row">
-            <label>{{localize (concat "INSPECTRES." (capitalize skillName))}}</label>
+            <label>{{localize (inspectres-concat "INSPECTRES." (inspectres-capitalize skillName))}}</label>
             <div class="skill-controls">
               <!-- Base dice pip input -->
               <div class="skill-base">
@@ -53,7 +53,7 @@
 
               <!-- Effective count -->
               <div class="skill-effective">
-                <span class="effective-value">{{subtract skill.base skill.penalty}}</span>
+                <span class="effective-value">{{inspectres-subtract skill.base skill.penalty}}</span>
                 <span class="skill-label">effective</span>
               </div>
 
@@ -103,12 +103,12 @@
           <div class="cool-pips">
             <span class="cool-label">Cool Dice (0–3)</span>
             <div class="pip-container">
-              {{#each (range 0 4) as |pip|}}
+              {{#each (inspectres-range 0 3) as |pip|}}
                 <button
                   type="button"
-                  class="cool-pip {{#if (gte ../system.cool (add pip 1))}}filled{{/if}}"
+                  class="cool-pip {{#if (inspectres-gte ../system.cool (inspectres-add pip 1))}}filled{{/if}}"
                   data-action="toggleCool"
-                  data-value="{{add pip 1}}"
+                  data-value="{{inspectres-add pip 1}}"
                 >
                   ●
                 </button>
@@ -150,7 +150,7 @@
     <!-- Mission Pool Section -->
     <section class="inspectres-section">
       <h2>{{localize "INSPECTRES.MissionPool"}}</h2>
-      <p class="mission-pool-display">{{system.missionPool}} franchise {{plural system.missionPool "die" "dice"}}</p>
+      <p class="mission-pool-display">{{system.missionPool}} franchise {{inspectres-plural system.missionPool "die" "dice"}}</p>
     </section>
   </div>
 </form>

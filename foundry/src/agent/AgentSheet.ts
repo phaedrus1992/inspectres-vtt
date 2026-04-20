@@ -2,7 +2,7 @@
  * InSpectres Agent Character Sheet
  */
 
-import { InSpectresAgent } from "./InSpectresAgent.js";
+import type { AgentData, AgentCharacteristic } from "./agent-schema.js";
 
 export class AgentSheet extends ActorSheet {
 
@@ -17,49 +17,47 @@ export class AgentSheet extends ActorSheet {
 
   override async getData() {
     const context = await super.getData();
+    const system = this.actor.system as unknown as AgentData;
     return {
       ...context,
-      system: (this.actor as any).system,
+      system,
     };
   }
 
   override activateListeners(html: JQuery<HTMLElement>) {
     super.activateListeners(html);
+    const system = this.actor.system as unknown as AgentData;
 
     // Roll buttons
     html.on("click", "[data-action='skillRoll']", (event: JQuery.ClickEvent) => {
       event.preventDefault();
       const skill = (event.currentTarget as HTMLElement).getAttribute("data-skill");
       if (skill) {
-        console.log("Skill roll requested:", skill);
+        // Skill roll implementation deferred to Phase 2
       }
     });
 
     // Cool toggle
     html.on("change", ".weird-checkbox", (event: JQuery.ChangeEvent) => {
       event.preventDefault();
-      (this.actor as any).update({
-        "system.isWeird": (event.target as HTMLInputElement).checked,
-      });
+      const updateData = { "system.isWeird": (event.target as HTMLInputElement).checked } as unknown as Parameters<typeof this.actor.update>[0];
+      void this.actor.update(updateData);
     });
 
     // Cool pip toggle (normal agents)
     html.on("click", ".cool-pip", (event: JQuery.ClickEvent) => {
       event.preventDefault();
       const value = parseInt((event.currentTarget as HTMLElement).getAttribute("data-value") || "0");
-      (this.actor as any).update({
-        "system.cool": value,
-      });
+      const updateData = { "system.cool": value } as unknown as Parameters<typeof this.actor.update>[0];
+      void this.actor.update(updateData);
     });
 
     // Add characteristic
     html.on("click", "[data-action='addCharacteristic']", (event: JQuery.ClickEvent) => {
       event.preventDefault();
-      const system = (this.actor as any).system;
-      const characteristics = (system.characteristics || []) as Array<{ text: string; used: boolean }>;
-      (this.actor as any).update({
-        "system.characteristics": [...characteristics, { text: "", used: false }],
-      });
+      const characteristics = (system.characteristics || []) as AgentCharacteristic[];
+      const updateData = { "system.characteristics": [...characteristics, { text: "", used: false }] } as unknown as Parameters<typeof this.actor.update>[0];
+      void this.actor.update(updateData);
     });
 
     // Remove characteristic
@@ -67,11 +65,9 @@ export class AgentSheet extends ActorSheet {
       event.preventDefault();
       const idx = parseInt((event.currentTarget as HTMLElement).getAttribute("data-idx") || "-1");
       if (idx >= 0) {
-        const system = (this.actor as any).system;
-        const characteristics = (system.characteristics || []) as Array<unknown>;
-        (this.actor as any).update({
-          "system.characteristics": characteristics.filter((_: unknown, i: number) => i !== idx),
-        });
+        const characteristics = (system.characteristics || []) as AgentCharacteristic[];
+        const updateData = { "system.characteristics": characteristics.filter((_: AgentCharacteristic, i: number) => i !== idx) } as unknown as Parameters<typeof this.actor.update>[0];
+        void this.actor.update(updateData);
       }
     });
   }
