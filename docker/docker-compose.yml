@@ -1,0 +1,19 @@
+secrets:
+  license_key:
+    file: ./secrets/license_key.txt
+
+services:
+  foundry:
+    image: ghcr.io/felddy/foundryvtt:release
+    hostname: foundry
+    ports:
+      - "30000:30000"
+    secrets:
+      - license_key
+    environment:
+      FOUNDRY_LICENSE_KEY: "DOCKER-SECRET:license_key"
+      FOUNDRY_HOSTNAME: foundry
+      CONTAINER_PRESERVE_CONFIG: "true"
+    volumes:
+      - ./data:/data
+      - ../foundry/dist:/data/Data/systems/inspectres:ro
