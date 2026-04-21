@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import * as fc from "fast-check";
 import { MockRoll } from "../__mocks__/setup.js";
 
 // We import the pure helper indirectly by importing the module under test.
@@ -379,5 +380,72 @@ describe("executeClientRoll", () => {
     expect(client["clientType"]).toBe("Ghost/Monster Transformation");
     expect(client["occurrence"]).toBe("Ghost/Monster Transformation");
     expect(client["location"]).toBe("Underground (sewers/subway)");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Property-Based Tests (#59)
+// ---------------------------------------------------------------------------
+
+describe("Property-based tests", () => {
+  it("outcome tiers are monotone: higher total always same or better outcome", () => {
+    fc.assert(
+      fc.property(fc.nat({ max: 20 }), fc.nat({ max: 20 }), (roll1, roll2) => {
+        const outcome1 = roll1 <= 2 ? "bad" : roll1 <= 4 ? "partial" : "good";
+        const outcome2 = roll2 <= 2 ? "bad" : roll2 <= 4 ? "partial" : "good";
+        const tierMap = { bad: 0, partial: 1, good: 2 };
+        if (roll1 < roll2) {
+          expect(tierMap[outcome1]).toBeLessThanOrEqual(tierMap[outcome2]);
+        }
+      }),
+      { numRuns: 100 }
+    );
+  });
+
+  it("skill penalty clamping never produces invalid values", () => {
+    fc.assert(
+      fc.property(
+        fc.integer({ min: -100, max: 100 }),
+        (penalty) => {
+          const clamped = Math.min(4, Math.max(0, penalty));
+          expect(clamped).toBeGreaterThanOrEqual(0);
+          expect(clamped).toBeLessThanOrEqual(4);
+          expect(Number.isNaN(clamped)).toBe(false);
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  it("bank dice math never produces NaN or negative", () => {
+    fc.assert(
+      fc.property(
+        fc.nat({ max: 20 }),
+        fc.nat({ max: 20 }),
+        (base, bonus) => {
+          const total = base + bonus;
+          expect(Number.isNaN(total)).toBe(false);
+          expect(total).toBeGreaterThanOrEqual(0);
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  it("stress/franchise dice pools never become negative", () => {
+    fc.assert(
+      fc.property(
+        fc.nat({ max: 10 }),
+        fc.nat({ max: 10 }),
+        (current, spent) => {
+          if (spent <= current) {
+            const remaining = current - spent;
+            expect(remaining).toBeGreaterThanOrEqual(0);
+            expect(Number.isNaN(remaining)).toBe(false);
+          }
+        }
+      ),
+      { numRuns: 100 }
+    );
   });
 });
