@@ -4,7 +4,6 @@ export function handleActionError(
   i18nKey: string,
   fallback: string,
 ): void {
-  const message = err instanceof Error ? err.message : String(err);
-  console.error(`${logPrefix}:`, message);
+  console.error(`${logPrefix}:`, err);
   ui.notifications?.error(game.i18n?.localize(i18nKey) ?? fallback);
 }

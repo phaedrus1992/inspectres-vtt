@@ -38,6 +38,7 @@ async function buildStressRollDialog(agent: Actor): Promise<void> {
         callback: (_event: Event, _button: HTMLButtonElement, dialog: HTMLDialogElement) => {
           const form = dialog.querySelector("form") as HTMLFormElement | null;
           if (!form) {
+            console.error("buildStressRollDialog: form element not found in dialog");
             return { stressDiceCount: 1, coolDiceUsed: 0 };
           }
           const data = new FormData(form);
@@ -105,7 +106,10 @@ export class AgentSheet extends foundry.applications.sheets.ActorSheetV2 {
 
   static async onSkillRoll(this: AgentSheet, _event: Event, target: HTMLElement): Promise<void> {
     const skillAttr = target.getAttribute("data-skill");
-    if (!isSkillName(skillAttr)) return;
+    if (!isSkillName(skillAttr)) {
+      console.error("onSkillRoll: missing or invalid data-skill attribute", { skillAttr });
+      return;
+    }
     const franchise = findFranchiseActor();
     if (franchise && franchiseSystemData(franchise).debtMode) {
       ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnSkillRollDebtMode") ?? "Skill rolls are blocked while in Debt Mode.");
@@ -129,10 +133,16 @@ export class AgentSheet extends foundry.applications.sheets.ActorSheetV2 {
 
   static async onSkillStep(this: AgentSheet, _event: Event, target: HTMLElement): Promise<void> {
     const skillAttr = target.getAttribute("data-skill");
-    if (!isSkillName(skillAttr)) return;
+    if (!isSkillName(skillAttr)) {
+      console.error("onSkillStep: missing or invalid data-skill attribute", { skillAttr });
+      return;
+    }
     const system = this.actor.system as unknown as AgentData;
     const skillData = system.skills[skillAttr];
-    if (!skillData) return;
+    if (!skillData) {
+      console.error("onSkillStep: skill data missing", { skillAttr, actorId: this.actor.id });
+      return;
+    }
     const current = skillData.base;
     const delta = target.getAttribute("data-action") === "skillIncrease" ? 1 : -1;
     const next = Math.min(4, Math.max(0, current + delta));
@@ -145,9 +155,15 @@ export class AgentSheet extends foundry.applications.sheets.ActorSheetV2 {
 
   static async onToggleCool(this: AgentSheet, _event: Event, target: HTMLElement): Promise<void> {
     const valueStr = target.getAttribute("data-value");
-    if (valueStr == null) return;
+    if (valueStr == null) {
+      console.error("onToggleCool: missing data-value attribute");
+      return;
+    }
     const pipValue = Number(valueStr);
-    if (Number.isNaN(pipValue) || pipValue < 1 || pipValue > 3) return;
+    if (Number.isNaN(pipValue) || pipValue < 1 || pipValue > 3) {
+      console.error("onToggleCool: invalid data-value", { valueStr });
+      return;
+    }
     const currentCool = (this.actor.system as unknown as AgentData).cool;
     const newCool = currentCool >= pipValue ? pipValue - 1 : pipValue;
     const updateData = { "system.cool": newCool } as unknown as Parameters<typeof this.actor.update>[0];
@@ -167,9 +183,15 @@ export class AgentSheet extends foundry.applications.sheets.ActorSheetV2 {
 
   static async onRemoveCharacteristic(this: AgentSheet, _event: Event, target: HTMLElement): Promise<void> {
     const idxStr = target.getAttribute("data-idx");
-    if (idxStr == null) return;
+    if (idxStr == null) {
+      console.error("onRemoveCharacteristic: missing data-idx attribute");
+      return;
+    }
     const idx = Number(idxStr);
-    if (Number.isNaN(idx) || idx < 0) return;
+    if (Number.isNaN(idx) || idx < 0) {
+      console.error("onRemoveCharacteristic: invalid data-idx value", { idxStr });
+      return;
+    }
     const currentSystem = this.actor.system as unknown as AgentData;
     const characteristics = (currentSystem.characteristics ?? []) as AgentCharacteristic[];
     const updateData = { "system.characteristics": characteristics.filter((_: AgentCharacteristic, i: number) => i !== idx) } as unknown as Parameters<typeof this.actor.update>[0];
