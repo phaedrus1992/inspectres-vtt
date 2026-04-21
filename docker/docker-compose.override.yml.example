@@ -1,0 +1,17 @@
+# Dev hot-reload override
+#
+# To use:
+#   1. Copy this file to docker-compose.override.yml (gitignored)
+#   2. In one terminal: cd foundry && npm run dev
+#   3. In another terminal: docker compose -f docker/docker-compose.yml up
+#
+# Vite rebuilds on save. The bind-mount (without :ro) means changes appear
+# in Foundry on browser reload without restarting the container.
+#
+# Do NOT run this alongside a separate production container — Foundry licenses
+# are single-instance and will conflict.
+
+services:
+  foundry:
+    volumes:
+      - ../foundry/dist:/data/Data/systems/inspectres
