@@ -1,4 +1,5 @@
 import { findFranchiseActor, franchiseSystemData } from "../franchise/franchise-utils.js";
+import { handleActionError } from "../utils/ui-errors.js";
 
 export class MissionTrackerApp extends foundry.applications.api.ApplicationV2 {
   static instance: MissionTrackerApp | null = null;
@@ -8,8 +9,7 @@ export class MissionTrackerApp extends foundry.applications.api.ApplicationV2 {
       MissionTrackerApp.instance = new MissionTrackerApp();
     }
     void MissionTrackerApp.instance.render({ force: true }).catch((err: unknown) => {
-      console.error("Failed to open Mission Tracker:", err);
-      ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorMissionTrackerOpen") ?? "Failed to open Mission Tracker");
+      handleActionError(err, "Failed to open Mission Tracker", "INSPECTRES.ErrorMissionTrackerOpen", "Failed to open Mission Tracker");
       MissionTrackerApp.instance = null;
     });
   }
@@ -47,17 +47,13 @@ export class MissionTrackerApp extends foundry.applications.api.ApplicationV2 {
 
   static async onBeginCleanUp(this: MissionTrackerApp, _event: Event, _target: HTMLElement): Promise<void> {
     void this.openDistributionDialog().catch((err: unknown) => {
-      const message = err instanceof Error ? err.message : String(err);
-      console.error("Distribution dialog failed:", message);
-      ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorRollFailed") ?? "Operation failed");
+      handleActionError(err, "Distribution dialog failed", "INSPECTRES.ErrorRollFailed", "Operation failed");
     });
   }
 
   static async onEndEarly(this: MissionTrackerApp, _event: Event, _target: HTMLElement): Promise<void> {
     void this.endEarly().catch((err: unknown) => {
-      const message = err instanceof Error ? err.message : String(err);
-      console.error("End mission early failed:", message);
-      ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorUpdateFailed") ?? "Failed to update actor data");
+      handleActionError(err, "End mission early failed", "INSPECTRES.ErrorUpdateFailed", "Failed to update actor data");
     });
   }
 
@@ -117,15 +113,30 @@ export class MissionTrackerApp extends foundry.applications.api.ApplicationV2 {
     if (result === null || result === undefined) return;
     const distribution = result as Record<string, number>;
 
+    const refreshedFranchise = findFranchiseActor();
+    if (!refreshedFranchise) {
+      ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorNoFranchise") ?? "No franchise actor found.");
+      return;
+    }
+    const refreshedSystem = franchiseSystemData(refreshedFranchise);
+    const refreshedTotal = refreshedSystem.missionPool;
+
     const distributedTotal = Object.values(distribution).reduce((sum, v) => sum + v, 0);
-    if (distributedTotal !== total) {
-      const msg = game.i18n?.format("INSPECTRES.DistributeDialogTotalMismatch", { total: String(total) })
-        ?? `Total must equal ${total} dice.`;
-      ui.notifications?.warn(msg);
+    if (distributedTotal !== refreshedTotal) {
+      const msg = game.i18n?.format("INSPECTRES.DistributeDialogTotalMismatch", { total: String(refreshedTotal) })
+        ?? `Total must equal ${refreshedTotal} dice.`;
+      if (distributedTotal !== total) {
+        ui.notifications?.warn(
+          game.i18n?.localize("INSPECTRES.DistributeDialogPoolChanged")
+            ?? `Mission pool changed from ${total} to ${refreshedTotal} while the dialog was open.`,
+        );
+      } else {
+        ui.notifications?.warn(msg);
+      }
       return;
     }
 
-    await this.broadcastMissionComplete(franchise, distribution);
+    await this.broadcastMissionComplete(refreshedFranchise, distribution);
   }
 
   private async broadcastMissionComplete(

@@ -1,6 +1,7 @@
 import { type FranchiseData } from "./franchise-schema.js";
 import { executeBankRoll, executeClientRoll } from "../rolls/roll-executor.js";
 import { MissionTrackerApp } from "../mission/MissionTrackerApp.js";
+import { handleActionError } from "../utils/ui-errors.js";
 
 export class FranchiseSheet extends foundry.applications.sheets.ActorSheetV2 {
   static override DEFAULT_OPTIONS = {
@@ -33,9 +34,7 @@ export class FranchiseSheet extends foundry.applications.sheets.ActorSheetV2 {
       return;
     }
     void executeBankRoll(this.actor).catch((err: unknown) => {
-      const message = err instanceof Error ? err.message : String(err);
-      console.error("Bank roll failed:", message);
-      ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorRollFailed") ?? "Roll failed");
+      handleActionError(err, "Bank roll failed", "INSPECTRES.ErrorRollFailed", "Roll failed");
     });
   }
 
@@ -46,9 +45,7 @@ export class FranchiseSheet extends foundry.applications.sheets.ActorSheetV2 {
       return;
     }
     void executeClientRoll(this.actor).catch((err: unknown) => {
-      const message = err instanceof Error ? err.message : String(err);
-      console.error("Client roll failed:", message);
-      ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorRollFailed") ?? "Roll failed");
+      handleActionError(err, "Client roll failed", "INSPECTRES.ErrorRollFailed", "Roll failed");
     });
   }
 
