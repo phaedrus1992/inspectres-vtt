@@ -3,6 +3,62 @@
  */
 
 import { type AgentData, type AgentCharacteristic } from "./agent-schema.js";
+import { executeSkillRoll, executeStressRoll, type SkillName } from "../rolls/roll-executor.js";
+
+const SKILL_NAMES = ["academics", "athletics", "technology", "contact"] as const;
+
+function isSkillName(value: string | null): value is SkillName {
+  return SKILL_NAMES.includes(value as SkillName);
+}
+
+function findFranchiseActor(): Actor | null {
+  if (!game.actors) return null;
+  for (const actor of game.actors) {
+    if ((actor.type as string) === "franchise") return actor;
+  }
+  return null;
+}
+
+async function buildStressRollDialog(agent: Actor): Promise<void> {
+  const system = agent.system as unknown as AgentData;
+  const maxCool = system.cool;
+
+  // Dialog.wait<T> is constrained by fvtt-types; cast through unknown to avoid the constraint
+  const result = await (Dialog.wait as (config: unknown) => Promise<unknown>)({
+    title: game.i18n?.localize("INSPECTRES.StressRoll") ?? "Stress Roll",
+    content: `
+      <form class="inspectres-roll-dialog">
+        <label>Stress Dice (1–5): <input type="number" name="stressDice" min="1" max="5" value="1"></label>
+        ${maxCool > 0 ? `<label>Cool dice to ignore lowest (0–${maxCool}): <input type="number" name="coolIgnore" min="0" max="${maxCool}" value="0"></label>` : ""}
+      </form>
+    `,
+    buttons: {
+      roll: {
+        label: "Roll",
+        callback: (html: JQuery) => {
+          const form = html.find("form")[0] as HTMLFormElement | undefined;
+          if (!form) return { stressDiceCount: 1, coolDiceUsed: 0 };
+          const data = new FormData(form);
+          const stressDiceCount = Math.max(1, Math.min(5, Number(data.get("stressDice") ?? 1)));
+          const coolDiceUsed = Math.max(0, Math.min(maxCool, Number(data.get("coolIgnore") ?? 0)));
+          return {
+            stressDiceCount: isNaN(stressDiceCount) ? 1 : stressDiceCount,
+            coolDiceUsed: isNaN(coolDiceUsed) ? 0 : coolDiceUsed,
+          };
+        },
+      },
+      cancel: {
+        label: "Cancel",
+        callback: () => null,
+      },
+    },
+    default: "roll",
+  });
+
+  if (result === null || result === undefined) return;
+  const params = result as { stressDiceCount: number; coolDiceUsed: number };
+  await executeStressRoll(agent, params);
+}
 
 export class AgentSheet extends ActorSheet {
 
@@ -27,7 +83,31 @@ export class AgentSheet extends ActorSheet {
   override activateListeners(html: JQuery<HTMLElement>) {
     super.activateListeners(html);
 
-    // Skill roll implementation deferred to Phase 2
+    // Skill roll
+    html.on("click", "[data-action='skillRoll']", (event: JQuery.ClickEvent) => {
+      event.preventDefault();
+      const skillAttr = (event.currentTarget as HTMLElement).getAttribute("data-skill");
+      if (!isSkillName(skillAttr)) {
+        console.error("skillRoll: missing or invalid data-skill attribute", skillAttr);
+        return;
+      }
+      const franchise = findFranchiseActor();
+      void executeSkillRoll(this.actor, franchise, skillAttr).catch((err: unknown) => {
+        const message = err instanceof Error ? err.message : String(err);
+        console.error("Skill roll failed:", message);
+        ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorRollFailed") ?? "Roll failed");
+      });
+    });
+
+    // Stress roll
+    html.on("click", "[data-action='stressRoll']", (event: JQuery.ClickEvent) => {
+      event.preventDefault();
+      void buildStressRollDialog(this.actor).catch((err: unknown) => {
+        const message = err instanceof Error ? err.message : String(err);
+        console.error("Stress roll failed:", message);
+        ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorRollFailed") ?? "Roll failed");
+      });
+    });
 
     // Cool toggle
     html.on("change", ".weird-checkbox", (event: JQuery.ChangeEvent) => {
