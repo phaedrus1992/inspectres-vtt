@@ -85,8 +85,8 @@ export default defineConfig({
                 walkDir(filePath);
               } else if (file.endsWith(".hbs")) {
                 const content = fs.readFileSync(filePath, "utf-8");
-                const relPath = path.relative(templatesDir, filePath);
-                this.emitFile({ type: "asset", fileName: `templates/${relPath}`, source: content });
+                const fileName = path.basename(filePath);
+                this.emitFile({ type: "asset", fileName: `templates/${fileName}`, source: content });
               }
             }
           };
