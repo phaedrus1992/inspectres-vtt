@@ -6,6 +6,7 @@ import {
 } from "./roll-charts.js";
 import { type AgentData } from "../agent/agent-schema.js";
 import { type FranchiseData } from "../franchise/franchise-schema.js";
+import { emitMissionPoolUpdated } from "../mission/socket.js";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -197,6 +198,7 @@ export async function executeSkillRoll(
   // Mission pool earned regardless of takesFour (it's an outcome, not a cost)
   if (franchise && franchiseSystem && outcome.franchiseDice > 0 && !system.isWeird) {
     await actorUpdate(franchise, { "system.missionPool": franchiseSystem.missionPool + outcome.franchiseDice });
+    if (franchise.id !== null) emitMissionPoolUpdated(franchise.id);
   }
 
   const speaker = ChatMessage.getSpeaker({ actor: agent });
@@ -389,5 +391,7 @@ export async function executeClientRoll(franchise: Actor): Promise<void> {
     title: game.i18n?.localize("INSPECTRES.ClientRoll") ?? "Client Roll",
     client: generated,
   });
-  await postChatCard(content, speaker, rolls);
+  // Client roll results are GM prep — whisper to all GMs only
+  const gmIds = (game.users?.filter((u) => u.isGM).map((u) => u.id).filter((id): id is string => id !== null)) ?? [];
+  await ChatMessage.create({ content, speaker, rolls, whisper: gmIds } as unknown as Parameters<typeof ChatMessage.create>[0]);
 }

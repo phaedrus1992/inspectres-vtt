@@ -3,12 +3,19 @@
   <header class="inspectres-header">
     <div class="sheet-header">
       <h1><input type="text" name="name" value="{{actor.name}}" placeholder="Franchise Name" /></h1>
-      <p class="actor-type">Franchise</p>
+      <p class="actor-type">{{localize "INSPECTRES.ActorTypeFranchise"}}</p>
     </div>
   </header>
 
   <!-- Content -->
   <div class="sheet-body">
+    {{#if system.debtMode}}
+      <div class="inspectres-debt-warning">
+        <span>⚠ {{localize "INSPECTRES.DebtModeWarning"}}</span>
+        <span>{{localize "INSPECTRES.DebtModeAmount"}} {{system.loanAmount}} {{inspectres-plural system.loanAmount (localize "INSPECTRES.DieSingular") (localize "INSPECTRES.DiePlural")}}</span>
+      </div>
+    {{/if}}
+
     <!-- Description -->
     <section class="inspectres-section">
       <textarea
@@ -66,8 +73,13 @@
           min="0"
           class="bank-input"
         />
-        <button type="button" class="inspectres-roll-button" data-action="bankRoll">
-          Roll Bank Dice
+        <button
+          type="button"
+          class="inspectres-roll-button"
+          data-action="bankRoll"
+          {{#if system.debtMode}}disabled{{/if}}
+        >
+          {{localize "INSPECTRES.BankRollButton"}}
         </button>
       </div>
     </section>
@@ -76,7 +88,7 @@
     <section class="inspectres-section">
       <h2>{{localize "INSPECTRES.Mission"}}</h2>
       <div class="mission-row">
-        <label>Goal (dice)</label>
+        <label>{{localize "INSPECTRES.MissionGoal"}}</label>
         <input
           type="number"
           name="system.missionGoal"
@@ -86,13 +98,13 @@
         />
       </div>
       <div class="mission-progress">
-        <span>Earned: {{system.missionPool}} / {{system.missionGoal}}</span>
-        <div class="progress-bar">
-          <div class="progress-fill" style="width: {{inspectres-multiply (inspectres-divide system.missionPool (inspectres-max system.missionGoal 1)) 100}}%"></div>
+        <span>{{localize "INSPECTRES.MissionEarned"}}: {{system.missionPool}} / {{system.missionGoal}}</span>
+        <div class="inspectres-progress-bar">
+          <div class="inspectres-progress-fill" style="width: {{inspectres-multiply (inspectres-divide system.missionPool (inspectres-max system.missionGoal 1)) 100}}%"></div>
         </div>
       </div>
       <button type="button" class="inspectres-roll-button" data-action="openMissionTracker">
-        Open Mission Tracker
+        {{localize "INSPECTRES.OpenMissionTracker"}}
       </button>
     </section>
 
@@ -105,11 +117,30 @@
     </section>
 
     <!-- Debt Mode Section -->
-    {{#if system.debtMode}}
-      <section class="inspectres-section inspectres-debt-warning">
-        <h2>⚠ Debt Mode</h2>
-        <p>Franchise borrowed {{system.loanAmount}} {{inspectres-plural system.loanAmount "die" "dice"}}</p>
-      </section>
-    {{/if}}
+    <section class="inspectres-section">
+      <h2>{{localize "INSPECTRES.DebtMode"}}</h2>
+      <div class="debt-row">
+        <label>
+          <input
+            type="checkbox"
+            name="system.debtMode"
+            {{#if system.debtMode}}checked{{/if}}
+          />
+          {{localize "INSPECTRES.DebtMode"}}
+        </label>
+        {{#if system.debtMode}}
+          <label>
+            {{localize "INSPECTRES.LoanAmount"}}:
+            <input
+              type="number"
+              name="system.loanAmount"
+              value="{{system.loanAmount}}"
+              min="0"
+              class="loan-input"
+            />
+          </label>
+        {{/if}}
+      </div>
+    </section>
   </div>
 </form>

@@ -8,19 +8,22 @@ import { AgentSheet } from "./agent/AgentSheet.js";
 import { InSpectresFranchise } from "./franchise/InSpectresFranchise.js";
 import { FranchiseSheet } from "./franchise/FranchiseSheet.js";
 import { registerHandlebarsHelpers } from "./utils/handlebars-helpers.js";
+import { MissionTrackerApp } from "./mission/MissionTrackerApp.js";
+import { onMissionSocketEvent } from "./mission/socket.js";
 
 Hooks.once("init", async function () {
   await loadTemplates([
     "systems/inspectres/templates/agent-sheet.hbs",
     "systems/inspectres/templates/franchise-sheet.hbs",
     "systems/inspectres/templates/roll-card.hbs",
+    "systems/inspectres/templates/mission-tracker.hbs",
   ]);
-  // Register actor document classes
-  // Note: Foundry V12+ supports documentClasses for per-type registration, but fvtt-types
-  // may not reflect this. Using a workaround: set documentClass to Agent and register
-  // sheets for both types. A future improvement is to use TypeDataModel for proper
-  // type separation.
-  (CONFIG.Actor.documentClass as typeof InSpectresAgent | typeof InSpectresFranchise) = InSpectresAgent;
+  // Register per-type actor document classes (Foundry V12+)
+  // fvtt-types doesn't know about documentClasses; cast through unknown to assign
+  (CONFIG.Actor as unknown as { documentClasses: Record<string, typeof Actor> }).documentClasses = {
+    agent: InSpectresAgent as unknown as typeof Actor,
+    franchise: InSpectresFranchise as unknown as typeof Actor,
+  };
 
   // Register actor type labels
   (CONFIG.Actor.typeLabels as Record<string, string>) = {
@@ -46,6 +49,16 @@ Hooks.once("init", async function () {
 });
 
 Hooks.once("ready", function () {
-  // System ready for play
+  onMissionSocketEvent(() => {
+    if (MissionTrackerApp.instance) {
+      MissionTrackerApp.instance.render(false);
+    }
+  });
+});
+
+Hooks.on("updateActor", function (actor: Actor) {
+  if ((actor.type as string) === "franchise" && MissionTrackerApp.instance) {
+    MissionTrackerApp.instance.render(false);
+  }
 });
 
