@@ -115,6 +115,34 @@ export class AgentSheet extends ActorSheet {
       });
     });
 
+    // Skill base increment/decrement
+    html.on("click", "[data-action='skillIncrease'],[data-action='skillDecrease']", (event: JQuery.ClickEvent) => {
+      event.preventDefault();
+      const el = event.currentTarget as HTMLElement;
+      const skillAttr = el.getAttribute("data-skill");
+      if (!isSkillName(skillAttr)) {
+        console.error("skill step: missing or invalid data-skill", skillAttr);
+        return;
+      }
+      const system = this.actor.system as unknown as AgentData;
+      const skillData = system.skills[skillAttr];
+      if (!skillData) {
+        console.error(`skill step: skills.${skillAttr} missing on actor ${this.actor.id}`);
+        ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorUpdateFailed") ?? "Failed to update actor data");
+        return;
+      }
+      const current = skillData.base;
+      const delta = el.getAttribute("data-action") === "skillIncrease" ? 1 : -1;
+      const next = Math.min(4, Math.max(0, current + delta));
+      if (next === current) return;
+      const updateData = { [`system.skills.${skillAttr}.base`]: next } as unknown as Parameters<typeof this.actor.update>[0];
+      void this.actor.update(updateData).catch((err: unknown) => {
+        const message = err instanceof Error ? err.message : String(err);
+        console.error("Failed to update skill:", message);
+        ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorUpdateFailed") ?? "Failed to update actor data");
+      });
+    });
+
     // Cool toggle
     html.on("change", ".weird-checkbox", (event: JQuery.ChangeEvent) => {
       event.preventDefault();

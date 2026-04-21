@@ -51,6 +51,99 @@
   cursor: not-allowed;
 }
 
+/* Skills grid — scoped under the agent sheet to override Foundry's global
+   button { width: 100% } and display: block resets */
+.inspectres-agent-sheet .skills-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.inspectres-agent-sheet .skill-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.inspectres-agent-sheet .skill-main-line {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.inspectres-agent-sheet .skill-name {
+  width: 6rem;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.inspectres-agent-sheet .skill-stepper {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+.inspectres-agent-sheet .skill-step {
+  width: 1.4rem;
+  height: 1.4rem;
+  padding: 0;
+  line-height: 1;
+  font-size: 1rem;
+  background: var(--inspectres-primary);
+  color: white;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.inspectres-agent-sheet .skill-step:hover {
+  background: var(--inspectres-secondary);
+}
+
+.inspectres-agent-sheet .skill-base-value {
+  width: 1.5rem;
+  text-align: center;
+  font-weight: bold;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.inspectres-agent-sheet .skill-effective-value {
+  color: #555;
+  font-size: 0.85rem;
+  flex: 1;
+}
+
+.inspectres-agent-sheet .skill-roll-button {
+  width: 1.6rem;
+  height: 1.6rem;
+  padding: 0;
+  margin-left: auto;
+  font-size: 0.9rem;
+  background: var(--inspectres-secondary);
+  color: white;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.inspectres-agent-sheet .skill-roll-button:hover {
+  background: var(--inspectres-accent);
+}
+
+.inspectres-agent-sheet .skill-penalty-line {
+  padding-left: 6.75rem;
+  font-size: 0.8rem;
+  color: var(--inspectres-accent);
+  font-style: italic;
+}
+
 /* Debt mode warning banner */
 .inspectres-debt-warning {
   background: #fef3cd;

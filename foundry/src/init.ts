@@ -48,17 +48,30 @@ Hooks.once("init", async function () {
   });
 });
 
+// The Create Actor dialog clips the Type dropdown. Force it to a usable height.
+Hooks.on("renderDialog", function (dialog: Dialog) {
+  if ((dialog as unknown as { id?: string }).id === "create-actor") {
+    dialog.setPosition({ height: "auto" as unknown as number });
+  }
+});
+
 Hooks.once("ready", function () {
   onMissionSocketEvent(() => {
     if (MissionTrackerApp.instance) {
-      MissionTrackerApp.instance.render(false);
+      // fvtt-types types render() as Application, but runtime returns Promise<Application>
+      void (MissionTrackerApp.instance.render(false) as unknown as Promise<unknown>).catch((err: unknown) => {
+        console.error("Mission tracker re-render failed (socket event):", err);
+      });
     }
   });
 });
 
 Hooks.on("updateActor", function (actor: Actor) {
   if ((actor.type as string) === "franchise" && MissionTrackerApp.instance) {
-    MissionTrackerApp.instance.render(false);
+    // fvtt-types types render() as Application, but runtime returns Promise<Application>
+    void (MissionTrackerApp.instance.render(false) as unknown as Promise<unknown>).catch((err: unknown) => {
+      console.error("Mission tracker re-render failed (actor update):", err);
+    });
   }
 });
 

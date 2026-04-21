@@ -150,6 +150,7 @@ export default defineConfig({
               throw new Error(`Failed to read packs directory ${dir}: ${message}`);
             }
             for (const entry of entries) {
+              if (entry.startsWith(".")) continue;
               const entryPath = path.join(dir, entry);
               try {
                 const stat = fs.statSync(entryPath);
