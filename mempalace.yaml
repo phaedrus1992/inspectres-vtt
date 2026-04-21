@@ -1,0 +1,101 @@
+wing: inspectres
+description: InSpectres RPG — paranormal investigation, player-driven storytelling, VTT tooling
+
+rooms:
+  - name: reference
+    description: Official rulebook, PDFs, and extracted text
+    keywords:
+      - rulebook
+      - reference
+      - pdftotext
+
+  - name: spec
+    description: Machine-readable rules specification for VTT and automation
+    keywords:
+      - specification
+      - rules
+      - charts
+      - mechanics
+
+  - name: spec-generation
+    description: Spec creation process, structure, and decisions
+    keywords:
+      - spec-generation
+      - documentation
+      - index
+
+  - name: vtt-implementation
+    description: VTT plugin architecture, components, and UI requirements
+    keywords:
+      - foundry
+      - vtt
+      - plugin
+      - ui-components
+
+  - name: mechanics-agents
+    description: Agent creation, skills, talents, weird agents
+    keywords:
+      - agent
+      - skill
+      - talent
+      - weird-agent
+      - character-creation
+
+  - name: mechanics-franchise
+    description: Franchise resources, cards, bank, mission economy
+    keywords:
+      - franchise
+      - card
+      - bank
+      - dice
+      - economy
+
+  - name: mechanics-rolls
+    description: Skill rolls, stress rolls, bank rolls, requirements
+    keywords:
+      - skill-roll
+      - stress-roll
+      - bank-roll
+      - roll-chart
+      - mechanics
+
+  - name: mechanics-advanced
+    description: Confessionals, characteristics, bankruptcy, death
+    keywords:
+      - confessional
+      - characteristic
+      - bankruptcy
+      - death
+      - optional-rules
+
+  - name: gameplay-structure
+    description: Job phases, mission goals, play structure, series play
+    keywords:
+      - job-phases
+      - mission
+      - play-structure
+      - campaign
+
+  - name: critical-interactions
+    description: Edge cases, design traps, implementor notes
+    keywords:
+      - edge-case
+      - critical-interaction
+      - implementation-note
+      - pitfall
+
+  - name: tools-design
+    description: Design discussions for tooling, encounter automation, session prep
+    keywords:
+      - design
+      - tooling
+      - automation
+      - session-prep
+
+  - name: playtest-log
+    description: Session reports, playtesting feedback, rule clarifications
+    keywords:
+      - playtest
+      - session
+      - feedback
+      - clarification
