@@ -11,3 +11,11 @@ It also contains a plugin for Foundry VTT for running an InSpectres campaign in 
 
 PDFs of the rulebook for InSpectres is in the `reference/` folder, as well as the output of `pdftotext` on the rulebook.
 
+# Running with Docker
+
+Foundry VTT can be run locally or self-hosted using Docker. The InSpectres system is
+pre-installed automatically.
+
+See [docs/docker.md](docs/docker.md) for full setup instructions including license key
+configuration, dev workflow, and self-hosting notes.
+
