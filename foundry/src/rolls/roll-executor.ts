@@ -34,6 +34,15 @@ export interface StressRollParams {
   coolDiceUsed: number;
 }
 
+// Structural subset of Actor used by roll functions — avoids pulling in the full
+// Foundry Actor class (130+ properties) in call sites that only need these fields.
+export interface RollActor {
+  readonly id: string | null;
+  readonly name: string;
+  readonly system: object;
+  update(data: Record<string, unknown>): Promise<unknown>;
+}
+
 // ---------------------------------------------------------------------------
 // Guards and helpers
 // ---------------------------------------------------------------------------
@@ -46,7 +55,7 @@ function extractFaces(roll: Roll): number[] {
   return roll.dice.flatMap((t) => t.results).filter((r) => r.active !== false).map((r) => r.result);
 }
 
-async function actorUpdate(actor: Actor, data: Record<string, unknown>): Promise<void> {
+async function actorUpdate(actor: RollActor, data: Record<string, unknown>): Promise<void> {
   const updateData = data as unknown as Parameters<typeof actor.update>[0];
   await actor.update(updateData);
 }
@@ -112,8 +121,8 @@ const CARD_FOR_SKILL: Record<SkillName, keyof FranchiseData["cards"] | null> = {
 // ---------------------------------------------------------------------------
 
 export async function executeSkillRoll(
-  agent: Actor,
-  franchise: Actor | null,
+  agent: RollActor,
+  franchise: RollActor | null,
   skillName: SkillName,
 ): Promise<void> {
   const system = agent.system as unknown as AgentData;
@@ -201,7 +210,7 @@ export async function executeSkillRoll(
     if (franchise.id !== null) emitMissionPoolUpdated(franchise.id);
   }
 
-  const speaker = ChatMessage.getSpeaker({ actor: agent });
+  const speaker = ChatMessage.getSpeaker({ actor: agent as Actor });
   const content = await renderTemplate("systems/inspectres/templates/roll-card.hbs", {
     rollType: "skill",
     title: `${game.i18n?.localize("INSPECTRES.SkillRoll") ?? "Skill Roll"}: ${skillName}`,
@@ -294,7 +303,7 @@ async function buildSkillRollDialog(opts: SkillRollDialogOptions): Promise<Skill
 // executeBankRoll
 // ---------------------------------------------------------------------------
 
-export async function executeBankRoll(franchise: Actor): Promise<void> {
+export async function executeBankRoll(franchise: RollActor): Promise<void> {
   const system = franchise.system as unknown as FranchiseData;
   const currentBank = system.bank;
 
@@ -308,7 +317,7 @@ export async function executeBankRoll(franchise: Actor): Promise<void> {
 
   await actorUpdate(franchise, { "system.bank": summary.finalBankTotal });
 
-  const speaker = ChatMessage.getSpeaker({ actor: franchise });
+  const speaker = ChatMessage.getSpeaker({ actor: franchise as Actor });
   const content = await renderTemplate("systems/inspectres/templates/roll-card.hbs", {
     rollType: "bank",
     title: game.i18n?.localize("INSPECTRES.BankRoll") ?? "Bank Roll",
@@ -322,7 +331,7 @@ export async function executeBankRoll(franchise: Actor): Promise<void> {
 // executeStressRoll
 // ---------------------------------------------------------------------------
 
-export async function executeStressRoll(agent: Actor, params: StressRollParams): Promise<void> {
+export async function executeStressRoll(agent: RollActor, params: StressRollParams): Promise<void> {
   const system = agent.system as unknown as AgentData;
   const { stressDiceCount, coolDiceUsed } = params;
 
@@ -345,7 +354,7 @@ export async function executeStressRoll(agent: Actor, params: StressRollParams):
     await actorUpdate(agent, { "system.cool": system.cool + outcome.coolGain });
   }
 
-  const speaker = ChatMessage.getSpeaker({ actor: agent });
+  const speaker = ChatMessage.getSpeaker({ actor: agent as Actor });
   const content = await renderTemplate("systems/inspectres/templates/roll-card.hbs", {
     rollType: "stress",
     title: game.i18n?.localize("INSPECTRES.StressRoll") ?? "Stress Roll",
@@ -375,7 +384,7 @@ function buildPenaltyNote(face: 1 | 2 | 3, stressDiceCount: number): string {
 // executeClientRoll
 // ---------------------------------------------------------------------------
 
-export async function executeClientRoll(franchise: Actor): Promise<void> {
+export async function executeClientRoll(franchise: RollActor): Promise<void> {
   const attributes = ["personality", "clientType", "occurrence", "location"] as const;
   const rolls: Roll[] = [];
   const generated: Record<string, string> = {};
@@ -390,7 +399,7 @@ export async function executeClientRoll(franchise: Actor): Promise<void> {
     generated[attr] = table[key] ?? "";
   }
 
-  const speaker = ChatMessage.getSpeaker({ actor: franchise });
+  const speaker = ChatMessage.getSpeaker({ actor: franchise as Actor });
   const content = await renderTemplate("systems/inspectres/templates/roll-card.hbs", {
     rollType: "client",
     title: game.i18n?.localize("INSPECTRES.ClientRoll") ?? "Client Roll",

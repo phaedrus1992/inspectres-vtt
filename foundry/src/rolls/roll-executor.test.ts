@@ -2,14 +2,6 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import * as fc from "fast-check";
 import { MockRoll } from "../__mocks__/setup.js";
 
-// Minimal typed test actor fixture — implements just enough of Actor to test behavior
-// without pulling in the full Foundry type (128+ properties). Cast to Actor where needed.
-interface TestActor {
-  name: string;
-  system: Record<string, unknown>;
-  update: (data: Record<string, unknown>) => Promise<TestActor>;
-}
-
 // We import the pure helper indirectly by importing the module under test.
 // The pure resolveBankDice logic is exercised via executeSkillRoll and
 // executeBankRoll, but we also export it for direct testing.
@@ -19,14 +11,16 @@ import {
   executeStressRoll,
   executeBankRoll,
   executeClientRoll,
+  type RollActor,
 } from "./roll-executor.js";
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
-function makeAgent(overrides: Record<string, unknown> = {}) {
+function makeAgent(overrides: Record<string, unknown> = {}): RollActor {
   return {
+    id: "test-agent-id",
     name: "Test Agent",
     system: {
       skills: {
@@ -72,10 +66,10 @@ function makeAgent(overrides: Record<string, unknown> = {}) {
   };
 }
 
-function makeFranchise(overrides: Record<string, unknown> = {}) {
+function makeFranchise(overrides: Record<string, unknown> = {}): RollActor {
   return {
+    id: "test-franchise-id",
     name: "Test Franchise",
-    type: "franchise",
     system: {
       cards: { library: 2, gym: 1, credit: 3 },
       bank: 4,
@@ -210,8 +204,8 @@ describe("executeSkillRoll", () => {
     };
     const agent = makeAgent();
     const franchise = makeFranchise();
-    await executeSkillRoll(agent as unknown as Actor, franchise as unknown as Actor, "academics");
-    expect(franchise.system.missionPool).toBe(1);
+    await executeSkillRoll(agent, franchise, "academics");
+    expect((franchise.system as Record<string, unknown>)["missionPool"]).toBe(1);
   });
 
   it("awards 2 franchise dice on roll of 6", async () => {
@@ -223,8 +217,8 @@ describe("executeSkillRoll", () => {
     };
     const agent = makeAgent();
     const franchise = makeFranchise();
-    await executeSkillRoll(agent as unknown as Actor, franchise as unknown as Actor, "academics");
-    expect(franchise.system.missionPool).toBe(2);
+    await executeSkillRoll(agent, franchise, "academics");
+    expect((franchise.system as Record<string, unknown>)["missionPool"]).toBe(2);
   });
 
   it("does not award franchise dice on roll of 4 or lower", async () => {
@@ -236,8 +230,8 @@ describe("executeSkillRoll", () => {
     };
     const agent = makeAgent();
     const franchise = makeFranchise();
-    await executeSkillRoll(agent as unknown as Actor, franchise as unknown as Actor, "academics");
-    expect(franchise.system.missionPool).toBe(0);
+    await executeSkillRoll(agent, franchise, "academics");
+    expect((franchise.system as Record<string, unknown>)["missionPool"]).toBe(0);
   });
 
   it("weird agents never earn franchise dice", async () => {
@@ -249,8 +243,8 @@ describe("executeSkillRoll", () => {
     };
     const agent = makeAgent({ isWeird: true });
     const franchise = makeFranchise();
-    await executeSkillRoll(agent as unknown as Actor, franchise as unknown as Actor, "academics");
-    expect(franchise.system.missionPool).toBe(0);
+    await executeSkillRoll(agent, franchise, "academics");
+    expect((franchise.system as Record<string, unknown>)["missionPool"]).toBe(0);
   });
 
   it("works with null franchise (no franchise dice awarded)", async () => {
@@ -261,7 +255,7 @@ describe("executeSkillRoll", () => {
       }
     };
     const agent = makeAgent();
-    await expect(executeSkillRoll(agent as unknown as Actor, null, "academics")).resolves.not.toThrow();
+    await expect(executeSkillRoll(agent, null, "academics")).resolves.not.toThrow();
   });
 
   it("zero-dice path rolls 2d6 and takes lowest", async () => {
@@ -276,7 +270,7 @@ describe("executeSkillRoll", () => {
     };
     const agent = makeAgent({ skills: { academics: { base: 0, penalty: 0 }, athletics: { base: 0, penalty: 0 }, technology: { base: 0, penalty: 0 }, contact: { base: 0, penalty: 0 } } });
     const chatCreateSpy = vi.spyOn(ChatMessage, "create");
-    await executeSkillRoll(agent as unknown as Actor, null, "academics");
+    await executeSkillRoll(agent, null, "academics");
     // Should have rolled 2d6 for the zero-dice path
     expect(rollFormula).toBe("2d6");
     expect(chatCreateSpy).toHaveBeenCalled();
@@ -297,8 +291,8 @@ describe("executeBankRoll", () => {
       }
     };
     const franchise = makeFranchise({ bank: 4 });
-    await executeBankRoll(franchise as unknown as Actor);
-    expect(franchise.system.bank).toBe(5);
+    await executeBankRoll(franchise);
+    expect((franchise.system as Record<string, unknown>)["bank"]).toBe(5);
   });
 
   it("zeroes bank on face 1", async () => {
@@ -309,14 +303,14 @@ describe("executeBankRoll", () => {
       }
     };
     const franchise = makeFranchise({ bank: 5 });
-    await executeBankRoll(franchise as unknown as Actor);
-    expect(franchise.system.bank).toBe(0);
+    await executeBankRoll(franchise);
+    expect((franchise.system as Record<string, unknown>)["bank"]).toBe(0);
   });
 
   it("warns and returns early when bank is 0", async () => {
     const franchise = makeFranchise({ bank: 0 });
     const updateSpy = vi.spyOn(franchise, "update");
-    await executeBankRoll(franchise as unknown as Actor);
+    await executeBankRoll(franchise);
     expect(updateSpy).not.toHaveBeenCalled();
   });
 });
@@ -334,8 +328,8 @@ describe("executeStressRoll", () => {
       }
     };
     const agent = makeAgent({ cool: 1 });
-    await executeStressRoll(agent as unknown as Actor, { stressDiceCount: 1, coolDiceUsed: 0 });
-    expect(agent.system.cool).toBe(2);
+    await executeStressRoll(agent, { stressDiceCount: 1, coolDiceUsed: 0 });
+    expect((agent.system as Record<string, unknown>)["cool"]).toBe(2);
   });
 
   it("zeroes cool on Meltdown (result 1)", async () => {
@@ -346,8 +340,8 @@ describe("executeStressRoll", () => {
       }
     };
     const agent = makeAgent({ cool: 3 });
-    await executeStressRoll(agent as unknown as Actor, { stressDiceCount: 1, coolDiceUsed: 0 });
-    expect(agent.system.cool).toBe(0);
+    await executeStressRoll(agent, { stressDiceCount: 1, coolDiceUsed: 0 });
+    expect((agent.system as Record<string, unknown>)["cool"]).toBe(0);
   });
 
   it("no actor update on result 5 (Blasé)", async () => {
@@ -359,7 +353,7 @@ describe("executeStressRoll", () => {
     };
     const agent = makeAgent({ cool: 2 });
     const updateSpy = vi.spyOn(agent, "update");
-    await executeStressRoll(agent as unknown as Actor, { stressDiceCount: 1, coolDiceUsed: 0 });
+    await executeStressRoll(agent, { stressDiceCount: 1, coolDiceUsed: 0 });
     expect(updateSpy).not.toHaveBeenCalled();
   });
 
@@ -372,10 +366,11 @@ describe("executeStressRoll", () => {
       }
     };
     const agent = makeAgent({ cool: 2 });
-    const coolBefore = agent.system.cool;
-    await executeStressRoll(agent as unknown as Actor, { stressDiceCount: 3, coolDiceUsed: 1 });
+    const sys = agent.system as Record<string, unknown>;
+    const coolBefore = sys["cool"];
+    await executeStressRoll(agent, { stressDiceCount: 3, coolDiceUsed: 1 });
     // Cool is NOT spent on stress ignore; result should be 3 (Stressed), cool unchanged
-    expect(agent.system.cool).toBe(coolBefore);
+    expect(sys["cool"]).toBe(coolBefore);
   });
 });
 
@@ -394,7 +389,7 @@ describe("executeClientRoll", () => {
     };
     const franchise = makeFranchise();
     const updateSpy = vi.spyOn(franchise, "update");
-    await executeClientRoll(franchise as unknown as Actor);
+    await executeClientRoll(franchise);
     expect(updateSpy).not.toHaveBeenCalled();
   });
 
@@ -410,7 +405,7 @@ describe("executeClientRoll", () => {
     };
     const chatCreateSpy = vi.spyOn(ChatMessage, "create");
     const franchise = makeFranchise();
-    await executeClientRoll(franchise as unknown as Actor);
+    await executeClientRoll(franchise);
     expect(chatCreateSpy).toHaveBeenCalledOnce();
   });
 
@@ -429,7 +424,7 @@ describe("executeClientRoll", () => {
         return capturedContent;
       });
     const franchise = makeFranchise();
-    await executeClientRoll(franchise as unknown as Actor);
+    await executeClientRoll(franchise);
     const parsed = JSON.parse(capturedContent) as Record<string, unknown>;
     const client = parsed["client"] as Record<string, string>;
     expect(client["personality"]).toBe("Horny");
