@@ -33,6 +33,33 @@ Never suppress type errors from `fvtt-types` with `@ts-ignore`; fix the type usa
 `skipLibCheck: true` in tsconfig is intentional (the library types have known issues), but your
 own code must be clean.
 
+### Filling fvtt-types Gaps
+
+`fvtt-types` trails Foundry releases — V2 APIs (`ApplicationV2`, `DialogV2`, V2 hook signatures)
+may be missing or incomplete. **Never use `unknown` as a workaround for missing types.** Instead:
+
+1. Check `src/types/foundry-v2.d.ts` — project-local ambient declarations for V2 APIs not yet
+   in fvtt-types.
+2. If what you need isn't there, add it. Use Foundry's API docs and the reference systems
+   (`reference/dnd5e/`, `reference/pf2e/`) to determine the accurate shape.
+3. When fvtt-types eventually gains the type, delete it from `foundry-v2.d.ts`.
+
+```typescript
+// Bad — loses type safety on the app parameter
+Hooks.on("renderDialogV2", function (_app: unknown, html: HTMLElement) { ... });
+
+// Good — ApplicationV2 declared in src/types/foundry-v2.d.ts
+Hooks.on("renderDialogV2", function (_app, html: HTMLElement) { ... });
+// (fvtt-types resolves _app to its own type; use RenderDialogV2Callback cast if you need
+//  the parameter typed as foundry.applications.api.ApplicationV2)
+```
+
+**V2 vs V1 hooks:** As of Foundry V13, all new dialogs and sheets use `ApplicationV2`. The old
+`renderDialog` / `renderActorSheet` hooks fire only for V1 `Application` subclasses (now in
+`foundry.appv1.*`). When writing hooks, check which API the target uses — inspect the DOM
+(`<div class="app">` = V1, `<dialog>` or `<section>` element = V2) and use the matching hook
+(`renderDialog` vs `renderDialogV2`, `renderActorSheet` vs `renderActorSheetV2`).
+
 ## Module Entry and Hook Registration
 
 All initialization must go through Foundry's lifecycle hooks. Never run setup code at module
@@ -113,40 +140,130 @@ relative to the source tree. Hard-code path strings or derive from a `SYSTEM_PAT
 construct paths dynamically from user input.
 
 Templates are plain HTML with Handlebars expressions. Keep logic out of templates: pass
-pre-computed values from `getData()`, not raw document data. Name helper functions with the system
-prefix: `Handlebars.registerHelper("inspectres-pluralize", ...)`.
+pre-computed values from `_prepareContext()` (V2) or `getData()` (V1 legacy), not raw document
+data. Name helper functions with the system prefix:
+`Handlebars.registerHelper("inspectres-pluralize", ...)`.
 
 ## Actor and Item Sheets
 
-Extend `ActorSheet` / `ItemSheet` (or their Application v2 equivalents). Override `getData()` to
-return a plain object — do not return the document itself as template data, as Foundry proxies can
-cause serialization issues:
+### V13 target: ApplicationV2 / ActorSheetV2
+
+Foundry V13 deprecated `ActorSheet` / `ItemSheet` (now `foundry.appv1.sheets.ActorSheet`).
+**New sheets must extend `ActorSheetV2` / `ItemSheetV2`** from `foundry.applications.sheets`.
+
+The existing `AgentSheet` and `FranchiseSheet` still extend the V1 `ActorSheet` and will produce
+deprecation warnings in V13. Migrating them is tracked in a GitHub issue — do not add new V1
+sheets; use `ActorSheetV2` for any new sheet.
+
+**V2 sheet skeleton:**
 
 ```typescript
-class AgentSheet extends ActorSheet {
-  override getData(): ActorSheetData & { systemData: AgentData } {
-    const base = super.getData();
-    return {
-      ...base,
-      systemData: this.actor.system as AgentData,
-    };
+// foundry.applications.sheets.ActorSheetV2 — available as global in V13+
+export class AgentSheet extends foundry.applications.sheets.ActorSheetV2 {
+  static override DEFAULT_OPTIONS = {
+    classes: ["inspectres", "sheet", "actor", "agent"],
+    position: { width: 600, height: 700 },
+    // Static action handlers replace activateListeners event delegation
+    actions: {
+      skillRoll: AgentSheet.onSkillRoll,
+      stressRoll: AgentSheet.onStressRoll,
+    },
+  };
+
+  static override PARTS = {
+    sheet: { template: "systems/inspectres/templates/agent-sheet.hbs" },
+  };
+
+  // Replaces getData() — return plain object, never the document itself
+  override async _prepareContext(_options: unknown): Promise<Record<string, unknown>> {
+    const base = await super._prepareContext(_options);
+    return { ...base, system: this.actor.system as AgentData };
+  }
+
+  // Replaces activateListeners() for non-action event handling
+  override async _onRender(_context: unknown, _options: unknown): Promise<void> {
+    await super._onRender(_context, _options);
+    // attach listeners not covered by DEFAULT_OPTIONS.actions
+  }
+
+  // Static action handler — Foundry binds `this` to the sheet instance
+  static async onSkillRoll(this: AgentSheet, _event: Event, target: HTMLElement): Promise<void> {
+    const skill = target.dataset["skill"] ?? "";
+    await executeSkillRoll(this.actor, findFranchiseActor(), skill as SkillName);
   }
 }
 ```
 
-Register sheets in `init`, not at module top-level:
+**V1 legacy pattern** (existing sheets only — do not write new V1 sheets):
+
+```typescript
+// Still works in V13 via foundry.appv1.sheets.ActorSheet compat shim.
+// Will break in V15 when appv1 is removed.
+export class AgentSheet extends ActorSheet {
+  override async getData() {
+    const context = await super.getData();
+    return { ...context, system: this.actor.system as AgentData };
+  }
+  override activateListeners(html: JQuery<HTMLElement>) {
+    super.activateListeners(html);
+    // event handlers
+  }
+}
+```
+
+**Registration** (unchanged for both V1 and V2):
 
 ```typescript
 Hooks.once("init", function () {
   Actors.registerSheet("inspectres", AgentSheet, {
     types: ["agent"],
     makeDefault: true,
-    label: "INSPECTRES.SheetAgent",
+    label: "INSPECTRES.SheetAgent",  // always a localization key, never a raw string
   });
 });
 ```
 
-Sheet labels must be localization keys, not raw strings.
+### Dialogs
+
+`Dialog` is deprecated in V13 (`foundry.appv1.api.Dialog`). Use `foundry.applications.api.DialogV2`:
+
+```typescript
+// Bad — deprecated V1 Dialog
+const result = await Dialog.wait({ buttons: { ok: { callback: () => 42 } } });
+
+// Good — V2 DialogV2
+const result = await foundry.applications.api.DialogV2.wait({
+  window: { title: game.i18n.localize("INSPECTRES.RollTitle") },
+  content: `<form>...</form>`,
+  buttons: [
+    {
+      action: "roll",
+      label: game.i18n.localize("INSPECTRES.DialogRoll"),
+      default: true,
+      callback: (_event, _button, dialog) => {
+        const form = dialog.querySelector("form") as HTMLFormElement;
+        return Object.fromEntries(new FormData(form));
+      },
+    },
+    { action: "cancel", label: game.i18n.localize("INSPECTRES.DialogCancel") },
+  ],
+});
+if (!result || result === "cancel") return;
+```
+
+The key difference: V2 `buttons` is an array (not an object), each button has an `action` string,
+and the `callback` receives `(event, button, dialogElement)` — not `(html: JQuery)`.
+
+### Application lifecycle comparison
+
+| Concern | V1 (deprecated) | V2 (target) |
+|---------|----------------|-------------|
+| Data for template | `getData()` | `_prepareContext()` |
+| Attach listeners | `activateListeners(html: JQuery)` | `_onRender(context, options)` + `DEFAULT_OPTIONS.actions` |
+| Form submit | `_updateObject(event, data)` | `_onSubmitForm(formData, event)` |
+| DOM element | `this.element` (jQuery) | `this.element` (HTMLElement) |
+| Render hook | `renderActorSheet(app, html, data)` | `renderActorSheetV2(app, context, options)` |
+| Dialog create | `Dialog.wait(config)` | `DialogV2.wait(config)` |
 
 ## Data Models (DataModel / TypeDataModel)
 
@@ -313,3 +430,10 @@ and prevents accidental value imports from type-only paths.
 | `forEach` in vite plugin file-walking code | `for...of` |
 | Sheet labels as raw strings | Localization keys |
 | `template.json` as the schema documentation | TypeScript `DataModel` classes |
+| `unknown` to work around missing fvtt-types types | Add the type to `src/types/foundry-v2.d.ts` |
+| `renderDialog` hook for V2 dialogs (`<dialog>` element) | `renderDialogV2` hook |
+| New sheet extending `ActorSheet` / `ItemSheet` (V1, deprecated V13) | `ActorSheetV2` / `ItemSheetV2` |
+| `Dialog.wait()` / `new Dialog()` (V1, deprecated V13) | `foundry.applications.api.DialogV2.wait()` |
+| `extends Application` for new UI apps (V1, deprecated V13) | `foundry.applications.api.ApplicationV2` |
+| `getData()` in new V2 sheets | `_prepareContext()` |
+| `activateListeners(html: JQuery)` in new V2 sheets | `_onRender()` + `DEFAULT_OPTIONS.actions` |
