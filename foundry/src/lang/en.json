@@ -25,6 +25,9 @@
     "ActorTypeAgent": "Agent",
     "ActorTypeFranchise": "Franchise",
     "SheetAgent": "Agent Sheet",
-    "SheetFranchise": "Franchise Sheet"
+    "SheetFranchise": "Franchise Sheet",
+    "ErrorAddCharacteristic": "Failed to add characteristic",
+    "ErrorRemoveCharacteristic": "Failed to remove characteristic",
+    "ErrorUpdateFailed": "Failed to update actor data"
   }
 }

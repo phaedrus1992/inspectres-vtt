@@ -2,7 +2,7 @@
  * InSpectres Franchise Sheet
  */
 
-import type { FranchiseData } from "./franchise-schema.js";
+import { type FranchiseData } from "./franchise-schema.js";
 
 export class FranchiseSheet extends ActorSheet {
   static override get defaultOptions() {
@@ -26,16 +26,6 @@ export class FranchiseSheet extends ActorSheet {
   override activateListeners(html: JQuery<HTMLElement>) {
     super.activateListeners(html);
 
-    // Bank roll button
-    html.on("click", "[data-action='bankRoll']", (event: JQuery.ClickEvent) => {
-      event.preventDefault();
-      // Bank roll implementation deferred to Phase 2
-    });
-
-    // Mission tracker button
-    html.on("click", "[data-action='openMissionTracker']", (event: JQuery.ClickEvent) => {
-      event.preventDefault();
-      // Mission tracker implementation deferred to Phase 2
-    });
+    // Bank roll and mission tracker implementations deferred to Phase 2
   }
 }

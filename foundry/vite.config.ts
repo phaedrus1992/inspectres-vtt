@@ -54,43 +54,84 @@ export default defineConfig({
         // Copy styles
         const stylesDir = path.resolve(__dirname, "src/styles");
         if (fs.existsSync(stylesDir)) {
-          for (const file of fs.readdirSync(stylesDir)) {
-            const filePath = path.join(stylesDir, file);
-            if (fs.statSync(filePath).isFile()) {
-              const content = fs.readFileSync(filePath, "utf-8");
-              this.emitFile({ type: "asset", fileName: `styles/${file}`, source: content });
+          try {
+            for (const file of fs.readdirSync(stylesDir)) {
+              const filePath = path.join(stylesDir, file);
+              try {
+                const stat = fs.statSync(filePath);
+                if (stat.isFile()) {
+                  const content = fs.readFileSync(filePath, "utf-8");
+                  this.emitFile({ type: "asset", fileName: `styles/${file}`, source: content });
+                }
+              } catch (err: unknown) {
+                const message = err instanceof Error ? err.message : String(err);
+                throw new Error(`Failed to process style file ${filePath}: ${message}`);
+              }
             }
+          } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : String(err);
+            throw new Error(`Failed to read styles directory at ${stylesDir}: ${message}`);
           }
         }
 
         // Copy lang
         const langDir = path.resolve(__dirname, "src/lang");
         if (fs.existsSync(langDir)) {
-          for (const file of fs.readdirSync(langDir)) {
-            const filePath = path.join(langDir, file);
-            if (fs.statSync(filePath).isFile()) {
-              const content = fs.readFileSync(filePath, "utf-8");
-              this.emitFile({ type: "asset", fileName: `lang/${file}`, source: content });
+          try {
+            for (const file of fs.readdirSync(langDir)) {
+              const filePath = path.join(langDir, file);
+              try {
+                const stat = fs.statSync(filePath);
+                if (stat.isFile()) {
+                  const content = fs.readFileSync(filePath, "utf-8");
+                  this.emitFile({ type: "asset", fileName: `lang/${file}`, source: content });
+                }
+              } catch (err: unknown) {
+                const message = err instanceof Error ? err.message : String(err);
+                throw new Error(`Failed to process lang file ${filePath}: ${message}`);
+              }
             }
+          } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : String(err);
+            throw new Error(`Failed to read lang directory at ${langDir}: ${message}`);
           }
         }
 
         // Copy Handlebars templates
         const templatesDir = path.resolve(__dirname, "src");
         if (fs.existsSync(templatesDir)) {
-          const walkDir = (dir: string) => {
-            for (const file of fs.readdirSync(dir)) {
-              const filePath = path.join(dir, file);
-              if (fs.statSync(filePath).isDirectory() && file !== "styles" && file !== "lang") {
-                walkDir(filePath);
-              } else if (file.endsWith(".hbs")) {
-                const content = fs.readFileSync(filePath, "utf-8");
-                const fileName = path.basename(filePath);
-                this.emitFile({ type: "asset", fileName: `templates/${fileName}`, source: content });
+          const walkDir = (dir: string, depth: number = 0): void => {
+            if (depth > 10) {
+              throw new Error(`Template directory nesting too deep at ${dir}`);
+            }
+            try {
+              for (const file of fs.readdirSync(dir)) {
+                const filePath = path.join(dir, file);
+                try {
+                  const stat = fs.statSync(filePath);
+                  if (stat.isDirectory() && file !== "styles" && file !== "lang") {
+                    walkDir(filePath, depth + 1);
+                  } else if (file.endsWith(".hbs")) {
+                    const content = fs.readFileSync(filePath, "utf-8");
+                    const fileName = path.basename(filePath);
+                    this.emitFile({ type: "asset", fileName: `templates/${fileName}`, source: content });
+                  }
+                } catch (err: unknown) {
+                  const message = err instanceof Error ? err.message : String(err);
+                  throw new Error(`Failed to process template ${filePath}: ${message}`);
+                }
               }
+            } catch (err: unknown) {
+              const message = err instanceof Error ? err.message : String(err);
+              throw new Error(`Failed to walk directory ${dir}: ${message}`);
             }
           };
-          walkDir(templatesDir);
+          try {
+            walkDir(templatesDir);
+          } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : String(err);
+            throw new Error(`Template build failed: ${message}`);
+          }
         }
       },
     },
