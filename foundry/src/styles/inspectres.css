@@ -51,38 +51,40 @@
   cursor: not-allowed;
 }
 
-/* Skills grid */
-.skills-grid {
+/* Skills grid — scoped under the agent sheet to override Foundry's global
+   button { width: 100% } and display: block resets */
+.inspectres-agent-sheet .skills-grid {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
 }
 
-.skill-row {
+.inspectres-agent-sheet .skill-row {
   display: flex;
   flex-direction: column;
   gap: 0.1rem;
 }
 
-.skill-main-line {
+.inspectres-agent-sheet .skill-main-line {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-.skill-name {
+.inspectres-agent-sheet .skill-name {
   width: 6rem;
   font-weight: bold;
   flex-shrink: 0;
 }
 
-.skill-stepper {
+.inspectres-agent-sheet .skill-stepper {
   display: flex;
   align-items: center;
   gap: 0.25rem;
+  flex-shrink: 0;
 }
 
-.skill-step {
+.inspectres-agent-sheet .skill-step {
   width: 1.4rem;
   height: 1.4rem;
   padding: 0;
@@ -93,32 +95,36 @@
   border: none;
   border-radius: 3px;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
-.skill-step:hover {
+.inspectres-agent-sheet .skill-step:hover {
   background: var(--inspectres-secondary);
 }
 
-.skill-base-value {
-  width: 1.25rem;
+.inspectres-agent-sheet .skill-base-value {
+  width: 1.5rem;
   text-align: center;
   font-weight: bold;
   font-size: 1rem;
+  flex-shrink: 0;
 }
 
-.skill-effective-value {
+.inspectres-agent-sheet .skill-effective-value {
   color: #555;
   font-size: 0.85rem;
   flex: 1;
 }
 
-.skill-roll-button {
+.inspectres-agent-sheet .skill-roll-button {
+  width: auto;
   margin-left: auto;
   padding: 0.25rem 0.75rem;
   font-size: 0.85rem;
+  flex-shrink: 0;
 }
 
-.skill-penalty-line {
+.inspectres-agent-sheet .skill-penalty-line {
   padding-left: 6.75rem;
   font-size: 0.8rem;
   color: var(--inspectres-accent);
