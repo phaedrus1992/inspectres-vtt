@@ -20,27 +20,31 @@ pre-installed. It uses the community-standard
 ## Secrets Setup
 
 The container needs your Foundry account credentials to download Foundry on first run, plus
-your license key. All three are passed as Docker secrets — they never appear in environment
-variable listings or `docker inspect` output.
+your license key. These are passed as a single Docker secret file — values never appear in
+environment variable listings or `docker inspect` output.
 
-Create each file with `echo -n` (the `-n` flag omits the trailing newline):
+Create `docker/secrets/config.json`:
 
-```bash
-echo -n "you@example.com" > docker/secrets/foundry_username.txt
-echo -n "your-password"   > docker/secrets/foundry_password.txt
-echo -n "XXXX-XXXX-XXXX-XXXX" > docker/secrets/license_key.txt
+```json
+{
+  "foundry_username": "you@example.com",
+  "foundry_password": "your-password",
+  "foundry_license_key": "XXXX-XXXX-XXXX-XXXX"
+}
 ```
 
-Verify all three are gitignored before continuing:
+Your username is the email address for your foundryvtt.com account. Your license key is on
+your account page there.
+
+Verify the file is gitignored before continuing:
 
 ```bash
-git check-ignore -v docker/secrets/foundry_username.txt \
-                    docker/secrets/foundry_password.txt \
-                    docker/secrets/license_key.txt
+git check-ignore -v docker/secrets/config.json
 ```
 
-Expected: three lines of output, one per file. If any file is missing from the output, do not
-proceed — do not commit credentials.
+Expected: `docker/secrets/.gitignore:1:config.json  docker/secrets/config.json`
+
+If it is not ignored, do not proceed — do not commit credentials.
 
 > **Note:** The username and password are used only on first run to download Foundry from
 > foundryvtt.com. Once the download is cached in `docker/data/`, they are not needed again
