@@ -25,6 +25,8 @@ into the container; they are not built inside Docker.
 docker/
   docker-compose.yml                    # primary compose file
   docker-compose.override.yml.example  # dev hot-reload example (copy to activate)
+  data/
+    .gitkeep                            # ensures data directory exists in the repo
   secrets/
     .gitignore                          # ignores license_key.txt
     README.md                           # instructions for creating the secret
@@ -88,7 +90,7 @@ Sections:
 
 1. **Prerequisites** — Docker, Docker Compose v2, and a built system (`npm run prod` in `foundry/`)
 2. **License key setup** — create `docker/secrets/license_key.txt`; why a secret file, not env var
-3. **Data directory** — create `docker/data/` before first run (`mkdir -p docker/data`); Docker bind-mounts require the host path to exist; explanation of what persists there
+3. **Data directory** — `docker/data/` is pre-created in the repo via `.gitkeep`; explanation of what persists there (worlds, assets, config)
 4. **Starting Foundry** — `docker compose -f docker/docker-compose.yml up -d`; open `http://localhost:30000`
 5. **Stopping** — `docker compose -f docker/docker-compose.yml down`
 6. **Updating the system** — `npm run prod` in `foundry/`, then restart; bind-mount picks up changes
