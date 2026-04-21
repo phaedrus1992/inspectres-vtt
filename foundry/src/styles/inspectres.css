@@ -117,11 +117,24 @@
 }
 
 .inspectres-agent-sheet .skill-roll-button {
-  width: auto;
+  width: 1.6rem;
+  height: 1.6rem;
+  padding: 0;
   margin-left: auto;
-  padding: 0.25rem 0.75rem;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
+  background: var(--inspectres-secondary);
+  color: white;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.inspectres-agent-sheet .skill-roll-button:hover {
+  background: var(--inspectres-accent);
 }
 
 .inspectres-agent-sheet .skill-penalty-line {

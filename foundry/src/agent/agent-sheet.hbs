@@ -40,10 +40,11 @@
               <span class="skill-effective-value">({{inspectres-subtract skill.base skill.penalty}} effective)</span>
               <button
                 type="button"
-                class="inspectres-roll-button skill-roll-button"
+                class="skill-roll-button"
                 data-action="skillRoll"
                 data-skill="{{skillName}}"
-              >{{localize "INSPECTRES.Roll"}}</button>
+                title="{{localize "INSPECTRES.Roll"}}"
+              ><i class="fas fa-dice"></i></button>
             </div>
             {{#if skill.penalty}}
               <div class="skill-penalty-line">
