@@ -133,6 +133,29 @@ export default defineConfig({
             throw new Error(`Template build failed: ${message}`);
           }
         }
+
+        // Copy packs (compendium content)
+        const packsDir = path.resolve(__dirname, "packs");
+        if (fs.existsSync(packsDir)) {
+          const copyDir = (dir: string, outPrefix: string): void => {
+            for (const entry of fs.readdirSync(dir)) {
+              const entryPath = path.join(dir, entry);
+              const stat = fs.statSync(entryPath);
+              if (stat.isDirectory()) {
+                copyDir(entryPath, `${outPrefix}/${entry}`);
+              } else {
+                const content = fs.readFileSync(entryPath, "utf-8");
+                this.emitFile({ type: "asset", fileName: `${outPrefix}/${entry}`, source: content });
+              }
+            }
+          };
+          try {
+            copyDir(packsDir, "packs");
+          } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : String(err);
+            throw new Error(`Failed to copy packs directory: ${message}`);
+          }
+        }
       },
     },
   ],
