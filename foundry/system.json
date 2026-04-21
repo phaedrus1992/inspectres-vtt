@@ -1,0 +1,46 @@
+{
+  "id": "inspectres",
+  "title": "InSpectres",
+  "description": "Paranormal investigation RPG system for Foundry VTT.",
+  "version": "0.1.0",
+  "compatibility": {
+    "minimum": "12",
+    "verified": "14"
+  },
+  "authors": [
+    {
+      "name": "Benjamin Reed"
+    }
+  ],
+  "esmodules": [
+    "inspectres.js"
+  ],
+  "styles": [
+    "styles/inspectres.css"
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ],
+  "packs": [
+    {
+      "name": "actors",
+      "label": "InSpectres Actors",
+      "path": "packs/actors",
+      "type": "Actor",
+      "system": "inspectres"
+    },
+    {
+      "name": "macros",
+      "label": "InSpectres Macros",
+      "path": "packs/macros",
+      "type": "Macro"
+    }
+  ],
+  "url": "https://github.com/phaedrus1992/inspectres-vtt",
+  "manifest": "https://github.com/phaedrus1992/inspectres-vtt/releases/latest/download/system.json",
+  "download": "https://github.com/phaedrus1992/inspectres-vtt/releases/latest/download/inspectres.zip"
+}
