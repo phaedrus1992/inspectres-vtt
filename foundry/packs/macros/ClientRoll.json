@@ -1,9 +1,9 @@
 {
-  "_id": "InSpectresClientRol1",
+  "_id": "ClientRoll000001",
   "name": "Client Roll",
   "type": "script",
   "img": "icons/svg/mystery-man-black.svg",
-  "scope": "actor",
+  "scope": "actors",
   "command": "const actor = token?.actor ?? character;\nif (!actor || actor.type !== 'franchise') {\n  ui.notifications.warn('Select a Franchise token to generate a client.');\n} else {\n  actor.sheet?.render(true);\n}",
   "flags": { "inspectres": { "macro": "client-roll" } },
   "_stats": {

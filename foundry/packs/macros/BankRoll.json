@@ -1,9 +1,9 @@
 {
-  "_id": "InSpectresBankRoll01",
+  "_id": "BankRoll00000001",
   "name": "Bank Roll",
   "type": "script",
   "img": "icons/svg/coins.svg",
-  "scope": "actor",
+  "scope": "actors",
   "command": "const actor = token?.actor ?? character;\nif (!actor || actor.type !== 'franchise') {\n  ui.notifications.warn('Select a Franchise token to roll the bank.');\n} else {\n  actor.sheet?.render(true);\n}",
   "flags": { "inspectres": { "macro": "bank-roll" } },
   "_stats": {
