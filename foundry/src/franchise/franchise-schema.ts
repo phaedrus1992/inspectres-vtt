@@ -9,6 +9,7 @@ export interface FranchiseCards {
 }
 
 export interface FranchiseData {
+  description: string;
   cards: FranchiseCards;
   bank: number;
   missionPool: number;
