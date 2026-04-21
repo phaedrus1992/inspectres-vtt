@@ -50,6 +50,34 @@ If it is not ignored, do not proceed — do not commit credentials.
 > foundryvtt.com. Once the download is cached in `docker/data/`, they are not needed again
 > unless you reset `docker/data/`.
 
+## User ID Setup
+
+The container runs as the UID/GID you specify so it can write to bind-mounted files in
+`foundry/dist/packs/` (Foundry needs write access to open LevelDB compendium packs).
+
+Copy the example file and fill in your values:
+
+```bash
+cp docker/.env.example docker/.env
+```
+
+Then edit `docker/.env`:
+
+```bash
+# Run `id -u` and `id -g` to get your values
+FOUNDRY_UID=501
+FOUNDRY_GID=20
+```
+
+To find your values:
+
+```bash
+id -u   # UID
+id -g   # GID
+```
+
+The file is gitignored. Do not commit it.
+
 ## Starting Foundry
 
 ```bash
