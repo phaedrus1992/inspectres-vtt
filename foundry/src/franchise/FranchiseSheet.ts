@@ -44,6 +44,11 @@ export class FranchiseSheet extends ActorSheet {
 
     html.on("click", "[data-action='clientRoll']", (event: JQuery.ClickEvent) => {
       event.preventDefault();
+      const clientSystem = this.actor.system as unknown as FranchiseData;
+      if (clientSystem.debtMode) {
+        ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnClientRollDebtMode") ?? "Client rolls are disabled in Debt Mode.");
+        return;
+      }
       void executeClientRoll(this.actor).catch((err: unknown) => {
         const message = err instanceof Error ? err.message : String(err);
         console.error("Client roll failed:", message);

@@ -198,7 +198,7 @@ export async function executeSkillRoll(
   // Mission pool earned regardless of takesFour (it's an outcome, not a cost)
   if (franchise && franchiseSystem && outcome.franchiseDice > 0 && !system.isWeird) {
     await actorUpdate(franchise, { "system.missionPool": franchiseSystem.missionPool + outcome.franchiseDice });
-    emitMissionPoolUpdated(franchise.id ?? "");
+    if (franchise.id !== null) emitMissionPoolUpdated(franchise.id);
   }
 
   const speaker = ChatMessage.getSpeaker({ actor: agent });

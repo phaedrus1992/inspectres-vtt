@@ -102,7 +102,7 @@ export class MissionTrackerApp extends Application {
             const distribution: Record<string, number> = {};
             for (const user of players) {
               const raw = Number(data.get(`player-${user.id}`) ?? 0);
-              distribution[user.id] = isNaN(raw) ? 0 : raw;
+              distribution[user.id] = isNaN(raw) ? 0 : Math.max(0, raw);
             }
             return distribution;
           },
@@ -149,8 +149,8 @@ export class MissionTrackerApp extends Application {
     const content = `<p>${baseMsg}</p><ul>${lines.map((l) => `<li>${l}</li>`).join("")}</ul>`;
     await ChatMessage.create({ content } as unknown as Parameters<typeof ChatMessage.create>[0]);
 
-    void system; // used for context above; pool already on franchise
-    this.render(false);
+    void system;
+    if (MissionTrackerApp.instance === this) this.render(false);
   }
 
   private async endEarly(): Promise<void> {
@@ -165,7 +165,7 @@ export class MissionTrackerApp extends Application {
     const msg = game.i18n?.localize("INSPECTRES.MissionEndedEarly") ?? "The mission ended early. Franchise pool cleared.";
     await ChatMessage.create({ content: `<p>${msg}</p>` } as unknown as Parameters<typeof ChatMessage.create>[0]);
 
-    this.render(false);
+    if (MissionTrackerApp.instance === this) this.render(false);
   }
 
   override close(options?: Application.CloseOptions): Promise<void> {
