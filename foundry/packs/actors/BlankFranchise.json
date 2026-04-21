@@ -1,0 +1,28 @@
+{
+  "_id": "BlankFranchise01",
+  "name": "Blank Franchise",
+  "type": "franchise",
+  "img": "icons/svg/building.svg",
+  "system": {
+    "description": "",
+    "cards": {
+      "library": 4,
+      "gym": 1,
+      "credit": 1
+    },
+    "bank": 1,
+    "missionPool": 0,
+    "missionGoal": 0,
+    "debtMode": false,
+    "loanAmount": 0
+  },
+  "flags": {},
+  "_stats": {
+    "systemId": "inspectres",
+    "systemVersion": "0.1.0",
+    "coreVersion": "12.0.0",
+    "createdTime": null,
+    "modifiedTime": null,
+    "lastModifiedBy": null
+  }
+}

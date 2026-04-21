@@ -1,0 +1,17 @@
+{
+  "_id": "BankRoll00000001",
+  "name": "Bank Roll",
+  "type": "script",
+  "img": "icons/svg/coins.svg",
+  "scope": "actors",
+  "command": "const actor = token?.actor ?? character;\nif (!actor || actor.type !== 'franchise') {\n  ui.notifications.warn('Select a Franchise token to roll the bank.');\n} else {\n  actor.sheet?.render(true);\n}",
+  "flags": { "inspectres": { "macro": "bank-roll" } },
+  "_stats": {
+    "systemId": "inspectres",
+    "systemVersion": "0.1.0",
+    "coreVersion": "12.0.0",
+    "createdTime": null,
+    "modifiedTime": null,
+    "lastModifiedBy": null
+  }
+}
