@@ -85,8 +85,8 @@ export class AgentSheet extends foundry.applications.sheets.ActorSheetV2 {
   override async _onRender(context: Record<string, unknown>, options: foundry.applications.api.ApplicationV2Options): Promise<void> {
     await super._onRender(context, options);
 
-    // Cool pip toggle (not covered by DEFAULT_OPTIONS.actions — uses change event)
-    this.element.querySelectorAll<HTMLInputElement>(".weird-checkbox").forEach((el) => {
+    // weird-checkbox: change event not covered by DEFAULT_OPTIONS.actions
+    for (const el of this.element.querySelectorAll<HTMLInputElement>(".weird-checkbox")) {
       el.addEventListener("change", (event: Event) => {
         const updateData = { "system.isWeird": (event.target as HTMLInputElement).checked } as unknown as Parameters<typeof this.actor.update>[0];
         void this.actor.update(updateData).catch((err: unknown) => {
@@ -95,9 +95,9 @@ export class AgentSheet extends foundry.applications.sheets.ActorSheetV2 {
           ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorUpdateFailed") ?? "Failed to update actor data");
         });
       });
-    });
+    }
 
-    this.element.querySelectorAll<HTMLElement>(".cool-pip").forEach((el) => {
+    for (const el of this.element.querySelectorAll<HTMLElement>(".cool-pip")) {
       el.addEventListener("click", (event: Event) => {
         event.preventDefault();
         const valueStr = (event.currentTarget as HTMLElement).getAttribute("data-value");
@@ -119,7 +119,7 @@ export class AgentSheet extends foundry.applications.sheets.ActorSheetV2 {
           ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorUpdateFailed") ?? "Failed to update actor data");
         });
       });
-    });
+    }
   }
 
   static async onSkillRoll(this: AgentSheet, _event: Event, target: HTMLElement): Promise<void> {
