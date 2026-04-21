@@ -7,35 +7,35 @@ import { InSpectresAgent } from "./agent/InSpectresAgent.js";
 import { AgentSheet } from "./agent/AgentSheet.js";
 import { InSpectresFranchise } from "./franchise/InSpectresFranchise.js";
 import { FranchiseSheet } from "./franchise/FranchiseSheet.js";
-
-console.log("InSpectres system initializing...");
+import { registerHandlebarsHelpers } from "./utils/handlebars-helpers.js";
 
 Hooks.once("init", () => {
-  console.log("InSpectres | System init");
-
   // Register actor document classes
-  CONFIG.Actor.documentClass = InSpectresAgent as any;
+  (CONFIG.Actor.documentClass as typeof InSpectresAgent) = InSpectresAgent;
 
   // Register actor type labels
-  (CONFIG.Actor.typeLabels as any) = {
-    agent: "Agent",
-    franchise: "Franchise",
+  (CONFIG.Actor.typeLabels as Record<string, string>) = {
+    agent: "INSPECTRES.ActorTypeAgent",
+    franchise: "INSPECTRES.ActorTypeFranchise",
   };
+
+  // Register Handlebars helpers
+  registerHandlebarsHelpers();
 
   // Register sheets
   Actors.registerSheet("inspectres", AgentSheet, {
-    types: ["agent" as any],
+    types: ["agent" as never],
     makeDefault: true,
-    label: "Agent Sheet",
+    label: "INSPECTRES.SheetAgent",
   });
 
   Actors.registerSheet("inspectres", FranchiseSheet, {
-    types: ["franchise" as any],
+    types: ["franchise" as never],
     makeDefault: true,
-    label: "Franchise Sheet",
+    label: "INSPECTRES.SheetFranchise",
   });
 });
 
 Hooks.once("ready", () => {
-  console.log("InSpectres | System ready");
+  // System ready for play
 });

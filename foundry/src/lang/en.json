@@ -20,6 +20,10 @@
     "SkillRoll": "Skill Roll",
     "StressRoll": "Stress Roll",
     "BankRoll": "Bank Roll",
-    "ClientRoll": "Client Roll"
+    "ClientRoll": "Client Roll",
+    "ActorTypeAgent": "Agent",
+    "ActorTypeFranchise": "Franchise",
+    "SheetAgent": "Agent Sheet",
+    "SheetFranchise": "Franchise Sheet"
   }
 }
