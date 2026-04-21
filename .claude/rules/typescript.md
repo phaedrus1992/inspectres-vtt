@@ -56,6 +56,27 @@ function parse(input: unknown): void {
 
 If `any` is truly unavoidable (e.g., test mocks), add an inline suppression comment explaining why.
 
+### Type Assertions: Justify, Don't Chain
+
+Use type assertions (`as T`) sparingly and only with a clear justification comment. Never chain through `unknown` as a workaround (`as unknown as T`) — this defeats narrowing and should trigger refactoring instead:
+
+```typescript
+// Bad — bypasses type system entirely
+const agent = makeTestFixture() as unknown as Actor;
+
+// Good — narrow with runtime check or add a proper helper
+const agent = makeTestFixture();
+if (!isValidActor(agent)) throw new Error("Invalid fixture");
+// agent is now properly narrowed to Actor type
+
+// Acceptable — minimal fixture for test with justification
+// Type narrowing: test fixture implements minimal Actor interface needed for roll execution.
+// Full Actor type includes 128+ Foundry properties unused in this test context.
+const agent = makeTestFixture() as unknown as Actor;
+```
+
+If you find yourself writing `as unknown as`, stop and ask: (1) Is there a type wrapper or constructor I can use instead? (2) Can I add a runtime check to properly narrow? (3) Is my fixture/data model incomplete? Fix the root cause rather than bypassing the type system.
+
 ### Interfaces vs Type Aliases
 
 - Use `interface` for object shapes — they have better display, performance, and extensibility
@@ -267,6 +288,7 @@ const POLL_TIMEOUT_MS = 30_000;
 | `for...in` | `for...of` / `Object.entries()` |
 | `@ts-ignore` | Fix the type error |
 | Type assertions (`as Foo`) without justification | Runtime type guards / narrowing |
+| `as unknown as Foo` chains | Create type-safe wrappers or add proper narrowing — chaining through `unknown` bypasses the type system |
 | Non-null assertions (`x!`) without justification | Null checks |
 | `== ` / `!=` (except `== null`) | `===` / `!==` |
 | `new String()` / `new Boolean()` / `new Number()` | Primitive literals |
