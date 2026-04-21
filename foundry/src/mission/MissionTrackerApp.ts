@@ -87,6 +87,7 @@ export class MissionTrackerApp extends foundry.applications.api.ApplicationV2 {
 
     const result = await foundry.applications.api.DialogV2.wait({
       window: { title: game.i18n?.localize("INSPECTRES.DistributeDialogTitle") ?? "Distribute Mission Dice" },
+      rejectClose: false,
       content,
       buttons: [
         {

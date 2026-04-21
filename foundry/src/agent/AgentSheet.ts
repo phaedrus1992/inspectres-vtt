@@ -22,6 +22,7 @@ async function buildStressRollDialog(agent: Actor): Promise<void> {
 
   const result = await foundry.applications.api.DialogV2.wait({
     window: { title: i18n?.localize("INSPECTRES.StressRoll") ?? "Stress Roll" },
+    rejectClose: false,
     content: `
       <form class="inspectres-roll-dialog">
         <label>${stressDiceLabel}: <input type="number" name="stressDice" min="1" max="5" value="1"></label>

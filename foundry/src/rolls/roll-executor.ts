@@ -257,6 +257,7 @@ async function buildSkillRollDialog(opts: SkillRollDialogOptions): Promise<Skill
 
   const result = await foundry.applications.api.DialogV2.wait({
     window: { title: `${i18n?.localize("INSPECTRES.SkillRoll") ?? "Skill Roll"}: ${opts.skillName}` },
+    rejectClose: false,
     content,
     buttons: [
       {
