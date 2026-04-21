@@ -54,55 +54,43 @@ export default defineConfig({
         // Copy styles
         const stylesDir = path.resolve(__dirname, "src/styles");
         if (fs.existsSync(stylesDir)) {
-          fs.readdirSync(stylesDir).forEach((file) => {
+          for (const file of fs.readdirSync(stylesDir)) {
             const filePath = path.join(stylesDir, file);
             if (fs.statSync(filePath).isFile()) {
               const content = fs.readFileSync(filePath, "utf-8");
-              this.emitFile({
-                type: "asset",
-                fileName: `styles/${file}`,
-                source: content,
-              });
+              this.emitFile({ type: "asset", fileName: `styles/${file}`, source: content });
             }
-          });
+          }
         }
 
         // Copy lang
         const langDir = path.resolve(__dirname, "src/lang");
         if (fs.existsSync(langDir)) {
-          fs.readdirSync(langDir).forEach((file) => {
+          for (const file of fs.readdirSync(langDir)) {
             const filePath = path.join(langDir, file);
             if (fs.statSync(filePath).isFile()) {
               const content = fs.readFileSync(filePath, "utf-8");
-              this.emitFile({
-                type: "asset",
-                fileName: `lang/${file}`,
-                source: content,
-              });
+              this.emitFile({ type: "asset", fileName: `lang/${file}`, source: content });
             }
-          });
+          }
         }
 
         // Copy Handlebars templates
         const templatesDir = path.resolve(__dirname, "src");
         if (fs.existsSync(templatesDir)) {
-          const walkDir = (dir: string, prefix: string) => {
-            fs.readdirSync(dir).forEach((file) => {
+          const walkDir = (dir: string) => {
+            for (const file of fs.readdirSync(dir)) {
               const filePath = path.join(dir, file);
               if (fs.statSync(filePath).isDirectory() && file !== "styles" && file !== "lang") {
-                walkDir(filePath, prefix ? `${prefix}/${file}` : file);
+                walkDir(filePath);
               } else if (file.endsWith(".hbs")) {
                 const content = fs.readFileSync(filePath, "utf-8");
                 const relPath = path.relative(templatesDir, filePath);
-                this.emitFile({
-                  type: "asset",
-                  fileName: `templates/${relPath}`,
-                  source: content,
-                });
+                this.emitFile({ type: "asset", fileName: `templates/${relPath}`, source: content });
               }
-            });
+            }
           };
-          walkDir(templatesDir, "");
+          walkDir(templatesDir);
         }
       },
     },
