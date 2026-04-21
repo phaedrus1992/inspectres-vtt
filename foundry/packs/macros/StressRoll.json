@@ -1,9 +1,9 @@
 {
-  "_id": "InSpectresStressRol1",
+  "_id": "StressRoll000001",
   "name": "Stress Roll",
   "type": "script",
   "img": "icons/svg/hazard.svg",
-  "scope": "actor",
+  "scope": "actors",
   "command": "const actor = token?.actor ?? character;\nif (!actor || actor.type !== 'agent') {\n  ui.notifications.warn('Select an Agent token to make a Stress roll.');\n} else {\n  actor.sheet?.render(true);\n}",
   "flags": { "inspectres": { "macro": "stress-roll" } },
   "_stats": {
