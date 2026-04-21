@@ -99,3 +99,23 @@ rooms:
       - session
       - feedback
       - clarification
+
+  - name: foundry-api
+    description: Foundry VTT v12 API documentation — classes, methods, patterns, data fields
+    keywords:
+      - foundry
+      - api
+      - datamodel
+      - typedata
+      - actor
+      - item
+      - hooks
+      - roll
+      - chatmessage
+      - activeeffect
+      - combat
+      - settings
+      - texteditor
+      - filepicker
+      - compendium
+      - utils

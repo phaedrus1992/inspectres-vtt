@@ -1,0 +1,6 @@
+[submodule "reference/dnd5e"]
+	path = reference/dnd5e
+	url = https://github.com/foundryvtt/dnd5e
+[submodule "reference/pf2e"]
+	path = reference/pf2e
+	url = https://github.com/foundryvtt/pf2e
