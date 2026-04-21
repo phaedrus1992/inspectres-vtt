@@ -19,4 +19,4 @@ services:
       CONTAINER_PRESERVE_CONFIG: "true"
     volumes:
       - ./data:/data
-      - ../foundry/dist:/data/Data/systems/inspectres:ro
+      - ../foundry/dist:/data/Data/systems/inspectres
