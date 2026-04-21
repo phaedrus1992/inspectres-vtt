@@ -88,7 +88,7 @@
       <div class="mission-progress">
         <span>Earned: {{system.missionPool}} / {{system.missionGoal}}</span>
         <div class="progress-bar">
-          <div class="progress-fill" style="width: {{multiply (divide system.missionPool (max system.missionGoal 1)) 100}}%"></div>
+          <div class="progress-fill" style="width: {{inspectres-multiply (inspectres-divide system.missionPool (inspectres-max system.missionGoal 1)) 100}}%"></div>
         </div>
       </div>
       <button type="button" class="inspectres-roll-button" data-action="openMissionTracker">
@@ -100,7 +100,7 @@
     {{#if system.debtMode}}
       <section class="inspectres-section inspectres-debt-warning">
         <h2>⚠ Debt Mode</h2>
-        <p>Franchise borrowed {{system.loanAmount}} {{plural system.loanAmount "die" "dice"}}</p>
+        <p>Franchise borrowed {{system.loanAmount}} {{inspectres-plural system.loanAmount "die" "dice"}}</p>
       </section>
     {{/if}}
   </div>

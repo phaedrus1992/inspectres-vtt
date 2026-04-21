@@ -7,35 +7,39 @@ import { InSpectresAgent } from "./agent/InSpectresAgent.js";
 import { AgentSheet } from "./agent/AgentSheet.js";
 import { InSpectresFranchise } from "./franchise/InSpectresFranchise.js";
 import { FranchiseSheet } from "./franchise/FranchiseSheet.js";
+import { registerHandlebarsHelpers } from "./utils/handlebars-helpers.js";
 
-console.log("InSpectres system initializing...");
-
-Hooks.once("init", () => {
-  console.log("InSpectres | System init");
-
+Hooks.once("init", function () {
   // Register actor document classes
-  CONFIG.Actor.documentClass = InSpectresAgent as any;
+  // Note: Foundry V12+ supports documentClasses for per-type registration, but fvtt-types
+  // may not reflect this. Using a workaround: set documentClass to Agent and register
+  // sheets for both types. A future improvement is to use TypeDataModel for proper
+  // type separation.
+  (CONFIG.Actor.documentClass as typeof InSpectresAgent | typeof InSpectresFranchise) = InSpectresAgent;
 
   // Register actor type labels
-  (CONFIG.Actor.typeLabels as any) = {
-    agent: "Agent",
-    franchise: "Franchise",
+  (CONFIG.Actor.typeLabels as Record<string, string>) = {
+    agent: "INSPECTRES.ActorTypeAgent",
+    franchise: "INSPECTRES.ActorTypeFranchise",
   };
+
+  // Register Handlebars helpers
+  registerHandlebarsHelpers();
 
   // Register sheets
   Actors.registerSheet("inspectres", AgentSheet, {
-    types: ["agent" as any],
+    types: ["agent" as never],
     makeDefault: true,
-    label: "Agent Sheet",
+    label: "INSPECTRES.SheetAgent",
   });
 
   Actors.registerSheet("inspectres", FranchiseSheet, {
-    types: ["franchise" as any],
+    types: ["franchise" as never],
     makeDefault: true,
-    label: "Franchise Sheet",
+    label: "INSPECTRES.SheetFranchise",
   });
 });
 
-Hooks.once("ready", () => {
-  console.log("InSpectres | System ready");
+Hooks.once("ready", function () {
+  // System ready for play
 });

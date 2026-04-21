@@ -13,6 +13,7 @@ export interface AgentCharacteristic {
 }
 
 export interface AgentData {
+  description: string;
   skills: {
     academics: AgentSkill;
     athletics: AgentSkill;
