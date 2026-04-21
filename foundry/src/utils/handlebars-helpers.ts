@@ -11,13 +11,9 @@ export function registerHandlebarsHelpers(): void {
 
   // Comparison helpers
   Handlebars.registerHelper("inspectres-gte", (a: number, b: number) => a >= b);
-  Handlebars.registerHelper("inspectres-lte", (a: number, b: number) => a <= b);
-  Handlebars.registerHelper("inspectres-gt", (a: number, b: number) => a > b);
-  Handlebars.registerHelper("inspectres-lt", (a: number, b: number) => a < b);
 
   // Math helpers
   Handlebars.registerHelper("inspectres-max", (a: number, b: number) => Math.max(a, b));
-  Handlebars.registerHelper("inspectres-min", (a: number, b: number) => Math.min(a, b));
 
   // String helpers
   Handlebars.registerHelper("inspectres-capitalize", (str: string) => {
