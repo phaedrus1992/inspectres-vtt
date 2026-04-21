@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { MockActorSheetV2, Hooks, hookHandlers } from "../__mocks__/setup.js";
+import { MockActorSheetV2, Hooks } from "../__mocks__/setup.js";
 import { AgentSheet } from "./AgentSheet.js";
 
 describe("AgentSheet", () => {
@@ -87,36 +87,4 @@ describe("AgentSheet", () => {
     });
   });
 
-  describe("DialogV2 cancel/close paths", () => {
-    it("buildStressRollDialog returns early when user cancels", async () => {
-      vi.spyOn(foundry.applications.api.DialogV2, "wait").mockResolvedValueOnce(null);
-      expect(true).toBe(true);
-    });
-
-    it("buildStressRollDialog returns early when dialog closes without result", async () => {
-      vi.spyOn(foundry.applications.api.DialogV2, "wait").mockResolvedValueOnce(undefined);
-      expect(true).toBe(true);
-    });
-
-    it("buildStressRollDialog form element missing returns safe defaults", async () => {
-      vi.spyOn(foundry.applications.api.DialogV2, "wait").mockImplementationOnce(async (config) => {
-        const defaultButton = (config.buttons as unknown as Array<{ callback?: (e: Event, b: HTMLButtonElement, d: HTMLDialogElement) => unknown }>)?.find((b) => (b as unknown as { default: boolean }).default);
-        const callback = defaultButton?.callback;
-        const mockDialog = document.createElement("dialog") as HTMLDialogElement;
-        return callback ? callback(new Event("click"), document.createElement("button"), mockDialog) : null;
-      });
-      expect(true).toBe(true);
-    });
-
-    it("onSkillRoll early returns on missing data-skill attribute", () => {
-      const button = document.createElement("button");
-      button.removeAttribute("data-skill");
-      expect(button.getAttribute("data-skill")).toBeNull();
-    });
-
-    it("stress roll early returns on debt mode block", () => {
-      const mockFranchise = { system: { debtMode: true } };
-      expect((mockFranchise.system as unknown as { debtMode: boolean }).debtMode).toBe(true);
-    });
-  });
 });
