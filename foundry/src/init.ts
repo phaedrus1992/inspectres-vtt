@@ -9,7 +9,12 @@ import { InSpectresFranchise } from "./franchise/InSpectresFranchise.js";
 import { FranchiseSheet } from "./franchise/FranchiseSheet.js";
 import { registerHandlebarsHelpers } from "./utils/handlebars-helpers.js";
 
-Hooks.once("init", function () {
+Hooks.once("init", async function () {
+  await loadTemplates([
+    "systems/inspectres/templates/agent-sheet.hbs",
+    "systems/inspectres/templates/franchise-sheet.hbs",
+    "systems/inspectres/templates/roll-card.hbs",
+  ]);
   // Register actor document classes
   // Note: Foundry V12+ supports documentClasses for per-type registration, but fvtt-types
   // may not reflect this. Using a workaround: set documentClass to Agent and register
@@ -43,3 +48,4 @@ Hooks.once("init", function () {
 Hooks.once("ready", function () {
   // System ready for play
 });
+

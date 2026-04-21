@@ -28,6 +28,8 @@
     "SheetFranchise": "Franchise Sheet",
     "ErrorAddCharacteristic": "Failed to add characteristic",
     "ErrorRemoveCharacteristic": "Failed to remove characteristic",
-    "ErrorUpdateFailed": "Failed to update actor data"
+    "ErrorUpdateFailed": "Failed to update actor data",
+    "ErrorRollFailed": "Roll failed",
+    "WarnNoBankDice": "No bank dice to roll."
   }
 }
