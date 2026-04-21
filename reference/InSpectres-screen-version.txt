@@ -1,0 +1,4246 @@
+Fighting the forces of darkness so you don't have to.
+1. Introduction .....................5
+About the Game ............................................................6
+Design Notes ................................................................6
+The World of InSpectres .................................................7
+
+2. Creating your Agent .........8
+Character Guidelines .......................................................9
+Agent Skills ................................................................10
+Academics ..............................................................10
+Athletics ................................................................10
+Technology .............................................................10
+Contact ..................................................................10
+Point Distribution ........................................................11
+Talents .......................................................................11
+Character Improvement ................................................11
+Cool Dice ....................................................................12
+Playing Supernatural Characters .....................................12
+Sidebar: Characters: Normal is Better ..............................13
+Agent Creation Summary ...............................................13
+
+3. Creating the Franchise ....14
+Sidebar: Who makes the Technology die roll? ...................15
+Franchise Cards ...........................................................16
+Library Card ............................................................16
+Gym Card ...............................................................16
+Credit Card .............................................................16
+Franchise Dice .............................................................16
+The Bank ....................................................................17
+Job Descriptions ..........................................................17
+Chief Executive Officer .............................................17
+Chief Technical Officer ..............................................19
+Chief Financial Officer ..............................................19
+Sidebar: Limited Technology ..........................................18
+Franchise Creation Summary ..........................................20
+
+Table of Contents
+
+Fighting the forces of darkness so you don't have to
+
+Appendices
+
+Chapter 8
+
+Chapter 7
+
+Chapter 6
+
+Chapter 5
+
+Chapter 4
+
+Chapter 3
+
+Chapter 2
+
+Chapter 1
+
+4. Game Mechanics .............21
+
+2
+
+Skill Roll Chart ............................................................ 22
+Sample Skill Rolls ........................................................19
+Roll Academics to… ................................................23
+Roll Athletics to… ..................................................23
+Roll Technology to… ...............................................23
+Roll Contact to… ....................................................23
+Earning Franchise Dice .................................................24
+Sidebar: Reduced Franchise Die Goals .............................24
+Requirements ..............................................................25
+‘Taking 4’ ...................................................................26
+Augmenting Skill Rolls .................................................26
+Rolling Bank dice ........................................................27
+Bank Roll Chart .......................................................27
+Teamwork ...................................................................28
+
+5. Stress ..........................30
+Stress Roll Chart ..........................................................31
+Stress Penalties ...........................................................28
+Suffer an Academics penalty? ....................................32
+Lost some Athletics dice? .........................................32
+Low on Technology? ...............................................32
+Having problems with Contact? .................................32
+Sample Stress Rolls Chart...............................................33
+Cool Dice ....................................................................34
+Sidebar: When to call for Stress Rolls? ............................34
+
+6. Weird Agents .................36
+The Good News ...........................................................36
+The Bad News .............................................................37
+Turning Weird .............................................................37
+Sample Weird agents ....................................................38
+Sidebar: A Random Star Trek Reference ...........................38
+Vampire .....................................................................39
+Werewolf ....................................................................40
+Ghost ........................................................................41
+Zombie ......................................................................42
+Psychic ......................................................................43
+Sorcerer .....................................................................44
+Demon .......................................................................45
+Supernatural Hero ........................................................46
+Table of Contents
+
+Fighting the forces of darkness so you don't have to
+
+7. Play Structure ...............47
+
+Chapter 5
+Chapter 6
+Chapter 7
+Chapter 8
+Appendices
+
+Table of Contents
+
+Chapter 4
+
+i. Glossary of Terms .....................67
+Skills .........................................................................67
+Academics ..............................................................67
+Athletics ................................................................67
+Contact ..................................................................67
+Technology ..............................................................67
+Die Pools ....................................................................68
+Bank dice ...............................................................68
+Card Dice ...............................................................68
+Cool dice ................................................................68
+
+Chapter 3
+
+Have Fun ....................................................................64
+Credits & Kudos ...........................................................65
+The Essential InSpectres InSpirado List ...........................65
+Bonus Materials on the Web ..........................................66
+Copyright Info ............................................................66
+
+Chapter 2
+
+8. Final Words....................63
+
+Chapter 1
+
+Starting Interviews ......................................................47
+Employee Screening ................................................48
+Investor Meeting .....................................................48
+Media Interview ......................................................48
+Confessionals ..............................................................48
+Sidebar: ‘The Chair’ ......................................................51
+Guidelines for Confessionals ......................................51
+Private Lives ...........................................................51
+Creating Non-player Characters ......................................52
+Jobs ..........................................................................52
+Getting the Call .......................................................53
+Client Roll Chart ......................................................54
+Research & Investigation ..........................................55
+Suiting Up ..............................................................56
+Fieldwork ...............................................................57
+Clean Up ................................................................57
+Bankruptcy & Debt ..................................................58
+Death & Dismemberment ..........................................59
+Vacation ................................................................59
+Character Continuity ....................................................60
+InSpectres: the Series ..................................................61
+Sidebar: One-shot vs. Series ...........................................62
+
+3
+
+Franchise Dice .........................................................69
+Skill Dice ................................................................69
+Stress Dice .............................................................69
+Talent Dice .............................................................69
+Game Mechanics ..........................................................70
+Augmenting ............................................................70
+Bank Rolls ..............................................................70
+Requirements ..........................................................70
+Skill Rolls ...............................................................70
+Stress Penalties .......................................................71
+Stress Rolls .............................................................71
+‘Taking 4’ ...............................................................71
+Teamwork ...............................................................71
+Play Structure .............................................................71
+Confessionals ..............................................................72
+Characteristics ............................................................72
+The Job ......................................................................72
+ii. Reference Charts .....................74
+Skill Roll Chart ............................................................74
+Stress Roll Chart ..........................................................74
+Bank Roll Chart ...........................................................75
+Client Roll Chart ..........................................................75
+Character sheet ...........................................................76
+Franchise sheet ...........................................................77
+ID Badge ....................................................................78
+Dice rolling sheet ........................................................79
+NDA ...........................................................................80
+
+Appendices
+
+Chapter 8
+
+Chapter 7
+
+Chapter 6
+
+Chapter 5
+
+Chapter 4
+
+Chapter 3
+
+Chapter 2
+
+Chapter 1
+
+Fighting the forces of darkness so you don't have to
+
+4
+Table of Contents
+
+1. Introduction
+nSpectres is a paranormal investigation and elimination service based in the Bay Area of California, dedicated to safeguarding the human race from extradimensional hazards and supernatural manifestations.
+Our skilled agents are handpicked for their physical
+prowess, academic achievement and technical aptitude.
+They are the elite – the best of the best.
+So if it’s ghosts or goblins, spooks, bogies or bumps in
+the night, you can rest easy knowing that our trained
+staff is on the case.
+InSpectres: Because it’s not just a vampiric infestation,
+it’s your vampiric infestation!
+
+I
+
+Fighting the forces of darkness so you don't have to
+
+Appendices
+
+Chapter 8
+
+Chapter 7
+
+Chapter 6
+
+Chapter 5
+
+Chapter 4
+
+Chapter 3
+
+Chapter 2
+
+Chapter 1
+Introduction
+
+About the Game
+InSpectres is a fast, simple and fun game that mixes horror and
+comedy in a world of start-up culture and supernatural frightfests. The setting is loosely defined, allowing you the freedom to
+fill in the blanks however you see fit. The mechanics are designed
+with player control in mind, as well as a few bells and whistles to
+turn the whole player-GM relationship on its head. Early incarnations have been received quite well, garnering a positive review on
+The Forge (an indie-gaming website) and inspiring several different interpretations of the rules. These “interpretations” (I call ’em
+mini-supplements) have taken the basic game into many different
+directions, from investigative news teams to haunted hospitals,
+elite-military units to turn of the century explorer’s clubs.
+InSpectres is loosely based on the films Ghostbusters and
+Ghostbusters II (which, frankly, wasn’t great) and “reality TV
+shows” like COPS and the Real World. Heavy doses of inspiration
+also come from my personal experiences as a software developer
+and employee of two Internet companies.
+Design Notes
+Unlike a lot of games out there, InSpectres didn’t start as an
+idea for a cool setting or anything like that. What I wanted to do
+was try designing a game that “fixed” some problems I saw in
+similar games that dealt with investigation (no names, please).
+That problem is what I call the “murder mystery” plot. Basically,
+it goes like this: the players stumble across a mystery of some
+sort. The GM then provides clues (in the form of helpful or notso-helpful NPCs, scraps of forensic information or first-hand
+knowledge of the event). If the players are smart, they’ll figure
+it out. If not, then the GM has to guide them along until they do
+figure it out. In effect, it becomes an exercise for the GM in
+which the players are guided down a pre-built track and react to
+stuff that pops up along the way (not unlike a funhouse ride).
+In the end, the game succeeds or fails on the merits of the GM
+running that game.
+What this game does is to allow the GM to set up the events,
+but then have the players (through their characters) decide what
+is really going on. The GM then reacts to the players and what
+they see as intriguing or exciting elements of the story.
+The other thing I wanted to do was to set up a play structure
+(the series of events that occurs in each game session). Using
+
+6
+About the Game
+
+Fighting the forces of darkness so you don't have to
+
+this play structure as a guide, the GM and players know what is
+expected of them at various stages of the game. The fun, of
+course, comes from doing stuff in each stage.
+
+Chapter 2
+Chapter 3
+Chapter 4
+Chapter 5
+Chapter 6
+Chapter 7
+Chapter 8
+Appendices
+
+The World of InSpectres
+InSpectres takes place in a modern,
+metropolitan setting where ghosts, demons
+and things that go bump in the night are
+real, documented and seen as sources of
+annoyance and embarrassment (rather
+than just the usual standards of fear, confusion and revulsion).
+In order to deal with the rising occurrences of supernatural infestations, a small
+start-up called InSpectres, Inc. was founded by a team of parapsychologists, ghost hunters and tech-heads looking for a way to
+make money without doing the normal 9-5 grind. Their service is
+designed to enable clients to confidentially contact the
+InSpectres and have their supernatural infestations investigated
+and (hopefully) eliminated.
+Of course, you can set your game anywhere you want … rural
+towns and foreign countries have their share of weird problems,
+maybe even more than the Big City and its suburbs. The InSpectres
+franchise creation rules enable you to run anything from a low-rent
+start-up to an established business (or even the Main Office itself!).
+Do you want to delve into a world of second-hand furniture, irate
+creditors and carryout? Or would you rather explore a bustling
+enterprise and all the bureaucracy and red tape that comes with it?
+Ultimately, the “World of InSpectres” is just a big sandbox in
+which to play. There are no hard, fast rules or cordoned-off areas
+marked “DO NOT CHANGE!” The heart and soul of the game is its
+premise and play structure … everything else is just an excuse
+to make a mess and have fun.
+There’s lots of room in this game for your own ideas. As I said earlier, some people have gone hog-wild with their own custom-built
+settings. So can you! Just take into account how the game works
+and start from there. The game is not just about colorful characters
+that investigate supernatural threats. It’s also about players that get
+to decide the How and What and Why of the game, rather than just
+relying on the skill and imagination of one person: the Game Master.
+This is collaborative storytelling without a net.
+
+Chapter 1
+Introduction
+
+7
+The World of InSpectres
+
+2. Creating your Agent
+
+hat kind of person quits their day-job in order to
+take up the rather odd career of professional
+ghost hunting? Well, all kinds of people, really …
+and that’s where you come in. InSpectres agents come from all
+backgrounds, all walks of life. Amateur para-psychologists, occult
+scholars, ex-military or law enforcement, tech-heads, used car
+salesmen, pro football players and ex-strippers have all found
+their place in the InSpectres family.
+But no matter what their background, you should come up
+with a reasonable explanation why your characters would want
+to undertake such a radical career change.
+Like the sign says, “You don’t have to be crazy to work here
+… but it helps.”
+
+W
+
+Fighting the forces of darkness so you don't have to
+
+Chapter 1
+Chapter 2
+Creating
+your Agent
+
+Chapter 3
+Chapter 4
+Chapter 5
+Chapter 6
+
+Character Guidelines
+First, come up with a name and a basic personality for your
+character. It helps to also come up with his or her former occupation (even if said occupation is “couch potato”). As far as
+quirkiness and mental instability, well, weirdoes are fine. Just
+remember a few guidelines:
+If your character is so “out there” that he or she wouldn’t get
+hired in the first place, then you should probably tone it down a
+bit or come up with a new concept. InSpectres is a business, first
+and foremost, and that twitchy gun nut with the tattoos might
+not be conducive to a stable work environment. Of course, the
+smaller the franchise, the more leeway they’re willing to give to
+possible new hires.
+If your character is a loner, argumentative or completely unreliable, he won’t last long in the close-knit team structure of the
+franchise. You don’t have to get along with everyone, but you can’t
+be a dickhead and expect to be hired or stay employed.
+Lastly, your character needs to have some special skills or field of
+expertise that the InSpectres would find attractive. This doesn’t
+mean that you have to be some whiz-kid scientist or occult librarian to get the job. It just means that your character should have
+something that he’s really good at – this could be anything from
+research to physical prowess to a pleasant speaking voice. Which
+brings us to skills…
+
+Chapter 7
+Chapter 8
+Appendices
+
+9
+Character Guidelines
+
+Chapter 1
+
+Fighting the forces of darkness so you don't have to
+
+Appendices
+
+Chapter 8
+
+Chapter 7
+
+Chapter 6
+
+Chapter 5
+
+Chapter 4
+
+Chapter 3
+
+Chapter 2
+Creating
+your Agent
+
+Agent Skills
+Okay, so you have your basic character concept in mind. Now
+you need to assign skill points to that character to flesh him or
+her out in terms of the game mechanics.
+There are four skills in this game, each covering a field of
+expertise:
+Academics
+Academics is the skill you’ll use when researching information
+(either online or in printed texts), coming up with theories,
+remembering facts and figures and both identifying and solving
+problems. Characters with a high Academics score are walking
+databases of useful information. Characters with low Academics
+are walking index cards of useful information. Single index cards,
+I might add.
+Athletics
+If the Academics skill represents your character’s brains, then
+brawn is measured by the Athletics skill. Anything physical (running, swimming, hiding, climbing and yes…fighting) is covered by
+Athletics. Firing weapons, such as crossbows or pistols, is also covered by this skill. Characters with a high Athletics score are excellent physical specimens, superior marksmen and able fighters.
+Characters with low Athletics are out-of-shape, scrawny, overweight or sickly.
+Technology
+The exception to this rule is when the firearm is some
+whacked-out scientific device. In this case, you’ll use the third
+skill: Technology, used to operate, repair or build equipment.
+Technology is also used whenever you want to buy (or have
+access) to equipment – anything from a computer to a shark
+cage. Characters with a high Technology score are elite hackers,
+expert inventors and hi-tech pack rats. Characters with low
+Technology scores have trouble setting the clock on their VCR.
+Contact
+The fourth and last skill is called Contact. Contact is your
+character’s ability to talk to people…normal people. Potential
+clients, anxious investors, bored housewives, litigious lawyers,
+
+10
+Agent Skills
+
+Fighting the forces of darkness so you don't have to
+
+Chapter 5
+Chapter 6
+Chapter 7
+Chapter 8
+Appendices
+
+Character Improvement
+Short answer: There is no character improvement. Well, not in
+the usual sense.
+Longer answer: Although your agent’s basic skill ratings won’t
+change over time, Confessionals and in-game events will help
+develop your character as the game progresses. Stress penalties
+
+Chapter 4
+
+Talents
+Your agent will also possess a unique Talent (either something
+at which they’re naturally gifted or a skill they picked up from
+before they joined the InSpectres). Choose an area where your
+character will gain a bonus die. Whenever this area comes into
+play, you’ll roll an extra die. Some sample Talents are:
+• Computers
+• Car Mechanic
+• Football Player
+• Star Trek Geek
+• Don Juan
+• Ninja Training
+• Librarian
+• Botany
+When using a Talent, strive to be creative! And remember that
+your character is allowed to use their Talent in any of the four skill
+areas. So if your ex-mechanic gets into a scrap, boost your
+Athletics roll by using a monkey wrench as a weapon. If your agent
+is sexy as all-get-out, maybe you can get the team a good deal on
+a used car (a bonus to the Technology roll). Get the picture?
+
+Chapter 2
+Creating
+your Agent
+
+Chapter 3
+
+Point Distribution
+You have nine skill dice to distribute to your character’s
+skills. Obviously, the more dice in a skill, the better your character is in that area (we’ll delve into the particulars in a bit). No
+one skill can be higher than four or lower than one.
+
+Chapter 1
+
+nosy reporters, irate police officers, annoying kids, and obsequious politicians. It also represents your character’s list of contacts – people that the character can call for advice, assistance
+and support. If your character is a people-person or has an active
+social life then he or she would probably have a high Contact
+score. Someone with a low Contact score…well, they hunt
+ghosts, demons and vampires for a living…
+
+11
+Character Improvement
+
+Chapter 1
+
+Fighting the forces of darkness so you don't have to
+
+Appendices
+
+Chapter 8
+
+Chapter 7
+
+Chapter 6
+
+Chapter 5
+
+Chapter 4
+
+Chapter 3
+
+Chapter 2
+Creating
+your Agent
+
+will introduce battle scars, phobias and weaknesses (which may
+or may not be cured!). Successful jobs will allow for more franchise dice, which equals better research, training and equipment.
+The other characters will provide for interesting relationships and
+rivalries. And of course, your own experiences during the game
+(and maybe even in Real Life) will give you new perspectives on
+your own style of play, its strengths and weaknesses.
+Character Improvement? No. Character development, you bet.
+Cool Dice
+Okay, I lied in that last paragraph. Characters in InSpectres
+can improve, but not in the usual way. Instead of gaining experience points or whatever, agents may gain Cool dice during the
+course of a mission. An agent’s initial Cool starts at zero but this
+will change once the game begins. You can read all about Cool
+dice later on (or you can just skip ahead to Chapter 5).
+Playing Supernatural Characters
+If you’d like to create a “weird” agent (one with supernatural
+abilities), then jump right to Chapter 6. Be forewarned that there
+are several restrictions…the biggest being that only one player
+may play a weird agent per game.
+EXAMPLE: Agent Creation
+The first step is to come up with a name and basic personality.
+I name my agent Mitch Dawson and decide that he’s a drama student working his way through college. Mitch is smart-alecky and
+romantic, with wild ideas about what really goes on within the
+InSpectres organization. Boy, is he in for a shock. My concept for
+the character is to play him as impatient, a bit clueless and kinda
+full of himself.
+The second step is to distribute nine skill dice among the four
+skills. I decide that Mitch’s strongest area will be Contact, so three
+dice go there. That leaves six dice to spend, so I place two dice into
+each of the three remaining skills.
+Finally, Mitch needs a Talent. Actor seems appropriate but not
+very interesting. Theatrical Combat has more style but it’s a little
+too limited. Then it hits me: Theatre Major. Mitch brings his knowledge of the dramatic arts to the company. He can quote
+Shakespeare, swing a prop sword, emote on cue and handle a lighting rig. Cool!
+
+12
+Cool Dice
+
+Fighting the forces of darkness so you don't have to
+
+Chapter 2
+Creating
+your Agent
+
+Chapter 3
+Chapter 4
+Chapter 5
+Chapter 6
+
+Agent Creation Summary
+• Come up with a name
+• Pick a former career or background
+• Place nine dice in your skills (Academics, Athletics,
+Technology and Contact)
+• No skill may have more than 4 dice or less than 1 die
+• Choose a Talent that’s appropriate for your agent’s background
+
+Chapter 1
+
+Characters: Normal is Better
+I cannot stress this enough. Normal is funnier than weird.
+I’ve played in games where the players made whacked-out
+characters with lots of quirks and idiosyncrasies and you
+know what? The most boring, normal, white-bread character is always the most entertaining. InSpectres is about
+normal folks wrapped up in abnormal situations...and
+chances are, the more normal the agent, the weirder the
+situation. And that’s what makes the game funny. This
+rule also applies to Weird Agents (strange as that sounds).
+An undead InSpectres agent is one thing. An undead
+InSpectres agent that is working to make alimony payments is another. The more real the character, the more
+surreal the experience. Trust me.
+
+Chapter 7
+Chapter 8
+Appendices
+
+13
+Agent Creation Summary
+
+3. Creating the Franchise
+
+y now you’re probably itching to get started. You’ve
+got a bunch of friends together to play (one GM and
+between three and five agents is the ideal amount),
+you’ve ordered the pizza and the GM is already plotting to make
+your lives interesting. But first, you have to build your franchise.
+The franchise is kind of like an additional character, except
+that everyone works together to create it. Time to put your heads
+together and answer the following questions:
+
+B
+
+• How big is your franchise? How long have you been
+in operation?
+
+Fighting the forces of darkness so you don't have to
+
+Chapter 2
+Chapter 3
+Creating the
+Franchise
+
+Chapter 4
+Chapter 5
+Chapter 6
+Chapter 7
+Chapter 8
+Appendices
+
+Who makes
+the Technology die roll?
+Unless you decide otherwise, the person who thought of
+the idea is the person that makes the roll. This is done
+this way for two reasons. First, this prevents the group’s
+techie guru from hogging all the Technology die rolls.
+Second, and more importantly, this means that less competent characters are rolling the dice and this is sure to
+generate some amusing results.
+
+Chapter 1
+
+• Are you the Main Office? An established franchise?
+A start-up operation?
+• Where is your franchise located? How many people
+work there?
+• Who runs the show? A board of directors or
+the agents themselves?
+• Do investors privately fund it or did you all max out
+your credit cards?
+• What does your franchise look like? What amenities
+does it feature?
+• Are you the only InSpectres franchise in the area? Are
+there any competitors?
+• What kinds of gear do you have access to? What do you
+use for transportation?
+• Do you have a specialty (ghosts, vampires, demons,
+crypto-zoology)?
+During this stage, you should work out the basic details of
+your franchise. Don’t worry about nailing down every single
+detail. Let it come out during the game. Also, whenever you
+mention a detail like equipment or staff or a posh office, the GM
+should have you roll your Technology dice. Depending on the
+success of the roll, you’ll be able to elaborate on the detail.
+
+15
+Who makes the Technology die roll?
+
+Chapter 2
+
+Chapter 1
+
+Fighting the forces of darkness so you don't have to
+
+Appendices
+
+Chapter 8
+
+Chapter 7
+
+Chapter 6
+
+Chapter 5
+
+Chapter 4
+
+Chapter 3
+Creating the
+Franchise
+
+Franchise Cards
+Franchise cards enable you to add dice to your skill rolls, thus
+increasing your chance of success. There are three types of Cards,
+with each Card able to augment a certain kind of skill roll. They are:
+Library Card
+The Library Card allows you to use the InSpectres’ vast library
+in order to aid in your research. Libraries can take many forms,
+from a huge database of information to snippets of folklore
+bound into a three-ring binder. “Ye Olde Collection of Dusty
+Books” is also a popular option with bespectacled bibliophiles.
+You’ll use your Library Card to
+augment an Academics roll.
+Gym Card
+The Gym Card gives you
+access not only to the latest in exercise equipment,
+it also allows you free access
+to firing ranges, martial arts dojos
+and really nice swimming pools.
+Not surprisingly, use of the Gym
+Card helps you on Athletics rolls.
+Credit Card
+Lastly, but definitely not least, is the corporate Credit Card. Access to the corporate Credit
+Card allows you and your fellow agents to buy
+cutting-edge technology and also to cover fees for
+technical training. Should I bother to mention that
+Credit Cards add dice to Technology skill rolls?
+Franchise Dice
+Unlike skill dice, the number of franchise dice
+you receive depends on the size of your franchise.
+For a brand spankin’ new franchise you get five dice to distribute
+among the three Cards. Established businesses can expect up to
+ten dice. Large, successful franchises get up to twenty. Working
+for the Main Office? How’s thirty dice sound? Any more than that
+and you’re just getting silly.
+Also unlike skills, there is no maximum or minimum. A young
+
+16
+Franchise Cards
+
+Fighting the forces of darkness so you don't have to
+
+Chapter 7
+Chapter 8
+Appendices
+
+Chief Technical Officer
+The CTO is the player blessed with keeping track of all the
+goodies purchased with Technology Skill Rolls. Your CTO is usually the biggest geek in the group (strangely enough, this player often has the agent with the highest Technology Skill).
+
+Chapter 6
+
+make the important decisions. Whether or not these decisions are
+actually followed is up for debate…
+
+Chapter 5
+
+Chief Executive Officer
+Choose one player to be the CEO, the de-facto leader of the
+team. It’s up to him (or her, this is the 21st century after all) to
+
+Chapter 3
+Creating the
+Franchise
+
+Chapter 4
+
+Job Descriptions
+Although not integral to the success of the game, a fun bit of
+color is to assign each player a job title and some related duties.
+Three suggestions (as well as their duties) are described as follows:
+
+Chapter 2
+
+The Bank
+The Bank is a repository for leftover franchise dice (in other
+words, dice that aren’t place on a particular Card). The good thing
+about the Bank is that these Bank dice can be used to increase
+any skill roll. They can also be used to alleviate the effects of
+Stress on your agents (more on Stress later). The downside is that
+there is no guarantee that Bank dice will be there when you need
+them. In order to keep track of what rolls what, your Bank dice
+should either be a different color than your normal dice or rolled
+separately from your other dice when making skill rolls.
+
+Chapter 1
+
+franchise can put all five dice onto their Credit Card…but it’s
+usually a good idea to split the dice up according to the strengths
+and weaknesses of your agents. Remember that Card dice are
+non-transferable – once you place them, you can’t switch them
+around on a whim.
+It’s important to note that the more dice you start out with,
+the more dangerous your missions (and the more lucrative). A
+big franchise means big bucks, but also lots of danger and
+stress. I recommend that you start small and work your way up
+the corporate ladder.
+One more thing: if you decide not to distribute all of your
+dice, the leftover dice are placed in the Bank.
+
+17
+Job Descriptions
+
+Chapter 2
+
+Chapter 1
+
+Fighting the forces of darkness so you don't have to
+
+Appendices
+
+Chapter 8
+
+Chapter 7
+
+Chapter 6
+
+Chapter 5
+
+Chapter 4
+
+Chapter 3
+Creating the
+Franchise
+
+Limited Technology
+It’s often wise for the group to set a technology limit for the
+game. Most games of InSpectres take place in the present
+day. Telephones, taxis, hamburger joints, cold medicine, etc.
+are easy to find in any big city. Even the smallest towns have
+access to post-1950s technology. This is the baseline technology limit for InSpectres. Ectoplasmic disintegrators and
+mystical tomes of power might be ultra-rare in your game, or
+they might not exist at all. The higher the technology limit,
+the crazier and more accessible technology can become. You
+can have a low-tech InSpectres game where the agents only
+have access to mundane equipment (a good option for rural
+settings or teams on location in remote areas). Also, just
+because the item is available doesn’t necessarily mean that
+it’s available Right Now. The “Oh yeah, I have one of those
+in my back pocket...” trick shouldn’t be overused.
+Some suggested Technology Limits are:
+Ultra-Tech: Weird science or alien assistance makes hi-tech
+equipment fairly common. MIB-style cannons, James
+Bond gadgets and cool occult objects are just a phone
+call and a requisition form away.
+Experimental/Fringe: Ghostbusters-level equipment,
+poorly tested and prone to breakdowns. Experimental
+equipment’s major drawback is that they’re all one-shots
+or prototypes. If it blows up, there’s no replacing it
+(well, not for awhile anyway).
+Standard: Standard tech is anything that can be bought,
+built or borrowed RIGHT NOW. This includes just about
+anything you’d encounter in the 21st century (laptop
+computers, mobile phones, submachine guns, laser pointers,
+deep-sea diving gear, etc.). In my games, I usually allow
+the team some experimental gear, just for fun.
+Simple/Primitive: Well, primitive by our standards. This
+includes classic monster-hunting gear...the old reliables:
+bells, books and candles, crossbows, hammers and
+stakes, holy water, swords, axes, revolvers, that kinda
+thing. Anything less hi-tech and the agents would be
+throwing rocks.
+
+18
+Limited Technology
+
+Fighting the forces of darkness so you don't have to
+
+Chapter 3
+Creating the
+Franchise
+
+Chapter 4
+Chapter 5
+Chapter 6
+Chapter 7
+Chapter 8
+Appendices
+
+EXAMPLE: Franchise Creation
+Now it’s time to build the company. Mitch is inexperienced, so the
+InSpectres team probably won’t be a cadre of elite ghost-hunters. The
+franchise has been open for a little while, and its agents are looking
+for additional help (seven franchise dice is a good start). The other
+players in this fictional scenario agree to this and we start divvying
+up our franchise dice.
+One player’s character is a former college professor (in a blazing
+display of creativity, this character is dubbed “The Professor” and is
+declared the group’s CEO). He suggests that since his character and
+Mitch are both involved in campus life, the franchise should be
+involved with the college as well. Again, everyone agrees and the
+school’s Police & Safety Department officially opens its Paranormal
+Student Affairs division. The Professor suggests that the school’s
+library be of the utmost importance. Everyone agrees and four franchise dice are placed onto the team’s Library Card. The Gym Card,
+Credit Card and Bank all receive one die each.
+Most of the particulars of Paranormal Student Affairs will be
+worked out during the game. The players do a couple preliminary Skill
+Rolls to get the creative juices flowing. It’s determined that the PSA
+offices are located in a small house on campus grounds (Mitch and
+another character also sleep here to save money). Weapons are scarce
+(none of the characters are combat experts anyway), so their missions are going to be more about investigation. The team rolls poorly on its Technology roll to figure out transportation. The Professor
+has an Audi but won’t use it for PSA-related duties. That leaves an
+electric-powered golf cart on loan from Police & Safety. Mitch uses his
+
+Chapter 2
+
+If you want more official titles, go for it. After all, “Chief of
+Security” and “Chief of Operations” are both pretty cool-sounding positions (even if they’re just corporate speak for “security
+guard” and “handyman.”
+You can also just split the duties and not officially declare a CEO,
+CTO or CFO. Whatever you want to do is just fine…just don’t ask the
+GM to handle your team’s affairs. That’s just asking for trouble.
+
+Chapter 1
+
+Chief Financial Officer
+You should choose one player to be the CFO, the person in
+charge of the Franchise Sheet and the one who keeps tally of the
+team’s Franchise dice (earned and invested).
+
+19
+EXAMPLE: Franchise Creation
+
+Fighting the forces of darkness so you don't have to
+
+Chapter 2
+
+Chapter 1
+
+high Contact skill to chat up a cute art student who agrees to give
+the golf cart some badly needed flair. Then the game begins …
+
+Appendices
+
+Chapter 8
+
+Chapter 7
+
+Chapter 6
+
+Chapter 5
+
+Chapter 4
+
+Chapter 3
+Creating the
+Franchise
+
+Franchise Creation Summary
+• Come up with a basic “one sentence” description of the
+team’s franchise
+• Determine the number of franchise dice you’ll start with
+(five to ten is good)
+• Distribute those franchise dice among the three Cards
+(Library, Gym and Credit)
+• Place any leftover franchise dice in the Bank
+• Decide on the details and peculiarities of the franchise
+• Assign job titles to the players (or let them fight over
+titles, which is also fun)
+
+20
+Franchise Creation Summary
+
+T
+
+4. Game Mechanics
+
+he InSpectres system is both incredibly easy to learn
+and incredibly challenging to use. The basic gist of the
+system is this: roll your skill dice when you want to
+use a skill, compare the result to a chart, and carry out the
+instructions on the chart.
+To do this, roll a number of six-sided dice equal to the number listed beside the skill you’re going to use. So if you need to
+make an Academics roll and you have an Academics of 3, you’d
+roll three dice. That’s all there is to it.
+After you make this roll; you’re going to have a handful of
+dice with numbers ranging from 1 to 6. Find the highest number
+shown and compare it to the Skill Roll Chart.
+
+Fighting the forces of darkness so you don't have to
+
+Chapter 3
+
+Chapter 2
+
+Chapter 1
+
+Skill Roll Chart
+
+Appendices
+
+Chapter 8
+
+Chapter 7
+
+Chapter 6
+
+Chapter 5
+
+Chapter 4
+Game
+Mechanics
+
+6
+
+Amazing! Describe the result and gain 2 franchise dice.
+
+5
+
+Good. Describe the result and gain a franchise die.
+
+4
+
+Fair. Describe the mostly positive result of your action
+but you must also include a negative or humorous effect.
+
+3
+
+Not Great. The GM decides your fate but you may be given
+a chance to suggest a single positive (albeit minor) effect.
+
+2
+
+Bad. The GM decides your fate or you may suggest
+something suitably negative.
+
+1
+
+Terrible! The GM gets to hose you with a truly dire
+situation resulting from your incompetence.
+
+This might seem a bit strange if you’re an experienced roleplaying gamer. Yes, you read it right. You get to call the shots if
+you’re successful. The idea is not that a high roll results in a successful use of the skill. A high roll simply means that you, as a
+player, can take over the game for a bit and describe the situation however you like. It stands to reason that with this amount
+of power, you’ll use it to your advantage, right? Or maybe not!
+Nothing is more fun than hosing your own character…
+And even if you don’t roll well, it doesn’t mean that you
+failed! It just means that you have to put your character in a
+tough or tense or comical situation. Your character doesn’t miss
+the vampire with the stake, you hit it in the stomach instead…or
+it’s not the kind of vampire that is killed when it’s staked…or
+anything else you can think of. It’s okay to “lose,” because the
+game is not about “winning” (besides, a failed roll is just a temporary setback and not a carved-in-stone result of, “OH MY GOD,
+WE’RE TOTALLY SCREWED NOW!”).
+Heck, think of it this way: You just made your character’s life
+(and the game) that much more interesting.
+And lest we dwell on the negative, let’s not forget the positive
+side of the equation. Rolled a 6? Well then, now’s your chance to
+describe exactly what happened…don’t skimp on all the gory
+details and cool action! This is your moment in the sun, baby.
+The key with Skill Rolls is to figure out what your character’s
+goal is when you make a skill roll. What would you roll when
+mixing a cocktail? Well, what’s your goal? Are you whipping up
+
+22
+Skill Roll Chart
+
+Fighting the forces of darkness so you don't have to
+
+Chapter 8
+Appendices
+
+Here’s another trick: you can substitute another skill for your
+Contact skill when you’re trying to influence someone with a display of knowledge, technical aptitude or athletic merit. In the
+above “impress your date” example, you could mix-up a batch of
+
+Chapter 7
+
+Roll Contact to…
+• Lie to someone
+• Get a sexy model’s telephone number
+• Con a police officer
+• Discuss your bill with an irate client
+• Ingratiate yourself with the zoning board
+
+Chapter 6
+
+Roll Technology to…
+• Upgrade your computer’s OS
+• Build a makeshift shelter in the woods
+• Pick a lock with a Swiss-army knife
+• Search the basement for a lost gadget
+• Use an experimental ghost zapper
+
+Chapter 4
+Game
+Mechanics
+
+Chapter 5
+
+Roll Athletics to…
+• Arm-wrestle a Yeti
+• Hide in the graveyard
+• Shoot a crossbow
+• Scale a trellis outside a haunted house
+• Smack someone up-side the head
+
+Chapter 3
+
+Roll Academics to…
+• Cast a deadly spell
+• Find a telephone number online
+• Research ancient Mayan burial rites
+• Lecture on molds, spores and fungi
+• Speak a foreign language
+
+Chapter 2
+
+Sample Skill Rolls
+Although there are only four skills, each is fairly broad and
+covers a wide field of aptitudes. Here are some suggestions for
+each field:
+
+Chapter 1
+
+a martini to impress a date? Then roll your Contact. When we say
+“cocktail,” are we speaking of the “Molotov” variety? Then roll
+your Technology (and stay away from open flames).
+
+23
+Sample Skill Rolls
+
+Chapter 3
+
+Chapter 2
+
+Chapter 1
+
+Fighting the forces of darkness so you don't have to
+
+Appendices
+
+Chapter 8
+
+Chapter 7
+
+Chapter 6
+
+Chapter 5
+
+Chapter 4
+Game
+Mechanics
+
+Nepalese Celebration Grog (whatever that is) and use your
+Academics skill instead. Be creative, be weird, be
+rewarded…that’s what this game is all about.
+Earning Franchise Dice
+Each job requires the team to earn a certain number of franchise dice. As you can see on the Skill Roll Chart, whenever the
+highest die is 5 or 6, your team will gain either one or two franchise dice. The more dice your agents acquire, the closer they will
+be to the end of their mission. These dice are then channeled
+back into the Cards and Bank when the game session ends. This
+is explained more fully in the Jobs section.
+EXAMPLE: Skill Roll
+Let’s say that Mitch and his cohorts are investigating a disturbance in the old Kappa Delta Pi house. This is weird, because the
+Kappas haven’t been active for decades and their house is a decrepit
+eyesore slated for a date with a bulldozer. The GM decides that this
+will be a standard investigation, worth fourteen franchise dice.
+If the team can pull this off without too many problems, they’ll
+be able to raise their Gym and Credit Cards…maybe even get a
+sweeter ride than that golf cart!
+The GM has set up the job, but this doesn’t mean that he’s figured out what the disturbance is, what’s causing it or how to deal
+with it. He might have an idea in mind, but this is at the mercy
+of the players and their ideas.
+Being new at this kinda thing, the team decides to split up.
+Mitch (armed with a flashlight and a walkie-talkie) heads up to
+
+Reduced Franchise Die Goals
+What’s to prevent a 30-die Franchise from doing po’dunk
+5-die missions for some easy cash? Well, *you’re* there,
+for starters. As the person who sets the die goals, the GM
+is ultimately responsible for making sure that the team
+doesn’t land any “get rich quick” jobs. The franchise die
+goal of 2x the team’s current Franchise Dice is a good
+number for most games. You can go as low as 1.5x but
+personally? I wouldn’t. Make them earn their keep!
+
+24
+Earning Franchise Dice
+
+Fighting the forces of darkness so you don't have to
+
+Chapter 2
+Chapter 3
+Chapter 4
+Game
+Mechanics
+
+Chapter 5
+Chapter 6
+Chapter 7
+Chapter 8
+Appendices
+
+Requirements
+Sometimes, one of the players will want something way out of
+the ordinary when making a skill roll (such as a “15 Gigawatt
+Insta-Deth Anti-Vampire Ray Gun”). Whenever a player makes a
+skill roll to acquire a piece of equipment (hi-tech, magical or
+mundane), the GM has the option to call for a specific number.
+• A high result of 6 is necessary for anything truly “out
+there” like magical grimoires (roll for each spell you want
+to look up), laser rifles or ectoplasmic reticulators (whatever those are).
+• Real-life but hard to get items require a high roll of at least
+5. These would include ancient swords, rare books, flamethrowers, a 57 Chevy in mint condition…you get the point.
+• If you want something you could find in a store right
+now, then you just need a high roll of 4.
+Of course, using the skill chart, you can shift the required
+number down one notch by adding a defect of some kind to the
+item in question. You want a pair of silver-plated pistols with silver nitrate bullets (minimum roll of 5) but you only roll a 4? Well,
+perhaps those guns will jam the first time you use them, or some
+other calamity may result (like the silver nitrate is actually sodium nitrate). Caveat emptor.
+
+Chapter 1
+
+the second floor. The rotting stairs creak under his weight and his
+flashlight can barely pierce the all-pervading gloom of the frat
+house. Just then, the GM tells the player to roll Mitch’s Athletics as
+a beer bottle arcs through their air…Mitch’s player grabs his two
+measly Athletics Dice and gets ready to roll them…
+…But he decides to up his chances at gaining control (the player has just thought of something cool that could happen). He
+spends the team’s sole Bank die (much to the dismay of the other
+players!) and rolls an extra die. The three dice clatter across the
+table and read: 2, 4, and 5. Not bad, Mitch! The high roll of 5 gives
+Mitch’s player the opportunity to seize control of the story and a
+Franchise die. He narrates the beer bottle narrowly missing Mitch’s
+head and crashing into a trophy case at the top of the stairs.
+Improvising wildly, the player describes that the contents of the
+case are polished and gleaming. The plot thickens and the group
+gets one step closer to their goal of fourteen franchise dice.
+
+25
+Requirements
+
+Chapter 3
+
+Chapter 2
+
+Chapter 1
+
+Fighting the forces of darkness so you don't have to
+
+Appendices
+
+Chapter 8
+
+Chapter 7
+
+Chapter 6
+
+Chapter 5
+
+Chapter 4
+Game
+Mechanics
+
+EXAMPLE: Requirements
+Jo bought the walkie-talkies for the team and rolled a high
+4…not good enough for the mil-spec units she was hoping for (the
+GM gave those a requirement of 5). But because she was just one
+point away from the requirement, the GM has given her a set of
+factory rejects. They work…but only most of the time.
+‘Taking 4’
+“Taking 4” is a little trick I borrowed from another role-playing game. If your character has a rating of 4 in any skill, you can
+just take a result 4 (bypassing the die roll).
+Now you’re probably wondering, “Why the hell would I want
+to do that? Four dice practically guarantees a better result than
+that!” You’d be right, if your character was operating at peak
+effectiveness. However, stressful events can lower your skills by
+as much as five dice (see Chapter 5 of page 16 for more about
+stress)! Unless your rated-4 Skill has dropped to 0, you can automatically claim a result of 4. Sure, it’s not great success, but it
+sure beats rolling a 3 or less!
+EXAMPLE: “Taking 4”
+Let’s say that Jo had a Technology skill of four. Later in the
+game, stress from the mission has reduced that skill to a one
+(meaning there’s a straight 50/50 chance of having things go her
+way). She may opt to “take a 4” instead of rolling whenever she
+uses her Technology Skill, guaranteeing a result of 4. If her skill
+ever drops to zero, she will lose that ability until she can restore
+her skill to one or higher.
+Augmenting Skill Rolls
+Whenever you make a skill roll, you can choose to spend dice
+from a Card and add those dice to the roll. Keep in mind that
+spent Card dice are always lost when used and each Card die can
+only augment its corresponding skill.
+• Library Card dice modify the Academics Skill
+• Gym Membership Card dice modify the Athletics Skill
+• Credit Card dice modify the Technology Skill
+• Bank dice or Cool dice can modify any Skill
+A character’s Talent Die can also augment a Skill Roll, but only
+
+26
+‘Taking 4’
+
+Fighting the forces of darkness so you don't have to
+
+Bank Roll Chart
+
+Interest! Return this die to the Bank.
+
+4
+
+Account Withdrawal! No Benefit or Penalty! Lose this die.
+
+3
+
+Account Withdrawal! No Benefit or Penalty! Lose this die.
+
+2
+
+Service Charge! Lose this die and an additional Bank die,
+if possible.
+
+1
+
+Account Overrun! Ignore all other results and lose all dice
+in Bank.
+
+Appendices
+
+EXAMPLE: Bank Die Roll
+Remember that lone Bank die that Mitch rolled? It turned out
+to be the 4, which means that nothing special happened…the die
+is spent just like a normal Card die.
+If the Bank die turned up as Mitch’s high roll of 5, it would mean
+that the die wasn’t actually spent – it would just return to the Bank.
+If the Bank die turned out to be the 2 that Mitch rolled, he’d lose
+the die and suffer a one-die penalty to the team’s Bank account.
+
+Chapter 8
+
+If you are spending Bank dice between missions (say, for
+Vacation or for restoring a weird agent’s Cool dice), roll the dice
+first, then consult the Chart, then carry on as normal.
+
+Chapter 7
+
+5
+
+Chapter 6
+
+Compounded Interest! Return this die and add a bonus
+die to the Bank.
+
+Chapter 4
+Game
+Mechanics
+
+Chapter 5
+
+6
+
+Chapter 3
+
+Rolling Bank dice
+When you roll your Bank dice, keep them separate from the rest
+of your roll (or use different-colored dice). After you roll, check
+each Bank die’s number against the following Bank dice chart.
+
+Chapter 2
+
+EXAMPLE: Augmentation
+Back when she was hunting for walkie-talkies, Jo could have
+spent dice from the team’s Credit Card to add bonus dice to her
+Technology Roll. She could have also used Bank dice or Cool dice to
+boost her roll. If her Talent applied (like she had Military
+Background as a Talent), she could add an additional die to the roll.
+
+Chapter 1
+
+if it applies to the Skill Roll (Talent Dice are never used up…so
+a Talented agent will always have at least one die to roll).
+
+27
+Rolling Bank Dice
+
+Chapter 3
+
+Chapter 2
+
+Chapter 1
+
+Fighting the forces of darkness so you don't have to
+
+Appendices
+
+Chapter 8
+
+Chapter 7
+
+Chapter 6
+
+Chapter 5
+
+Chapter 4
+Game
+Mechanics
+
+Teamwork
+You can also improve your chances by acting as a team. The
+other players may announce assisting actions and roll their skill
+dice as normal. After this is done, they give you any one of the
+dice that they rolled (even if their action was a failure) and you
+get to use the value rolled on this die. Players do not have to use
+the same skill in order to help out; their actions can simply give
+their teammate an advantage.
+If a teammate has announced the intent to help out, he or she
+must hand over a die to the other player, even if the die is a lessthan-desired result. For obvious reasons, characters with a skill
+of 1 can only hand over their single die if they choose to take an
+automatic failure on their own action.
+EXAMPLE: Teamwork
+The Professor is examining an occult tome, trying to remember
+
+28
+Teamwork
+
+Fighting the forces of darkness so you don't have to
+
+Chapter 2
+Chapter 3
+Chapter 4
+Game
+Mechanics
+
+Chapter 5
+Chapter 6
+
+Teamwork never hurts the person you’re trying to help. At
+minimum, you just won’t contribute anything worthwhile and
+you could end up hosing yourself. But if things go well, you can
+really pull another character out of the fire. One important note,
+though: only the person being helped (in the example, this
+would be the Professor) can win franchise dice for the team.
+
+Chapter 1
+
+his ancient Sumerian before some demons can knock down his
+hastily constructed barricade. Jo announces that she’s going to
+help him out by blasting a few of the hell-spawned creeps. Jo rolls
+her Athletics skill and gets a 1, 4, and 5. She takes the 5 as a success and blasts apart one of the demons. Although not a great roll,
+she gives the 4 to the Professor, hoping that his Academics skill roll
+works out. If the Prof rolls less than a 4, he can use Jo’s loaned 4
+to score a partial success.
+Just then, Barry grabs his shotgun and hurries over to assist Jo
+and the Professor. Barry’s not that great a shot to begin with (he’s
+got an Athletics score of two) and he’s a bit hurt from a previous
+encounter (giving him a one-die penalty to this action). Still, he
+gives it the old college try, rolls his one die…and scores a 3.
+Because he has to give up his only die to Jo, he automatically fails
+(duh, nice going, Bar’). Jo rolls her eyes as Barry trips over his
+shoelaces and falls headfirst into the barricade.
+
+Chapter 7
+Chapter 8
+Appendices
+
+29
+Teamwork
+
+5. Stress
+nSpectres get stressed. Their work is sometimes dirty or dangerous, the hours are long and there’s always the possibility
+of a lawsuit from an unhappy client. And let’s face it,
+InSpectres agents aren’t always the most stable individuals…
+Whenever your agent feels stress, you roll between one and
+five dice (depending on the severity of the stress) and consult
+the imaginatively named Stress Roll Chart.
+General life/work hassles rate about one die, two at the most.
+Mildly spooky common supernatural occurrences (your average
+haunting, vampire attack or werewolf sighting) deserve two or
+three dice, again depending on the severity of the event.
+Exposure to “Things Which Man Was Not Meant to Know” (tenta-
+
+I
+
+Fighting the forces of darkness so you don't have to
+
+4
+
+Annoyed. Suffer a 1-die penalty to your next skill roll
+(no matter where or when you perform it).
+
+3
+
+Stressed. Lose a die from an appropriate skill.
+
+2
+
+Frazzled. Lose two dice from an appropriate skill (or
+one die from two skills)
+
+1
+
+Chapter 7
+Chapter 8
+Appendices
+
+If your skill has been reduced down to zero, then you automatically fail any and all uses of that skill (treat this the same
+as rolling a 1 on the Skill Roll Chart). You can’t even use the
+“Take 4” rule…that’s how bad it is. And no, you can’t use the
+Teamwork rule to lend people high-scoring dice for their stress
+roll. Stress is something each character has to face alone. That’s
+part of the reason stress is so damn…stressful.
+To restore your skills to their normal scores, you need to
+either take a Vacation at the end of the mission or spend Cool
+dice anytime during the game.
+As far as role-playing stress, well…by this time your skills
+aren’t quite as good as they once were. So you’re rolling fewer
+dice. Which means you’ll have a greater chance of rolling poorly.
+Which means you and the GM will have to describe your character’s inability to function at peak levels. In effect, the stress
+penalty reinforces role-playing a stressed character.
+
+Chapter 5
+Stress
+
+Chapter 6
+
+Complete and total nuclear meltdown. Lose your Cool
+(if you have any) and lose a number of skill dice equal
+to the number of stress dice rolled.
+
+Chapter 4
+
+Blasé. No effects…you just don’t care.
+
+Chapter 3
+
+5
+
+Chapter 2
+
+6
+
+Stress Roll Chart
+Too Cool for School. You gain a point of Cool and
+suffer no real stress.
+
+Chapter 1
+
+cle things from beyond, workplace decapitations, oozing zombie
+flesh) warrant between three or four dice. The GM is free to add
+a stress die if your agent is especially tired, cranky, hurt or if
+they’ve already made a stress roll earlier that day. Demanding a
+stress roll of more than five dice is just plain mean.
+After the Stress dice have been rolled, find the lowest result
+and look it up on the Stress Roll Chart.
+
+31
+Stress Roll Chart
+
+Chapter 4
+
+Chapter 3
+
+Chapter 2
+
+Chapter 1
+
+Fighting the forces of darkness so you don't have to
+
+Appendices
+
+Chapter 8
+
+Chapter 7
+
+Chapter 6
+
+Chapter 5
+Stress
+
+Stress Penalties
+Remember that blowing a stress roll doesn’t mean that you’re
+literally “stressed.” It just means that your skills have been compromised by some awful situation. How does it work? Temporary
+insanity, injury, clumsiness, lack of concentration, fear, supernatural possession…use whatever you think fits the situation,
+your character and the mood of the game.
+Suffer an Academics penalty?
+Okay…you got bonked on the head and it hurts too much to concentrate. Or you’re too scared to think straight. Or you can’t remember whether Malaysian vampires are sensitive to sunlight or not.
+Lost some Athletics dice?
+Maybe you’re out of breath. Or you tripped and sprained an
+ankle. Or you had a heart attack. Or the monster has wounded you.
+Low on Technology?
+Maybe in the confusion you dropped something and it broke.
+Or you lost that key part. Or you had your fingers crushed and
+typing out strings of LINUX commands…problematic.
+Having problems with Contact?
+This is easy to role-play…you’re scared speechless! Or you’ve
+gone a bit loco and are busy chatting up a potted plant. Or even
+better…you’re covered in fluorescent pink goo and it’s making
+you angry for no good reason (hey, sounds familiar, doesn’t it?).
+There is no health meter
+in this game, nor are
+mental and physical
+damage separated out
+into two distinct areas.
+Use your imagination,
+have some fun with it
+and don’t be afraid of making your character’s life
+difficult. After all, in this
+game, time (and frozen margaritas) heals all wounds.
+
+32
+Stress Problems
+
+Fighting the forces of darkness so you don't have to
+
+Your InSpectres agent…
+
+You need to roll…
+
+Is harangued by the cops about a digging permit
+
+One die
+
+Is arrested because you have no digging permit
+
+Two dice
+
+Sees a pair of glowing eyes staring from the dark
+
+Two dice
+
+Sees a pair of eyeballs lying on the floor
+
+Two dice
+
+Sees a pair of eyeballs staring up at him
+from the floor
+
+Three dice
+
+Is confronted by a drooling demon-spawn
+from Hell
+
+Three dice
+
+Sees his buddy get bitten in half
+by a drooling demon
+
+Three dice
+
+Is later attacked by the upper-half
+of his dead friend
+
+Four dice
+
+Has all of the above happen in the same day
+
+Five dice
+
+Chapter 7
+Chapter 8
+Appendices
+
+EXAMPLE: Stress Roll
+The Professor is downstairs investigating the kitchen refrigerator. It’s full of cold beers from the local brewery (which, incidentally, has been closed for the past twenty years). Curious, he reaches down to grab one when…POP! POP! POP! The bottlecaps fly off
+and send great geysers of beer into the air. The GM calls for a onedie Stress roll as the Professor is covered in skunky beer. The professor’s player rolls one die and scores a 2. According to the Stress
+Chart, this means that the Professor will lose either two Skill Dice
+from any skill or one Skill Die from any two different skills. He
+decides that the stinky brew has reduced his Contact skill by one
+and the sudden explosion has rattled his nerves, causing his
+Academics to drop by one die as well. This penalty will last until
+the professor has a chance to rest, clean up and collect his senses
+
+Chapter 5
+Stress
+
+Chapter 6
+
+Two dice
+
+Chapter 4
+
+Gets cut off in traffic by an 18-wheeler
+
+Chapter 3
+
+One die
+
+Chapter 2
+
+Gets cut off in traffic
+
+Chapter 1
+
+Sample Stress Rolls
+The following are some example situations and the stress they
+could generate:
+
+33
+Sample Stress Rolls
+
+Fighting the forces of darkness so you don't have to
+
+Chapter 4
+
+Chapter 3
+
+Chapter 2
+
+Chapter 1
+
+(in other words, he can spend a Bank die or two at the end of the
+mission to negate these penalties).
+Cool Dice
+“Being Cool” is more than just having a flair for fashion and
+excellent taste in food, wine and art. It’s also a measure of your
+character’s steely resolve, iron will and brass cajones. In this
+game, it takes more than a pair of shades and a black leather
+jacket to be cool (well, unless you’re the author of this game)
+It also takes Cool dice.
+How do you get Cool dice? Well, if you’re a weird agent you
+might start the game being Cool. If not, then you might become
+Cool during the game if your lowest Stress Roll die is a 6.
+If your agent has a Cool die, you get to ignore the lowest
+stress die you roll (which means that you can safely ignore all
+one-die stress rolls). If you have more than one Cool die, you get
+to ignore that many stress dice. Cool!
+You can also elect to spend Cool dice to augment any skill roll
+
+Appendices
+
+Chapter 8
+
+Chapter 7
+
+Chapter 6
+
+Chapter 5
+Stress
+
+When to call for Stress Rolls?
+Stress Rolls are a handy way for the GM to adjust the flow
+of the game and to promote some of the themes in
+InSpectres. Remember that these die rolls aren’t “stress”
+in the traditional sense. A Stress Roll simply means that
+an agent has encountered a situation that could impair
+his or her skills in some way (be it through aggravation,
+distress, injury, madness).
+1-die Stress Rolls are good for the minor annoyances of
+daily life (supernatural or otherwise). They probably won’t
+harm the agents or their franchise and because only one
+die is rolled, there is a 1 in 6 chance of gaining Cool
+(which is a good thing to have once the GM starts calling
+for really tough Stress Rolls). As the mission progresses,
+call for higher Stress Rolls as the stakes are raised. The
+really high Stress Rolls (4+) should only come into play
+when things are looking dire and the “Big Bad” of the
+mission rears its ugly head.
+
+34
+Cool Dice
+
+Fighting the forces of darkness so you don't have to
+
+Chapter 2
+Chapter 3
+Chapter 4
+
+EXAMPLE: Cool Dice
+Mitch has just seen a pair of decapitated football jocks materialize in from of him. The GM decrees that this is just too creepy
+and tells the player that he must roll two stress dice. He does so
+and scores, get this, a pair of sixes. The lowest die he rolled is a 6
+so he gets a Cool die. Nice one, Mitch!
+The next time the GM has Mitch make a stress roll, Mitch can
+ignore the lowest die and read the next-lowest die. This means he’s
+less apt to go completely bonkers if something bad happens. He
+could also spend his Cool die to augment a skill roll or to restore
+a penalized skill. For now, Mitch feels as cool as a cucumber.
+
+Chapter 1
+
+(because you’re so damn cool). Of course, this means that those
+Cool dice are gone and can’t be used to ignore stress dice. You
+win some you lose some. You can also spend Cool dice during the
+game to remove Stress-related penalties (each Cool die you spend
+restores one point to a given skill).
+One more thing: since nobody is totally Cool, you can only
+have a maximum of three Cool dice at a time (weird agents are the
+exception. They’re really cool…so they get to ignore this rule).
+
+Chapter 5
+Stress
+
+Chapter 6
+Chapter 7
+Chapter 8
+Appendices
+
+35
+Cool Dice
+
+6. Weird Agents
+
+Y
+
+es, yes, yes. You can play a non-human or otherwise
+out-of-the-ordinary agent in a game of InSpectres.
+Here’s how:
+
+The Good News
+First of all, you get ten Skill Dice to spend during character
+creation, but you don’t gain the benefit of a Talent. The lowest
+skill rating you can have is zero (meaning you can’t use that skill
+without spending Bank, Cool or Card dice). The highest skill rating you can have is ten (meaning you kick ass). You don’t have
+
+Fighting the forces of darkness so you don't have to
+
+Chapter 6
+Chapter 4
+Chapter 5
+Chapter 6
+Weird
+Agents
+
+Chapter 7
+Chapter 8
+Appendices
+
+Turning Weird
+Although it’s slightly unorthodox, it’s certainly feasible to
+have your normal agent turn into a weird agent during the course
+of the game. Werewolf attacks, vampire bites, necromantic ritu-
+
+Chapter 2
+
+The Bad News
+Weird agents don’t get to pick a Talent. Also, whenever you
+want to use a cool power, you have to spend a Cool die. No, you
+can’t augment the use of powers with Cards or Bank dice. Yes, it
+does add to a skill (usually either Athletics or Contact, depending on whether the power is physical or mental in nature). You
+can replace Cool dice the usual way (by rolling a 6 as your lowest die on a stress roll) or by changing the team’s franchise dice
+into your own Cool dice (a benefit that normal agents don’t get).
+The other nasty part about being undead, lycanthropic, demonic or otherwise “from beyond” is that you don’t get paid. Why?
+Well, maybe you just can’t get paid (because of a lack of a social
+security card, birth certificate or proof of citizenship). Or you do
+get paid but your income is eaten up by weird expenditures (fresh
+supplies of O+ and grave-dirt …or a voodoo houngan on retainer).
+You might even be working for the InSpectres as a way to pay off
+some metaphysical debt that’s tying you to this world.
+The end result is that when Weird agents roll 5’s or 6’s on their
+Skill Rolls, they don’t earn Franchise dice. Sure, they help the
+team finish jobs and make money…but they’re as much a liability to the company as they are an asset.
+
+Chapter 1
+
+to use all your skill dice — leftover dice are converted to Cool
+dice and weird agents can hold as many Cool dice as they want!
+This means that weird characters are the least likely to suffer
+from stress penalties and the most likely to do really cool stuff.
+Second, we have to discuss cool powers. The best part about
+playing a weird agent is that you can do stuff that a human
+InSpectres agent can only dream of doing. Exactly what those
+powers are is up for discussion with the GM and the other players…but the system is lax enough to allow of sorts of madness.
+Of course, your character’s powers should fit its concept; werewolves can’t pass through walls, vampires can’t breathe fire (well,
+usually they can’t breathe fire).
+Now, you know that you’re not gonna get away with playing
+a weird character without some kinds of negatives, right?
+
+37
+Turning Weird
+
+Chapter 5
+
+Chapter 4
+
+Chapter 3
+
+Chapter 2
+
+Chapter 1
+
+Fighting the forces of darkness so you don't have to
+
+Sample Weird agents
+As is the case in this game, there are no hard and fast rules
+about what your weird agent can or can’t do. A vampire in my
+game might be totally different than a vampire in yours, and
+there can be many variations of what a vampire is within one
+game. But the following pages feature some sample character
+types you can use for inspiration, as well as possible abilities and
+skill ratings.
+
+A Random Star Trek Reference
+InSpectres (as written) is about normal people. Having a
+weird agent on your team is like having a Vulcan aboard the
+U.S.S. Enterprise – it’s an interesting way shed light on
+human qualities (did I just make a Star Trek reference? I am
+a geek…but you’re reading this so I guess you are too).
+This means that each InSpectres game is limited to one
+weird agent. This doesn’t mean that there can only ever be
+one weirdo in the company, it just means that only one
+weird agent character may be played in a given game.
+
+Appendices
+
+Chapter 8
+
+Chapter 7
+
+Chapter 6
+Weird
+Agents
+
+als (to revive fallen comrades) and other supernatural events are
+all potential hazards that your agents might face. Keeping in
+mind the “one weird agent per game rule,” there’s a quick and
+easy way to transform your character:
+Re-distribute your character’s Skill Dice (remember that as a
+weird agent you get ten skill Dice to play with), cross out your
+Talent, jot down your character’s newfound abilities and presto,
+you’re good to go!
+
+38
+Sample Weird Agents
+
+Fighting the forces of darkness so you don't have to
+
+3
+0
+3
+2
+
+Chapter 4
+
+Athletics
+Technology
+Contact
+Cool
+
+(Can speak a few languages and is
+intrigued by occult stuff)
+(Possesses the strength of the damned!)
+(“What’s a blender?”)
+(The power to enslave men’s minds!)
+(Tall, pale, gorgeous…and looks great
+in black.)
+
+Chapter 6
+
+2
+
+Chapter 2
+
+Academics
+
+Chapter 1
+
+Vampire
+Vampires are undead bloodsuckers. You knew this, yes?
+Common powers include shapeshifting into a bat or mist
+(Athletics) and powers of mind control (Contact). Since vampires
+tend to be very old and anachronistic, they tend not to be a little out of touch in the modern technology department. The typical vampire is vulnerable to fire, sunlight and a stake through
+the heart.
+
+Chapter 5
+Chapter 6
+Weird
+Agents
+
+Chapter 7
+Chapter 8
+Appendices
+
+39
+Vampire
+
+Werewolf
+During a full moon, the werewolf turns into a savage beast
+that is half-man, half-wolf. Werewolves possess keen senses,
+sharp claws and bestial strength and speed. Werewolves are kept
+at bay with wolfsbane and can only be killed by silver weaponry.
+Because they are part-time monsters, they have two ratings
+under each skill – the first is their normal skill, the second is for
+when they’re in beast-form.
+Academics
+
+2/0
+
+(Not the scholarly type.)
+
+Athletics
+
+2/7
+
+(A jumping, howling ball of furry fury.)
+
+Technology
+
+2/0
+
+(Clawed hands make it difficult to
+access the Internet.)
+
+Contact
+
+1/0
+
+(“Grrr! Grrr!”)
+
+Cool
+
+3
+
+(Being able to turn into a wolfman
+is cool.)
+
+Chapter 5
+
+Chapter 4
+
+Chapter 3
+
+Chapter 2
+
+Chapter 1
+
+Fighting the forces of darkness so you don't have to
+
+Appendices
+
+Chapter 8
+
+Chapter 7
+
+Chapter 6
+Weird
+Agents
+
+40
+Werewolf
+
+Fighting the forces of darkness so you don't have to
+
+Athletics
+
+0
+
+(Throw a football?)
+
+Technology
+
+0
+
+(No place to keep their wallet.)
+
+Contact
+
+2
+
+(We use telephones, they use Ouija
+boards … same diff.)
+
+Cool
+
+5
+
+(What scares a ghost? Hopefully
+not much.)
+
+Chapter 4
+
+(Ghosts are well-read, albeit dead.)
+Chapter 6
+
+3
+
+Chapter 2
+
+Academics
+
+Chapter 1
+
+Ghost
+The spirits of the restless dead are the InSpectres #1 stock in
+trade. The company is even named after a type of ghost
+(InSpectres, get it?). Normal ghosts are invisible and incorporeal
+so they must spend Cool dice to affect the world of the living,
+but they can float and pass through walls. Ghosts are usually tied
+to a specific place or object and must resolve some aspect of their
+pre-death existence before passing on to their ultimate fate.
+
+Chapter 5
+Chapter 6
+Weird
+Agents
+
+Chapter 7
+Chapter 8
+Appendices
+
+41
+Ghost
+
+Zombie
+Shambling husks, once human, now doomed to a mindless
+existence. Presumably, you’ll want your zombie character to have
+a bit more pep in his step. As you can see, zombies are powerhouses when it comes to staring down danger (those with eyes
+left to stare, that is). We’ll just assume that your zombie co-worker prefers raw hamburger meat to human brains fresh outta the
+skull. Ugh.
+Academics
+
+0
+
+(They need brains all right.)
+
+Athletics
+
+3
+
+(Tough, but slow.)
+
+Technology
+
+0
+
+(It can swing a wrench, just don’t
+expect it to fix your car.)
+
+Contact
+
+0
+
+(Zombies aren’t great
+conversationalists … )
+
+Cool
+
+7
+
+(Nothing fazes ’em.)
+
+Chapter 5
+
+Chapter 4
+
+Chapter 3
+
+Chapter 2
+
+Chapter 1
+
+Fighting the forces of darkness so you don't have to
+
+Appendices
+
+Chapter 8
+
+Chapter 7
+
+Chapter 6
+Weird
+Agents
+
+42
+Zombie
+
+Fighting the forces of darkness so you don't have to
+
+Athletics
+
+1
+
+(Migraines, caffeine addiction
+and poor diet = low score.)
+
+Technology
+
+2
+
+(Average ability, has a creepy
+fascination with prime numbers.)
+
+Contact
+
+5
+
+(Can see right into your soul.)
+
+Cool
+
+0
+
+(Shaken, not stirred.)
+
+Chapter 4
+
+(Trivia nut but that’s of limited value
+more often than not.)
+
+Chapter 6
+
+2
+
+Chapter 2
+
+Academics
+
+Chapter 1
+
+Psychic
+Psychics are people gifted with crazy mental powers. The
+ability to predict the future, to set things ablaze, to read minds.
+Good stuff. Psychics don’t fall into a pat category – each is
+quite unique. But here’s the classic “freaky mutant with telepathy and nosebleeds” variety of psychic.
+
+Chapter 5
+Chapter 6
+Weird
+Agents
+
+Chapter 7
+Chapter 8
+Appendices
+
+43
+Psychic
+
+Chapter 5
+
+Chapter 4
+
+Chapter 3
+
+Chapter 2
+
+Chapter 1
+
+Fighting the forces of darkness so you don't have to
+
+Sorcerer
+Rumor has it that there’s another game on the market where
+you play intense demon-summoning dudes (and you can find it
+at www.sorcerer-rpg.com). These guys probably have some kind
+of spell for each point of Academics, a magical trinket per point
+of Technology and the cell-phone number of some extra-planar
+entity per point of Contact. Like psychics, these guys are all over
+the map. Here’s the typical occult scholar with a fetish for cloaks
+with high-collars.
+Academics
+
+5
+
+(Even has the book-on-tape version
+of the Necronomicon.)
+
+Athletics
+
+1
+
+(Bookish sort, glasses, British accent,
+ghastly pallor.)
+
+Technology
+
+1
+
+(Practically lives in his dusty old
+library.)
+
+Contact
+
+1
+
+(Actually has a lot of friends. One is
+a stuffed raven … right.)
+
+Cool
+
+2
+
+(Can bend reality to his will.)
+
+Appendices
+
+Chapter 8
+
+Chapter 7
+
+Chapter 6
+Weird
+Agents
+
+44
+Sorcerer
+
+Fighting the forces of darkness so you don't have to
+
+Athletics
+
+1
+
+(He’s the cutest thing…just a tiny
+lil’ red guy.)
+
+Technology
+
+2
+
+(Typical demonic abilities include
+knowing how to make coffee.)
+
+Contact
+
+2
+
+(Really persuasive.)
+
+Cool
+
+1
+
+(Flame on!)
+
+Chapter 4
+
+(Knows, and speaks, Latin – forward
+and backward).
+
+Chapter 6
+
+4
+
+Chapter 2
+
+Academics
+
+Chapter 1
+
+Demon
+Hell-spawned creatures of great power, demons are the classic
+standby when it’s five minutes until game-time and you need to
+whip up a quickie monster. Not all demons are bad, though. But
+even the good ones slip now and then, and every one has some
+feature that belies their otherworldly origins. Here’s a firebreathing lil’ dude with batwings. An imp, I think it’s called.
+
+Chapter 5
+Chapter 6
+Weird
+Agents
+
+Chapter 7
+Chapter 8
+Appendices
+
+45
+Demon
+
+Supernatural Hero
+This is the generic uber-kick-ass slayer/ninja/martial artist
+that one guy in your group is going to want to play. You know
+the dude who has the nunchaku and the sharpened samurai
+sword in his apartment? This one’s for you, big guy!
+Academics
+
+1
+
+(Knows lots of ways to kick your ass,
+can’t do long division.)
+
+Athletics
+
+4
+
+(Can of whoop-ass? She’s a whole
+six-pack.)
+
+Technology
+
+2
+
+(Has the same sword that Wesley
+Snipes had in Blade, okay?)
+
+Contact
+
+1
+
+(Must … speak … in … halting …
+monotone … )
+
+Cool
+
+2
+
+(Black leather? Check. Scar? Check.
+Kung fu grip? Check.)
+
+Chapter 5
+
+Chapter 4
+
+Chapter 3
+
+Chapter 2
+
+Chapter 1
+
+Fighting the forces of darkness so you don't have to
+
+Appendices
+
+Chapter 8
+
+Chapter 7
+
+Chapter 6
+Weird
+Agents
+
+46
+Supernatural Hero
+
+A
+
+Starting Interviews
+There are three types of Starting Interview that may happen
+during the game. Decide what one sounds the most appealing
+and then go to town.
+
+7. Play Structure
+
+ll games of InSpectres start with the Starting
+Interview (well, the first game you play – skip the
+Starting Interview for subsequent games if you
+want). This method enables the players to quickly get to know
+one another and their respective playing styles (if the group is
+new). It’s also a great way to get to know one another’s characters and for the GM to establish the tone and mood of the game
+(satirical, spooky, paranoid, slapstick, etc.).
+
+Chapter 6
+
+Chapter 5
+
+Chapter 4
+
+Chapter 3
+
+Chapter 2
+
+Chapter 1
+
+Fighting the forces of darkness so you don't have to
+
+Appendices
+
+Chapter 8
+
+Chapter 7
+Play
+Structure
+
+Employee Screening
+This is a good choice for players have just started their franchise. The applicant could either be a prospective player, an
+established player who wants to role-play his character’s job
+interview with the team, or an NPC controlled by the GM. The
+Screening can be professional, hostile, friendly or completely
+surreal (depending on the mood of the participants and the
+desired outcome).
+Investor Meeting
+This is a good way to start the game with if the players have
+just started and their franchise needs seed money or they’ve been
+around long enough to “get noticed” by a Venture Capitalist.
+Typically, the GM portrays a possible investor in the InSpectres
+franchise and the players need to come up with reasons why the
+VC should part with his money. Again, this can be played straight
+and serious or as whacked-out as you can imagine. In one of my
+games, their prospective VC was a very tall, very pale man named
+Vladimir Rusitov who wore lots of black and would only meet
+with the group at night. You figure it out. ;)
+Media Interview
+The Media Interview is perfect for a group that’s either starting as a well-established franchise or one that’s burst onto the
+scene through a hail of news reports and PR-friendly antics. The
+GM portrays a reporter from some kind of news agency (print, television, radio or web) and asks the players questions about the
+business. A crafty GM may want to insert some pointed questions
+in order to see how the players think on their feet. I’ve seen all
+kinds of sub-plots arise from this kind of start – romance,
+intrigue, paranoia…it’s great fun. Personally, I’m a big supporter
+of the “nosy tabloid journalist out for a scandal” interview. In
+fact, there’s an online supplement for InSpectres called
+“Nightwatch” that deals with a supernatural TV news program.
+Confessionals
+More than skills, more than Cards, more than Cool dice, the
+most powerful element of InSpectres is known as the
+Confessional. Ever see a reality show on TV? The “Confessional”
+happens when someone on the show gets some “alone time” with
+
+48
+Confessionals
+
+Fighting the forces of darkness so you don't have to
+
+Chapter 1
+Chapter 2
+Chapter 3
+Chapter 4
+Chapter 5
+Chapter 6
+Chapter 7
+Play
+Structure
+
+Chapter 8
+Appendices
+
+the camera and speaks directly to the viewers (in a fictional
+show, this is called “breaking the fourth wall”). During this
+scene, the subject of the Confessional can talk about the other
+people on the show, shed some light on current events or (due
+to the magic of editing) comment on events which have already
+happened in the past but you have yet to see.
+During any scene, you have the option of “stepping into the
+Confessional” and breaking up the action with your character’s
+thoughts and feelings. It’s the only time your character can
+“speak” to the players (and not their characters) and it gives you
+free rein to introduce new story elements or plot complications.
+You can foreshadow events and then play them out during the
+game or you can talk smack about someone’s character and actually give them physical and mental traits and quirks (these are
+called characteristics in the game). As this is a new idea to many
+players and GM’s out there, some examples are probably in order.
+
+49
+Confessionals
+
+Chapter 6
+
+Chapter 5
+
+Chapter 4
+
+Chapter 3
+
+Chapter 2
+
+Chapter 1
+
+Fighting the forces of darkness so you don't have to
+
+Appendices
+
+Chapter 8
+
+Chapter 7
+Play
+Structure
+
+EXAMPLE: Confessional with Characteristics
+Barry is using his Confessional to comment on how much Jo was
+flirting with their last client. He can give Jo the descriptor of
+“Flirtatious” and Jo can add that to her character sheet. Now, even
+if Jo wasn’t really planning to play a flirtatious character, she is
+now known to be a flirt and should role-play that from now on. If
+she does, she’ll earn an additional Franchise die at the end of the
+mission. If she doesn’t, well that’s okay…she just won’t get the
+extra point.
+When you assign a characteristic in this way, you have the
+option of making that trait positive (“Brave”), negative
+(“Cowardly”) or ambiguous (“Secretive”). The player who is given
+a characteristic should write it down and incorporate it into his
+or her role-playing from that point on. As a form of compensation for letting another player mess with your character, you get
+an extra Franchise die at the end of the game, but only if you
+role-play that trait (put a little check mark next to the characteristic when you use it). Characteristics do not need to be used
+from game to game. Pick and choose the ones you like to mold
+and shape your character. But to get that bonus die, be sure to
+incorporate the characteristic into that game.
+EXAMPLE: Confessional with Plot Devices
+Jo now takes her turn in the Confessional and says (with a big
+grin), “Of course, if I had known what would happen to us later,
+I would have never flirted with that particular guy. Thankfully, the
+Professor’s quick thinking helped to pull our bacon from the fire.”
+Obviously, the players have no idea what Jo is talking about.
+The trick is to have all the players and the GM a) get Jo to flirt
+with some guy, b) to have something very bad arise from that,
+and c) to have the Professor come up with a solution. Here’s one
+more, this time acting as a kind of “flashback” scene:
+EXAMPLE: Confessional with Time Shifts
+Mitch takes his Confessional right as his team is being overrun
+by a pack of ghouls. “Fortunately, I had a packet of hot sauce in
+my pocket from our lunch at the burrito place.” The scene then
+resumes and Mitch’s character uses the hot sauce to blind the leader
+of the ghouls, giving the team a few precious seconds to get away.
+
+50
+Confessionals
+
+Fighting the forces of darkness so you don't have to
+
+Chapter 4
+Chapter 5
+Chapter 6
+Chapter 7
+Play
+Structure
+
+Chapter 8
+Appendices
+
+Private Lives
+InSpectres agents are people too. They have friends, families
+and interests outside of their rather unusual jobs. In fact, the
+whole point of this game is about normal people who have unusual jobs and still manage to wake up in the morning, drive to work
+(coffee and donut in hand) and punch a time-clock. Sure, they’re
+fighting demons and chasing ghosts, but it’s still just a job. Take
+a real-life profession like “police officer.” Danger, excitement,
+guns, car chases and cool detective work, right? Well, that’s what
+you see on television but most police work involves waiting
+around, filling out paperwork and dealing with folks who don’t
+necessarily want to deal with you. Still sound fun?
+
+Chapter 3
+
+• Address the other players as if they were watching the
+Confessional on television.
+• Confessionals should always add; never negate or
+detract from the game.
+• Only one player can give a Confessional per scene.
+• Each player can only give and receive one characteristic
+per game.
+It may take some time to get the hang of using Confessionals.
+But I guarantee that once you “get it,” you’ll be twisting the plot
+into pretzels in no time flat.
+
+Chapter 2
+
+Guidelines for Confessionals
+Creative players learn to incorporate plot complications, characteristics and flashbacks/foreshadowing into their Confessionals.
+The only hard and fast rules for Confessionals are these:
+
+Chapter 1
+
+‘The Chair’
+Since first e-publishing this game, I’ve adopted a useful
+technique: set aside a big, comfy chair for the players when
+they give their Confessionals. Better yet … set up an entire
+area that’s reserved for Confessionals – a comfy chair for
+the “character” and a couch or some kind of lounging
+device for the GM and the others players. This kinda sets up
+an actor/audience situation that is wicked effective!
+
+51
+Confessionals
+
+Chapter 6
+
+Chapter 5
+
+Chapter 4
+
+Chapter 3
+
+Chapter 2
+
+Chapter 1
+
+Fighting the forces of darkness so you don't have to
+
+Appendices
+
+Chapter 8
+
+Chapter 7
+Play
+Structure
+
+When you’re playing InSpectres, remember that all this supernatural hooey is just a job to your character. The real meat of the
+game is dealing with people (clients, friends and family) who see
+your character’s profession as being dangerous, exciting, gross or
+unusual. What happens when your character comes home dripping with demonic ichor? How will your character handle a jealous girlfriend when he calmly explains that he was just chatting
+up that gorgeous Goth vampire chick to “get information” about
+a case? These interpersonal relationships (and how they conflict
+with “the job”) can provide for some awesome roleplaying…make sure you don’t lose sight of these kinds of stories.
+The GM may occasionally throw a personal crisis at one or
+more of the players (Stress Rolls might even be called for).
+Usually, the Contact skill is used to handle these situations. Cool
+dice may be used to augment Contact rolls, but because it’s not
+official InSpectres business, no Bank dice or Card dice may be
+used…and no franchise dice are gained during these encounters.
+Make sure that it’s clear to the players when a given skill roll
+won’t net them any franchise dice.
+Creating Non-player Characters
+One of the strangest things about this game is that only the
+characters actually have attributes. Non-player Characters (NPCs,
+the dudes created and controlled by the GM) don’t have skills or
+Cool or Card dice or anything like that. An NPC or a monster
+might a have stress rating, but this number can fluctuate during
+the game depending on circumstances (meeting Joe the Vampire
+might not be stressful at all, until he goes crazy and tries to sink
+his fangs into you).
+Jobs
+Most InSpectres games revolve around a basic play structure: the
+Job. You’ve all seen this before on TV (especially on cop/law/medical shows), a tried-and-true sequence of events that happen in a
+pre-defined order. This kind of familiar structure might seem like
+anathema (look it up) to the typical role-playing gamer who thrives
+on rich, unique games that are full of surprises.
+Well, InSpectres is rich, unique and full of surprises. How is
+this possible? Because although the sequence of events is scripted, the circumstances of those events is wildly improvisational.
+So let’s break it down:
+
+52
+Creating Non-player Characters
+
+Fighting the forces of darkness so you don't have to
+
+Chapter 3
+Chapter 4
+Chapter 5
+Chapter 6
+Chapter 7
+Play
+Structure
+
+Chapter 8
+Appendices
+
+Getting the Call
+“The Call” usually consists of a client contacting the team,
+either in person or through a phone call or email (sure, why not?).
+This is the event that kicks the game into high gear. In most
+cases, the client sets up a meeting with one or more of the agents.
+Most often this is at the InSpectres’ headquarters but a client who
+wishes to avoid public scrutiny (because of their position or fame)
+may decide to hold the interview in their home, in a restaurant or
+in an abandoned graveyard at the stroke of midnight.
+The classic “Getting the Call” moment occurs in the film
+Ghostbusters, when Dana (Sigourney Weaver) has that little problem
+with her refrigerator and calls the boys-in-gray to take a look-see.
+After Dana met with the Ghostbusters at their converted-fire station
+offices, Dr. Venkman (Bill Murray) checked out her apartment, asked
+some questions and proceeded to hit on her. Great scene.
+When the InSpectres agents get the call, the GM should decide
+how tough the job is going to be. This means that the GM should
+
+Chapter 2
+
+Occasionally, agents go back and forth between
+Research/Investigation and Fieldwork. Humorous or characterdefining interludes could also take place at anytime (this
+includes Confessionals or any other non-work-related incidents).
+Remember that although the game sessions focus on the
+InSpectres’ jobs, you should never neglect an opportunity to contrast that job and “real life.” What do ghost hunters do to relax?
+What are their home-lives like? This is where the funny is.
+
+Chapter 1
+
+• Getting the Call (contact client and learn about the
+upcoming job)
+• Research/Investigation (research the problem and/or
+investigate the location and come up with a possible,
+plausible explanation)
+• Suiting Up (procure the necessary equipment to deal
+with the problem)
+• Fieldwork (travel to the scene and deal with the problem)
+• Cleaning Up (transfer franchise dice to Cards or to
+the Bank)
+• Vacation (spend dice to remove your agent’s stress
+penalties)
+
+53
+Jobs
+
+Chapter 6
+
+Chapter 5
+
+Chapter 4
+
+Chapter 3
+
+Chapter 2
+
+Chapter 1
+
+Fighting the forces of darkness so you don't have to
+
+Appendices
+
+Chapter 8
+
+Chapter 7
+Play
+Structure
+
+come up with a maximum number of franchise dice needed for
+the mission. When the players acquire this number, the mission
+is successfully completed. For an easy mission, ten Franchise dice
+are all that’s needed. A tougher job warrants around twenty dice
+and a truly difficult mission requires thirty or more dice. As a
+general rule, I go with double the number of franchise dice the
+group starts out with. Seems to work okay.
+You may also have the InSpectres stumble across some weird
+happenings during their training or their days off (or even worse,
+when they’re all on Vacation!). This can be a cool way of kicking
+off a story but don’t overdo it — remember, altruism is noble, but
+it doesn’t pay the rent!
+Client Roll Chart
+InSpectres is built to run at the drop of a hat. Simple rules, a
+very “sticky” premise and lots of opportunities for the players to
+direct the flow of the game. In keeping with these design elements, here is a quick and dirty way to generate random, unique
+and memorable clients to get the ball rolling.
+Roll two six-sided dice for each field (Personality, Client,
+Occurrence and Location) and consult the following chart to randomly generate bizarre clients and job descriptions:
+Roll
+
+Personality
+
+Client
+
+2
+
+Horny
+
+Ghost/Monster Transformation
+
+Underground
+(sewers / subway)
+
+3
+
+Bored
+
+Police Officer
+
+Appearance
+
+In the water
+
+4
+
+Skeptical
+
+Student
+
+Bizarre phenomena Some remote area
+
+5
+
+Angry
+
+City Worker
+
+Abnormal weather A restaurant
+
+6
+
+Impatient
+
+Storekeeper
+
+Odd Smell
+
+Municipal building
+
+7
+
+Weird
+
+Housewife
+
+Weird Sound
+
+Apartment building
+
+8
+
+Frantic
+
+Gov’t Official
+
+Strange Light
+
+Store / office
+
+9
+
+Terrified
+
+Businessman
+
+Haunting
+
+Residential area
+
+10
+
+Calm
+
+Hospital Worker Destruction
+
+Public park or zoo
+
+11
+
+Enthusiastic
+
+Motorist
+
+Infestation
+
+In a sketchy
+neighborhood
+
+12
+
+Blasé
+
+Aristocrat
+
+Abduction
+
+Somewhere in a
+parallel dimension
+
+54
+Client Roll Chart
+
+Occurrence
+
+Location
+
+Fighting the forces of darkness so you don't have to
+
+Chapter 2
+Chapter 3
+Chapter 4
+Chapter 5
+Chapter 6
+Chapter 7
+Play
+Structure
+
+Chapter 8
+Appendices
+
+Research & Investigation
+This is a very important phase and a great time to start hitting those books and using your Academics and Contact skills.
+Talk to the client, interview witnesses, search public records, collect data and for god’s sake — take notes!
+This is also where InSpectres (the game) gets a little kooky.
+The GM might have an idea of what’s happening, but that
+doesn’t necessarily mean that he or she knows for certain what’s
+going on. Through a combination of GM-player interaction, roleplaying, problem solving and quick wits, you can determine what
+the problem is that you’re all facing. Then roll the appropriate
+dice (usually Academics or Contact, sometimes Technology if
+you’re using your expensive toys to do the work for you) and that
+determines whether you’re “right” or not.
+In order words, the GM’s job is NOT to feed clues to the players
+and string them along until they arrive at the correct solution to
+the problem. In this game the GM gives the players the raw material they’ll need to decide what the problem is in the first place.
+Are they right? Are they wrong? Have them roll the appropriate
+skills and tailor the game around them. If your initial plan is to
+have that haunted house filled with demons and the players decide
+(after some killer Academics rolls) that the house IS a demon, then
+CHANGE YOUR IDEA. This is a game where the players determine
+
+Chapter 1
+
+Of course, if you don’t like the result, feel free to roll again,
+pick another choice or add your own selection.
+Now, don’t forget that this is only the initial problem. The
+players and their Skill Rolls influence the real source of the problem, which could turn out to be something completely different
+than what you had in mind at first. The farmer might say that
+aliens are draining the blood from his cattle but it could turn out
+to be just a bunch of bored vampires stuck out in the sticks.
+Also, remember that clients are not trained professionals.
+They’re not necessarily honest or forthcoming with information
+either. Some might try to scam the team out of paying the bill.
+Others might be hiding some embarrassing family secret (“Ms.
+Jones, it says here that the cause of death was auto-erotic,
+errr…well, it doesn’t look like your husband fell in the shower,
+Ma’am.”) or just plain uninformed.
+After all, John and Jane Q. Public wouldn’t know the difference
+between a Shoggoth and Shub-Niggurath, if you get my drift.
+
+55
+Jobs
+
+how the story progresses. The GM is there to keep the pace, just like
+the bass player in the band (to paraphrase a friend of mine, the
+same one with the game about summoning demons).
+Suiting Up
+The “Suiting Up” stage is when you and the rest of the team
+get to load up all the neat toys you’ve purchased on the company credit card. Lots of Technology rolls net some crazy results –
+from hi-tech items from the bleeding edge of science to homemade weapons made from baling wire, spit and tinfoil.
+If your equipment has already been covered during franchise
+creation, who’s to say that it’s available for use at the moment? Roll
+again…maybe you’ll hose yourself and be out of ammo for that
+grenade launcher. Or maybe you found some extra cash to upgrade
+your armory and you acquired some antique silver dueling pistols.
+Oh, and if you haven’t already done so, roll to see what your
+transportation situation is like. Nothing is funnier than a bunch
+of vampire slayers taking the bus.
+
+Chapter 6
+
+Chapter 5
+
+Chapter 4
+
+Chapter 3
+
+Chapter 2
+
+Chapter 1
+
+Fighting the forces of darkness so you don't have to
+
+Appendices
+
+Chapter 8
+
+Chapter 7
+Play
+Structure
+
+56
+Jobs
+
+Fighting the forces of darkness so you don't have to
+
+Chapter 3
+Chapter 4
+Chapter 5
+Chapter 6
+Chapter 7
+Play
+Structure
+
+Chapter 8
+Appendices
+
+• Cards (to augment Academics, Athletics or Technology
+skill rolls)
+• Bank (to augment skill rolls)
+• Vacation (to restore skills that were reduced due to stress)
+• Cool dice (for weird agents)
+Unplaced Franchise Dice cannot be used until the end of the
+next mission. Until then, they’re just sitting around (on the plus
+side, this gives the team a little padding for their next goal).
+
+Chapter 2
+
+Clean Up
+The final part of any job is the best part: getting paid. The
+stage where you get to feed dice back into the franchise’s Cards
+or Bank account and work off that nasty, nasty stress with a
+relaxing Vacation.
+To finish the mission, the players need to acquire a certain
+number of franchise dice. Once this number is reached, they may
+finish the job and get paid. If the characters continue to make
+skill rolls, they cannot gain more franchise dice. But if they’re
+having fun, well let ’em go nuts.
+If the players want, they can end a mission prematurely, that
+is, without resolving the problem or gaining the requisite number of franchise dice. Ending a mission in such a manner nets the
+team half the dice they’ve gained up to that point.
+Remember that at the end of the mission, all Franchise Dice
+should be placed into one of the following areas.
+
+Chapter 1
+
+Fieldwork
+This is where the magic happens…the climax of the game.
+Lots of Athletics and Technology rolls, lots of action, blood n’
+gore, suspense, and a multitude of Stress rolls and Confessionals
+to liven things up.
+The Fieldwork stage is where you face the source of the problem (or possibly one source of the problem) and deal with it.
+This could mean anything from using that jury-rigged ghost trap
+on a pesky poltergeist to shoving a foot-long stake through the
+heart of some fanged menace. Of course, an imaginative group of
+players could find themselves anywhere, at anytime, doing
+almost anything. The key is to enjoy the experience and have a
+good laugh as well as a good scare.
+
+57
+Jobs
+
+Chapter 6
+
+Chapter 5
+
+Chapter 4
+
+Chapter 3
+
+Chapter 2
+
+Chapter 1
+
+Fighting the forces of darkness so you don't have to
+
+Appendices
+
+Chapter 8
+
+Chapter 7
+Play
+Structure
+
+Bankruptcy & Debt
+So what happens if your franchise runs out of dice? Well, dice
+= money. And if you can’t pay the bills, your franchise is going
+to have to close its doors. It’s hard enough to finish missions in
+one piece, it’s harder still to finish them without the benefit of
+training and resources. But all is not lost. If your team ever runs
+out of franchise dice (either during the mission or at the start or
+end of a mission), you can go into debt. Here’s how:
+First of all, you no longer have access to your Cards (consider
+them collateral for the business loan). Secondly, you may place
+up to ten dice into the Bank. Set your franchise’s total number
+of dice to zero, minus the amount of dice now on loan (so you’ll
+have anywhere from –1 to –10 franchise dice). Beware! Having
+lots of Bank dice to play with is a lot of fun because you can use
+them for any skill roll…but there’s always the chance of wiping
+out your savings with one unlucky roll of the dice.
+At the end of the mission, you must first “pay back” a number of dice equal to the loan +1 (this extra die is lost and not put
+back into the franchise). If your franchise dice total is a positive
+number, no problem…you’re good to go. The Cards are back
+under your control, your creditors are happy and life is good.
+If it’s zero, you’ll need to take out another loan. The Cards
+stay in hock. Your creditors will give you the evil eye. Small children will cry out when you draw near.
+If it remains in a negative state, you’re out of business. Does
+
+58
+Jobs
+
+Fighting the forces of darkness so you don't have to
+
+Chapter 4
+Chapter 5
+Chapter 6
+Chapter 7
+Play
+Structure
+
+Chapter 8
+Appendices
+
+Vacation
+This stage is meant to be short and sweet. You can end the
+game right after Vacation or you can continue right into anoth-
+
+Chapter 3
+
+level and next thing you know, he’s dead from a stupid poison
+needle trap. The only attribute that will increase in this game is
+your Cool, and that’s not even guaranteed to stay the same over
+the course of a mission.
+The franchise remains …
+The team still gets paid ...
+… It’s just one less person for “Happy Hour” at the local pub.
+If your InSpectres team is ready for this kind of job then let
+the GM know that you’re invoking the “Death & Dismemberment”
+clause. Consider hazard pay to be a bonus of one franchise die per
+agent at the end of such a mission (this means that a twenty-die
+mission for four agents would net the team twenty-four dice if
+the mission was completed successfully). Weird agents, alas,
+don’t get such a benefit (most of them are already dead).
+
+Chapter 2
+
+Death & Dismemberment
+InSpectres is supposed to be a horror-comedy game, with both
+funny and scary situations occurring in equal proportions. In
+most cases, this is “Ghostbusters-level” intensity – shocks and
+scares but no really harsh stuff. But if you and your group want
+to up the ante a little bit, you can lower the comedy and raise
+the horror by as much as you want. In game terms, this means
+tougher missions, more frequent stress rolls and more severe
+stress penalties. And because the players have control in
+InSpectres games, you shouldn’t be afraid to maim, mutilate and
+even kill your own character.
+I know what you’re thinking. Did I hear him right? Kill my
+own character?
+Yup. Think of it this way: you won’t be penalized for losing
+your character because your character never gets better – so it’s
+not like you’ve spent the last two months getting him to 4th
+
+Chapter 1
+
+this mean you have to stop playing? No, of course not. But it
+does mean that your current InSpectres franchise has gone kaput
+and the team will need to start over again. Not only does your
+franchise lose all equipment gained over the course of play, the
+agents also lose any and all Cool dice they’ve acquired thus far.
+
+59
+Jobs
+
+Chapter 6
+
+Chapter 5
+
+Chapter 4
+
+Chapter 3
+
+Chapter 2
+
+Chapter 1
+
+Fighting the forces of darkness so you don't have to
+
+Appendices
+
+Chapter 8
+
+Chapter 7
+Play
+Structure
+
+er job. An interesting game could arise from something that happens during your Vacation (a great excuse to set your InSpectres
+game in Hawaii…like an episode of Magnum PI).
+If you’re suffering from a stress-related penalty, you can now
+get back some or all of your skill dice by removing dice from the
+Bank or by spending the franchise dice you earned at the end of
+the mission. One die restores one point to a skill.
+If you’re still stressed and you have no Bank dice to spend,
+you must spend your own Cool dice. If you have nothing left,
+you’re screwed for the time being and your Stress penalties stick
+around for the next game session. Just breathe deep and start
+chewing those antacids…
+Weird agents can take Vacations, too. The same rules apply
+except that Weird agents can also spend franchise dice or Bank
+dice to replenish their Cool dice (a vampire that takes long
+Vacations is going to be a drain on your finances…pun intended).
+Character Continuity
+Most of the time, Vacations exist in a kind of “no time” zone
+where your character won’t have to be out of play while he or she is
+recovering. However, if you’re going for realism or if your group is
+playing an InSpectres series (where you play many games with continuing characters and sub-plots), you can schedule your characters’
+Vacation times around their dice penalties. It’ll work like this:
+Your agent lost …
+
+Your agent is out of work for…
+
+1 skill die
+
+One day (“He went home early.”)
+
+2-3 skill dice
+
+Three days (“He took a long weekend.”)
+
+4-5 skill dice
+
+Two weeks (“He’s in Maui.”)
+
+6+ skill dice
+
+One month plus a week for every die
+above 6 (“He’s on life support.“)
+
+In a game like this, each player can maintain a kind of “character portfolio” containing a variety of agents to play when one
+is out of commission. The cool thing is that these other guys are
+considered to be “on assignment” when not in-play. You don’t
+get earn any extra Franchise dice or anything, but you can use
+them as NPCs or (even better) as additional agents in your franchise. That means you can pull the file of a specialized agent
+
+60
+Character Continuity
+
+Fighting the forces of darkness so you don't have to
+
+Chapter 3
+Chapter 4
+Chapter 5
+Chapter 6
+Chapter 7
+Play
+Structure
+
+Chapter 8
+Appendices
+
+InSpectres: the Series
+After you play your first game of InSpectres, I can almost
+guarantee that you’ll want to play again. And because the game
+encourages player-driven stories and requires almost no prep
+time, it’s not all that hard to switch off GM duties (seriously, you
+don’t even need a GM to play this game…it just about runs
+itself). Your team is established, your offices are set up and all
+have your first (and hopefully successful) job under your belt.
+I say keep it going! Think of the game not as some epic adventure, but as a television series. The agents are the stars … the guys
+that get their names and faces shown during the opening credits.
+Then you have your secondary characters, guest stars and extras.
+You can run individual sessions like one-shot “a day in the life of”
+stories (like COPS), episodes in a long-running story arc (like Buffy
+the Vampire Slayer). You can even combine the two; a story arc
+spanning a bunch of sessions, punctuated with one-shot adventures (that may or may not have anything at all to do with the
+main story). The first episode is where you introduce the characters
+and their franchise. You might run a game (in the beginning or
+
+Chapter 2
+
+EXAMPLE: After the Mission
+The fourteen franchise dice needed to finish the mission have
+been earned … Miller Time! Time to wrap up loose ends, solve the
+mystery and get the characters back to home base for some R&R.
+Those fourteen dice (plus bonus dice from hazard pay or from roleplaying characteristics gained during the job) are then channeled
+back into the Cards or the Bank. The agents in need of Vacation (like
+the Professor) can spend franchise dice to restore their skills back to
+their original ratings.
+If for some reason, the players “solved” the mission after earning only ten franchise dice, they would suffer the penalty and lose
+half those dice (whether the penalty is for shoddy work, back taxes,
+license renewal or insurance payments is unimportant except maybe
+as color). So in the end, a premature finish would only net the team
+a paltry five franchise dice…barely enough to keep them in Instant
+Ramen for the rest of the month.
+
+Chapter 1
+
+when a certain kind of job is called for (“Vampire Goats? Put
+Johnson on that one … didn’t he grow up on a farm?”). It also
+gives each player the opportunity to have a weird agent in their
+portfolio without breaking the “one weirdo per game” rule.
+
+61
+Inspectres the Series
+
+Chapter 6
+
+Chapter 5
+
+Chapter 4
+
+Chapter 3
+
+Chapter 2
+
+Chapter 1
+
+Fighting the forces of darkness so you don't have to
+
+later on as a flashback episode) that happens before the business is
+created (the library scene in Ghostbusters introduces some characters and has them go on a mission before their spook-hunting
+enterprise is even mentioned!). If additional players join, start the
+game off with an Employee Screening and interview them for the
+job. Someone moving away? Kill off their character in that shocking season finale. The world is your oyster, baby.
+
+One-shot vs. Series
+InSpectres makes for a great one-shot game to play at parties or conventions. Little to no prep time, engaging and
+simple premise, easy-to-learn rules and characters that take
+minutes to create = perfect one-shot game, right? The thing
+is, InSpectres benefits from long-term play! I’m not talking
+an epic 15-year long campaign (there are far too many cool
+RPGs out there to only play one). I’m talking about four or
+five games using the same characters and a single franchise.
+Not only will the players get more out of the game’s various
+mechanics (Confessionals, the Bank, Characteristics, Cool
+Dice), but the game’s themes get a chance to make themselves apparent. The players can watch their franchise gain
+and lose money ... eventually either pulling a profit or
+falling into Chapter 11 bankruptcy
+
+Appendices
+
+Chapter 8
+
+Chapter 7
+Play
+Structure
+
+62
+One-shot vs. Series
+
+I
+
+Running the Game
+If your players are reticent about taking control, you’ll
+have to prompt, prod and push them in the right direction. Ask lots of questions. If they ask you if there is a fire
+
+8. Final Words
+
+f you’re used to the regular way of GMing, this game
+is going to feel like a bucket of cold water in your
+face at five o’clock in the morning - shocking, but
+hopefully refreshing. Prep time is minimal, yes. But you’ll
+need to be fast on your feet and willing to change your
+pre-conceptions about the game at the drop of a hat. You’ll
+also need to get your players involved in running the
+game, a job you normally keep all to yourself.
+
+Chapter 7
+
+Chapter 6
+
+Chapter 5
+
+Chapter 4
+
+Chapter 3
+
+Chapter 2
+
+Chapter 1
+
+Fighting the forces of darkness so you don't have to
+
+Appendices
+
+Chapter 8
+Final Words
+
+extinguisher on the wall, ask them “Well, is there?” You’ll
+probably use the phrase, “Okay, now what to you do?” a lot until
+they get the hang of things.
+Allow them the freedom to make up the results of a bad die
+roll. If they refuse to play in the spirit of the game, hose them.
+Hose them in a BIG way. Likewise, if they roll 6’s and act wishywashy, then give them a pretty good result and hint that if they
+would run with the descriptions, their characters’ effectiveness
+would increase dramatically (again, pun intended…get it?).
+Try and get across the feeling that although the action is
+unfolding in a linear fashion (like a story), the act of creating
+that story is non-linear. Not only does this mean you can muck
+with the timeline of the game (by using Confessionals, for example), the game can be run with the knowledge that everything
+has already happened in the past and only now is are the events
+being shown. In other words, playing the game is like creating a
+documentary of “a day in the life of the InSpectres” and the story
+that unfolds is akin to someone watching that film footage.
+Oh, and I can almost guarantee that once one player tries out
+a Confessional, the other players will want to mix it up as well.
+Encourage them! And hey, you. Be sure to sit back and get into
+the game as much as your players. As an InSpectres GM, you’re
+obviously a person of rare and refined sensibilities. Enjoy yourself…this isn’t brain surgery!
+Have Fun
+So there you have it, a complete role-playing game…and one
+without lists of monsters, complex combat rules, pre-made
+adventures or crappy fiction. Why? Because hopefully, the rules
+to this game have given you the tools necessary to come up with
+even better stuff than I could write. And whereas many RPGs are
+simply warmed-up leftovers from someone else’s campaign,
+InSpectres is more like a cooking class. The intent is to give you
+the ingredients and techniques required for creating your own
+tasty masterpieces.
+Oh, you can forget that old adage about “too many chefs spoiling the soup.” What’s wrong with the players and the GM working together? And what’s with this age-old tradition of “hiding
+behind the screen?” I say, “Share the power…share the wealth!”
+And dammit, have a good time.
+
+64
+Have Fun
+
+Fighting the forces of darkness so you don't have to
+
+Illustrations
+Jon Morris – www.ape-law.com
+Manning L. Krull - www.jerkbox.com
+
+Chapter 6
+Chapter 7
+Chapter 8
+Final Words
+
+Appendices
+
+The Essential InSpectres InSpirado List
+Let’s face it here. Genre-wise, I’m not treading in strange new
+waters – TV shows, comics and games about ghost hunters and
+paranormal investigators are a dime a dozen. Despite this, I think
+InSpectres has some cool stuff in it that makes it unique.
+Anyway, here’s the good stuff…stuff you should definitely
+check out to get into that InSpectres state of mind.
+• Ghostbusters, Ghostbusters II and The Real Ghostbusters
+(animated series)
+• Men in Black (the movie) and Men in Black: the series
+(animated series)
+• Startup.com (documentary about a failed Internet
+company)
+• The Real World, Survivor and COPS (reality TV shows)
+• Buffy the Vampire Slayer (and also Angel, because
+“Angel Investigations” is a classic example of what a
+“covert” InSpectres team might be like)
+
+Chapter 5
+
+“DEATH TO GIANT CLAMS!”
+
+Chapter 4
+
+Special thanks to all of the InSpectres Agents and GM's all over
+the world!
+
+Chapter 3
+
+Playtesters and Advisors
+Zak Arntson, Mario Bonassin, Paul Czege, Ron Edwards, Michael
+Gentry, Stephen Grady, Mike Holmes, Tim Kirk, “Graveyard” Greg
+McNutt, Jürgen Mayer, Joshua Neff, Nathan Hill, Clinton R. Nixon
+and Sean Wipfli.
+
+Chapter 2
+
+Graphic Design
+Book design and layout by Matt Snyder – www.chimera.info
+Character record sheets by Ben Morgan – www.ad1066.com
+InSpectres logo designed by Jared A. Sorensen
+Logo illustrated by Fufu Frauenwahl – www.fufufrauenwahl.com
+
+Chapter 1
+
+Credits & Kudos
+Game design and text by Jared A. Sorensen
+
+65
+The Essential InSpectres InSpirado List
+
+Chapter 7
+
+Chapter 6
+
+Chapter 5
+
+Chapter 4
+
+Chapter 3
+
+Chapter 2
+
+Chapter 1
+
+Fighting the forces of darkness so you don't have to
+
+Chapter 8
+Final Words
+
+• Hellboy (a comic book by Mike Mignola featuring the
+greatest weird agent ever!)
+• Demon Cops (a Sorcerer supplement by Ron Edwards,
+the author of Sorcerer)
+Bonus Materials on the Web
+You can download all the InSpectres record sheets at
+http://www.inspectres.com or http://www.memento-mori.com.
+While you're there, check out two free InSpectres supplements:
+Tim Boser's In-Speckers (aka, "InSpectres Jr.") and
+UnSpeakable (a unique spin on Lovecraftian horror). Join in the
+conversation at Memento Mori Theatricks' official message forum
+(http://www.indie-rpgs.com).
+Got an idea for your own mini-supplement? Visit the
+InSpectres web site for details!
+Copyright Info
+Copyright © 2002-2003 Memento Mori / Jared A. Sorensen.
+All Rights Reserved.
+Interior illustrations copyright (c) 2003 their respective
+artists
+This publication may not be reproduced, in whole or in part,
+including the cover image, in any form (beyond that copying permitted by Sections 107 and 108 of the US Copyright Law and
+except by reviewers for the public press), without written permission from the publisher. In other words, ask first.
+Memento-Mori Theatricks
+Game Design From Beyond the Grave!
+
+Appendices
+
+www.memento-mori.com
+
+66
+Copyright Info
+
+The following information has been provided as a supercondensed version of the full rules. Not only is it appropriate as
+a reference tool for the GM, it’s also a good way to introduce
+the concepts of the game to new players. Just photocopy the
+following sections and hand ’em out at the beginning of your
+first session of InSpectres.
+Skills
+There are four skills in InSpectres. Each represents a very
+broad, abstract field of knowledge or ability. One (Technology) is
+even an abstraction of resources and buying power. The level of
+any skill is defined with skill dice (the typical InSpectres agent
+has nine skill dice spread out among the four skills).
+Academics
+The Academics skill is used most often in the game when an
+InSpectres agent is researching information. It can also be used to
+describe an agent’s intellect, memory and level of education.
+Athletics
+The Athletics skill is an indicator of an agent’s physical prowess,
+strength, hand-eye coordination and physical fitness. Actions
+that are physical in nature (running, lifting, jumping, etc.) use
+this skill. Athletics is also the skill that governs brawling, martial arts knowledge, marksmanship and driving ability.
+Contact
+Contact is a catchall skill that is mainly used when the agents are
+attempting to communicate with the general public, clients,
+investors, the media and the authorities. Contact can also be
+used to dig up rumors or gossip about people.
+Technology
+Technology pertains to computers, electronics, machines and
+other types of equipment. It appears to overlap with Athletics
+when it comes to the use of weapons and vehicles but Athletics
+deals more with marksmanship and coordination and Technology
+deals with hi-tech gadgetry that relies on computer targeting
+systems and the like. The Technology skill is also used whenever
+the player is trying to build, scrounge, or purchase a piece of
+Glossary of Terms
+
+Appendix I. Glossary of Terms
+
+i. Glossary of Terms
+
+67
+
+Chapter 8
+
+Chapter 7
+
+Chapter 6
+
+Chapter 5
+
+Chapter 4
+
+Chapter 3
+
+Chapter 2
+
+Chapter 1
+
+Fighting the forces of darkness so you don't have to
+
+Appendix I
+Glossary
+of Terms
+
+equipment. InSpectres uses a Requirement rule where players
+must roll a certain number or higher on their Technology skill
+rolls, depending on the rarity and cost of the item in question.
+Die Pools
+InSpectres contains a metric butt-load of die pools. To help
+you keep them clear, here is a list of all the die pools used in the
+game, with descriptions of how each is used.
+Bank dice
+Bank dice are franchise dice that are squirreled away in some
+kind of 401(k), Mutual Fund, stock portfolio-kinda thing. They’re
+handy because you can spend them to alleviate stress penalties
+(during Vacations), augment any skill roll or (for weird agents)
+turn them into Cool dice.
+Bank dice are tricky because whenever you use one (either on
+a skill roll or for some other reason), you have a chance of losing more dice than you actually spent. On the plus side, it is possible to gain “interest” on Bank dice.
+Card Dice
+Card Dice are just franchise dice that have been spent on any of
+the three InSpectres Cards (Gym Membership Card, Library Use
+Card and Credit Card). The disadvantage of Card dice is that they
+are linked to skills. For instance, you cannot augment an
+Athletics skill roll with Credit Card dice. The advantage of Card
+dice is that unlike Bank dice, you only lose what you use.
+Cool dice
+Cool dice allow you to ignore some or all of your stress. For each
+Cool die you have, you may ignore the lowest-rolled stress die. You
+can also spend your Cool dice to augment a skill roll. Weird agents
+may also spend their Cool dice to activate their weird abilities.
+Cool dice are usually gained during play when a low 6 is rolled
+during a Stress Roll. Normal agents may have a maximum of three
+Cool dice at any one time. Weird agents have no such limitation.
+When dealing with situations outside of your character’s job
+with InSpectres, you can only use Cool dice to augment rolls.
+Unless you want to be indicted on embezzlement charges…
+
+68
+Glossary: Die Pools
+
+Fighting the forces of darkness so you don't have to
+
+Chapter 4
+Chapter 5
+Chapter 6
+Chapter 7
+Chapter 8
+
+Talent Dice
+All normal, human agents gain a bonus die (called a Talent die)
+when performing skill rolls within their selected Talent. This Talent
+die is never lost, not even when the agent suffers stress.
+
+Chapter 3
+
+Stress Dice
+Stress dice (between one and five) are rolled when a character faces injury, terror or irritation. The lowest stress die rolled is
+used to determine the result of the roll.
+
+Chapter 2
+
+Skill Dice
+Every normal character has nine skill dice to distribute during
+character creation. Weird agents get ten skill dice. The dice are
+rolled when your character uses his or her Academics, Athletics,
+Technology or Contact skills. The highest skill die rolled is used
+to determine the result of the roll.
+
+Chapter 1
+
+Franchise Dice
+Franchise dice are distributed between the InSpectres team’s
+three Cards (the Gym Membership, Library Use and Credit Cards).
+The number of franchise dice the team receives depends on how
+long that team has been around, their financial situation and the
+desires of the players and the GM. A brand-new InSpectres team
+receives between five and ten franchise dice. More established
+groups may have between fifteen and twenty dice. The crème de
+la crème will have around thirty Franchise dice.
+Franchise dice are also what you collect during a job. The number of franchise dice needed to finish the job is set at the beginning of the game by the GM. Whenever a member or your team
+rolls a high 5 or a high 6, your team gets either one or two franchise dice. When the required number of franchise dice is reached,
+you can end the mission and collect those dice as payment.
+When setting the number of Franchise dice needed to finish a
+mission, the GM should take the team’s current number of franchise dice into account. A good rule of thumb is to require twice
+the number of Franchise dice with which the team starts the
+game. In general, the more franchise dice you have, the tougher
+your jobs will be. Not only in terms of the number of franchise
+dice you’ll need to finish the mission, but also in terms of plot
+complications and stress rolls.
+
+Appendix I
+Glossary
+of Terms
+
+69
+Glossary: Die Pools
+
+Chapter 8
+
+Chapter 7
+
+Chapter 6
+
+Chapter 5
+
+Chapter 4
+
+Chapter 3
+
+Chapter 2
+
+Chapter 1
+
+Fighting the forces of darkness so you don't have to
+
+Appendix I
+Glossary
+of Terms
+
+Game Mechanics
+Although InSpectres is not a complex game, it does possess a
+few wrinkles to spice things up.
+Augmenting
+When you Augment a skill roll, it means that you are subtracting
+dice from a die pool and adding those dice to your skill roll.
+Bank Rolls
+Whenever a Bank die is used to augment a skill roll, that die
+serves two functions. The first is to increase the likelihood of
+rolling a high die. The second is to determine what happens to
+the team’s Bank as a result of that die being used. Sometimes,
+the die will be lost. Other times, it will remain in the Bank. If a
+6 is rolled, the Bank die is kept in the Bank and an additional
+Bank die is added to the Bank. If a low number is rolled, multiple Bank dice might be lost.
+If a player ever spend Bank dice during Vacation (to restore
+skills that have suffered from stress penalties), the dice are rolled
+and the results are used to determine what Bank dice are kept,
+lost or gained.
+Requirements
+Requirements are used to prevent players from getting every
+piece of equipment they can dream up. If the item in question is
+common and/or inexpensive, a minimum of one 4 must be rolled.
+If the item is more expensive or harder to find, a 5 is needed. If
+the desired item is very rare or prohibitively expensive, a 6 is
+required. Players may reduce a Requirement by reducing the safety, effectiveness or reliability of the item in question.
+Skill Rolls
+A skill roll is when the player rolls a number of dice equal to one
+of his or her character’s skills. The highest number showing on
+the dice is used to determine the result (1, 2, and 3 being bad
+results, 4, 5, and 6 being good results). Skill rolls are not just for
+basic task resolution. Because they govern how much control the
+players can exert over the game, they can be called for in a variety of situations: attacking a creature, researching information,
+building a gadget, romancing a client, repairing a vehicle, talking to an insurance agency or buying a rare book.
+
+70
+Glossary: Game Mechanics
+
+Fighting the forces of darkness so you don't have to
+
+Chapter 5
+Chapter 6
+Chapter 7
+Chapter 8
+
+Play Structure
+Play Structure is a term I use for how the game is actually
+played. Many role-playing games don’t have a clear Play
+Structure. Those that do often use the setup-conflict-climax-resolution sequence that’s common to dramatic writing. Because
+InSpectres is more about what happens during the game than
+about what happens at the end, the Play Structure is concerned
+with clearly marking out how the game should be played. That
+
+Chapter 4
+
+Teamwork
+Teamwork is a special tactic where members of the team help one
+another out by sharing dice from a skill roll. If you want to help
+out another player (and your character is attempting to help that
+player’s character), you may make a skill roll and give one of
+your results to that player. Once the desire to help another player has been announced, you must hand over one die from your
+skill roll, even if that leaves you with a less-than-desired result.
+If using teamwork to assist another character, you won’t earn
+extra franchise dice if you roll a 5 or a 6.
+
+Chapter 3
+
+‘Taking 4’
+Any character with a skill rating of four may elect to take an
+automatic “4” instead of rolling dice when using that skill.
+Characters with skills of zero due to stress penalties may not Take
+4. Characters may not Take 4 when making stress rolls or Bank
+rolls. Taking 4 is a sensible tactic when stress penalties have
+brought your Skill’s rating below a three.
+
+Chapter 2
+
+Stress Rolls
+Whenever a character faces some kind of stress (either physical
+or mental), that character’s player must roll a number of stress
+dice (determined by the GM, usually between one and five dice).
+The lowest die is used to determine the result (one stress die may
+be ignored per Cool die possessed by the character).
+
+Chapter 1
+
+Stress Penalties
+Stress penalties arise from rolling below a 5 on a Stress Roll.
+These penalties temporarily reduce a character’s skills by anything from one to five skill dice. Spending Cool dice during play
+or Bank dice at the end of a mission is the only way to negate
+lasting stress penalties.
+
+Appendix I
+Glossary
+of Terms
+
+71
+Glossary: Play Structure
+
+Chapter 8
+
+Chapter 7
+
+Chapter 6
+
+Chapter 5
+
+Chapter 4
+
+Chapter 3
+
+Chapter 2
+
+Chapter 1
+
+Fighting the forces of darkness so you don't have to
+
+Appendix I
+Glossary
+of Terms
+
+way, everyone is moving in the same direction and emphasis can
+be placed on the moment, rather than trying to cajole the story
+into a cohesive narrative.
+Confessionals
+Confessionals are opportunities for players to temporarily suspend the game and have their characters speak directly to the
+other players. During a Confessional, the player gets a few minutes to comment on the game thus far, or to jump backward or
+forward in time to introduce new plot elements, complications or
+solutions. The term and the technique stem from “Reality Shows”
+where one of the participants is sequestered in a private location
+with a camera and shares his or her thoughts on what has transpired in the past (and to speculate on what may happen in the
+future).
+The “rules” for Confessionals are as follows:
+• Address the other players as if they were watching the
+Confessional on television.
+• Confessionals should always add; never negate or
+detract from the game.
+• Only one player can give a Confessional per scene.
+• Each player can only give and receive one characteristic
+per game.
+Characteristics
+Characteristics are personality traits given to characters during a Confessional. Although they don’t have to be incorporated
+into the personality of the character, there is an incentive for
+doing so (in the form of a bonus of one franchise die at the end
+of the game session). Characteristics are fairly fluid and are likely to change from one game to the next. Of course, there’s no reason why the same characteristic can’t be used for the same character each session.
+The Job
+The Job refers to an actual problem that the InSpectres are hired
+to investigate and solve. This happens in several distinct phases:
+
+72
+Glossary: Confessionals
+
+Fighting the forces of darkness so you don't have to
+
+Chapter 1
+Chapter 2
+Chapter 3
+
+• Getting the Call (contact client and learn about the
+upcoming job)
+• Research/Investigation (research the problem and/or
+investigate the location and come up with a possible,
+plausible explanation)
+• Suiting Up (procure the necessary equipment to deal
+with the problem)
+• Fieldwork (travel to the scene and deal with the problem)
+• Clean Up (transfer franchise dice to Cards or to the Bank)
+• Vacation (spend dice to remove your agent’s stress
+penalties)
+
+Chapter 4
+Chapter 5
+Chapter 6
+Chapter 7
+Chapter 8
+Appendix I
+Glossary
+of Terms
+
+73
+Glossary: The Job
+
+Appendix II. Reference Charts
+
+ii. Reference Charts
+The following charts are used throughout InSpectres and are
+repeated here for your convenient reference.
+Skill Roll Chart
+6
+
+Amazing! Describe the result and gain 2 franchise dice.
+
+5
+
+Good. Describe the result and gain a franchise die.
+
+4
+
+Fair. Describe the mostly positive result of your action
+but you must also include a negative or humorous effect.
+
+3
+
+Not Great. The GM decides your fate but you may be given
+a chance to suggest a single positive (albeit minor) effect.
+
+2
+
+Bad. The GM decides your fate or you may suggest
+something suitably negative.
+
+1
+
+Terrible! The GM gets to hose you with a truly dire
+situation resulting from your incompetence.
+
+6
+
+Stress Roll Chart
+Too Cool for School. You gain a point of Cool and
+suffer no real stress.
+
+5
+
+Blasé. No effects…you just don’t care.
+
+4
+
+Annoyed. Suffer a 1-die penalty to your next skill roll
+(no matter where or when you perform it).
+
+3
+
+Stressed. Lose a die from an appropriate skill.
+
+2
+
+Frazzled. Lose two dice from an appropriate skill (or
+one die from two skills)
+
+1
+
+Complete and total nuclear meltdown. Lose your Cool
+(if you have any) and lose a number of skill dice equal
+to the number of stress dice rolled.
+
+74
+Reference Charts
+
+Fighting the forces of darkness so you don't have to
+
+Chapter 1
+
+Bank Roll Chart
+
+Interest! Return this die to the Bank.
+
+4
+
+Account Withdrawal! No Benefit or Penalty! Lose this die.
+
+3
+
+Account Withdrawal! No Benefit or Penalty! Lose this die.
+
+2
+
+Service Charge! Lose this die and an additional Bank die,
+if possible.
+
+1
+
+Account Overrun! Ignore all other results and lose all dice
+in Bank.
+
+Chapter 4
+
+5
+
+Chapter 3
+
+Compounded Interest! Return this die and add a bonus
+die to the Bank.
+
+Chapter 2
+
+6
+
+Chapter 5
+
+Client
+
+Occurrence
+
+Location
+
+2
+
+Horny
+
+Ghost/Monster Transformation
+
+Underground
+(sewers / subway)
+
+3
+
+Bored
+
+Police Officer
+
+Appearance
+
+In the water
+
+4
+
+Skeptical
+
+Student
+
+Bizarre phenomena Some remote area
+
+5
+
+Angry
+
+City Worker
+
+Abnormal weather A restaurant
+
+6
+
+Impatient
+
+Storekeeper
+
+Odd Smell
+
+Municipal building
+
+7
+
+Weird
+
+Housewife
+
+Weird Sound
+
+Apartment building
+
+8
+
+Frantic
+
+Gov’t Official
+
+Strange Light
+
+Store / office
+
+9
+
+Terrified
+
+Businessman
+
+Haunting
+
+Residential area
+
+10
+
+Calm
+
+Hospital Worker Destruction
+
+Public park or zoo
+
+11
+
+Enthusiastic
+
+Motorist
+
+Infestation
+
+In a sketchy
+neighborhood
+
+12
+
+Blasé
+
+Aristocrat
+
+Abduction
+
+Somewhere in a
+parallel dimension
+
+Reference Charts
+
+Chapter 8
+
+Personality
+
+Chapter 7
+
+Roll
+
+Chapter 6
+
+Client Roll Chart
+Roll 2 six-sided dice or choose whatever seems most interesting.
+
+Appendix II
+Reference
+Charts
+
+75
+
+Fighting the forces of darkness so you don't have to
+
+Character Sheet
+You are free to photocopy this page for personal use only.
+Download a printable PDF version of this sheet at:
+www.inspectres.com
+
+76
+Character Sheet
+
+Fighting the forces of darkness so you don't have to
+
+Franchise sheet
+You are free to photocopy this page for personal use only.
+Download a printable PDF version of this sheet at:
+www.inspectres.com
+
+77
+Franchise Sheet
+
+Fighting the forces of darkness so you don't have to
+
+ID Badge
+You are free to photocopy this page for personal use only.
+Download a printable PDF version of this sheet at:
+www.inspectres.com
+
+78
+ID Badge
+
+Fighting the forces of darkness so you don't have to
+
+Card sheet
+Use this page to keep track of your card dice. Just put the
+appropriate number of six-sided dice on each Card and on the
+Bank deposit slip.
+You are free to photocopy this page for personal use only.
+Download a printable PDF version of this sheet at:
+www.inspectres.com
+
+79
+Card Sheet
+
+Fighting the forces of darkness so you don't have to
+
+EMPLOYEE NON-DISCLOSURE AGREEMENT
+FOR GOOD CONSIDERATION, and in consideration of being employed by
+___InSpectres__ (Company), the undersigned employee hereby agrees
+and acknowledges:
+1. That during the course of my employ there may be disclosed to me certain
+trade secrets of the Company; said trade secrets consisting but not necessarily
+limited to:
+(a) Technical information: Methods, processes, formulae, compositions,
+systems, techniques, inventions, machines, computer programs and
+research projects.
+(b) Business information: Customer lists, pricing data, sources of supply,
+financial data and marketing, production, or merchandising systems
+or plans.
+2. I agree that I shall not during, or at any time after the termination of my
+employment with the Company, use for myself or others, or disclose or divulge to
+others including future employees, any trade secrets, confidential information, or
+any other proprietary data of the Company in violation of this agreement.
+3. That upon the termination of my employment from the Company:
+(a) I shall return to the Company all documents and property of the
+Company, including but not necessarily limited to: drawings, blueprints, reports, manuals, correspondence, customer lists, computer
+programs, and all other materials and all copies thereof relating in
+any way to the Company's business, or in any way obtained by me
+during the course of employ. I further agree that I shall not retain
+copies, notes or abstracts of the foregoing.
+(b) The Company may notify any future or prospective employer or third
+party of the existence of this agreement, and shall be entitled to full
+injunctive relief for any breach.
+(c) This agreement shall be binding upon me and my personal representatives and successors in interest, and shall inure to the benefit of the
+Company, its successors and assigns.
+Signed this _____ day of ____________________, 20____.
+______________________________
+Company
+
+_______________________________
+Employee
+
+
