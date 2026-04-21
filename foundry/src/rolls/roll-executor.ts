@@ -266,7 +266,10 @@ async function buildSkillRollDialog(opts: SkillRollDialogOptions): Promise<Skill
         default: true,
         callback: (_event: Event, _button: HTMLButtonElement, dialog: HTMLDialogElement) => {
           const form = dialog.querySelector("form") as HTMLFormElement | null;
-          if (!form) return { cardDice: 0, bankDice: 0, coolDice: 0, talentDie: false, takesFour: false };
+          if (!form) {
+            console.error("buildSkillRollDialog: form element not found in dialog; using defaults");
+            return { cardDice: 0, bankDice: 0, coolDice: 0, talentDie: false, takesFour: false };
+          }
           const data = new FormData(form);
           const cardDice = data.has("cardDice") ? opts.availableCardDice : 0;
           const bankDice = Math.min(Number(data.get("bankDice") ?? 0), opts.availableBank);
