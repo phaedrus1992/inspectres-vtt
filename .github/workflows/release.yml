@@ -59,7 +59,12 @@ jobs:
             const base = 'https://github.com/' + repo + '/releases';
             manifest.manifest = base + '/latest/download/system.json';
             manifest.download = base + '/download/' + tag + '/inspectres.zip';
-            fs.writeFileSync(distPath, JSON.stringify(manifest, null, 2) + '\n');
+            try {
+              fs.writeFileSync(distPath, JSON.stringify(manifest, null, 2) + '\n');
+            } catch (e) {
+              console.error('Error: failed to write system.json: ' + e.message);
+              process.exit(1);
+            }
             console.log('Injected release URLs for tag: ' + tag);
           "
 
