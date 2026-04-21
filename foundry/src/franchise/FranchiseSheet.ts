@@ -2,7 +2,7 @@
  * InSpectres Franchise Sheet
  */
 
-import { InSpectresFranchise } from "./InSpectresFranchise.js";
+import type { FranchiseData } from "./franchise-schema.js";
 
 export class FranchiseSheet extends ActorSheet {
   static override get defaultOptions() {
@@ -16,9 +16,10 @@ export class FranchiseSheet extends ActorSheet {
 
   override async getData() {
     const context = await super.getData();
+    const system = this.actor.system as unknown as FranchiseData;
     return {
       ...context,
-      system: (this.actor as any).system,
+      system,
     };
   }
 
@@ -28,13 +29,13 @@ export class FranchiseSheet extends ActorSheet {
     // Bank roll button
     html.on("click", "[data-action='bankRoll']", (event: JQuery.ClickEvent) => {
       event.preventDefault();
-      console.log("Bank roll requested");
+      // Bank roll implementation deferred to Phase 2
     });
 
     // Mission tracker button
     html.on("click", "[data-action='openMissionTracker']", (event: JQuery.ClickEvent) => {
       event.preventDefault();
-      console.log("Mission tracker requested");
+      // Mission tracker implementation deferred to Phase 2
     });
   }
 }
