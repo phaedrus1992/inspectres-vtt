@@ -3,37 +3,35 @@
 This directory holds secret files read by Docker Compose at runtime. All files listed here
 are gitignored and must never be committed.
 
-## Required files
+## Required: `config.json`
 
-### `foundry_username.txt`
+Create a file named `config.json` with your Foundry VTT account credentials and license key:
 
-Your Foundry VTT account username (email address):
-
-```bash
-echo -n "you@example.com" > docker/secrets/foundry_username.txt
+```json
+{
+  "foundry_username": "you@example.com",
+  "foundry_password": "your-password",
+  "foundry_license_key": "XXXX-XXXX-XXXX-XXXX"
+}
 ```
 
-### `foundry_password.txt`
+Your username is the email address you use to log in to foundryvtt.com. Your license key is
+found in your account page there.
 
-Your Foundry VTT account password:
-
-```bash
-echo -n "your-password" > docker/secrets/foundry_password.txt
-```
-
-### `license_key.txt`
-
-Your Foundry VTT license key (found in your account on foundryvtt.com):
+Verify the file is gitignored before continuing:
 
 ```bash
-echo -n "XXXX-XXXX-XXXX-XXXX" > docker/secrets/license_key.txt
+git check-ignore -v docker/secrets/config.json
 ```
 
-## Rules
+Expected: `docker/secrets/.gitignore:1:config.json  docker/secrets/config.json`
 
-- One line per file, no trailing newline (the `-n` flag on `echo` handles this)
-- Do not commit these files — they are gitignored
-- Docker Compose reads them as secrets; values never appear in `docker inspect` output or
-  shell history
-- The username and password are used only on first run to download Foundry from foundryvtt.com.
-  Once downloaded, they are not needed again unless you reset `docker/data/`.
+If it is not ignored, do not proceed — do not commit credentials.
+
+## Notes
+
+- The credentials are used only on first run to download Foundry from foundryvtt.com. Once
+  downloaded and cached in `docker/data/`, they are not needed again unless you reset
+  `docker/data/`.
+- This file is mounted into the container as `/run/secrets/config.json` and read by the
+  felddy/foundryvtt image's entrypoint.

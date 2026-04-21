@@ -1,10 +1,6 @@
 secrets:
-  license_key:
-    file: ./secrets/license_key.txt
-  foundry_username:
-    file: ./secrets/foundry_username.txt
-  foundry_password:
-    file: ./secrets/foundry_password.txt
+  config_json:
+    file: ./secrets/config.json
 
 services:
   foundry:
@@ -15,13 +11,9 @@ services:
     ports:
       - "30000:30000"
     secrets:
-      - license_key
-      - foundry_username
-      - foundry_password
+      - source: config_json
+        target: config.json
     environment:
-      FOUNDRY_LICENSE_KEY: "DOCKER-SECRET:license_key"
-      FOUNDRY_USERNAME: "DOCKER-SECRET:foundry_username"
-      FOUNDRY_PASSWORD: "DOCKER-SECRET:foundry_password"
       FOUNDRY_HOSTNAME: foundry
       CONTAINER_PRESERVE_CONFIG: "true"
     volumes:
