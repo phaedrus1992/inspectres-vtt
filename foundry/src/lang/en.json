@@ -26,8 +26,21 @@
     "ActorTypeFranchise": "Franchise",
     "SheetAgent": "Agent Sheet",
     "SheetFranchise": "Franchise Sheet",
+    "DialogBaseDice": "Base dice",
+    "DialogCardDice": "Card dice",
+    "DialogCardDiceAvailable": "Card Dice ({n} available)",
+    "DialogBankDice": "Bank Dice (0–{max})",
+    "DialogCoolDice": "Cool Dice (0–{max})",
+    "DialogTalentDie": "Talent Die",
+    "DialogTakesFour": "Take a 4 (skip roll)",
+    "DialogStressDice": "Stress Dice (1–5)",
+    "DialogCoolIgnore": "Cool dice to ignore lowest (0–{max})",
+    "DialogRoll": "Roll",
+    "DialogCancel": "Cancel",
     "ErrorAddCharacteristic": "Failed to add characteristic",
     "ErrorRemoveCharacteristic": "Failed to remove characteristic",
-    "ErrorUpdateFailed": "Failed to update actor data"
+    "ErrorUpdateFailed": "Failed to update actor data",
+    "ErrorRollFailed": "Roll failed",
+    "WarnNoBankDice": "No bank dice to roll."
   }
 }

@@ -94,6 +94,61 @@ const Actors = {
   },
 };
 
+// Mock Roll — pre-populate results via mockResults before calling evaluate()
+class MockRoll {
+  formula: string;
+  dice: Array<{ results: Array<{ result: number; active: boolean }> }> = [];
+
+  constructor(formula: string) {
+    this.formula = formula;
+  }
+
+  async evaluate() {
+    return this;
+  }
+
+  // Test helper: set the dice results directly
+  setResults(faces: number[]) {
+    this.dice = [{ results: faces.map((result) => ({ result, active: true })) }];
+  }
+}
+
+// Mock Dialog
+const Dialog = {
+  async wait<T>(config: {
+    title: string;
+    content: string;
+    buttons: Record<string, { label: string; callback: (html: JQuery) => T }>;
+    default: string;
+  }): Promise<T> {
+    const defaultKey = config.default;
+    const defaultButton = config.buttons[defaultKey];
+    if (!defaultButton) throw new Error(`Dialog: no button with key "${defaultKey}"`);
+    const mockHtml = { find: () => ({ val: () => "0", prop: () => false }) } as unknown as JQuery;
+    return defaultButton.callback(mockHtml);
+  },
+};
+
+// Mock ChatMessage
+const ChatMessage = {
+  async create(data: Record<string, unknown>) {
+    return data;
+  },
+  getSpeaker(options: { actor?: { name?: string } }) {
+    return { alias: options.actor?.name ?? "Unknown" };
+  },
+};
+
+// Mock renderTemplate
+async function renderTemplate(path: string, data: unknown): Promise<string> {
+  return JSON.stringify(data);
+}
+
+// Mock loadTemplates
+async function loadTemplates(paths: string[]): Promise<void> {
+  void paths;
+}
+
 // Assign to global
 Object.assign(globalThis, {
   Actor: MockActor,
@@ -103,6 +158,11 @@ Object.assign(globalThis, {
   game,
   ui,
   Actors,
+  Roll: MockRoll,
+  Dialog,
+  ChatMessage,
+  renderTemplate,
+  loadTemplates,
   foundry: {
     abstract: {
       TypeDataModel: class {},
@@ -115,4 +175,4 @@ Object.assign(globalThis, {
   },
 });
 
-export { MockActor, MockActorSheet, Hooks, CONFIG, game, ui, Actors, hookHandlers };
+export { MockActor, MockActorSheet, Hooks, CONFIG, game, ui, Actors, hookHandlers, MockRoll, Dialog, ChatMessage, renderTemplate };
