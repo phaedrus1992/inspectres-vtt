@@ -9,128 +9,78 @@ paths:
 
 Patterns for building Actor and Item sheets. Companion to `foundry-api.md` and `foundry-vite.md`.
 
-## Choosing Application Version
+## Application Version
 
-**ApplicationV1** (`ActorSheet`, `ItemSheet`): stable, widely documented, required for most
-system-level sheets today. Use for all current InSpectres sheets.
+All InSpectres sheets use **ApplicationV2** (`ActorSheetV2` / `ItemSheetV2`), targeting Foundry V13+.
+Do not write new sheets extending V1 `ActorSheet` / `ItemSheet` — those are deprecated in V13 and removed in V15.
 
-**ApplicationV2** (`ActorSheetV2`, `DocumentSheetV2`): newer API, cleaner TypeScript, but less
-community tooling. Consider for new sheets once fvtt-types v13 types stabilize.
-
-When in doubt, use ApplicationV1.
-
-## ActorSheet Pattern
+## ActorSheetV2 Pattern
 
 ```typescript
-export class AgentSheet extends ActorSheet {
-  static override get defaultOptions(): ActorSheet.Options {
-    return foundry.utils.mergeObject(super.defaultOptions, {
-      classes: ["inspectres", "sheet", "actor", "agent"],
-      template: "systems/inspectres/templates/actors/agent-sheet.hbs",
-      width: 680,
-      height: 520,
-      tabs: [{
-        navSelector: ".sheet-tabs",
-        contentSelector: ".sheet-body",
-        initial: "stats",
-      }],
-      dragDrop: [{ dragSelector: ".item-list .item", dropSelector: null }],
+export class AgentSheet extends foundry.applications.sheets.ActorSheetV2 {
+  static override DEFAULT_OPTIONS = {
+    classes: ["inspectres", "sheet", "actor", "agent"],
+    position: { width: 680, height: 520 },
+    actions: {
+      rollDice: AgentSheet.onRollDice,
+      editItem: AgentSheet.onEditItem,
+      deleteItem: AgentSheet.onDeleteItem,
+    },
+  };
+
+  static override PARTS = {
+    sheet: { template: "systems/inspectres/templates/actors/agent-sheet.hbs" },
+  };
+
+  override async _prepareContext(_options: foundry.applications.api.ApplicationV2Options): Promise<Record<string, unknown>> {
+    const base = await super._prepareContext(_options);
+    return { ...base, system: this.actor.system as AgentData };
+  }
+
+  override async _onRender(context: Record<string, unknown>, options: foundry.applications.api.ApplicationV2Options): Promise<void> {
+    await super._onRender(context, options);
+    // Attach listeners not covered by DEFAULT_OPTIONS.actions (e.g. change events)
+    this.element.querySelectorAll<HTMLInputElement>("[data-some-input]").forEach((el) => {
+      el.addEventListener("change", (event) => { /* handler */ });
     });
   }
 
-  override getData(): ActorSheet.Data & { systemData: AgentData; enrichedBio: string } {
-    const base = super.getData();
-    return {
-      ...base,
-      systemData: this.actor.system as AgentData,
-      // Pre-enrich HTML fields so templates receive safe HTML, not raw markdown
-      enrichedBio: "",  // await TextEditor.enrichHTML(this.actor.system.bio, { async: false })
-    };
-  }
-
-  override activateListeners(html: JQuery): void {
-    super.activateListeners(html);
-    if (!this.isEditable) return;
-
-    // Use event delegation on the html root, not document.body
-    html.find("[data-action='roll-dice']").on("click", this.#onRollDice.bind(this));
-    html.find("[data-action='item-create']").on("click", this.#onItemCreate.bind(this));
-    html.find("[data-action='item-delete']").on("click", this.#onItemDelete.bind(this));
-    html.find("[data-action='item-edit']").on("click", this.#onItemEdit.bind(this));
-  }
-
-  async #onRollDice(event: JQuery.ClickEvent): Promise<void> {
-    event.preventDefault();
-    const target = event.currentTarget as HTMLElement;
+  // Static action handlers — Foundry binds `this` to the sheet instance
+  static async onRollDice(this: AgentSheet, _event: Event, target: HTMLElement): Promise<void> {
     const rollType = target.dataset["rollType"] ?? "";
     // ... roll logic
   }
 
-  async #onItemCreate(event: JQuery.ClickEvent): Promise<void> {
-    event.preventDefault();
-    await this.actor.createEmbeddedDocuments("Item", [{
-      name: game.i18n.localize("INSPECTRES.NewItem"),
-      type: "ability",
-    }]);
-  }
-
-  async #onItemDelete(event: JQuery.ClickEvent): Promise<void> {
-    event.preventDefault();
-    const target = event.currentTarget as HTMLElement;
-    const itemId = target.closest("[data-item-id]")?.dataset["itemId"];
+  static async onEditItem(this: AgentSheet, _event: Event, target: HTMLElement): Promise<void> {
+    const itemId = target.closest<HTMLElement>("[data-item-id]")?.dataset["itemId"];
     if (!itemId) return;
-    const item = this.actor.items.get(itemId);
-    await item?.delete();
+    this.actor.items.get(itemId)?.sheet?.render({ force: true });
   }
 
-  async #onItemEdit(event: JQuery.ClickEvent): Promise<void> {
-    event.preventDefault();
-    const target = event.currentTarget as HTMLElement;
-    const itemId = target.closest("[data-item-id]")?.dataset["itemId"];
+  static async onDeleteItem(this: AgentSheet, _event: Event, target: HTMLElement): Promise<void> {
+    const itemId = target.closest<HTMLElement>("[data-item-id]")?.dataset["itemId"];
     if (!itemId) return;
-    this.actor.items.get(itemId)?.sheet?.render(true);
-  }
-
-  // Drag and drop support
-  override _canDragStart(_selector: string): boolean {
-    return this.isEditable;
-  }
-
-  override _onDragStart(event: DragEvent): void {
-    const target = event.currentTarget as HTMLElement;
-    const itemId = target.dataset["itemId"];
-    if (!itemId) return;
-    const item = this.actor.items.get(itemId);
-    event.dataTransfer?.setData("text/plain", JSON.stringify(item?.toDragData()));
+    await this.actor.items.get(itemId)?.delete();
   }
 }
 ```
 
-## ItemSheet Pattern
+## ItemSheetV2 Pattern
 
 ```typescript
-export class AbilitySheet extends ItemSheet {
-  static override get defaultOptions(): ItemSheet.Options {
-    return foundry.utils.mergeObject(super.defaultOptions, {
-      classes: ["inspectres", "sheet", "item", "ability"],
-      template: "systems/inspectres/templates/items/ability-sheet.hbs",
-      width: 520,
-      height: 380,
-    });
-  }
+export class AbilitySheet extends foundry.applications.sheets.ItemSheetV2 {
+  static override DEFAULT_OPTIONS = {
+    classes: ["inspectres", "sheet", "item", "ability"],
+    position: { width: 520, height: 380 },
+  };
 
-  override getData(): ItemSheet.Data & { systemData: AbilityData } {
-    const base = super.getData();
-    return {
-      ...base,
-      systemData: this.item.system as AbilityData,
-    };
-  }
+  static override PARTS = {
+    sheet: { template: "systems/inspectres/templates/items/ability-sheet.hbs" },
+  };
 
-  override activateListeners(html: JQuery): void {
-    super.activateListeners(html);
-    if (!this.isEditable) return;
-    // handlers
+  override async _prepareContext(_options: foundry.applications.api.ApplicationV2Options): Promise<Record<string, unknown>> {
+    const base = await super._prepareContext(_options);
+    return { ...base, system: this.item.system as AbilityData };
   }
 }
 ```
@@ -274,49 +224,54 @@ Never hardcode color values — they break dark mode and user themes.
 
 ## Dialog Patterns
 
+Use `foundry.applications.api.DialogV2` (V2 API). `Dialog` is deprecated in V13.
+
 ```typescript
 // Simple confirmation
-const confirmed = await Dialog.confirm({
-  title: game.i18n.localize("INSPECTRES.DeleteTitle"),
+const confirmed = await foundry.applications.api.DialogV2.confirm({
+  window: { title: game.i18n.localize("INSPECTRES.DeleteTitle") },
   content: `<p>${game.i18n.localize("INSPECTRES.DeleteConfirm")}</p>`,
 });
 if (!confirmed) return;
 
-// Custom dialog with form
-const result = await new Promise<number | null>((resolve) => {
-  new Dialog({
-    title: game.i18n.localize("INSPECTRES.DicePool"),
-    content: `<form>
-      <label>${game.i18n.localize("INSPECTRES.DiceCount")}</label>
-      <input type="number" name="count" value="2" min="1" max="6">
-    </form>`,
-    buttons: {
-      roll: {
-        icon: '<i class="fas fa-dice-d6"></i>',
-        label: game.i18n.localize("INSPECTRES.Roll"),
-        callback: (html: JQuery) => {
-          resolve(Number((html.find('[name="count"]').val())));
-        },
-      },
-      cancel: {
-        label: game.i18n.localize("INSPECTRES.Cancel"),
-        callback: () => resolve(null),
+// Custom dialog with form — buttons is an array, callback receives native HTMLDialogElement
+const result = await foundry.applications.api.DialogV2.wait({
+  window: { title: game.i18n.localize("INSPECTRES.DicePool") },
+  content: `<form>
+    <label>${game.i18n.localize("INSPECTRES.DiceCount")}</label>
+    <input type="number" name="count" value="2" min="1" max="6">
+  </form>`,
+  buttons: [
+    {
+      action: "roll",
+      label: game.i18n.localize("INSPECTRES.Roll"),
+      default: true,
+      callback: (_event, _button, dialog) => {
+        const form = dialog.querySelector("form") as HTMLFormElement | null;
+        return form ? Number(new FormData(form).get("count")) : null;
       },
     },
-    default: "roll",
-  }).render(true);
+    {
+      action: "cancel",
+      label: game.i18n.localize("INSPECTRES.Cancel"),
+      callback: () => null,
+    },
+  ],
 });
+if (result === null || result === undefined) return;
 ```
 
 ## Anti-Patterns
 
 | Never do this | Do this instead |
 |---------------|-----------------|
-| Return `this.actor` from `getData()` | Spread `super.getData()`, pass `system` separately |
-| `html.find(".roll").click(...)` | Use `data-action` + event delegation |
+| Return `this.actor` from `_prepareContext()` | Spread `super._prepareContext()`, pass `system` separately |
+| `getData()` in V2 sheets | `_prepareContext()` |
+| `activateListeners(html: JQuery)` in V2 sheets | `_onRender()` + `DEFAULT_OPTIONS.actions` |
 | Hard-coded strings in templates | `{{localize "INSPECTRES.Key"}}` |
-| `document.querySelector` in sheets | `html.find(selector)` (scoped to sheet) |
+| `document.querySelector` in sheets | `this.element.querySelector(selector)` (scoped to sheet) |
 | CSS without `.inspectres` root selector | Nest under `.inspectres.sheet { ... }` |
 | Hardcoded pixel colors | `var(--color-border-light-primary)` |
-| `new Dialog(...)` without `render(true)` | Always call `.render(true)` to display |
+| `new Dialog(...)` / `Dialog.wait()` (V1, deprecated V13) | `foundry.applications.api.DialogV2.wait()` |
 | Registering sheets outside `init` hook | Always register in `Hooks.once("init", ...)` |
+| `extends ActorSheet` / `extends ItemSheet` (V1, deprecated V13) | `foundry.applications.sheets.ActorSheetV2` |

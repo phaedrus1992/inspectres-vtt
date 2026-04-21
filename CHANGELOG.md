@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- All sheets and the Mission Tracker app now use the Foundry V13 ApplicationV2 API, eliminating
+  deprecation warnings for `ActorSheet` and `Application`. Requires Foundry V13 or later.
+- Roll dialogs (skill roll, stress roll, distribute mission dice) use `DialogV2` — the new native
+  browser `<dialog>` element — instead of the deprecated V1 `Dialog`.
+- Create Actor dialog height is now fixed using the `renderDialogV2` hook (previously the hook
+  targeted V1 dialogs and had no effect in V13+).
+- Minimum supported Foundry version bumped from 12 to 13.
+
 ### Added
 
 - Foundry VTT system scaffold with TypeScript + Vite build pipeline

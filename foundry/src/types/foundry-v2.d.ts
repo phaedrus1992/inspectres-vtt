@@ -7,6 +7,12 @@
  * Reference: https://foundryvtt.com/api/v12/classes/foundry.applications.api.ApplicationV2.html
  */
 
+/** Foundry's extended FormData class — available as a global in V13+. */
+declare class FormDataExtended extends FormData {
+  readonly object: Record<string, unknown>;
+  readonly dtypes: Record<string, string>;
+}
+
 declare namespace foundry.applications.api {
   interface ApplicationV2Options {
     id?: string;
@@ -24,6 +30,16 @@ declare namespace foundry.applications.api {
       left?: number;
     };
     actions?: Record<string, (event: Event, target: HTMLElement) => void | Promise<void>>;
+    form?: {
+      handler?: (event: Event, form: HTMLFormElement, formData: FormDataExtended) => void | Promise<void>;
+      submitOnChange?: boolean;
+      closeOnSubmit?: boolean;
+    };
+  }
+
+  interface ApplicationV2Part {
+    template: string;
+    scrollable?: string[];
   }
 
   /** Base class for all V2 applications. */
@@ -34,26 +50,43 @@ declare namespace foundry.applications.api {
     /** The outermost DOM element rendered by this application. */
     readonly element: HTMLElement;
 
+    static DEFAULT_OPTIONS: ApplicationV2Options;
+    static PARTS: Record<string, ApplicationV2Part>;
+
     render(options?: { force?: boolean; position?: ApplicationV2Options["position"] }): Promise<ApplicationV2>;
     close(options?: { animate?: boolean }): Promise<ApplicationV2>;
     setPosition(position: ApplicationV2Options["position"]): ApplicationV2Options["position"];
+
+    _prepareContext(options: ApplicationV2Options): Promise<Record<string, unknown>>;
+    _onRender(context: Record<string, unknown>, options: ApplicationV2Options): Promise<void>;
+  }
+
+  interface DialogV2Button {
+    action: string;
+    label: string;
+    icon?: string;
+    default?: boolean;
+    callback?: (event: Event, button: HTMLButtonElement, dialog: HTMLDialogElement) => unknown;
   }
 
   /** Modal/modeless dialog built on ApplicationV2. */
   class DialogV2 extends ApplicationV2 {
+    static wait(config: {
+      content: string;
+      window?: { title?: string };
+      position?: ApplicationV2Options["position"];
+      rejectClose?: boolean;
+      modal?: boolean;
+      buttons?: DialogV2Button[];
+    }): Promise<unknown>;
+
     static prompt(config: {
       content: string;
       window?: { title?: string };
       position?: ApplicationV2Options["position"];
       rejectClose?: boolean;
       modal?: boolean;
-      buttons?: Array<{
-        action: string;
-        label: string;
-        icon?: string;
-        default?: boolean;
-        callback?: (event: Event, button: HTMLButtonElement, dialog: HTMLDialogElement) => unknown;
-      }>;
+      buttons?: DialogV2Button[];
     }): Promise<unknown>;
 
     static confirm(config: {
@@ -62,6 +95,27 @@ declare namespace foundry.applications.api {
       rejectClose?: boolean;
       modal?: boolean;
     }): Promise<boolean>;
+  }
+}
+
+declare namespace foundry.applications.sheets {
+  interface ActorSheetV2Options extends foundry.applications.api.ApplicationV2Options {
+    document?: Actor;
+  }
+
+  /** Base class for V2 actor sheets. */
+  class ActorSheetV2 extends foundry.applications.api.ApplicationV2 {
+    readonly actor: Actor;
+    readonly isEditable: boolean;
+
+    static DEFAULT_OPTIONS: foundry.applications.api.ApplicationV2Options & {
+      actions?: Record<string, (this: ActorSheetV2, event: Event, target: HTMLElement) => void | Promise<void>>;
+    };
+
+    static PARTS: Record<string, { template: string; scrollable?: string[] }>;
+
+    _prepareContext(options: foundry.applications.api.ApplicationV2Options): Promise<Record<string, unknown>>;
+    _onRender(context: Record<string, unknown>, options: foundry.applications.api.ApplicationV2Options): Promise<void>;
   }
 }
 
