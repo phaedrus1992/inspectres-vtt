@@ -1,0 +1,18 @@
+{
+  "name": "inspectres-vtt",
+  "version": "0.1.0",
+  "description": "InSpectres paranormal investigation RPG system for Foundry VTT",
+  "type": "module",
+  "scripts": {
+    "dev": "vite build --watch --config vite.config.ts",
+    "build": "vite build --config vite.config.ts",
+    "prod": "vite build --config vite.config.prod.ts",
+    "check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.19",
+    "fvtt-types": "github:League-of-Foundry-Developers/foundry-vtt-types#main",
+    "typescript": "^5.7.2",
+    "vite": "^5.4.11"
+  }
+}

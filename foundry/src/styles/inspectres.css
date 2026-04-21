@@ -1,0 +1,52 @@
+/* InSpectres System Stylesheet */
+
+:root {
+  --inspectres-primary: #2c3e50;
+  --inspectres-secondary: #3498db;
+  --inspectres-accent: #e74c3c;
+  --inspectres-light: #ecf0f1;
+  --inspectres-dark: #1a252f;
+}
+
+/* Base sheet styles */
+.inspectres-sheet {
+  background: var(--inspectres-light);
+  border: 1px solid var(--inspectres-primary);
+}
+
+.inspectres-header {
+  background: linear-gradient(135deg, var(--inspectres-primary), var(--inspectres-secondary));
+  color: white;
+  padding: 1rem;
+  border-radius: 4px 4px 0 0;
+}
+
+.inspectres-section {
+  padding: 1rem;
+  border-bottom: 1px solid var(--inspectres-light);
+}
+
+.inspectres-section:last-child {
+  border-bottom: none;
+}
+
+/* Roll buttons */
+.inspectres-roll-button {
+  background: var(--inspectres-secondary);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+
+.inspectres-roll-button:hover {
+  background: var(--inspectres-accent);
+}
+
+.inspectres-roll-button:disabled {
+  background: #95a5a6;
+  cursor: not-allowed;
+}
