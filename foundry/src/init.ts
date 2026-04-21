@@ -48,10 +48,12 @@ Hooks.once("init", async function () {
   });
 });
 
-// The Create Actor dialog clips the Type dropdown. Force it to a usable height.
-Hooks.on("renderDialog", function (dialog: Dialog) {
-  if ((dialog as unknown as { id?: string }).id === "create-actor") {
-    dialog.setPosition({ height: "auto" as unknown as number });
+// The Create Actor dialog defaults to a fixed height too small to show all fields.
+// renderDialogV2 fires for ApplicationV2-based dialogs (Foundry V12+).
+// Match on the select[name="type"] presence — unique to document-creation dialogs.
+Hooks.on("renderDialogV2", function (_app, html: HTMLElement) {
+  if (html.querySelector("select[name='type']")) {
+    html.style.height = "auto";
   }
 });
 

@@ -33,6 +33,32 @@ Never suppress type errors from `fvtt-types` with `@ts-ignore`; fix the type usa
 `skipLibCheck: true` in tsconfig is intentional (the library types have known issues), but your
 own code must be clean.
 
+### Filling fvtt-types Gaps
+
+`fvtt-types` trails Foundry releases — V2 APIs (`ApplicationV2`, `DialogV2`, V2 hook signatures)
+may be missing or incomplete. **Never use `unknown` as a workaround for missing types.** Instead:
+
+1. Check `src/types/foundry-v2.d.ts` — project-local ambient declarations for V2 APIs not yet
+   in fvtt-types.
+2. If what you need isn't there, add it. Use Foundry's API docs and the reference systems
+   (`reference/dnd5e/`, `reference/pf2e/`) to determine the accurate shape.
+3. When fvtt-types eventually gains the type, delete it from `foundry-v2.d.ts`.
+
+```typescript
+// Bad — loses type safety on the app parameter
+Hooks.on("renderDialogV2", function (_app: unknown, html: HTMLElement) { ... });
+
+// Good — ApplicationV2 declared in src/types/foundry-v2.d.ts
+Hooks.on("renderDialogV2", function (_app, html: HTMLElement) { ... });
+// (fvtt-types resolves _app to its own type; use RenderDialogV2Callback cast if you need
+//  the parameter typed as foundry.applications.api.ApplicationV2)
+```
+
+**V2 vs V1 hooks:** Foundry V12 uses `ApplicationV2` for all new dialogs. The old `renderDialog`
+hook fires only for V1 `Application` subclasses. When writing hooks for dialogs or sheets, check
+which API the dialog uses — inspect the DOM (`<div class="app">` = V1, `<dialog>` element = V2)
+and use the matching hook (`renderDialog` vs `renderDialogV2`).
+
 ## Module Entry and Hook Registration
 
 All initialization must go through Foundry's lifecycle hooks. Never run setup code at module
@@ -313,3 +339,5 @@ and prevents accidental value imports from type-only paths.
 | `forEach` in vite plugin file-walking code | `for...of` |
 | Sheet labels as raw strings | Localization keys |
 | `template.json` as the schema documentation | TypeScript `DataModel` classes |
+| `unknown` to work around missing fvtt-types types | Add the type to `src/types/foundry-v2.d.ts` |
+| `renderDialog` hook for V2 dialogs (`<dialog>` element) | `renderDialogV2` hook |
