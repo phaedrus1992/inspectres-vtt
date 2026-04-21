@@ -66,6 +66,7 @@ export class AgentSheet extends foundry.applications.sheets.ActorSheetV2 {
   static override DEFAULT_OPTIONS = {
     classes: ["inspectres", "sheet", "actor", "agent"],
     position: { width: 600, height: 700 as number | "auto" },
+    form: { submitOnChange: true, closeOnSubmit: false },
     actions: {
       skillRoll: AgentSheet.onSkillRoll,
       stressRoll: AgentSheet.onStressRoll,

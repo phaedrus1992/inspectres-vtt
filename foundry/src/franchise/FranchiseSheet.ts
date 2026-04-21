@@ -6,6 +6,7 @@ export class FranchiseSheet extends foundry.applications.sheets.ActorSheetV2 {
   static override DEFAULT_OPTIONS = {
     classes: ["inspectres", "sheet", "actor", "franchise"],
     position: { width: 600, height: 600 as number | "auto" },
+    form: { submitOnChange: true, closeOnSubmit: false },
     actions: {
       bankRoll: FranchiseSheet.onBankRoll,
       clientRoll: FranchiseSheet.onClientRoll,

@@ -7,6 +7,12 @@
  * Reference: https://foundryvtt.com/api/v12/classes/foundry.applications.api.ApplicationV2.html
  */
 
+/** Foundry's extended FormData class — available as a global in V13+. */
+declare class FormDataExtended extends FormData {
+  readonly object: Record<string, unknown>;
+  readonly dtypes: Record<string, string>;
+}
+
 declare namespace foundry.applications.api {
   interface ApplicationV2Options {
     id?: string;
@@ -24,6 +30,11 @@ declare namespace foundry.applications.api {
       left?: number;
     };
     actions?: Record<string, (event: Event, target: HTMLElement) => void | Promise<void>>;
+    form?: {
+      handler?: (event: Event, form: HTMLFormElement, formData: FormDataExtended) => void | Promise<void>;
+      submitOnChange?: boolean;
+      closeOnSubmit?: boolean;
+    };
   }
 
   interface ApplicationV2Part {
