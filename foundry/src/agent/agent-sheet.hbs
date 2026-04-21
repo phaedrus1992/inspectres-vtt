@@ -30,43 +30,26 @@
       <div class="skills-grid">
         {{#each system.skills as |skill skillName|}}
           <div class="skill-row">
-            <label>{{localize (inspectres-concat "INSPECTRES." (inspectres-capitalize skillName))}}</label>
-            <div class="skill-controls">
-              <!-- Base dice pip input -->
-              <div class="skill-base">
-                <input
-                  type="number"
-                  name="system.skills.{{skillName}}.base"
-                  value="{{skill.base}}"
-                  min="0"
-                  max="4"
-                  class="skill-pip"
-                />
-                <span class="skill-label">base</span>
+            <div class="skill-main-line">
+              <label class="skill-name">{{localize (inspectres-concat "INSPECTRES." (inspectres-capitalize skillName))}}</label>
+              <div class="skill-stepper">
+                <button type="button" class="skill-step" data-action="skillDecrease" data-skill="{{skillName}}">−</button>
+                <span class="skill-base-value">{{skill.base}}</span>
+                <button type="button" class="skill-step" data-action="skillIncrease" data-skill="{{skillName}}">+</button>
               </div>
-
-              <!-- Penalty display -->
-              <div class="skill-penalty">
-                <span class="penalty-value">-{{skill.penalty}}</span>
-                <span class="skill-label">penalty</span>
-              </div>
-
-              <!-- Effective count -->
-              <div class="skill-effective">
-                <span class="effective-value">{{inspectres-subtract skill.base skill.penalty}}</span>
-                <span class="skill-label">effective</span>
-              </div>
-
-              <!-- Roll button -->
+              <span class="skill-effective-value">({{inspectres-subtract skill.base skill.penalty}} effective)</span>
               <button
                 type="button"
-                class="inspectres-roll-button"
+                class="inspectres-roll-button skill-roll-button"
                 data-action="skillRoll"
                 data-skill="{{skillName}}"
-              >
-                Roll
-              </button>
+              >{{localize "INSPECTRES.Roll"}}</button>
             </div>
+            {{#if skill.penalty}}
+              <div class="skill-penalty-line">
+                −{{skill.penalty}} {{localize "INSPECTRES.PenaltyFromStress"}}
+              </div>
+            {{/if}}
           </div>
         {{/each}}
       </div>
