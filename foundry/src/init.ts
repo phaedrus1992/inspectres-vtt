@@ -49,8 +49,8 @@ Hooks.once("init", async function () {
 });
 
 // The Create Actor dialog clips the Type dropdown. Force it to a usable height.
-Hooks.on("renderDialog", function (dialog: Dialog, html: JQuery) {
-  if (html.find("select[name='type']").length && html.find("input[name='name']").length) {
+Hooks.on("renderDialog", function (dialog: Dialog) {
+  if ((dialog as unknown as { id?: string }).id === "create-actor") {
     dialog.setPosition({ height: "auto" as unknown as number });
   }
 });
