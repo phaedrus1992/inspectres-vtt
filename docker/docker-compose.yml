@@ -4,6 +4,8 @@ secrets:
 
 services:
   foundry:
+    # "release" tracks the latest stable Foundry release. Pin to a specific version
+    # (e.g. ghcr.io/felddy/foundryvtt:13.345) if you need reproducible deployments.
     image: ghcr.io/felddy/foundryvtt:release
     hostname: foundry
     ports:
