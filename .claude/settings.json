@@ -1,4 +1,19 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(gh auth refresh)",
+      "Bash(gh auth status)",
+      "Bash(gh label *)",
+      "Bash(gh search *)",
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(npx tsc *)",
+      "Skill(commit-commands:commit-push-pr)",
+      "WebFetch(domain:foundryvtt.com)",
+      "WebFetch(domain:foundryvtt.wiki)",
+      "WebFetch(domain:vite.dev)"
+    ]
+  },
   "enabledPlugins": {
     "frontend-design@claude-plugins-official": true
   }

@@ -1,6 +1,4 @@
-/**
- * Mock Foundry globals for testing
- */
+import { vi } from "vitest";
 
 // Mock Actor class
 class MockActor {
@@ -31,6 +29,25 @@ class MockActorSheet {
   activateListeners(html: JQuery<HTMLElement>) {
     // stub
   }
+}
+
+// Mock Application class
+class MockApplication {
+  static defaultOptions = {
+    id: "",
+    classes: [] as string[],
+    template: "",
+    title: "",
+    width: 400,
+    height: "auto",
+    resizable: true,
+    minimizable: true,
+  };
+
+  render(_force?: boolean) { return this; }
+  async close(_options?: unknown) {}
+  getData(): Record<string, unknown> { return {}; }
+  activateListeners(_html: JQuery<HTMLElement>) {}
 }
 
 // Mock Hooks
@@ -71,10 +88,22 @@ const CONFIG = {
 
 // Mock game
 const game = {
-  actors: { get: (id: string) => new MockActor() },
+  actors: { get: (_id: string) => new MockActor() },
+  users: {
+    filter: (fn: (u: { isGM: boolean; active: boolean; id: string; name: string }) => boolean) => {
+      const users = [{ isGM: false, active: true, id: "test-user", name: "Test Player" }];
+      return users.filter(fn);
+    },
+    get: (_id: string) => ({ isGM: false, active: true, id: "test-user", name: "Test Player" }),
+  },
+  user: { isGM: false, id: "test-user", name: "Test Player" },
+  socket: {
+    emit: vi.fn(),
+    on: vi.fn(),
+  },
   i18n: {
     localize: (key: string) => key,
-    format: (key: string, data: Record<string, unknown>) => key,
+    format: (key: string, _data: Record<string, unknown>) => key,
   },
 };
 
@@ -153,6 +182,7 @@ async function loadTemplates(paths: string[]): Promise<void> {
 Object.assign(globalThis, {
   Actor: MockActor,
   ActorSheet: MockActorSheet,
+  Application: MockApplication,
   Hooks,
   CONFIG,
   game,
@@ -175,4 +205,4 @@ Object.assign(globalThis, {
   },
 });
 
-export { MockActor, MockActorSheet, Hooks, CONFIG, game, ui, Actors, hookHandlers, MockRoll, Dialog, ChatMessage, renderTemplate };
+export { MockActor, MockActorSheet, MockApplication, Hooks, CONFIG, game, ui, Actors, hookHandlers, MockRoll, Dialog, ChatMessage, renderTemplate };
