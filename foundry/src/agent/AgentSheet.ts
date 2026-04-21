@@ -125,7 +125,13 @@ export class AgentSheet extends ActorSheet {
         return;
       }
       const system = this.actor.system as unknown as AgentData;
-      const current = system.skills[skillAttr].base;
+      const skillData = system.skills[skillAttr];
+      if (!skillData) {
+        console.error(`skill step: skills.${skillAttr} missing on actor ${this.actor.id}`);
+        ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorUpdateFailed") ?? "Failed to update actor data");
+        return;
+      }
+      const current = skillData.base;
       const delta = el.getAttribute("data-action") === "skillIncrease" ? 1 : -1;
       const next = Math.min(4, Math.max(0, current + delta));
       if (next === current) return;
