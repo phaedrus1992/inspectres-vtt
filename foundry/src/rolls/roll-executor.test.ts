@@ -1,6 +1,14 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import * as fc from "fast-check";
 import { MockRoll } from "../__mocks__/setup.js";
+
+// Minimal typed test actor fixture — implements just enough of Actor to test behavior
+// without pulling in the full Foundry type (128+ properties). Cast to Actor where needed.
+interface TestActor {
+  name: string;
+  system: Record<string, unknown>;
+  update: (data: Record<string, unknown>) => Promise<TestActor>;
+}
 
 // We import the pure helper indirectly by importing the module under test.
 // The pure resolveBankDice logic is exercised via executeSkillRoll and
@@ -34,9 +42,31 @@ function makeAgent(overrides: Record<string, unknown> = {}) {
       ...overrides,
     },
     async update(data: Record<string, unknown>) {
-      Object.assign(this.system, Object.fromEntries(
-        Object.entries(data).map(([k, v]) => [k.replace("system.", ""), v])
-      ));
+      for (const [k, v] of Object.entries(data)) {
+        const systemPath = k.replace("system.", "");
+        const parts = systemPath.split(".");
+        if (parts.length === 1) {
+          (this.system as Record<string, unknown>)[systemPath] = v;
+        } else {
+          let obj = this.system as Record<string, unknown>;
+          for (let i = 0; i < parts.length - 1; i++) {
+            const part = parts[i];
+            if (part !== undefined) {
+              if (!(part in obj)) {
+                obj[part] = {};
+              }
+              const next = obj[part];
+              if (typeof next === "object" && next !== null) {
+                obj = next as Record<string, unknown>;
+              }
+            }
+          }
+          const lastPart = parts[parts.length - 1];
+          if (lastPart !== undefined) {
+            obj[lastPart] = v;
+          }
+        }
+      }
       return this;
     },
   };
@@ -56,9 +86,31 @@ function makeFranchise(overrides: Record<string, unknown> = {}) {
       ...overrides,
     },
     async update(data: Record<string, unknown>) {
-      Object.assign(this.system, Object.fromEntries(
-        Object.entries(data).map(([k, v]) => [k.replace("system.", ""), v])
-      ));
+      for (const [k, v] of Object.entries(data)) {
+        const systemPath = k.replace("system.", "");
+        const parts = systemPath.split(".");
+        if (parts.length === 1) {
+          (this.system as Record<string, unknown>)[systemPath] = v;
+        } else {
+          let obj = this.system as Record<string, unknown>;
+          for (let i = 0; i < parts.length - 1; i++) {
+            const part = parts[i];
+            if (part !== undefined) {
+              if (!(part in obj)) {
+                obj[part] = {};
+              }
+              const next = obj[part];
+              if (typeof next === "object" && next !== null) {
+                obj = next as Record<string, unknown>;
+              }
+            }
+          }
+          const lastPart = parts[parts.length - 1];
+          if (lastPart !== undefined) {
+            obj[lastPart] = v;
+          }
+        }
+      }
       return this;
     },
   };
@@ -145,6 +197,10 @@ describe("executeSkillRoll", () => {
     });
   });
 
+  afterEach(() => {
+    (globalThis as unknown as { Roll: typeof MockRoll }).Roll = MockRoll;
+  });
+
   it("awards franchise dice on roll of 5", async () => {
     (globalThis as unknown as { Roll: typeof MockRoll }).Roll = class extends MockRoll {
       constructor(formula: string) {
@@ -154,7 +210,7 @@ describe("executeSkillRoll", () => {
     };
     const agent = makeAgent();
     const franchise = makeFranchise();
-    await executeSkillRoll(agent as never, franchise as never, "academics");
+    await executeSkillRoll(agent as unknown as Actor, franchise as unknown as Actor, "academics");
     expect(franchise.system.missionPool).toBe(1);
   });
 
@@ -167,7 +223,7 @@ describe("executeSkillRoll", () => {
     };
     const agent = makeAgent();
     const franchise = makeFranchise();
-    await executeSkillRoll(agent as never, franchise as never, "academics");
+    await executeSkillRoll(agent as unknown as Actor, franchise as unknown as Actor, "academics");
     expect(franchise.system.missionPool).toBe(2);
   });
 
@@ -180,7 +236,7 @@ describe("executeSkillRoll", () => {
     };
     const agent = makeAgent();
     const franchise = makeFranchise();
-    await executeSkillRoll(agent as never, franchise as never, "academics");
+    await executeSkillRoll(agent as unknown as Actor, franchise as unknown as Actor, "academics");
     expect(franchise.system.missionPool).toBe(0);
   });
 
@@ -193,7 +249,7 @@ describe("executeSkillRoll", () => {
     };
     const agent = makeAgent({ isWeird: true });
     const franchise = makeFranchise();
-    await executeSkillRoll(agent as never, franchise as never, "academics");
+    await executeSkillRoll(agent as unknown as Actor, franchise as unknown as Actor, "academics");
     expect(franchise.system.missionPool).toBe(0);
   });
 
@@ -205,7 +261,7 @@ describe("executeSkillRoll", () => {
       }
     };
     const agent = makeAgent();
-    await expect(executeSkillRoll(agent as never, null, "academics")).resolves.not.toThrow();
+    await expect(executeSkillRoll(agent as unknown as Actor, null, "academics")).resolves.not.toThrow();
   });
 
   it("zero-dice path rolls 2d6 and takes lowest", async () => {
@@ -220,7 +276,7 @@ describe("executeSkillRoll", () => {
     };
     const agent = makeAgent({ skills: { academics: { base: 0, penalty: 0 }, athletics: { base: 0, penalty: 0 }, technology: { base: 0, penalty: 0 }, contact: { base: 0, penalty: 0 } } });
     const chatCreateSpy = vi.spyOn(ChatMessage, "create");
-    await executeSkillRoll(agent as never, null, "academics");
+    await executeSkillRoll(agent as unknown as Actor, null, "academics");
     // Should have rolled 2d6 for the zero-dice path
     expect(rollFormula).toBe("2d6");
     expect(chatCreateSpy).toHaveBeenCalled();
@@ -241,7 +297,7 @@ describe("executeBankRoll", () => {
       }
     };
     const franchise = makeFranchise({ bank: 4 });
-    await executeBankRoll(franchise as never);
+    await executeBankRoll(franchise as unknown as Actor);
     expect(franchise.system.bank).toBe(5);
   });
 
@@ -253,14 +309,14 @@ describe("executeBankRoll", () => {
       }
     };
     const franchise = makeFranchise({ bank: 5 });
-    await executeBankRoll(franchise as never);
+    await executeBankRoll(franchise as unknown as Actor);
     expect(franchise.system.bank).toBe(0);
   });
 
   it("warns and returns early when bank is 0", async () => {
     const franchise = makeFranchise({ bank: 0 });
     const updateSpy = vi.spyOn(franchise, "update");
-    await executeBankRoll(franchise as never);
+    await executeBankRoll(franchise as unknown as Actor);
     expect(updateSpy).not.toHaveBeenCalled();
   });
 });
@@ -278,7 +334,7 @@ describe("executeStressRoll", () => {
       }
     };
     const agent = makeAgent({ cool: 1 });
-    await executeStressRoll(agent as never, { stressDiceCount: 1, coolDiceUsed: 0 });
+    await executeStressRoll(agent as unknown as Actor, { stressDiceCount: 1, coolDiceUsed: 0 });
     expect(agent.system.cool).toBe(2);
   });
 
@@ -290,7 +346,7 @@ describe("executeStressRoll", () => {
       }
     };
     const agent = makeAgent({ cool: 3 });
-    await executeStressRoll(agent as never, { stressDiceCount: 1, coolDiceUsed: 0 });
+    await executeStressRoll(agent as unknown as Actor, { stressDiceCount: 1, coolDiceUsed: 0 });
     expect(agent.system.cool).toBe(0);
   });
 
@@ -303,7 +359,7 @@ describe("executeStressRoll", () => {
     };
     const agent = makeAgent({ cool: 2 });
     const updateSpy = vi.spyOn(agent, "update");
-    await executeStressRoll(agent as never, { stressDiceCount: 1, coolDiceUsed: 0 });
+    await executeStressRoll(agent as unknown as Actor, { stressDiceCount: 1, coolDiceUsed: 0 });
     expect(updateSpy).not.toHaveBeenCalled();
   });
 
@@ -317,7 +373,7 @@ describe("executeStressRoll", () => {
     };
     const agent = makeAgent({ cool: 2 });
     const coolBefore = agent.system.cool;
-    await executeStressRoll(agent as never, { stressDiceCount: 3, coolDiceUsed: 1 });
+    await executeStressRoll(agent as unknown as Actor, { stressDiceCount: 3, coolDiceUsed: 1 });
     // Cool is NOT spent on stress ignore; result should be 3 (Stressed), cool unchanged
     expect(agent.system.cool).toBe(coolBefore);
   });
@@ -338,7 +394,7 @@ describe("executeClientRoll", () => {
     };
     const franchise = makeFranchise();
     const updateSpy = vi.spyOn(franchise, "update");
-    await executeClientRoll(franchise as never);
+    await executeClientRoll(franchise as unknown as Actor);
     expect(updateSpy).not.toHaveBeenCalled();
   });
 
@@ -354,7 +410,7 @@ describe("executeClientRoll", () => {
     };
     const chatCreateSpy = vi.spyOn(ChatMessage, "create");
     const franchise = makeFranchise();
-    await executeClientRoll(franchise as never);
+    await executeClientRoll(franchise as unknown as Actor);
     expect(chatCreateSpy).toHaveBeenCalledOnce();
   });
 
@@ -373,7 +429,7 @@ describe("executeClientRoll", () => {
         return capturedContent;
       });
     const franchise = makeFranchise();
-    await executeClientRoll(franchise as never);
+    await executeClientRoll(franchise as unknown as Actor);
     const parsed = JSON.parse(capturedContent) as Record<string, unknown>;
     const client = parsed["client"] as Record<string, string>;
     expect(client["personality"]).toBe("Horny");
@@ -384,68 +440,51 @@ describe("executeClientRoll", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Property-Based Tests (#59)
+// Invariants
 // ---------------------------------------------------------------------------
 
-describe("Property-based tests", () => {
-  it("outcome tiers are monotone: higher total always same or better outcome", () => {
-    fc.assert(
-      fc.property(fc.nat({ max: 20 }), fc.nat({ max: 20 }), (roll1, roll2) => {
-        const outcome1 = roll1 <= 2 ? "bad" : roll1 <= 4 ? "partial" : "good";
-        const outcome2 = roll2 <= 2 ? "bad" : roll2 <= 4 ? "partial" : "good";
-        const tierMap = { bad: 0, partial: 1, good: 2 };
-        if (roll1 < roll2) {
-          expect(tierMap[outcome1]).toBeLessThanOrEqual(tierMap[outcome2]);
-        }
-      }),
-      { numRuns: 100 }
-    );
-  });
-
-  it("skill penalty clamping never produces invalid values", () => {
+describe("invariants", () => {
+  it("resolveBankDice never produces negative final bank total", () => {
     fc.assert(
       fc.property(
-        fc.integer({ min: -100, max: 100 }),
-        (penalty) => {
-          const clamped = Math.min(4, Math.max(0, penalty));
-          expect(clamped).toBeGreaterThanOrEqual(0);
-          expect(clamped).toBeLessThanOrEqual(4);
-          expect(Number.isNaN(clamped)).toBe(false);
+        fc.array(fc.integer({ min: 1, max: 6 }), { maxLength: 10 }),
+        fc.nat({ max: 50 }),
+        (faces, initial) => {
+          const result = resolveBankDice(faces, initial);
+          expect(result.finalBankTotal).toBeGreaterThanOrEqual(0);
+          expect(Number.isNaN(result.finalBankTotal)).toBe(false);
         }
       ),
       { numRuns: 100 }
     );
   });
 
-  it("bank dice math never produces NaN or negative", () => {
+  it("resolveBankDice single face=1 always zeroes bank regardless of other faces", () => {
     fc.assert(
       fc.property(
-        fc.nat({ max: 20 }),
-        fc.nat({ max: 20 }),
-        (base, bonus) => {
-          const total = base + bonus;
-          expect(Number.isNaN(total)).toBe(false);
-          expect(total).toBeGreaterThanOrEqual(0);
+        fc.array(fc.integer({ min: 1, max: 6 }), { minLength: 1, maxLength: 5 }),
+        fc.nat({ max: 50 }),
+        (otherFaces, initial) => {
+          const faces = [...otherFaces, 1];
+          const result = resolveBankDice(faces, initial);
+          expect(result.finalBankTotal).toBe(0);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 50 }
     );
   });
 
-  it("stress/franchise dice pools never become negative", () => {
+  it("empty dice array leaves bank unchanged", () => {
     fc.assert(
       fc.property(
-        fc.nat({ max: 10 }),
-        fc.nat({ max: 10 }),
-        (current, spent) => {
-          if (spent <= current) {
-            const remaining = current - spent;
-            expect(remaining).toBeGreaterThanOrEqual(0);
-            expect(Number.isNaN(remaining)).toBe(false);
-          }
+        fc.nat({ max: 50 }),
+        (initial) => {
+          const result = resolveBankDice([], initial);
+          expect(result.finalBankTotal).toBe(initial);
+          expect(result.resolutions).toHaveLength(0);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 50 }
     );
   });
 });
