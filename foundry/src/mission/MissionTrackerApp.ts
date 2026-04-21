@@ -1,5 +1,4 @@
 import { findFranchiseActor, franchiseSystemData } from "../franchise/franchise-utils.js";
-import { type FranchiseData } from "../franchise/franchise-schema.js";
 
 export class MissionTrackerApp extends foundry.applications.api.ApplicationV2 {
   static instance: MissionTrackerApp | null = null;
@@ -8,7 +7,11 @@ export class MissionTrackerApp extends foundry.applications.api.ApplicationV2 {
     if (!MissionTrackerApp.instance) {
       MissionTrackerApp.instance = new MissionTrackerApp();
     }
-    void MissionTrackerApp.instance.render({ force: true });
+    void MissionTrackerApp.instance.render({ force: true }).catch((err: unknown) => {
+      console.error("Failed to open Mission Tracker:", err);
+      ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorMissionTrackerOpen") ?? "Failed to open Mission Tracker");
+      MissionTrackerApp.instance = null;
+    });
   }
 
   static override DEFAULT_OPTIONS: foundry.applications.api.ApplicationV2Options = {
@@ -121,12 +124,11 @@ export class MissionTrackerApp extends foundry.applications.api.ApplicationV2 {
       return;
     }
 
-    await this.broadcastMissionComplete(franchise, system, distribution);
+    await this.broadcastMissionComplete(franchise, distribution);
   }
 
   private async broadcastMissionComplete(
     franchise: Actor,
-    system: FranchiseData,
     distribution: Record<string, number>,
   ): Promise<void> {
     const updateData = { "system.missionPool": 0 } as unknown as Parameters<typeof franchise.update>[0];
@@ -144,8 +146,11 @@ export class MissionTrackerApp extends foundry.applications.api.ApplicationV2 {
     const content = `<p>${baseMsg}</p><ul>${lines.map((l) => `<li>${l}</li>`).join("")}</ul>`;
     await ChatMessage.create({ content } as unknown as Parameters<typeof ChatMessage.create>[0]);
 
-    void system;
-    if (MissionTrackerApp.instance === this) void this.render();
+    if (MissionTrackerApp.instance === this) {
+      void this.render().catch((err: unknown) => {
+        console.error("Mission tracker re-render failed (broadcastMissionComplete):", err);
+      });
+    }
   }
 
   private async endEarly(): Promise<void> {
@@ -160,7 +165,11 @@ export class MissionTrackerApp extends foundry.applications.api.ApplicationV2 {
     const msg = game.i18n?.localize("INSPECTRES.MissionEndedEarly") ?? "The mission ended early. Franchise pool cleared.";
     await ChatMessage.create({ content: `<p>${msg}</p>` } as unknown as Parameters<typeof ChatMessage.create>[0]);
 
-    if (MissionTrackerApp.instance === this) void this.render();
+    if (MissionTrackerApp.instance === this) {
+      void this.render().catch((err: unknown) => {
+        console.error("Mission tracker re-render failed (endEarly):", err);
+      });
+    }
   }
 
   override async close(options?: { animate?: boolean }): Promise<foundry.applications.api.ApplicationV2> {
