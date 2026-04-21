@@ -1,14 +1,39 @@
-# Foundry License Key Secret
+# Foundry Secrets
 
-Create a file named `license_key.txt` in this directory containing your Foundry VTT license key:
+This directory holds secret files read by Docker Compose at runtime. All files listed here
+are gitignored and must never be committed.
 
+## Required files
+
+### `foundry_username.txt`
+
+Your Foundry VTT account username (email address):
+
+```bash
+echo -n "you@example.com" > docker/secrets/foundry_username.txt
 ```
-XXXX-XXXX-XXXX-XXXX
+
+### `foundry_password.txt`
+
+Your Foundry VTT account password:
+
+```bash
+echo -n "your-password" > docker/secrets/foundry_password.txt
 ```
 
-Rules:
-- One line, no trailing newline
-- Do not commit this file — it is gitignored
-- Docker Compose reads it as a secret and passes it to the container at runtime
-- Never set the license key as a plain environment variable; Docker secrets keep it out of
-  `docker inspect` output and shell history
+### `license_key.txt`
+
+Your Foundry VTT license key (found in your account on foundryvtt.com):
+
+```bash
+echo -n "XXXX-XXXX-XXXX-XXXX" > docker/secrets/license_key.txt
+```
+
+## Rules
+
+- One line per file, no trailing newline (the `-n` flag on `echo` handles this)
+- Do not commit these files — they are gitignored
+- Docker Compose reads them as secrets; values never appear in `docker inspect` output or
+  shell history
+- The username and password are used only on first run to download Foundry from foundryvtt.com.
+  Once downloaded, they are not needed again unless you reset `docker/data/`.
