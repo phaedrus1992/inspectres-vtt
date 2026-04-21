@@ -48,11 +48,10 @@ Hooks.once("init", async function () {
   });
 });
 
-// The Create Actor dialog clips the Type dropdown. Force the app window tall
-// enough to show all fields whenever a dialog contains an actor-type select.
-Hooks.on("renderDialog", function (_dialog: Dialog, html: JQuery) {
+// The Create Actor dialog clips the Type dropdown. Force it to a usable height.
+Hooks.on("renderDialog", function (dialog: Dialog, html: JQuery) {
   if (html.find("select[name='type']").length && html.find("input[name='name']").length) {
-    html.closest(".app.dialog").css({ "min-height": "200px" });
+    dialog.setPosition({ height: "auto" as unknown as number });
   }
 });
 
