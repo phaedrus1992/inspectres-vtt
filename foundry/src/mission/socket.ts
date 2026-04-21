@@ -13,12 +13,23 @@ export function emitMissionPoolUpdated(franchiseId: string): void {
 export function onMissionSocketEvent(handler: (payload: MissionSocketPayload) => void): void {
   game.socket?.on(SOCKET_EVENT, (payload: unknown) => {
     if (
-      typeof payload === "object" &&
-      payload !== null &&
-      "type" in payload &&
-      (payload as MissionSocketPayload).type === "missionPoolUpdated"
-    ) {
+      typeof payload !== "object" ||
+      payload === null ||
+      !("type" in payload) ||
+      !("franchiseId" in payload) ||
+      typeof (payload as { type: unknown }).type !== "string" ||
+      typeof (payload as { franchiseId: unknown }).franchiseId !== "string"
+    ) return;
+
+    if ((payload as { type: string }).type !== "missionPoolUpdated") {
+      console.warn("onMissionSocketEvent: unhandled payload type", (payload as { type: string }).type);
+      return;
+    }
+
+    try {
       handler(payload as MissionSocketPayload);
+    } catch (err: unknown) {
+      console.error("onMissionSocketEvent: handler threw", err);
     }
   });
 }

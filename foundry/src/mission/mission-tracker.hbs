@@ -22,15 +22,17 @@
   </div>
 
   {{#if isGm}}
-    <div class="tracker-actions">
-      {{#if missionComplete}}
-        <button type="button" class="inspectres-roll-button" data-action="beginCleanUp">
-          {{localize "INSPECTRES.MissionTrackerBeginCleanUp"}}
+    {{#if missionPool}}
+      <div class="tracker-actions">
+        {{#if missionComplete}}
+          <button type="button" class="inspectres-roll-button" data-action="beginCleanUp">
+            {{localize "INSPECTRES.MissionTrackerBeginCleanUp"}}
+          </button>
+        {{/if}}
+        <button type="button" class="inspectres-roll-button" data-action="endEarly">
+          {{localize "INSPECTRES.MissionTrackerEndEarly"}}
         </button>
-      {{/if}}
-      <button type="button" class="inspectres-roll-button" data-action="endEarly">
-        {{localize "INSPECTRES.MissionTrackerEndEarly"}}
-      </button>
-    </div>
+      </div>
+    {{/if}}
   {{/if}}
 </div>

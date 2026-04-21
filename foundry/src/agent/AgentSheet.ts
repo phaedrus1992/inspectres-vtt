@@ -103,6 +103,11 @@ export class AgentSheet extends ActorSheet {
     // Stress roll
     html.on("click", "[data-action='stressRoll']", (event: JQuery.ClickEvent) => {
       event.preventDefault();
+      const franchise = findFranchiseActor();
+      if (franchise && franchiseSystemData(franchise).debtMode) {
+        ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnStressRollDebtMode") ?? "Stress rolls are blocked while in Debt Mode.");
+        return;
+      }
       void buildStressRollDialog(this.actor).catch((err: unknown) => {
         const message = err instanceof Error ? err.message : String(err);
         console.error("Stress roll failed:", message);
@@ -140,7 +145,7 @@ export class AgentSheet extends ActorSheet {
       void this.actor.update(updateData).catch((err: unknown) => {
         const message = err instanceof Error ? err.message : String(err);
         console.error("Failed to set cool dice:", message);
-        ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorUpdateFailed") || "Failed to update actor data");
+        ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorUpdateFailed") ?? "Failed to update actor data");
       });
     });
 
@@ -153,7 +158,7 @@ export class AgentSheet extends ActorSheet {
       void this.actor.update(updateData).catch((err: unknown) => {
         const message = err instanceof Error ? err.message : String(err);
         console.error("Failed to add characteristic:", message);
-        ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorAddCharacteristic") || "Failed to add characteristic");
+        ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorAddCharacteristic") ?? "Failed to add characteristic");
       });
     });
 
@@ -176,7 +181,7 @@ export class AgentSheet extends ActorSheet {
       void this.actor.update(updateData).catch((err: unknown) => {
         const message = err instanceof Error ? err.message : String(err);
         console.error("Failed to remove characteristic:", message);
-        ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorRemoveCharacteristic") || "Failed to remove characteristic");
+        ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorRemoveCharacteristic") ?? "Failed to remove characteristic");
       });
     });
   }

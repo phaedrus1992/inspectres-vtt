@@ -67,6 +67,8 @@
     "ErrorNoFranchise": "No franchise actor found in this world.",
     "WarnNoBankDice": "No bank dice to roll.",
     "WarnSkillRollDebtMode": "Skill rolls are blocked while in Debt Mode.",
-    "WarnBankRollDebtMode": "Bank rolls are disabled in Debt Mode."
+    "WarnStressRollDebtMode": "Stress rolls are blocked while in Debt Mode.",
+    "WarnBankRollDebtMode": "Bank rolls are disabled in Debt Mode.",
+    "WarnClientRollDebtMode": "Client rolls are disabled in Debt Mode."
   }
 }
