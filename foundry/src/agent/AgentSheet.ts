@@ -72,6 +72,7 @@ export class AgentSheet extends foundry.applications.sheets.ActorSheetV2 {
       stressRoll: AgentSheet.onStressRoll,
       skillIncrease: AgentSheet.onSkillStep,
       skillDecrease: AgentSheet.onSkillStep,
+      toggleCool: AgentSheet.onToggleCool,
       addCharacteristic: AgentSheet.onAddCharacteristic,
       removeCharacteristic: AgentSheet.onRemoveCharacteristic,
     },
@@ -102,29 +103,6 @@ export class AgentSheet extends foundry.applications.sheets.ActorSheetV2 {
       });
     }
 
-    for (const el of this.element.querySelectorAll<HTMLElement>(".cool-pip")) {
-      el.addEventListener("click", (event: Event) => {
-        event.preventDefault();
-        const valueStr = (event.currentTarget as HTMLElement).getAttribute("data-value");
-        if (valueStr == null) {
-          console.error("cool-pip: missing data-value attribute");
-          return;
-        }
-        const pipValue = Number(valueStr);
-        if (Number.isNaN(pipValue) || pipValue < 1 || pipValue > 3) {
-          console.error("cool-pip: invalid data-value", valueStr);
-          return;
-        }
-        const currentCool = (this.actor.system as unknown as AgentData).cool;
-        const newCool = currentCool >= pipValue ? pipValue - 1 : pipValue;
-        const updateData = { "system.cool": newCool } as unknown as Parameters<typeof this.actor.update>[0];
-        void this.actor.update(updateData).catch((err: unknown) => {
-          const message = err instanceof Error ? err.message : String(err);
-          console.error("Failed to set cool dice:", message);
-          ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorUpdateFailed") ?? "Failed to update actor data");
-        });
-      });
-    }
   }
 
   static async onSkillRoll(this: AgentSheet, _event: Event, target: HTMLElement): Promise<void> {
@@ -179,6 +157,27 @@ export class AgentSheet extends foundry.applications.sheets.ActorSheetV2 {
     void this.actor.update(updateData).catch((err: unknown) => {
       const message = err instanceof Error ? err.message : String(err);
       console.error("Failed to update skill:", message);
+      ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorUpdateFailed") ?? "Failed to update actor data");
+    });
+  }
+
+  static async onToggleCool(this: AgentSheet, _event: Event, target: HTMLElement): Promise<void> {
+    const valueStr = target.getAttribute("data-value");
+    if (valueStr == null) {
+      console.error("toggleCool: missing data-value attribute");
+      return;
+    }
+    const pipValue = Number(valueStr);
+    if (Number.isNaN(pipValue) || pipValue < 1 || pipValue > 3) {
+      console.error("toggleCool: invalid data-value", valueStr);
+      return;
+    }
+    const currentCool = (this.actor.system as unknown as AgentData).cool;
+    const newCool = currentCool >= pipValue ? pipValue - 1 : pipValue;
+    const updateData = { "system.cool": newCool } as unknown as Parameters<typeof this.actor.update>[0];
+    void this.actor.update(updateData).catch((err: unknown) => {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error("Failed to set cool dice:", message);
       ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorUpdateFailed") ?? "Failed to update actor data");
     });
   }
