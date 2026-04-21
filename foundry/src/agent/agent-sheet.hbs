@@ -103,7 +103,7 @@
           <div class="cool-pips">
             <span class="cool-label">Cool Dice (0–3)</span>
             <div class="pip-container">
-              {{#each (inspectres-range 0 3) as |pip|}}
+              {{#each (inspectres-range 0 2) as |pip|}}
                 <button
                   type="button"
                   class="cool-pip {{#if (inspectres-gte ../system.cool (inspectres-add pip 1))}}filled{{/if}}"
