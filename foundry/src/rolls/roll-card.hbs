@@ -1,0 +1,58 @@
+<div class="inspectres inspectres-roll-card inspectres-roll-card--{{rollType}}">
+  <h3 class="roll-card-title">{{title}}</h3>
+
+  {{#if (eq rollType "skill")}}
+    {{#if takesFour}}
+      <p class="roll-card-note">Took a 4 — automatic Fair result.</p>
+    {{/if}}
+    <div class="roll-card-outcome">
+      <span class="roll-card-result">{{result}}</span>
+      <p class="roll-card-narration">{{narration}}</p>
+    </div>
+    {{#if franchiseDiceEarned}}
+      {{#unless isWeird}}
+        <p class="roll-card-franchise">+{{franchiseDiceEarned}} franchise {{inspectres-plural franchiseDiceEarned "die" "dice"}} added to mission pool</p>
+      {{/unless}}
+    {{/if}}
+    {{#if bankResolutions.length}}
+      <div class="roll-card-bank-resolutions">
+        <h4>Bank Dice Results</h4>
+        {{#each bankResolutions as |resolution|}}
+          <p class="bank-die-result {{#if resolution.loseAllBank}}lose-all{{/if}}">
+            {{resolution.face}}: {{resolution.result}} — {{resolution.narration}}
+          </p>
+        {{/each}}
+      </div>
+    {{/if}}
+  {{/if}}
+
+  {{#if (eq rollType "bank")}}
+    <div class="roll-card-bank-resolutions">
+      {{#each resolutions as |resolution|}}
+        <p class="bank-die-result {{#if resolution.loseAllBank}}lose-all{{/if}}">
+          {{resolution.face}}: {{resolution.result}} — {{resolution.narration}}
+        </p>
+      {{/each}}
+    </div>
+    <p class="roll-card-bank-total">Bank total: {{finalBankTotal}}</p>
+  {{/if}}
+
+  {{#if (eq rollType "stress")}}
+    <div class="roll-card-outcome">
+      <span class="roll-card-result">{{result}}</span>
+      <p class="roll-card-narration">{{narration}}</p>
+    </div>
+    {{#if penaltyNote}}
+      <p class="roll-card-penalty-note">⚠ {{penaltyNote}}</p>
+    {{/if}}
+  {{/if}}
+
+  {{#if (eq rollType "client")}}
+    <div class="roll-card-client">
+      <p><strong>Personality:</strong> {{client.personality}}</p>
+      <p><strong>Client Type:</strong> {{client.clientType}}</p>
+      <p><strong>Occurrence:</strong> {{client.occurrence}}</p>
+      <p><strong>Location:</strong> {{client.location}}</p>
+    </div>
+  {{/if}}
+</div>
