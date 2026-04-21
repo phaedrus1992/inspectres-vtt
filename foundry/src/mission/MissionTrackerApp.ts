@@ -1,30 +1,35 @@
 import { findFranchiseActor, franchiseSystemData } from "../franchise/franchise-utils.js";
 import { type FranchiseData } from "../franchise/franchise-schema.js";
 
-export class MissionTrackerApp extends Application {
+export class MissionTrackerApp extends foundry.applications.api.ApplicationV2 {
   static instance: MissionTrackerApp | null = null;
 
   static open(): void {
     if (!MissionTrackerApp.instance) {
       MissionTrackerApp.instance = new MissionTrackerApp();
     }
-    MissionTrackerApp.instance.render(true);
+    void MissionTrackerApp.instance.render({ force: true });
   }
 
-  static override get defaultOptions() {
-    return foundry.utils.mergeObject(super.defaultOptions, {
-      id: "inspectres-mission-tracker",
-      classes: ["inspectres", "inspectres-mission-tracker-window"],
-      template: "systems/inspectres/templates/mission-tracker.hbs",
-      title: game.i18n?.localize("INSPECTRES.MissionTrackerTitle") ?? "Mission Tracker",
-      width: 360,
-      height: "auto",
+  static override DEFAULT_OPTIONS: foundry.applications.api.ApplicationV2Options = {
+    id: "inspectres-mission-tracker",
+    classes: ["inspectres", "inspectres-mission-tracker-window"],
+    window: {
+      title: "INSPECTRES.MissionTrackerTitle",
       resizable: false,
-      minimizable: true,
-    });
-  }
+    },
+    position: { width: 360, height: "auto" },
+    actions: {
+      beginCleanUp: MissionTrackerApp.onBeginCleanUp,
+      endEarly: MissionTrackerApp.onEndEarly,
+    },
+  };
 
-  override getData(): Record<string, unknown> {
+  static override PARTS = {
+    sheet: { template: "systems/inspectres/templates/mission-tracker.hbs" },
+  };
+
+  override async _prepareContext(_options: foundry.applications.api.ApplicationV2Options): Promise<Record<string, unknown>> {
     const franchise = findFranchiseActor();
     if (!franchise) {
       return { missionPool: 0, missionGoal: 0, progressPercent: 0, missionComplete: false, isGm: game.user?.isGM ?? false };
@@ -34,34 +39,22 @@ export class MissionTrackerApp extends Application {
     const missionGoal = system.missionGoal;
     const progressPercent = missionGoal > 0 ? Math.min(100, Math.round((missionPool / missionGoal) * 100)) : 0;
     const missionComplete = missionGoal > 0 && missionPool >= missionGoal;
-    return {
-      missionPool,
-      missionGoal,
-      progressPercent,
-      missionComplete,
-      isGm: game.user?.isGM ?? false,
-    };
+    return { missionPool, missionGoal, progressPercent, missionComplete, isGm: game.user?.isGM ?? false };
   }
 
-  override activateListeners(html: JQuery<HTMLElement>) {
-    super.activateListeners(html);
-
-    html.on("click", "[data-action='beginCleanUp']", (event: JQuery.ClickEvent) => {
-      event.preventDefault();
-      void this.openDistributionDialog().catch((err: unknown) => {
-        const message = err instanceof Error ? err.message : String(err);
-        console.error("Distribution dialog failed:", message);
-        ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorRollFailed") ?? "Operation failed");
-      });
+  static async onBeginCleanUp(this: MissionTrackerApp, _event: Event, _target: HTMLElement): Promise<void> {
+    void this.openDistributionDialog().catch((err: unknown) => {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error("Distribution dialog failed:", message);
+      ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorRollFailed") ?? "Operation failed");
     });
+  }
 
-    html.on("click", "[data-action='endEarly']", (event: JQuery.ClickEvent) => {
-      event.preventDefault();
-      void this.endEarly().catch((err: unknown) => {
-        const message = err instanceof Error ? err.message : String(err);
-        console.error("End mission early failed:", message);
-        ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorUpdateFailed") ?? "Failed to update actor data");
-      });
+  static async onEndEarly(this: MissionTrackerApp, _event: Event, _target: HTMLElement): Promise<void> {
+    void this.endEarly().catch((err: unknown) => {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error("End mission early failed:", message);
+      ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorUpdateFailed") ?? "Failed to update actor data");
     });
   }
 
@@ -89,14 +82,16 @@ export class MissionTrackerApp extends Application {
       </form>
     `;
 
-    const result = await (Dialog.wait as (config: unknown) => Promise<unknown>)({
-      title: game.i18n?.localize("INSPECTRES.DistributeDialogTitle") ?? "Distribute Mission Dice",
+    const result = await foundry.applications.api.DialogV2.wait({
+      window: { title: game.i18n?.localize("INSPECTRES.DistributeDialogTitle") ?? "Distribute Mission Dice" },
       content,
-      buttons: {
-        confirm: {
+      buttons: [
+        {
+          action: "confirm",
           label: game.i18n?.localize("INSPECTRES.DistributeDialogConfirm") ?? "Confirm",
-          callback: (html: JQuery) => {
-            const form = html.find("form")[0] as HTMLFormElement | undefined;
+          default: true,
+          callback: (_event: Event, _button: HTMLButtonElement, dialog: HTMLDialogElement) => {
+            const form = dialog.querySelector("form") as HTMLFormElement | null;
             if (!form) return null;
             const data = new FormData(form);
             const distribution: Record<string, number> = {};
@@ -107,12 +102,12 @@ export class MissionTrackerApp extends Application {
             return distribution;
           },
         },
-        cancel: {
+        {
+          action: "cancel",
           label: game.i18n?.localize("INSPECTRES.DistributeDialogCancel") ?? "Cancel",
           callback: () => null,
         },
-      },
-      default: "confirm",
+      ],
     });
 
     if (result === null || result === undefined) return;
@@ -150,7 +145,7 @@ export class MissionTrackerApp extends Application {
     await ChatMessage.create({ content } as unknown as Parameters<typeof ChatMessage.create>[0]);
 
     void system;
-    if (MissionTrackerApp.instance === this) this.render(false);
+    if (MissionTrackerApp.instance === this) void this.render();
   }
 
   private async endEarly(): Promise<void> {
@@ -165,10 +160,10 @@ export class MissionTrackerApp extends Application {
     const msg = game.i18n?.localize("INSPECTRES.MissionEndedEarly") ?? "The mission ended early. Franchise pool cleared.";
     await ChatMessage.create({ content: `<p>${msg}</p>` } as unknown as Parameters<typeof ChatMessage.create>[0]);
 
-    if (MissionTrackerApp.instance === this) this.render(false);
+    if (MissionTrackerApp.instance === this) void this.render();
   }
 
-  override close(options?: Application.CloseOptions): Promise<void> {
+  override async close(options?: { animate?: boolean }): Promise<foundry.applications.api.ApplicationV2> {
     MissionTrackerApp.instance = null;
     return super.close(options);
   }

@@ -34,14 +34,14 @@ Hooks.once("init", async function () {
   // Register Handlebars helpers
   registerHandlebarsHelpers();
 
-  // Register sheets
-  Actors.registerSheet("inspectres", AgentSheet, {
+  // Register sheets — cast needed because fvtt-types' registerSheet expects V1 constructor type
+  Actors.registerSheet("inspectres", AgentSheet as never, {
     types: ["agent" as never],
     makeDefault: true,
     label: "INSPECTRES.SheetAgent",
   });
 
-  Actors.registerSheet("inspectres", FranchiseSheet, {
+  Actors.registerSheet("inspectres", FranchiseSheet as never, {
     types: ["franchise" as never],
     makeDefault: true,
     label: "INSPECTRES.SheetFranchise",
@@ -49,7 +49,7 @@ Hooks.once("init", async function () {
 });
 
 // The Create Actor dialog defaults to a fixed height too small to show all fields.
-// renderDialogV2 fires for ApplicationV2-based dialogs (Foundry V12+).
+// renderDialogV2 fires for ApplicationV2-based dialogs (Foundry V13+).
 // Match on the select[name="type"] presence — unique to document-creation dialogs.
 Hooks.on("renderDialogV2", function (_app, html: HTMLElement) {
   if (html.querySelector("select[name='type']")) {
@@ -60,8 +60,7 @@ Hooks.on("renderDialogV2", function (_app, html: HTMLElement) {
 Hooks.once("ready", function () {
   onMissionSocketEvent(() => {
     if (MissionTrackerApp.instance) {
-      // fvtt-types types render() as Application, but runtime returns Promise<Application>
-      void (MissionTrackerApp.instance.render(false) as unknown as Promise<unknown>).catch((err: unknown) => {
+      void MissionTrackerApp.instance.render().catch((err: unknown) => {
         console.error("Mission tracker re-render failed (socket event):", err);
       });
     }
@@ -70,10 +69,8 @@ Hooks.once("ready", function () {
 
 Hooks.on("updateActor", function (actor: Actor) {
   if ((actor.type as string) === "franchise" && MissionTrackerApp.instance) {
-    // fvtt-types types render() as Application, but runtime returns Promise<Application>
-    void (MissionTrackerApp.instance.render(false) as unknown as Promise<unknown>).catch((err: unknown) => {
+    void MissionTrackerApp.instance.render().catch((err: unknown) => {
       console.error("Mission tracker re-render failed (actor update):", err);
     });
   }
 });
-

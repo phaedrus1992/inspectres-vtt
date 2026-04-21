@@ -13,41 +13,46 @@ class MockActor {
   }
 }
 
-// Mock ActorSheet class
-class MockActorSheet {
+// Mock ActorSheetV2 class
+class MockActorSheetV2 {
   actor: MockActor = new MockActor();
-  editable: boolean = true;
+  isEditable: boolean = true;
 
-  async getData() {
+  static DEFAULT_OPTIONS = {
+    id: "",
+    classes: [] as string[],
+    window: { title: "" },
+    position: { width: 600, height: 700 },
+    actions: {} as Record<string, unknown>,
+  };
+
+  static PARTS: Record<string, { template: string }> = {};
+
+  async _prepareContext(_options: unknown) {
     return {
       actor: this.actor,
-      data: this.actor.system,
-      editable: this.editable,
+      system: this.actor.system,
+      isEditable: this.isEditable,
     };
   }
 
-  activateListeners(html: JQuery<HTMLElement>) {
-    // stub
-  }
+  async _onRender(_context: unknown, _options: unknown) {}
+
+  render(_options?: unknown) { return Promise.resolve(this); }
+  async close(_options?: unknown) {}
 }
 
-// Mock Application class
-class MockApplication {
-  static defaultOptions = {
+// Mock ApplicationV2 class
+class MockApplicationV2 {
+  static DEFAULT_OPTIONS = {
     id: "",
     classes: [] as string[],
-    template: "",
-    title: "",
-    width: 400,
-    height: "auto",
-    resizable: true,
-    minimizable: true,
+    window: { title: "" },
+    position: { width: 400, height: "auto" as const },
   };
 
-  render(_force?: boolean) { return this; }
+  render(_options?: unknown) { return Promise.resolve(this); }
   async close(_options?: unknown) {}
-  getData(): Record<string, unknown> { return {}; }
-  activateListeners(_html: JQuery<HTMLElement>) {}
 }
 
 // Mock Hooks
@@ -118,7 +123,7 @@ const ui = {
 
 // Mock Actors collection
 const Actors = {
-  registerSheet: (system: string, sheet: typeof MockActorSheet, options: Record<string, unknown>) => {
+  registerSheet: (_system: string, _sheet: unknown, _options: Record<string, unknown>) => {
     // stub
   },
 };
@@ -142,19 +147,31 @@ class MockRoll {
   }
 }
 
-// Mock Dialog
-const Dialog = {
-  async wait<T>(config: {
-    title: string;
+// Mock DialogV2 — V2 API: buttons array, callback receives (event, button, dialogElement)
+const MockDialogV2 = {
+  async wait(config: {
     content: string;
-    buttons: Record<string, { label: string; callback: (html: JQuery) => T }>;
-    default: string;
-  }): Promise<T> {
-    const defaultKey = config.default;
-    const defaultButton = config.buttons[defaultKey];
-    if (!defaultButton) throw new Error(`Dialog: no button with key "${defaultKey}"`);
-    const mockHtml = { find: () => ({ val: () => "0", prop: () => false }) } as unknown as JQuery;
-    return defaultButton.callback(mockHtml);
+    window?: { title?: string };
+    rejectClose?: boolean;
+    modal?: boolean;
+    buttons?: Array<{
+      action: string;
+      label: string;
+      icon?: string;
+      default?: boolean;
+      callback?: (event: Event, button: HTMLButtonElement, dialog: HTMLDialogElement) => unknown;
+    }>;
+  }): Promise<unknown> {
+    const defaultButton = config.buttons?.find((b) => b.default) ?? config.buttons?.[0];
+    if (!defaultButton?.callback) return null;
+    // Provide a minimal HTMLDialogElement stub with a querySelector that finds a form
+    const mockForm = document.createElement("form");
+    const mockDialog = document.createElement("dialog") as unknown as HTMLDialogElement;
+    mockDialog.appendChild(mockForm);
+    // stub querySelector on the dialog element
+    (mockDialog as unknown as { querySelector: (sel: string) => HTMLFormElement | null }).querySelector =
+      (sel: string) => (sel === "form" ? mockForm : null);
+    return defaultButton.callback(new Event("click"), document.createElement("button"), mockDialog);
   },
 };
 
@@ -181,15 +198,12 @@ async function loadTemplates(paths: string[]): Promise<void> {
 // Assign to global
 Object.assign(globalThis, {
   Actor: MockActor,
-  ActorSheet: MockActorSheet,
-  Application: MockApplication,
   Hooks,
   CONFIG,
   game,
   ui,
   Actors,
   Roll: MockRoll,
-  Dialog,
   ChatMessage,
   renderTemplate,
   loadTemplates,
@@ -202,7 +216,30 @@ Object.assign(globalThis, {
         return Object.assign(target, source);
       },
     },
+    applications: {
+      api: {
+        ApplicationV2: MockApplicationV2,
+        DialogV2: MockDialogV2,
+      },
+      sheets: {
+        ActorSheetV2: MockActorSheetV2,
+      },
+    },
   },
 });
 
-export { MockActor, MockActorSheet, MockApplication, Hooks, CONFIG, game, ui, Actors, hookHandlers, MockRoll, Dialog, ChatMessage, renderTemplate };
+export {
+  MockActor,
+  MockActorSheetV2,
+  MockApplicationV2,
+  MockDialogV2,
+  Hooks,
+  CONFIG,
+  game,
+  ui,
+  Actors,
+  hookHandlers,
+  MockRoll,
+  ChatMessage,
+  renderTemplate,
+};

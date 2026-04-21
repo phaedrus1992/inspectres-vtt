@@ -255,15 +255,16 @@ async function buildSkillRollDialog(opts: SkillRollDialogOptions): Promise<Skill
     </form>
   `;
 
-  // Dialog.wait<T> is constrained by fvtt-types; cast through unknown to avoid the constraint
-  const result = await (Dialog.wait as (config: unknown) => Promise<unknown>)({
-    title: `${i18n?.localize("INSPECTRES.SkillRoll") ?? "Skill Roll"}: ${opts.skillName}`,
+  const result = await foundry.applications.api.DialogV2.wait({
+    window: { title: `${i18n?.localize("INSPECTRES.SkillRoll") ?? "Skill Roll"}: ${opts.skillName}` },
     content,
-    buttons: {
-      roll: {
+    buttons: [
+      {
+        action: "roll",
         label: i18n?.localize("INSPECTRES.DialogRoll") ?? "Roll",
-        callback: (html: JQuery) => {
-          const form = html.find("form")[0] as HTMLFormElement | undefined;
+        default: true,
+        callback: (_event: Event, _button: HTMLButtonElement, dialog: HTMLDialogElement) => {
+          const form = dialog.querySelector("form") as HTMLFormElement | null;
           if (!form) return { cardDice: 0, bankDice: 0, coolDice: 0, talentDie: false, takesFour: false };
           const data = new FormData(form);
           const cardDice = data.has("cardDice") ? opts.availableCardDice : 0;
@@ -274,12 +275,12 @@ async function buildSkillRollDialog(opts: SkillRollDialogOptions): Promise<Skill
           return { cardDice, bankDice: isNaN(bankDice) ? 0 : bankDice, coolDice: isNaN(coolDice) ? 0 : coolDice, talentDie, takesFour };
         },
       },
-      cancel: {
+      {
+        action: "cancel",
         label: i18n?.localize("INSPECTRES.DialogCancel") ?? "Cancel",
         callback: () => null,
       },
-    },
-    default: "roll",
+    ],
   });
   if (result === null || result === undefined) return null;
   return result as SkillRollAugmentation;
