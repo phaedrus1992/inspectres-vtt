@@ -45,21 +45,9 @@ function extractFaces(roll: Roll): number[] {
   return roll.dice.flatMap((t) => t.results).filter((r) => r.active !== false).map((r) => r.result);
 }
 
-function actorUpdate(actor: Actor, data: Record<string, unknown>): void {
+async function actorUpdate(actor: Actor, data: Record<string, unknown>): Promise<void> {
   const updateData = data as unknown as Parameters<typeof actor.update>[0];
-  void actor.update(updateData).catch((err: unknown) => {
-    const message = err instanceof Error ? err.message : String(err);
-    console.error("Failed to update actor:", message);
-    ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorUpdateFailed") ?? "Failed to update actor data");
-  });
-}
-
-function findFranchiseActor(): Actor | null {
-  if (!game.actors) return null;
-  for (const actor of game.actors) {
-    if ((actor.type as string) === "franchise") return actor;
-  }
-  return null;
+  await actor.update(updateData);
 }
 
 async function rollDice(count: number): Promise<{ roll: Roll; faces: number[] }> {
@@ -171,40 +159,44 @@ export async function executeSkillRoll(
       // Zero dice: roll 2d6 take lowest (rules: auto-fail at 0 skill = treated as 1)
       const { roll, faces } = await rollDice(2);
       mainRoll = roll;
-      const lowestFace = Math.min(...faces);
+      const lowestFace = faces.length > 0 ? Math.min(...faces) : 1;
       highestFace = isDieFace(lowestFace) ? lowestFace : 1;
     } else {
       const { roll, faces } = await rollDice(totalDice);
       mainRoll = roll;
-      const maxFace = Math.max(...faces);
+      const maxFace = faces.length > 0 ? Math.max(...faces) : 1;
       highestFace = isDieFace(maxFace) ? maxFace : 1;
     }
   }
 
   const outcome = SKILL_ROLL_CHART[highestFace];
 
-  // Resolve bank dice augmentation
+  // Resolve bank dice augmentation (only when not taking a 4)
   let bankSummary: BankResolutionSummary | null = null;
-  if (augmentation.bankDice > 0 && franchiseSystem) {
+  if (!augmentation.takesFour && augmentation.bankDice > 0 && franchiseSystem) {
     const { faces: bankFaces } = await rollDice(augmentation.bankDice);
-    bankSummary = resolveBankDice(bankFaces, availableBank - augmentation.bankDice);
+    // Pass availableBank (pre-spend); resolveBankDice accounts for spending internally
+    bankSummary = resolveBankDice(bankFaces, availableBank);
   }
 
-  // Apply actor updates
-  if (franchise && franchiseSystem) {
-    if (augmentation.cardDice > 0 && cardType) {
-      actorUpdate(franchise, { [`system.cards.${cardType}`]: availableCardDice - augmentation.cardDice });
+  // Apply actor updates — skipped entirely when taking a 4 (no resources spent)
+  if (!augmentation.takesFour) {
+    if (franchise && franchiseSystem) {
+      if (augmentation.cardDice > 0 && cardType) {
+        await actorUpdate(franchise, { [`system.cards.${cardType}`]: availableCardDice - augmentation.cardDice });
+      }
+      if (bankSummary !== null) {
+        await actorUpdate(franchise, { "system.bank": bankSummary.finalBankTotal });
+      }
     }
-    if (bankSummary !== null) {
-      actorUpdate(franchise, { "system.bank": bankSummary.finalBankTotal });
-    }
-    if (outcome.franchiseDice > 0 && !system.isWeird) {
-      actorUpdate(franchise, { "system.missionPool": franchiseSystem.missionPool + outcome.franchiseDice });
+    if (augmentation.coolDice > 0) {
+      await actorUpdate(agent, { "system.cool": availableCool - augmentation.coolDice });
     }
   }
 
-  if (augmentation.coolDice > 0) {
-    actorUpdate(agent, { "system.cool": availableCool - augmentation.coolDice });
+  // Mission pool earned regardless of takesFour (it's an outcome, not a cost)
+  if (franchise && franchiseSystem && outcome.franchiseDice > 0 && !system.isWeird) {
+    await actorUpdate(franchise, { "system.missionPool": franchiseSystem.missionPool + outcome.franchiseDice });
   }
 
   const speaker = ChatMessage.getSpeaker({ actor: agent });
@@ -240,28 +232,34 @@ interface SkillRollAugmentation {
 }
 
 async function buildSkillRollDialog(opts: SkillRollDialogOptions): Promise<SkillRollAugmentation | null> {
+  const i18n = game.i18n;
   const cardLabel = opts.availableCardDice > 0
-    ? `Card Dice (${opts.availableCardDice} available)`
+    ? i18n?.format("INSPECTRES.DialogCardDiceAvailable", { n: String(opts.availableCardDice) }) ?? `Card Dice (${opts.availableCardDice} available)`
     : null;
+  const bankLabel = i18n?.format("INSPECTRES.DialogBankDice", { max: String(opts.availableBank) }) ?? `Bank Dice (0–${opts.availableBank})`;
+  const coolLabel = i18n?.format("INSPECTRES.DialogCoolDice", { max: String(opts.availableCool) }) ?? `Cool Dice (0–${opts.availableCool})`;
+  const talentLabel = i18n?.localize("INSPECTRES.DialogTalentDie") ?? "Talent Die";
+  const takesFourLabel = i18n?.localize("INSPECTRES.DialogTakesFour") ?? "Take a 4 (skip roll)";
+  const baseDiceLabel = i18n?.localize("INSPECTRES.DialogBaseDice") ?? "Base dice";
 
   const content = `
     <form class="inspectres-roll-dialog">
-      <p><strong>Base dice:</strong> ${opts.effectiveDice}</p>
-      ${cardLabel ? `<label><input type="checkbox" name="cardDice" ${opts.availableCardDice === 0 ? "disabled" : ""}> ${cardLabel}</label>` : ""}
-      ${opts.availableBank > 0 ? `<label>Bank Dice (0–${opts.availableBank}): <input type="number" name="bankDice" min="0" max="${opts.availableBank}" value="0"></label>` : ""}
-      ${opts.availableCool > 0 ? `<label>Cool Dice (0–${opts.availableCool}): <input type="number" name="coolDice" min="0" max="${opts.availableCool}" value="0"></label>` : ""}
-      ${opts.hasTalent ? `<label><input type="checkbox" name="talentDie"> Talent Die</label>` : ""}
-      ${opts.canTakeFour ? `<label><input type="checkbox" name="takesFour"> Take a 4 (skip roll)</label>` : ""}
+      <p><strong>${baseDiceLabel}:</strong> ${opts.effectiveDice}</p>
+      ${cardLabel ? `<label><input type="checkbox" name="cardDice"> ${cardLabel}</label>` : ""}
+      ${opts.availableBank > 0 ? `<label>${bankLabel}: <input type="number" name="bankDice" min="0" max="${opts.availableBank}" value="0"></label>` : ""}
+      ${opts.availableCool > 0 ? `<label>${coolLabel}: <input type="number" name="coolDice" min="0" max="${opts.availableCool}" value="0"></label>` : ""}
+      ${opts.hasTalent ? `<label><input type="checkbox" name="talentDie"> ${talentLabel}</label>` : ""}
+      ${opts.canTakeFour ? `<label><input type="checkbox" name="takesFour"> ${takesFourLabel}</label>` : ""}
     </form>
   `;
 
   // Dialog.wait<T> is constrained by fvtt-types; cast through unknown to avoid the constraint
   const result = await (Dialog.wait as (config: unknown) => Promise<unknown>)({
-    title: `${game.i18n?.localize("INSPECTRES.SkillRoll") ?? "Skill Roll"}: ${opts.skillName}`,
+    title: `${i18n?.localize("INSPECTRES.SkillRoll") ?? "Skill Roll"}: ${opts.skillName}`,
     content,
     buttons: {
       roll: {
-        label: "Roll",
+        label: i18n?.localize("INSPECTRES.DialogRoll") ?? "Roll",
         callback: (html: JQuery) => {
           const form = html.find("form")[0] as HTMLFormElement | undefined;
           if (!form) return { cardDice: 0, bankDice: 0, coolDice: 0, talentDie: false, takesFour: false };
@@ -275,7 +273,7 @@ async function buildSkillRollDialog(opts: SkillRollDialogOptions): Promise<Skill
         },
       },
       cancel: {
-        label: "Cancel",
+        label: i18n?.localize("INSPECTRES.DialogCancel") ?? "Cancel",
         callback: () => null,
       },
     },
@@ -301,7 +299,7 @@ export async function executeBankRoll(franchise: Actor): Promise<void> {
   const { roll, faces } = await rollDice(currentBank);
   const summary = resolveBankDice(faces, currentBank);
 
-  actorUpdate(franchise, { "system.bank": summary.finalBankTotal });
+  await actorUpdate(franchise, { "system.bank": summary.finalBankTotal });
 
   const speaker = ChatMessage.getSpeaker({ actor: franchise });
   const content = await renderTemplate("systems/inspectres/templates/roll-card.hbs", {
@@ -327,19 +325,17 @@ export async function executeStressRoll(agent: Actor, params: StressRollParams):
   const sorted = [...faces].sort((a, b) => a - b);
   const active = sorted.slice(coolDiceUsed);
 
-  // If all dice ignored by cool, treat as 6 (Too Cool)
+  // active[0] is always defined here; ?? 6 satisfies noUncheckedIndexedAccess
   const rawLowest = active.length > 0 ? (active[0] ?? 6) : 6;
   const effectiveFace: DieFace = isDieFace(rawLowest) ? rawLowest : 1;
   const outcome = STRESS_ROLL_CHART[effectiveFace];
 
-  // Apply updates
-  if (outcome.coolGain > 0) {
-    actorUpdate(agent, { "system.cool": system.cool + outcome.coolGain });
-  }
-
+  // Apply updates — meltdown takes precedence over coolGain
   if (effectiveFace === 1) {
     // Meltdown: zero cool, skill penalty = stress dice count (narrated in chat)
-    actorUpdate(agent, { "system.cool": 0 });
+    await actorUpdate(agent, { "system.cool": 0 });
+  } else if (outcome.coolGain > 0) {
+    await actorUpdate(agent, { "system.cool": system.cool + outcome.coolGain });
   }
 
   const speaker = ChatMessage.getSpeaker({ actor: agent });
@@ -352,13 +348,12 @@ export async function executeStressRoll(agent: Actor, params: StressRollParams):
     coolDiceUsed,
     diceRolled: faces,
     effectiveFace,
-    // For results requiring manual skill reduction, include a reminder
-    penaltyNote: effectiveFace <= 3 ? buildPenaltyNote(effectiveFace, stressDiceCount) : null,
+    penaltyNote: effectiveFace <= 3 ? buildPenaltyNote(effectiveFace as 1 | 2 | 3, stressDiceCount) : null,
   });
   await postChatCard(content, speaker, [roll]);
 }
 
-function buildPenaltyNote(face: DieFace, stressDiceCount: number): string {
+function buildPenaltyNote(face: 1 | 2 | 3, stressDiceCount: number): string {
   switch (face) {
     case 3:
       return "Reduce 1 die from one skill of your choice on your character sheet.";
@@ -366,8 +361,6 @@ function buildPenaltyNote(face: DieFace, stressDiceCount: number): string {
       return "Reduce 2 dice from one skill, or 1 die from each of two skills on your character sheet.";
     case 1:
       return `Meltdown! Cool dice reset to 0. Reduce ${stressDiceCount} skill dice total (distributed as you choose) on your character sheet.`;
-    default:
-      return "";
   }
 }
 

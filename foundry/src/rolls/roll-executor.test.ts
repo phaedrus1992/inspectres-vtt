@@ -206,6 +206,24 @@ describe("executeSkillRoll", () => {
     const agent = makeAgent();
     await expect(executeSkillRoll(agent as never, null, "academics")).resolves.not.toThrow();
   });
+
+  it("zero-dice path rolls 2d6 and takes lowest", async () => {
+    // Agent with no skill dice (base 0 penalty 0 → effectiveDice 0) and dialog returns no augments
+    let rollFormula = "";
+    (globalThis as unknown as { Roll: typeof MockRoll }).Roll = class extends MockRoll {
+      constructor(formula: string) {
+        super(formula);
+        rollFormula = formula;
+        this.setResults([6, 2]); // lowest is 2 → Taxing result
+      }
+    };
+    const agent = makeAgent({ skills: { academics: { base: 0, penalty: 0 }, athletics: { base: 0, penalty: 0 }, technology: { base: 0, penalty: 0 }, contact: { base: 0, penalty: 0 } } });
+    const chatCreateSpy = vi.spyOn(ChatMessage, "create");
+    await executeSkillRoll(agent as never, null, "academics");
+    // Should have rolled 2d6 for the zero-dice path
+    expect(rollFormula).toBe("2d6");
+    expect(chatCreateSpy).toHaveBeenCalled();
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -337,5 +355,29 @@ describe("executeClientRoll", () => {
     const franchise = makeFranchise();
     await executeClientRoll(franchise as never);
     expect(chatCreateSpy).toHaveBeenCalledOnce();
+  });
+
+  it("passes generated client attributes to the chat template", async () => {
+    // Sum 2 → minimum values (personality: Horny, clientType: Ghost/Monster Transformation, etc.)
+    (globalThis as unknown as { Roll: typeof MockRoll }).Roll = class extends MockRoll {
+      constructor(formula: string) {
+        super(formula);
+        this.setResults([1, 1]); // sum 2
+      }
+    };
+    let capturedContent = "";
+    vi.spyOn(globalThis as unknown as { renderTemplate: (path: string, data: Record<string, unknown>) => Promise<string> }, "renderTemplate")
+      .mockImplementation(async (_path: string, data: Record<string, unknown>) => {
+        capturedContent = JSON.stringify(data);
+        return capturedContent;
+      });
+    const franchise = makeFranchise();
+    await executeClientRoll(franchise as never);
+    const parsed = JSON.parse(capturedContent) as Record<string, unknown>;
+    const client = parsed["client"] as Record<string, string>;
+    expect(client["personality"]).toBe("Horny");
+    expect(client["clientType"]).toBe("Ghost/Monster Transformation");
+    expect(client["occurrence"]).toBe("Ghost/Monster Transformation");
+    expect(client["location"]).toBe("Underground (sewers/subway)");
   });
 });
