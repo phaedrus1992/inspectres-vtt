@@ -12,12 +12,19 @@ import { MissionTrackerApp } from "./mission/MissionTrackerApp.js";
 import { onMissionSocketEvent } from "./mission/socket.js";
 
 Hooks.once("init", async function () {
-  await loadTemplates([
-    "systems/inspectres/templates/agent-sheet.hbs",
-    "systems/inspectres/templates/franchise-sheet.hbs",
-    "systems/inspectres/templates/roll-card.hbs",
-    "systems/inspectres/templates/mission-tracker.hbs",
-  ]);
+  try {
+    await loadTemplates([
+      "systems/inspectres/templates/agent-sheet.hbs",
+      "systems/inspectres/templates/franchise-sheet.hbs",
+      "systems/inspectres/templates/roll-card.hbs",
+      "systems/inspectres/templates/mission-tracker.hbs",
+    ]);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("Failed to load templates:", message);
+    ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorTemplateLoad") ?? `Template load failed: ${message}`);
+  }
+
   // Register per-type actor document classes (Foundry V12+)
   // fvtt-types doesn't know about documentClasses; cast through unknown to assign
   (CONFIG.Actor as unknown as { documentClasses: Record<string, typeof Actor> }).documentClasses = {

@@ -5,6 +5,7 @@
 import { type AgentData, type AgentCharacteristic } from "./agent-schema.js";
 import { executeSkillRoll, executeStressRoll, type SkillName } from "../rolls/roll-executor.js";
 import { findFranchiseActor, franchiseSystemData } from "../franchise/franchise-utils.js";
+import { handleActionError } from "../utils/ui-errors.js";
 
 const SKILL_NAMES = ["academics", "athletics", "technology", "contact"] as const;
 
@@ -37,7 +38,6 @@ async function buildStressRollDialog(agent: Actor): Promise<void> {
         callback: (_event: Event, _button: HTMLButtonElement, dialog: HTMLDialogElement) => {
           const form = dialog.querySelector("form") as HTMLFormElement | null;
           if (!form) {
-            console.error("buildStressRollDialog: form element not found in dialog; using defaults");
             return { stressDiceCount: 1, coolDiceUsed: 0 };
           }
           const data = new FormData(form);
@@ -96,9 +96,7 @@ export class AgentSheet extends foundry.applications.sheets.ActorSheetV2 {
       el.addEventListener("change", (event: Event) => {
         const updateData = { "system.isWeird": (event.target as HTMLInputElement).checked } as unknown as Parameters<typeof this.actor.update>[0];
         void this.actor.update(updateData).catch((err: unknown) => {
-          const message = err instanceof Error ? err.message : String(err);
-          console.error("Failed to toggle weird status:", message);
-          ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorUpdateFailed") ?? "Failed to update actor data");
+          handleActionError(err, "Failed to toggle weird status", "INSPECTRES.ErrorUpdateFailed", "Failed to update actor data");
         });
       });
     }
@@ -107,19 +105,14 @@ export class AgentSheet extends foundry.applications.sheets.ActorSheetV2 {
 
   static async onSkillRoll(this: AgentSheet, _event: Event, target: HTMLElement): Promise<void> {
     const skillAttr = target.getAttribute("data-skill");
-    if (!isSkillName(skillAttr)) {
-      console.error("skillRoll: missing or invalid data-skill attribute", skillAttr);
-      return;
-    }
+    if (!isSkillName(skillAttr)) return;
     const franchise = findFranchiseActor();
     if (franchise && franchiseSystemData(franchise).debtMode) {
       ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnSkillRollDebtMode") ?? "Skill rolls are blocked while in Debt Mode.");
       return;
     }
     void executeSkillRoll(this.actor, franchise, skillAttr).catch((err: unknown) => {
-      const message = err instanceof Error ? err.message : String(err);
-      console.error("Skill roll failed:", message);
-      ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorRollFailed") ?? "Roll failed");
+      handleActionError(err, "Skill roll failed", "INSPECTRES.ErrorRollFailed", "Roll failed");
     });
   }
 
@@ -130,55 +123,36 @@ export class AgentSheet extends foundry.applications.sheets.ActorSheetV2 {
       return;
     }
     void buildStressRollDialog(this.actor).catch((err: unknown) => {
-      const message = err instanceof Error ? err.message : String(err);
-      console.error("Stress roll failed:", message);
-      ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorRollFailed") ?? "Roll failed");
+      handleActionError(err, "Stress roll failed", "INSPECTRES.ErrorRollFailed", "Roll failed");
     });
   }
 
   static async onSkillStep(this: AgentSheet, _event: Event, target: HTMLElement): Promise<void> {
     const skillAttr = target.getAttribute("data-skill");
-    if (!isSkillName(skillAttr)) {
-      console.error("skill step: missing or invalid data-skill", skillAttr);
-      return;
-    }
+    if (!isSkillName(skillAttr)) return;
     const system = this.actor.system as unknown as AgentData;
     const skillData = system.skills[skillAttr];
-    if (!skillData) {
-      console.error(`skill step: skills.${skillAttr} missing on actor ${this.actor.id}`);
-      ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorUpdateFailed") ?? "Failed to update actor data");
-      return;
-    }
+    if (!skillData) return;
     const current = skillData.base;
     const delta = target.getAttribute("data-action") === "skillIncrease" ? 1 : -1;
     const next = Math.min(4, Math.max(0, current + delta));
     if (next === current) return;
     const updateData = { [`system.skills.${skillAttr}.base`]: next } as unknown as Parameters<typeof this.actor.update>[0];
     void this.actor.update(updateData).catch((err: unknown) => {
-      const message = err instanceof Error ? err.message : String(err);
-      console.error("Failed to update skill:", message);
-      ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorUpdateFailed") ?? "Failed to update actor data");
+      handleActionError(err, "Failed to update skill", "INSPECTRES.ErrorUpdateFailed", "Failed to update actor data");
     });
   }
 
   static async onToggleCool(this: AgentSheet, _event: Event, target: HTMLElement): Promise<void> {
     const valueStr = target.getAttribute("data-value");
-    if (valueStr == null) {
-      console.error("toggleCool: missing data-value attribute");
-      return;
-    }
+    if (valueStr == null) return;
     const pipValue = Number(valueStr);
-    if (Number.isNaN(pipValue) || pipValue < 1 || pipValue > 3) {
-      console.error("toggleCool: invalid data-value", valueStr);
-      return;
-    }
+    if (Number.isNaN(pipValue) || pipValue < 1 || pipValue > 3) return;
     const currentCool = (this.actor.system as unknown as AgentData).cool;
     const newCool = currentCool >= pipValue ? pipValue - 1 : pipValue;
     const updateData = { "system.cool": newCool } as unknown as Parameters<typeof this.actor.update>[0];
     void this.actor.update(updateData).catch((err: unknown) => {
-      const message = err instanceof Error ? err.message : String(err);
-      console.error("Failed to set cool dice:", message);
-      ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorUpdateFailed") ?? "Failed to update actor data");
+      handleActionError(err, "Failed to set cool dice", "INSPECTRES.ErrorUpdateFailed", "Failed to update actor data");
     });
   }
 
@@ -187,30 +161,20 @@ export class AgentSheet extends foundry.applications.sheets.ActorSheetV2 {
     const characteristics = (currentSystem.characteristics ?? []) as AgentCharacteristic[];
     const updateData = { "system.characteristics": [...characteristics, { text: "", used: false }] } as unknown as Parameters<typeof this.actor.update>[0];
     void this.actor.update(updateData).catch((err: unknown) => {
-      const message = err instanceof Error ? err.message : String(err);
-      console.error("Failed to add characteristic:", message);
-      ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorAddCharacteristic") ?? "Failed to add characteristic");
+      handleActionError(err, "Failed to add characteristic", "INSPECTRES.ErrorAddCharacteristic", "Failed to add characteristic");
     });
   }
 
   static async onRemoveCharacteristic(this: AgentSheet, _event: Event, target: HTMLElement): Promise<void> {
     const idxStr = target.getAttribute("data-idx");
-    if (idxStr == null) {
-      console.error("removeCharacteristic: missing data-idx attribute");
-      return;
-    }
+    if (idxStr == null) return;
     const idx = Number(idxStr);
-    if (Number.isNaN(idx) || idx < 0) {
-      console.error("removeCharacteristic: invalid data-idx value", idxStr);
-      return;
-    }
+    if (Number.isNaN(idx) || idx < 0) return;
     const currentSystem = this.actor.system as unknown as AgentData;
     const characteristics = (currentSystem.characteristics ?? []) as AgentCharacteristic[];
     const updateData = { "system.characteristics": characteristics.filter((_: AgentCharacteristic, i: number) => i !== idx) } as unknown as Parameters<typeof this.actor.update>[0];
     void this.actor.update(updateData).catch((err: unknown) => {
-      const message = err instanceof Error ? err.message : String(err);
-      console.error("Failed to remove characteristic:", message);
-      ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorRemoveCharacteristic") ?? "Failed to remove characteristic");
+      handleActionError(err, "Failed to remove characteristic", "INSPECTRES.ErrorRemoveCharacteristic", "Failed to remove characteristic");
     });
   }
 }
