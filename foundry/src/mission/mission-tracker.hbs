@@ -1,0 +1,38 @@
+<div class="inspectres-mission-tracker">
+  <div class="tracker-header">
+    {{localize "INSPECTRES.MissionTrackerTitle"}}
+  </div>
+
+  <div class="tracker-progress">
+    <div class="tracker-stats">
+      <span>{{localize "INSPECTRES.MissionTrackerPool"}}: {{missionPool}}</span>
+      <span>{{localize "INSPECTRES.MissionTrackerGoal"}}: {{missionGoal}}</span>
+    </div>
+    <div class="inspectres-progress-bar">
+      <div
+        class="inspectres-progress-fill"
+        style="width: {{progressPercent}}%"
+      ></div>
+    </div>
+    {{#if missionComplete}}
+      <div class="inspectres-mission-complete">
+        {{localize "INSPECTRES.MissionTrackerComplete"}}
+      </div>
+    {{/if}}
+  </div>
+
+  {{#if isGm}}
+    {{#if missionPool}}
+      <div class="tracker-actions">
+        {{#if missionComplete}}
+          <button type="button" class="inspectres-roll-button" data-action="beginCleanUp">
+            {{localize "INSPECTRES.MissionTrackerBeginCleanUp"}}
+          </button>
+        {{/if}}
+        <button type="button" class="inspectres-roll-button" data-action="endEarly">
+          {{localize "INSPECTRES.MissionTrackerEndEarly"}}
+        </button>
+      </div>
+    {{/if}}
+  {{/if}}
+</div>

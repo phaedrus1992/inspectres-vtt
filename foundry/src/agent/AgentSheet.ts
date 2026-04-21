@@ -4,19 +4,12 @@
 
 import { type AgentData, type AgentCharacteristic } from "./agent-schema.js";
 import { executeSkillRoll, executeStressRoll, type SkillName } from "../rolls/roll-executor.js";
+import { findFranchiseActor, franchiseSystemData } from "../franchise/franchise-utils.js";
 
 const SKILL_NAMES = ["academics", "athletics", "technology", "contact"] as const;
 
 function isSkillName(value: string | null): value is SkillName {
   return SKILL_NAMES.includes(value as SkillName);
-}
-
-function findFranchiseActor(): Actor | null {
-  if (!game.actors) return null;
-  for (const actor of game.actors) {
-    if ((actor.type as string) === "franchise") return actor;
-  }
-  return null;
 }
 
 async function buildStressRollDialog(agent: Actor): Promise<void> {
@@ -96,6 +89,10 @@ export class AgentSheet extends ActorSheet {
         return;
       }
       const franchise = findFranchiseActor();
+      if (franchise && franchiseSystemData(franchise).debtMode) {
+        ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnSkillRollDebtMode") ?? "Skill rolls are blocked while in Debt Mode.");
+        return;
+      }
       void executeSkillRoll(this.actor, franchise, skillAttr).catch((err: unknown) => {
         const message = err instanceof Error ? err.message : String(err);
         console.error("Skill roll failed:", message);
@@ -106,6 +103,11 @@ export class AgentSheet extends ActorSheet {
     // Stress roll
     html.on("click", "[data-action='stressRoll']", (event: JQuery.ClickEvent) => {
       event.preventDefault();
+      const franchise = findFranchiseActor();
+      if (franchise && franchiseSystemData(franchise).debtMode) {
+        ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnStressRollDebtMode") ?? "Stress rolls are blocked while in Debt Mode.");
+        return;
+      }
       void buildStressRollDialog(this.actor).catch((err: unknown) => {
         const message = err instanceof Error ? err.message : String(err);
         console.error("Stress roll failed:", message);
@@ -124,7 +126,7 @@ export class AgentSheet extends ActorSheet {
       });
     });
 
-    // Cool pip toggle (normal agents)
+    // Cool pip toggle (normal agents): clicking active pip toggles it off (cool = pipValue - 1)
     html.on("click", ".cool-pip", (event: JQuery.ClickEvent) => {
       event.preventDefault();
       const valueStr = (event.currentTarget as HTMLElement).getAttribute("data-value");
@@ -132,16 +134,18 @@ export class AgentSheet extends ActorSheet {
         console.error("cool-pip: missing data-value attribute");
         return;
       }
-      const value = Number(valueStr);
-      if (Number.isNaN(value) || value < 0 || value > 3) {
+      const pipValue = Number(valueStr);
+      if (Number.isNaN(pipValue) || pipValue < 1 || pipValue > 3) {
         console.error("cool-pip: invalid data-value", valueStr);
         return;
       }
-      const updateData = { "system.cool": value } as unknown as Parameters<typeof this.actor.update>[0];
+      const currentCool = (this.actor.system as unknown as AgentData).cool;
+      const newCool = currentCool >= pipValue ? pipValue - 1 : pipValue;
+      const updateData = { "system.cool": newCool } as unknown as Parameters<typeof this.actor.update>[0];
       void this.actor.update(updateData).catch((err: unknown) => {
         const message = err instanceof Error ? err.message : String(err);
         console.error("Failed to set cool dice:", message);
-        ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorUpdateFailed") || "Failed to update actor data");
+        ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorUpdateFailed") ?? "Failed to update actor data");
       });
     });
 
@@ -154,7 +158,7 @@ export class AgentSheet extends ActorSheet {
       void this.actor.update(updateData).catch((err: unknown) => {
         const message = err instanceof Error ? err.message : String(err);
         console.error("Failed to add characteristic:", message);
-        ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorAddCharacteristic") || "Failed to add characteristic");
+        ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorAddCharacteristic") ?? "Failed to add characteristic");
       });
     });
 
@@ -177,7 +181,7 @@ export class AgentSheet extends ActorSheet {
       void this.actor.update(updateData).catch((err: unknown) => {
         const message = err instanceof Error ? err.message : String(err);
         console.error("Failed to remove characteristic:", message);
-        ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorRemoveCharacteristic") || "Failed to remove characteristic");
+        ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorRemoveCharacteristic") ?? "Failed to remove characteristic");
       });
     });
   }
