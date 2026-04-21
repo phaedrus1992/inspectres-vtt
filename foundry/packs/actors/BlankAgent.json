@@ -1,0 +1,29 @@
+{
+  "_id": "BlankAgent000001",
+  "name": "Blank Agent",
+  "type": "agent",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+    "description": "",
+    "skills": {
+      "academics": { "base": 2, "penalty": 0 },
+      "athletics": { "base": 2, "penalty": 0 },
+      "technology": { "base": 2, "penalty": 0 },
+      "contact": { "base": 3, "penalty": 0 }
+    },
+    "talent": "",
+    "cool": 0,
+    "isWeird": false,
+    "characteristics": [],
+    "missionPool": 0
+  },
+  "flags": {},
+  "_stats": {
+    "systemId": "inspectres",
+    "systemVersion": "0.1.0",
+    "coreVersion": "12.0.0",
+    "createdTime": null,
+    "modifiedTime": null,
+    "lastModifiedBy": null
+  }
+}

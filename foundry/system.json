@@ -2,7 +2,7 @@
   "id": "inspectres",
   "title": "InSpectres",
   "description": "Paranormal investigation RPG system for Foundry VTT.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "compatibility": {
     "minimum": "12",
     "verified": "14"

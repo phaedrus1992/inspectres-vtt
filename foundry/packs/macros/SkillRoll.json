@@ -1,0 +1,17 @@
+{
+  "_id": "SkillRoll0000001",
+  "name": "Skill Roll",
+  "type": "script",
+  "img": "icons/svg/dice-target.svg",
+  "scope": "actors",
+  "command": "const actor = token?.actor ?? character;\nif (!actor || actor.type !== 'agent') {\n  ui.notifications.warn('Select an Agent token to roll skills.');\n} else {\n  actor.sheet?.render(true);\n}",
+  "flags": { "inspectres": { "macro": "skill-roll" } },
+  "_stats": {
+    "systemId": "inspectres",
+    "systemVersion": "0.1.0",
+    "coreVersion": "12.0.0",
+    "createdTime": null,
+    "modifiedTime": null,
+    "lastModifiedBy": null
+  }
+}
