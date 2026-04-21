@@ -13,11 +13,10 @@ services:
     secrets:
       - source: config_json
         target: config.json
+    user: "${FOUNDRY_UID}:${FOUNDRY_GID}"
     environment:
       FOUNDRY_HOSTNAME: foundry
       CONTAINER_PRESERVE_CONFIG: "true"
-      FOUNDRY_UID: "${FOUNDRY_UID}"
-      FOUNDRY_GID: "${FOUNDRY_GID}"
     volumes:
       - ./data:/data
       - ../foundry/dist:/data/Data/systems/inspectres:ro
