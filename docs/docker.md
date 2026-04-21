@@ -7,7 +7,7 @@ pre-installed. It uses the community-standard
 ## Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/) and Docker Compose v2 (`docker compose version`)
-- A [Foundry VTT](https://foundryvtt.com/) license key
+- A [Foundry VTT](https://foundryvtt.com/) account with a license key
 - The InSpectres system built locally — run this first:
 
   ```bash
@@ -17,29 +17,34 @@ pre-installed. It uses the community-standard
   cd ..
   ```
 
-## License Key Setup
+## Secrets Setup
 
-Foundry requires a license key to run. Pass it via Docker secret so it never appears in
-environment variable listings or shell history.
+The container needs your Foundry account credentials to download Foundry on first run, plus
+your license key. All three are passed as Docker secrets — they never appear in environment
+variable listings or `docker inspect` output.
 
-1. Create the secret file:
+Create each file with `echo -n` (the `-n` flag omits the trailing newline):
 
-   ```bash
-   echo -n "YOUR-LICENSE-KEY-HERE" > docker/secrets/license_key.txt
-   ```
+```bash
+echo -n "you@example.com" > docker/secrets/foundry_username.txt
+echo -n "your-password"   > docker/secrets/foundry_password.txt
+echo -n "XXXX-XXXX-XXXX-XXXX" > docker/secrets/license_key.txt
+```
 
-   Replace `YOUR-LICENSE-KEY-HERE` with your actual license key. The `-n` flag omits the
-   trailing newline.
+Verify all three are gitignored before continuing:
 
-2. Verify the file is gitignored:
+```bash
+git check-ignore -v docker/secrets/foundry_username.txt \
+                    docker/secrets/foundry_password.txt \
+                    docker/secrets/license_key.txt
+```
 
-   ```bash
-   git check-ignore -v docker/secrets/license_key.txt
-   ```
+Expected: three lines of output, one per file. If any file is missing from the output, do not
+proceed — do not commit credentials.
 
-   Expected output: `docker/secrets/.gitignore:1:license_key.txt  docker/secrets/license_key.txt`
-
-   If it's not ignored, do not proceed — do not commit your license key.
+> **Note:** The username and password are used only on first run to download Foundry from
+> foundryvtt.com. Once the download is cached in `docker/data/`, they are not needed again
+> unless you reset `docker/data/`.
 
 ## Starting Foundry
 
@@ -49,8 +54,9 @@ docker compose -f docker/docker-compose.yml up -d
 
 Then open [http://localhost:30000](http://localhost:30000) in your browser.
 
-On first run, Foundry will prompt you to enter the license key. Enter it once through the UI —
-it is then stored in `docker/data/` and reused on subsequent starts.
+On first run, the container downloads Foundry using your account credentials and applies the
+license key automatically. This takes a minute or two — watch `docker compose logs -f` to
+follow progress. Once you see `Server started`, the UI is ready.
 
 ## Stopping Foundry
 
