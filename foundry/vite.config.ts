@@ -134,27 +134,48 @@ export default defineConfig({
           }
         }
 
-        // Copy packs (compendium content)
-        const packsDir = path.resolve(__dirname, "packs");
-        if (fs.existsSync(packsDir)) {
-          const copyDir = (dir: string, outPrefix: string): void => {
-            for (const entry of fs.readdirSync(dir)) {
+        // Copy compiled packs (LevelDB output from `npm run pack`)
+        // Source JSON in packs/ must be compiled via fvtt-cli before building.
+        const compiledPacksDir = path.resolve(__dirname, "packs-compiled");
+        if (fs.existsSync(compiledPacksDir)) {
+          function copyDir(ctx: typeof this, dir: string, outPrefix: string, depth: number = 0): void {
+            if (depth > 10) {
+              throw new Error(`Pack directory nesting too deep at ${dir}`);
+            }
+            let entries: string[];
+            try {
+              entries = fs.readdirSync(dir);
+            } catch (err: unknown) {
+              const message = err instanceof Error ? err.message : String(err);
+              throw new Error(`Failed to read packs directory ${dir}: ${message}`);
+            }
+            for (const entry of entries) {
               const entryPath = path.join(dir, entry);
-              const stat = fs.statSync(entryPath);
-              if (stat.isDirectory()) {
-                copyDir(entryPath, `${outPrefix}/${entry}`);
-              } else {
-                const content = fs.readFileSync(entryPath, "utf-8");
-                this.emitFile({ type: "asset", fileName: `${outPrefix}/${entry}`, source: content });
+              try {
+                const stat = fs.statSync(entryPath);
+                if (stat.isDirectory()) {
+                  copyDir(ctx, entryPath, `${outPrefix}/${entry}`, depth + 1);
+                } else {
+                  const content = fs.readFileSync(entryPath);
+                  ctx.emitFile({ type: "asset", fileName: `${outPrefix}/${entry}`, source: new Uint8Array(content) });
+                }
+              } catch (err: unknown) {
+                const message = err instanceof Error ? err.message : String(err);
+                throw new Error(`Failed to process pack entry ${entryPath}: ${message}`);
               }
             }
-          };
+          }
           try {
-            copyDir(packsDir, "packs");
+            copyDir(this, compiledPacksDir, "packs");
           } catch (err: unknown) {
             const message = err instanceof Error ? err.message : String(err);
-            throw new Error(`Failed to copy packs directory: ${message}`);
+            throw new Error(`Failed to copy compiled packs: ${message}`);
           }
+        } else {
+          this.warn(
+            "packs-compiled/ not found — run `npm run pack` before building to include compendium packs. " +
+            "Skipping packs in this build."
+          );
         }
       },
     },
