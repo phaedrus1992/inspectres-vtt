@@ -23,18 +23,22 @@ async function buildStressRollDialog(agent: Actor): Promise<void> {
   const system = agent.system as unknown as AgentData;
   const maxCool = system.cool;
 
+  const i18n = game.i18n;
+  const stressDiceLabel = i18n?.localize("INSPECTRES.DialogStressDice") ?? "Stress Dice (1–5)";
+  const coolIgnoreLabel = i18n?.format("INSPECTRES.DialogCoolIgnore", { max: String(maxCool) }) ?? `Cool dice to ignore lowest (0–${maxCool})`;
+
   // Dialog.wait<T> is constrained by fvtt-types; cast through unknown to avoid the constraint
   const result = await (Dialog.wait as (config: unknown) => Promise<unknown>)({
-    title: game.i18n?.localize("INSPECTRES.StressRoll") ?? "Stress Roll",
+    title: i18n?.localize("INSPECTRES.StressRoll") ?? "Stress Roll",
     content: `
       <form class="inspectres-roll-dialog">
-        <label>Stress Dice (1–5): <input type="number" name="stressDice" min="1" max="5" value="1"></label>
-        ${maxCool > 0 ? `<label>Cool dice to ignore lowest (0–${maxCool}): <input type="number" name="coolIgnore" min="0" max="${maxCool}" value="0"></label>` : ""}
+        <label>${stressDiceLabel}: <input type="number" name="stressDice" min="1" max="5" value="1"></label>
+        ${maxCool > 0 ? `<label>${coolIgnoreLabel}: <input type="number" name="coolIgnore" min="0" max="${maxCool}" value="0"></label>` : ""}
       </form>
     `,
     buttons: {
       roll: {
-        label: "Roll",
+        label: i18n?.localize("INSPECTRES.DialogRoll") ?? "Roll",
         callback: (html: JQuery) => {
           const form = html.find("form")[0] as HTMLFormElement | undefined;
           if (!form) return { stressDiceCount: 1, coolDiceUsed: 0 };
@@ -48,7 +52,7 @@ async function buildStressRollDialog(agent: Actor): Promise<void> {
         },
       },
       cancel: {
-        label: "Cancel",
+        label: i18n?.localize("INSPECTRES.DialogCancel") ?? "Cancel",
         callback: () => null,
       },
     },
@@ -116,7 +120,7 @@ export class AgentSheet extends ActorSheet {
       void this.actor.update(updateData).catch((err: unknown) => {
         const message = err instanceof Error ? err.message : String(err);
         console.error("Failed to toggle weird status:", message);
-        ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorUpdateFailed") || "Failed to update actor data");
+        ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorUpdateFailed") ?? "Failed to update actor data");
       });
     });
 
