@@ -275,7 +275,7 @@
       font-size: 0.85rem;
       padding: 0 0.25rem;
 
-      &:hover { color: darken(var(--inspectres-accent), 15%); }
+      &:hover { color: color-mix(in srgb, var(--inspectres-accent), black 20%); }
     }
 
     .characteristic-row {

@@ -96,9 +96,7 @@ declare namespace foundry.applications.api {
       modal?: boolean;
     }): Promise<boolean>;
   }
-}
 
-declare namespace foundry.applications.api {
   /**
    * Mixin that provides Handlebars template rendering (_renderHTML / _replaceHTML) to an
    * ApplicationV2 subclass. Required for any ApplicationV2-based sheet that uses PARTS.
