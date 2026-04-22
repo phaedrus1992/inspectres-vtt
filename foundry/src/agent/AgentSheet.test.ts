@@ -55,6 +55,83 @@ describe("AgentSheet", () => {
     });
   });
 
+  describe("tab navigation", () => {
+    function makeSheetWithTabs(activeTab = "stats") {
+      const mockActor = new MockActorSheetV2().actor;
+      const sheet = Object.create(AgentSheet.prototype);
+      sheet.actor = mockActor;
+      sheet.isEditable = true;
+
+      const statsTab = document.createElement("div");
+      statsTab.setAttribute("data-tab", "stats");
+      statsTab.classList.add("tab");
+
+      const notesTab = document.createElement("div");
+      notesTab.setAttribute("data-tab", "notes");
+      notesTab.classList.add("tab");
+
+      const statsBtn = document.createElement("button");
+      statsBtn.setAttribute("data-tab", "stats");
+      statsBtn.classList.add("sheet-tab");
+
+      const notesBtn = document.createElement("button");
+      notesBtn.setAttribute("data-tab", "notes");
+      notesBtn.classList.add("sheet-tab");
+
+      const element = document.createElement("form");
+      element.appendChild(statsTab);
+      element.appendChild(notesTab);
+      element.appendChild(statsBtn);
+      element.appendChild(notesBtn);
+
+      element.dataset["activeTab"] = activeTab;
+
+      Object.defineProperty(sheet, "element", { value: element });
+      return { sheet, statsTab, notesTab, statsBtn, notesBtn };
+    }
+
+    it("activates the stats tab by default on first render", async () => {
+      const { sheet, statsTab, notesTab, statsBtn, notesBtn } = makeSheetWithTabs();
+      await sheet._onRender({}, {});
+
+      expect(statsTab.classList.contains("active")).toBe(true);
+      expect(notesTab.classList.contains("active")).toBe(false);
+      expect(statsBtn.classList.contains("active")).toBe(true);
+      expect(notesBtn.classList.contains("active")).toBe(false);
+    });
+
+    it("activates the notes tab when stored as active", async () => {
+      const { sheet, statsTab, notesTab, statsBtn, notesBtn } = makeSheetWithTabs("notes");
+      await sheet._onRender({}, {});
+
+      expect(notesTab.classList.contains("active")).toBe(true);
+      expect(statsTab.classList.contains("active")).toBe(false);
+      expect(notesBtn.classList.contains("active")).toBe(true);
+      expect(statsBtn.classList.contains("active")).toBe(false);
+    });
+
+    it("switches to notes tab when a tab button is clicked", async () => {
+      const { sheet, statsTab, notesTab, notesBtn } = makeSheetWithTabs();
+      await sheet._onRender({}, {});
+
+      notesBtn.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+
+      expect(notesTab.classList.contains("active")).toBe(true);
+      expect(statsTab.classList.contains("active")).toBe(false);
+    });
+
+    it("remembers tab state across re-renders", async () => {
+      const { sheet, notesBtn, notesTab } = makeSheetWithTabs();
+      await sheet._onRender({}, {});
+
+      notesBtn.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      expect(sheet.element.dataset["activeTab"]).toBe("notes");
+
+      await sheet._onRender({}, {});
+      expect(notesTab.classList.contains("active")).toBe(true);
+    });
+  });
+
   describe("_onRender", () => {
     it("does not attach change listeners when sheet is not editable", async () => {
       const mockSheet = new MockActorSheetV2();

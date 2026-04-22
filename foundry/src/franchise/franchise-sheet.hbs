@@ -7,140 +7,158 @@
     </div>
   </header>
 
+  <!-- Tab strip -->
+  <nav class="inspectres-tabs" role="tablist">
+    <button type="button" class="sheet-tab" data-tab="stats" role="tab" aria-selected="true" aria-controls="tab-stats">{{localize "INSPECTRES.TabStats"}}</button>
+    <button type="button" class="sheet-tab" data-tab="notes" role="tab" aria-selected="false" aria-controls="tab-notes">{{localize "INSPECTRES.TabNotes"}}</button>
+  </nav>
+
   <!-- Content -->
   <div class="sheet-body">
-    {{#if system.debtMode}}
-      <div class="inspectres-debt-warning">
-        <span>⚠ {{localize "INSPECTRES.DebtModeWarning"}}</span>
-        <span>{{localize "INSPECTRES.DebtModeAmount"}} {{system.loanAmount}} {{inspectres-plural system.loanAmount (localize "INSPECTRES.DieSingular") (localize "INSPECTRES.DiePlural")}}</span>
-      </div>
-    {{/if}}
 
-    <!-- Description -->
-    <section class="inspectres-section">
-      <textarea
-        name="system.description"
-        placeholder="Franchise description"
-        class="franchise-description"
-      >{{system.description}}</textarea>
-    </section>
+    <!-- Stats Tab -->
+    <div class="tab" data-tab="stats" id="tab-stats" role="tabpanel">
 
-    <!-- Cards Section -->
-    <section class="inspectres-section">
-      <h2>{{localize "INSPECTRES.Cards"}}</h2>
-      <div class="cards-grid">
-        <div class="card-row">
-          <label>{{localize "INSPECTRES.Library"}}</label>
-          <input
-            type="number"
-            name="system.cards.library"
-            value="{{system.cards.library}}"
-            min="0"
-            class="card-input"
-          />
+      {{#if system.debtMode}}
+        <div class="inspectres-debt-warning">
+          <span>⚠ {{localize "INSPECTRES.DebtModeWarning"}}</span>
+          <span>{{localize "INSPECTRES.DebtModeAmount"}} {{system.loanAmount}} {{inspectres-plural system.loanAmount (localize "INSPECTRES.DieSingular") (localize "INSPECTRES.DiePlural")}}</span>
         </div>
-        <div class="card-row">
-          <label>{{localize "INSPECTRES.Gym"}}</label>
-          <input
-            type="number"
-            name="system.cards.gym"
-            value="{{system.cards.gym}}"
-            min="0"
-            class="card-input"
-          />
-        </div>
-        <div class="card-row">
-          <label>{{localize "INSPECTRES.Credit"}}</label>
-          <input
-            type="number"
-            name="system.cards.credit"
-            value="{{system.cards.credit}}"
-            min="0"
-            class="card-input"
-          />
-        </div>
-      </div>
-    </section>
+      {{/if}}
 
-    <!-- Bank Section -->
-    <section class="inspectres-section">
-      <h2>{{localize "INSPECTRES.Bank"}}</h2>
-      <div class="bank-row">
-        <input
-          type="number"
-          name="system.bank"
-          value="{{system.bank}}"
-          min="0"
-          class="bank-input"
-        />
-        <button
-          type="button"
-          class="inspectres-roll-button"
-          data-action="bankRoll"
-          {{#if system.debtMode}}disabled{{/if}}
-        >
-          {{localize "INSPECTRES.BankRollButton"}}
-        </button>
-      </div>
-    </section>
-
-    <!-- Mission Section -->
-    <section class="inspectres-section">
-      <h2>{{localize "INSPECTRES.Mission"}}</h2>
-      <div class="mission-row">
-        <label>{{localize "INSPECTRES.MissionGoal"}}</label>
-        <input
-          type="number"
-          name="system.missionGoal"
-          value="{{system.missionGoal}}"
-          min="0"
-          class="mission-goal"
-        />
-      </div>
-      <div class="mission-progress">
-        <span>{{localize "INSPECTRES.MissionEarned"}}: {{system.missionPool}} / {{system.missionGoal}}</span>
-        <div class="inspectres-progress-bar">
-          <div class="inspectres-progress-fill" style="width: {{inspectres-multiply (inspectres-divide system.missionPool (inspectres-max system.missionGoal 1)) 100}}%"></div>
-        </div>
-      </div>
-      <button type="button" class="inspectres-roll-button" data-action="openMissionTracker">
-        {{localize "INSPECTRES.OpenMissionTracker"}}
-      </button>
-    </section>
-
-    <!-- Client Roll Section -->
-    <section class="inspectres-section">
-      <h2>{{localize "INSPECTRES.ClientRoll"}}</h2>
-      <button type="button" class="inspectres-roll-button" data-action="clientRoll">
-        {{localize "INSPECTRES.ClientRoll"}}
-      </button>
-    </section>
-
-    <!-- Debt Mode Section -->
-    <section class="inspectres-section">
-      <h2>{{localize "INSPECTRES.DebtMode"}}</h2>
-      <div class="debt-row">
-        <label>
-          <input
-            type="checkbox"
-            name="system.debtMode"
-            {{#if system.debtMode}}checked{{/if}}
-          />
-          {{localize "INSPECTRES.DebtMode"}}
-        </label>
-        {{#if system.debtMode}}
-          <label>
-            {{localize "INSPECTRES.LoanAmount"}}:
+      <!-- Cards Section -->
+      <section class="inspectres-section">
+        <h2>{{localize "INSPECTRES.Cards"}}</h2>
+        <div class="cards-grid">
+          <div class="card-row">
+            <label>{{localize "INSPECTRES.Library"}}</label>
             <input
               type="number"
-              name="system.loanAmount"
-              value="{{system.loanAmount}}"
+              name="system.cards.library"
+              value="{{system.cards.library}}"
               min="0"
-              class="loan-input"
+              class="card-input"
             />
+          </div>
+          <div class="card-row">
+            <label>{{localize "INSPECTRES.Gym"}}</label>
+            <input
+              type="number"
+              name="system.cards.gym"
+              value="{{system.cards.gym}}"
+              min="0"
+              class="card-input"
+            />
+          </div>
+          <div class="card-row">
+            <label>{{localize "INSPECTRES.Credit"}}</label>
+            <input
+              type="number"
+              name="system.cards.credit"
+              value="{{system.cards.credit}}"
+              min="0"
+              class="card-input"
+            />
+          </div>
+        </div>
+      </section>
+
+      <!-- Bank Section -->
+      <section class="inspectres-section">
+        <h2>{{localize "INSPECTRES.Bank"}}</h2>
+        <div class="bank-row">
+          <input
+            type="number"
+            name="system.bank"
+            value="{{system.bank}}"
+            min="0"
+            class="bank-input"
+          />
+          <button
+            type="button"
+            class="inspectres-roll-button"
+            data-action="bankRoll"
+            {{#if system.debtMode}}disabled{{/if}}
+          >
+            {{localize "INSPECTRES.BankRollButton"}}
+          </button>
+        </div>
+      </section>
+
+      <!-- Mission Section -->
+      <section class="inspectres-section">
+        <h2>{{localize "INSPECTRES.Mission"}}</h2>
+        <div class="mission-row">
+          <label>{{localize "INSPECTRES.MissionGoal"}}</label>
+          <input
+            type="number"
+            name="system.missionGoal"
+            value="{{system.missionGoal}}"
+            min="0"
+            class="mission-goal"
+          />
+        </div>
+        <div class="mission-progress">
+          <span>{{localize "INSPECTRES.MissionEarned"}}: {{system.missionPool}} / {{system.missionGoal}}</span>
+          <div class="inspectres-progress-bar">
+            <div class="inspectres-progress-fill" style="width: {{inspectres-multiply (inspectres-divide system.missionPool (inspectres-max system.missionGoal 1)) 100}}%"></div>
+          </div>
+        </div>
+        <button type="button" class="inspectres-roll-button" data-action="openMissionTracker">
+          {{localize "INSPECTRES.OpenMissionTracker"}}
+        </button>
+      </section>
+
+      <!-- Client Roll Section -->
+      <section class="inspectres-section">
+        <h2>{{localize "INSPECTRES.ClientRoll"}}</h2>
+        <button type="button" class="inspectres-roll-button" data-action="clientRoll">
+          {{localize "INSPECTRES.ClientRoll"}}
+        </button>
+      </section>
+
+    </div><!-- /stats tab -->
+
+    <!-- Notes Tab -->
+    <div class="tab" data-tab="notes" id="tab-notes" role="tabpanel">
+
+      <!-- Description -->
+      <section class="inspectres-section">
+        <textarea
+          name="system.description"
+          placeholder="Franchise description"
+          class="franchise-description"
+        >{{system.description}}</textarea>
+      </section>
+
+      <!-- Debt Mode Section -->
+      <section class="inspectres-section">
+        <h2>{{localize "INSPECTRES.DebtMode"}}</h2>
+        <div class="debt-row">
+          <label>
+            <input
+              type="checkbox"
+              name="system.debtMode"
+              {{#if system.debtMode}}checked{{/if}}
+            />
+            {{localize "INSPECTRES.DebtMode"}}
           </label>
-        {{/if}}
-      </div>
-    </section>
+          {{#if system.debtMode}}
+            <label>
+              {{localize "INSPECTRES.LoanAmount"}}:
+              <input
+                type="number"
+                name="system.loanAmount"
+                value="{{system.loanAmount}}"
+                min="0"
+                class="loan-input"
+              />
+            </label>
+          {{/if}}
+        </div>
+      </section>
+
+    </div><!-- /notes tab -->
+
   </div>
 </form>
