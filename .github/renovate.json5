@@ -25,8 +25,14 @@
   prHourlyLimit: 0,
   rangeStrategy: 'bump',
 
-  // Specific Package Rules
+  // Enable GitHub Actions digest pinning with version comments
+  // e.g. actions/checkout@<sha>  # v4.2.0
+  'github-actions': {
+    pinDigests: true,
+  },
+
   packageRules: [
+    // Auto-merge all non-major updates
     {
       groupName: 'auto-merge non-major dependencies',
       groupSlug: 'all-non-major',
@@ -35,6 +41,7 @@
       ],
       automerge: true,
     },
+    // Auto-merge devDependencies (including major)
     {
       groupName: 'auto-merge developer dependencies',
       groupSlug: 'dev-dependencies',
@@ -43,5 +50,29 @@
       ],
       automerge: true,
     },
-
+    // Group vitest + coverage plugin — they must move together
+    {
+      groupName: 'vitest',
+      matchPackageNames: [
+        'vitest',
+        '@vitest/coverage-v8',
+      ],
+    },
+    // Keep @types/node major version aligned with the Node LTS used in CI (Node 24)
+    // Bump manually when Node LTS is upgraded in ci.yml
+    {
+      matchPackageNames: [
+        '@types/node',
+      ],
+      allowedVersions: '^24',
+    },
+    // GitHub Actions: update digest pins and include version in commit/PR
+    {
+      matchManagers: [
+        'github-actions',
+      ],
+      automerge: true,
+      commitMessageExtra: '({{newVersion}})',
+    },
+  ],
 }
