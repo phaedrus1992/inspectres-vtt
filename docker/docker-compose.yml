@@ -4,9 +4,9 @@ secrets:
 
 services:
   foundry:
-    # "release" tracks the latest stable Foundry release. Pin to a specific version
-    # (e.g. ghcr.io/felddy/foundryvtt:13.345) if you need reproducible deployments.
-    image: ghcr.io/felddy/foundryvtt:release
+    # Pinned to V13 — system.json minimum is 13, so we develop and verify against it.
+    # To upgrade to V14+: change to ghcr.io/felddy/foundryvtt:release
+    image: ghcr.io/felddy/foundryvtt:13
     hostname: foundry
     ports:
       - "30000:30000"
