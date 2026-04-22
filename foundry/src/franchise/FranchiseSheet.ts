@@ -29,6 +29,7 @@ export class FranchiseSheet extends foundry.applications.sheets.ActorSheetV2 {
   }
 
   static async onBankRoll(this: FranchiseSheet, _event: Event, _target: HTMLElement): Promise<void> {
+    if (!this.isEditable) return;
     // fvtt-types v13 + template.json: actor.system resolves to UnknownSystem; cast required until DataModelConfig migration
     const system = this.actor.system as unknown as FranchiseData;
     if (system.debtMode) {
@@ -41,6 +42,7 @@ export class FranchiseSheet extends foundry.applications.sheets.ActorSheetV2 {
   }
 
   static async onClientRoll(this: FranchiseSheet, _event: Event, _target: HTMLElement): Promise<void> {
+    if (!this.isEditable) return;
     // fvtt-types v13 + template.json: actor.system resolves to UnknownSystem; cast required until DataModelConfig migration
     const system = this.actor.system as unknown as FranchiseData;
     if (system.debtMode) {
