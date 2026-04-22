@@ -18,7 +18,6 @@ describe("getOrCreateListenerController", () => {
 
     const first = getOrCreateListenerController(controllers, instance);
     const firstAbortSpy = vi.spyOn(first, "abort");
-
     const second = getOrCreateListenerController(controllers, instance);
 
     expect(firstAbortSpy).toHaveBeenCalledOnce();
@@ -35,8 +34,13 @@ describe("getOrCreateListenerController", () => {
     const controller2 = getOrCreateListenerController(controllers, instance2);
 
     expect(controller1).not.toBe(controller2);
+    expect(controller1.signal).not.toBe(controller2.signal);
     expect(controllers.get(instance1)).toBe(controller1);
     expect(controllers.get(instance2)).toBe(controller2);
+
+    controller1.abort();
+    expect(controller1.signal.aborted).toBe(true);
+    expect(controller2.signal.aborted).toBe(false);
   });
 
   it("does not affect other instances when aborting one", () => {
@@ -46,11 +50,11 @@ describe("getOrCreateListenerController", () => {
 
     const controller1 = getOrCreateListenerController(controllers, instance1);
     const controller2 = getOrCreateListenerController(controllers, instance2);
-    const firstAbort = vi.spyOn(controller1, "abort");
+    const controller1AbortSpy = vi.spyOn(controller1, "abort");
 
     getOrCreateListenerController(controllers, instance1);
 
-    expect(firstAbort).toHaveBeenCalledOnce();
+    expect(controller1AbortSpy).toHaveBeenCalledOnce();
     expect(controllers.get(instance2)).toBe(controller2);
   });
 
@@ -58,6 +62,7 @@ describe("getOrCreateListenerController", () => {
     const controllers = new WeakMap<object, AbortController>();
     const instance = {};
     const abortSpies: ReturnType<typeof vi.spyOn>[] = [];
+    const createdControllers: AbortController[] = [];
 
     for (let i = 0; i < 3; i += 1) {
       const controller = getOrCreateListenerController(controllers, instance);
@@ -65,25 +70,28 @@ describe("getOrCreateListenerController", () => {
         expect(abortSpies[i - 1]).toHaveBeenCalledOnce();
       }
       abortSpies.push(vi.spyOn(controller, "abort"));
+      createdControllers.push(controller);
     }
+
+    expect(controllers.get(instance)).toBe(createdControllers[2]);
+    expect(createdControllers[2].signal.aborted).toBe(false);
   });
 
-  it("returns fresh controller after instance is garbage collected", () => {
+  it("isolates controllers for distinct instances across multiple bindings", () => {
     const controllers = new WeakMap<object, AbortController>();
-    let instance: object | null = {};
+    const instance1 = {};
+    const instance2 = {};
 
-    const controller1 = getOrCreateListenerController(controllers, instance);
-    const controller2 = getOrCreateListenerController(controllers, instance);
+    const controller1A = getOrCreateListenerController(controllers, instance1);
+    const controller1B = getOrCreateListenerController(controllers, instance1);
 
-    expect(controller1).not.toBe(controller2);
-    expect(controllers.get(instance)).toBe(controller2);
+    expect(controller1A).not.toBe(controller1B);
+    expect(controllers.get(instance1)).toBe(controller1B);
 
-    instance = null;
+    const controller2A = getOrCreateListenerController(controllers, instance2);
 
-    const instance3 = {};
-    const controller3 = getOrCreateListenerController(controllers, instance3);
-
-    expect(controller3).not.toBe(controller2);
+    expect(controller2A).not.toBe(controller1A);
+    expect(controller2A).not.toBe(controller1B);
   });
 
   it("preserves signal property for use with event listeners", () => {
@@ -91,12 +99,16 @@ describe("getOrCreateListenerController", () => {
     const instance = {};
 
     const first = getOrCreateListenerController(controllers, instance);
+    const firstSignal = first.signal;
 
-    expect(first.signal).toBeInstanceOf(AbortSignal);
-    expect(first.signal.aborted).toBe(false);
+    expect(firstSignal).toBeInstanceOf(AbortSignal);
+    expect(firstSignal.aborted).toBe(false);
 
     const second = getOrCreateListenerController(controllers, instance);
-    expect(first.signal.aborted).toBe(true);
-    expect(second.signal.aborted).toBe(false);
+    const secondSignal = second.signal;
+
+    expect(firstSignal).not.toBe(secondSignal);
+    expect(firstSignal.aborted).toBe(true);
+    expect(secondSignal.aborted).toBe(false);
   });
 });
