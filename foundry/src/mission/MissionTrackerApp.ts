@@ -160,7 +160,7 @@ export class MissionTrackerApp extends foundry.applications.api.ApplicationV2 {
 
     if (MissionTrackerApp.instance === this) {
       void this.render().catch((err: unknown) => {
-        console.error("Mission tracker re-render failed (broadcastMissionComplete):", err);
+        handleActionError(err, "Mission tracker re-render failed", "INSPECTRES.ErrorMissionTrackerOpen", "Failed to refresh mission tracker");
       });
     }
   }
@@ -179,7 +179,7 @@ export class MissionTrackerApp extends foundry.applications.api.ApplicationV2 {
 
     if (MissionTrackerApp.instance === this) {
       void this.render().catch((err: unknown) => {
-        console.error("Mission tracker re-render failed (endEarly):", err);
+        handleActionError(err, "Mission tracker re-render failed", "INSPECTRES.ErrorMissionTrackerOpen", "Failed to refresh mission tracker");
       });
     }
   }

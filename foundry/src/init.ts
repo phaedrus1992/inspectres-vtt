@@ -24,7 +24,6 @@ Hooks.once("init", async function () {
     const message = err instanceof Error ? err.message : String(err);
     console.error("Failed to load templates:", message);
     ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorTemplateLoad") ?? `Template load failed: ${message}`);
-    throw err;
   }
 
   // Register per-type actor document classes (Foundry V12+)
