@@ -116,7 +116,7 @@ export class AgentSheet extends foundry.applications.sheets.ActorSheetV2 {
       return;
     }
     void executeSkillRoll(this.actor, franchise, skillAttr).catch((err: unknown) => {
-      handleActionError(err, "Skill roll failed", "INSPECTRES.ErrorRollFailed", "Roll failed");
+      handleActionError(err, "Skill roll failed", "INSPECTRES.ErrorSkillRollFailed", "Skill roll failed");
     });
   }
 
@@ -127,7 +127,7 @@ export class AgentSheet extends foundry.applications.sheets.ActorSheetV2 {
       return;
     }
     void buildStressRollDialog(this.actor).catch((err: unknown) => {
-      handleActionError(err, "Stress roll failed", "INSPECTRES.ErrorRollFailed", "Roll failed");
+      handleActionError(err, "Stress roll failed", "INSPECTRES.ErrorStressRollFailed", "Stress roll failed");
     });
   }
 
