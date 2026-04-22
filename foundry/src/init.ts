@@ -65,15 +65,15 @@ Hooks.once("init", async function () {
   });
 });
 
-// The Create Actor dialog defaults to a fixed height too small to show all fields.
-// renderDialogV2 fires for ApplicationV2-based dialogs (Foundry V13+).
-// Match on the select[name="type"] presence — unique to document-creation dialogs.
-// setPosition must be used instead of style.height because Foundry calls setPosition after
-// the hook fires and would overwrite any inline style change.
+// The Create Actor/Item dialog (DialogV2.prompt) can render at an incorrect height because
+// _updatePosition runs before the browser paints the form content. Re-measure after layout
+// by deferring setPosition to the next animation frame so the browser has committed the DOM.
 Hooks.on("renderDialogV2", function (app, html: HTMLElement) {
-  if (html.querySelector("select[name='type']")) {
-    // fvtt-types types the hook's app param as Any; cast through unknown to call setPosition
-    (app as unknown as foundry.applications.api.ApplicationV2).setPosition({ height: "auto" });
+  if (html.querySelector("form#document-create")) {
+    requestAnimationFrame(() => {
+      // fvtt-types types the hook's app param as Any; cast through unknown to call setPosition
+      (app as unknown as foundry.applications.api.ApplicationV2).setPosition({ height: "auto" });
+    });
   }
 });
 
