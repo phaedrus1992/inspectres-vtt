@@ -77,6 +77,11 @@ const agent = makeTestFixture() as unknown as Actor;
 
 If you find yourself writing `as unknown as`, stop and ask: (1) Is there a type wrapper or constructor I can use instead? (2) Can I add a runtime check to properly narrow? (3) Is my fixture/data model incomplete? Fix the root cause rather than bypassing the type system.
 
+**Exception — fvtt-types boundary:** `actor.system as unknown as AgentData` is currently
+unavoidable because fvtt-types v13 cannot resolve `Actor.system` to project types for
+`template.json` systems (requires `TypeDataModel` migration). These casts are accepted with a
+justification comment; see `.claude/rules/foundry-vite.md` for full context.
+
 ### Interfaces vs Type Aliases
 
 - Use `interface` for object shapes — they have better display, performance, and extensibility
