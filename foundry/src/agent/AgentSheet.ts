@@ -6,6 +6,7 @@ import { type AgentData, type AgentCharacteristic } from "./agent-schema.js";
 import { executeSkillRoll, executeStressRoll, type SkillName } from "../rolls/roll-executor.js";
 import { findFranchiseActor, franchiseSystemData } from "../franchise/franchise-utils.js";
 import { handleActionError } from "../utils/ui-errors.js";
+import { activateTabs } from "../utils/sheet-tabs.js";
 
 const SKILL_NAMES = ["academics", "athletics", "technology", "contact"] as const;
 
@@ -94,6 +95,9 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
 
   override async _onRender(context: Record<string, unknown>, options: foundry.applications.api.ApplicationV2Options): Promise<void> {
     await super._onRender(context, options);
+
+    activateTabs(this.element, "stats");
+
     if (!this.isEditable) return;
 
     // weird-checkbox: change event not covered by DEFAULT_OPTIONS.actions

@@ -171,6 +171,43 @@
   }
 }
 
+/* ─── Tab strip ─────────────────────────────────────────────────────────── */
+
+.inspectres .inspectres-tabs {
+  display: flex;
+  border-bottom: 2px solid var(--inspectres-input-border);
+  background: var(--inspectres-section-bg);
+  padding: 0 1rem;
+  gap: 0;
+
+  .sheet-tab {
+    padding: 0.45rem 0.9rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--inspectres-text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    text-transform: uppercase;
+    transition: color 0.12s, border-color 0.12s;
+    user-select: none;
+
+    &:hover { color: var(--inspectres-text); }
+
+    &.active {
+      color: var(--inspectres-secondary);
+      border-bottom-color: var(--inspectres-secondary);
+    }
+  }
+}
+
+.inspectres .sheet-body .tab {
+  display: none;
+
+  &.active { display: block; }
+}
+
 /* ─── Section chrome ─────────────────────────────────────────────────────── */
 
 .inspectres .inspectres-section {

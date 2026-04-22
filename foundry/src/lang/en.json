@@ -141,6 +141,8 @@
       "ServiceCharge": "Lose this die + 1 additional Bank die",
       "AccountOverrun": "Lose ALL Bank dice"
     },
+    "TabStats": "Stats",
+    "TabNotes": "Notes",
     "AriaLabel": {
       "SkillRoll": "Roll this skill",
       "CoolToggle": "Toggle cool die at pip {index}",

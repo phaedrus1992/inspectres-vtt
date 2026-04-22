@@ -2,6 +2,7 @@ import { type FranchiseData } from "./franchise-schema.js";
 import { executeBankRoll, executeClientRoll } from "../rolls/roll-executor.js";
 import { MissionTrackerApp } from "../mission/MissionTrackerApp.js";
 import { handleActionError } from "../utils/ui-errors.js";
+import { activateTabs } from "../utils/sheet-tabs.js";
 
 // HandlebarsApplicationMixin provides _renderHTML/_replaceHTML required by ApplicationV2 for PARTS-based sheets
 export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.sheets.ActorSheetV2) {
@@ -19,6 +20,11 @@ export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicati
   static override PARTS = {
     sheet: { template: "systems/inspectres/templates/franchise-sheet.hbs" },
   };
+
+  override async _onRender(context: Record<string, unknown>, options: foundry.applications.api.ApplicationV2Options): Promise<void> {
+    await super._onRender(context, options);
+    activateTabs(this.element, "stats");
+  }
 
   override async _prepareContext(_options: foundry.applications.api.ApplicationV2Options): Promise<Record<string, unknown>> {
     const base = await super._prepareContext(_options);

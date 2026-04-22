@@ -10,140 +10,158 @@
     </div>
   </header>
 
+  <!-- Tab strip -->
+  <nav class="inspectres-tabs">
+    <a class="sheet-tab" data-tab="stats">{{localize "INSPECTRES.TabStats"}}</a>
+    <a class="sheet-tab" data-tab="notes">{{localize "INSPECTRES.TabNotes"}}</a>
+  </nav>
+
   <!-- Content -->
   <div class="sheet-body">
-    <!-- Talent Section -->
-    <section class="inspectres-section">
-      <h2>{{localize "INSPECTRES.Talent"}}</h2>
-      <input
-        type="text"
-        name="system.talent"
-        value="{{system.talent}}"
-        placeholder="e.g., Theatre Major"
-        class="talent-input"
-      />
-    </section>
 
-    <!-- Skills Section -->
-    <section class="inspectres-section">
-      <h2>{{localize "INSPECTRES.Skills"}}</h2>
-      <div class="skills-grid">
-        {{#each system.skills as |skill skillName|}}
-          <div class="skill-row">
-            <div class="skill-main-line">
-              <label class="skill-name">{{localize (inspectres-concat "INSPECTRES." (inspectres-capitalize skillName))}}</label>
-              <div class="skill-stepper">
-                <button type="button" class="skill-step" data-action="skillDecrease" data-skill="{{skillName}}" aria-label="{{inspectres-format "INSPECTRES.AriaLabel.SkillAdjust" (hash skill=skillName)}} decrease">−</button>
-                <span class="skill-base-value">{{skill.base}}</span>
-                <button type="button" class="skill-step" data-action="skillIncrease" data-skill="{{skillName}}" aria-label="{{inspectres-format "INSPECTRES.AriaLabel.SkillAdjust" (hash skill=skillName)}} increase">+</button>
-              </div>
-              <span class="skill-effective-value">({{inspectres-subtract skill.base skill.penalty}} {{localize "INSPECTRES.SkillEffective"}})</span>
-              <button
-                type="button"
-                class="skill-roll-button"
-                data-action="skillRoll"
-                data-skill="{{skillName}}"
-                aria-label="{{localize "INSPECTRES.AriaLabel.SkillRoll"}}"
-              ><i class="fas fa-dice"></i></button>
-            </div>
-            {{#if skill.penalty}}
-              <div class="skill-penalty-line">
-                −{{skill.penalty}} {{localize "INSPECTRES.PenaltyFromStress"}}
-              </div>
-            {{/if}}
-          </div>
-        {{/each}}
-      </div>
-    </section>
+    <!-- Stats Tab -->
+    <div class="tab" data-tab="stats">
 
-    <!-- Cool & Weird Section -->
-    <section class="inspectres-section">
-      <h2>{{localize "INSPECTRES.Cool"}}</h2>
-      <div class="cool-toggle">
-        <label>
-          <input
-            type="checkbox"
-            name="system.isWeird"
-            {{#if system.isWeird}}checked{{/if}}
-            class="weird-checkbox"
-          />
-          {{localize "INSPECTRES.WeirdAgent"}}
-        </label>
-      </div>
+      <!-- Talent Section -->
+      <section class="inspectres-section">
+        <h2>{{localize "INSPECTRES.Talent"}}</h2>
+        <input
+          type="text"
+          name="system.talent"
+          value="{{system.talent}}"
+          placeholder="e.g., Theatre Major"
+          class="talent-input"
+        />
+      </section>
 
-      <div class="cool-tracker">
-        {{#if system.isWeird}}
-          <div class="cool-counter">
-            <span class="cool-label">{{localize "INSPECTRES.CoolUnlimited"}}</span>
-            <input
-              type="number"
-              name="system.cool"
-              value="{{system.cool}}"
-              min="0"
-              class="cool-input"
-            />
-          </div>
-        {{else}}
-          <div class="cool-pips">
-            <span class="cool-label">{{inspectres-format "INSPECTRES.CoolDiceLabel" (hash max=3)}}</span>
-            <div class="pip-container">
-              {{#each (inspectres-range 0 2) as |pip|}}
+      <!-- Skills Section -->
+      <section class="inspectres-section">
+        <h2>{{localize "INSPECTRES.Skills"}}</h2>
+        <div class="skills-grid">
+          {{#each system.skills as |skill skillName|}}
+            <div class="skill-row">
+              <div class="skill-main-line">
+                <label class="skill-name">{{localize (inspectres-concat "INSPECTRES." (inspectres-capitalize skillName))}}</label>
+                <div class="skill-stepper">
+                  <button type="button" class="skill-step" data-action="skillDecrease" data-skill="{{skillName}}" aria-label="{{inspectres-format "INSPECTRES.AriaLabel.SkillAdjust" (hash skill=skillName)}} decrease">−</button>
+                  <span class="skill-base-value">{{skill.base}}</span>
+                  <button type="button" class="skill-step" data-action="skillIncrease" data-skill="{{skillName}}" aria-label="{{inspectres-format "INSPECTRES.AriaLabel.SkillAdjust" (hash skill=skillName)}} increase">+</button>
+                </div>
+                <span class="skill-effective-value">({{inspectres-subtract skill.base skill.penalty}} {{localize "INSPECTRES.SkillEffective"}})</span>
                 <button
                   type="button"
-                  class="cool-pip {{#if (inspectres-gte ../system.cool (inspectres-add pip 1))}}filled{{/if}}"
-                  data-action="toggleCool"
-                  data-value="{{inspectres-add pip 1}}"
-                  aria-label="{{inspectres-format "INSPECTRES.AriaLabel.CoolToggle" (hash index=(inspectres-add pip 1))}}"
-                >
-                  ●
-                </button>
-              {{/each}}
+                  class="skill-roll-button"
+                  data-action="skillRoll"
+                  data-skill="{{skillName}}"
+                  aria-label="{{localize "INSPECTRES.AriaLabel.SkillRoll"}}"
+                ><i class="fas fa-dice"></i></button>
+              </div>
+              {{#if skill.penalty}}
+                <div class="skill-penalty-line">
+                  −{{skill.penalty}} {{localize "INSPECTRES.PenaltyFromStress"}}
+                </div>
+              {{/if}}
             </div>
-          </div>
-        {{/if}}
-      </div>
-    </section>
+          {{/each}}
+        </div>
+      </section>
 
-    <!-- Characteristics Section -->
-    <section class="inspectres-section">
-      <h2>{{localize "INSPECTRES.Characteristics"}}</h2>
-      <div class="characteristics-list">
-        {{#each system.characteristics as |characteristic idx|}}
-          <div class="characteristic-row">
+      <!-- Cool & Weird Section -->
+      <section class="inspectres-section">
+        <h2>{{localize "INSPECTRES.Cool"}}</h2>
+        <div class="cool-toggle">
+          <label>
             <input
               type="checkbox"
-              name="system.characteristics.{{idx}}.used"
-              {{#if characteristic.used}}checked{{/if}}
-              class="characteristic-used"
+              name="system.isWeird"
+              {{#if system.isWeird}}checked{{/if}}
+              class="weird-checkbox"
             />
-            <input
-              type="text"
-              name="system.characteristics.{{idx}}.text"
-              value="{{characteristic.text}}"
-              placeholder="Characteristic text"
-              class="characteristic-text"
-            />
-            <button type="button" class="btn-remove" data-action="removeCharacteristic" data-idx="{{idx}}" aria-label="{{localize "INSPECTRES.AriaLabel.RemoveCharacteristic"}}">
-              ✕
-            </button>
-          </div>
-        {{/each}}
-      </div>
-      <button type="button" class="btn-add" data-action="addCharacteristic">{{localize "INSPECTRES.AddCharacteristic"}}</button>
-    </section>
+            {{localize "INSPECTRES.WeirdAgent"}}
+          </label>
+        </div>
 
-    <!-- Stress Roll Section -->
-    <section class="inspectres-section">
-      <h2>{{localize "INSPECTRES.StressRoll"}}</h2>
-      <button type="button" class="inspectres-roll-button" data-action="stressRoll">
-        {{localize "INSPECTRES.StressRoll"}}
-      </button>
-    </section>
+        <div class="cool-tracker">
+          {{#if system.isWeird}}
+            <div class="cool-counter">
+              <span class="cool-label">{{localize "INSPECTRES.CoolUnlimited"}}</span>
+              <input
+                type="number"
+                name="system.cool"
+                value="{{system.cool}}"
+                min="0"
+                class="cool-input"
+              />
+            </div>
+          {{else}}
+            <div class="cool-pips">
+              <span class="cool-label">{{inspectres-format "INSPECTRES.CoolDiceLabel" (hash max=3)}}</span>
+              <div class="pip-container">
+                {{#each (inspectres-range 0 2) as |pip|}}
+                  <button
+                    type="button"
+                    class="cool-pip {{#if (inspectres-gte ../system.cool (inspectres-add pip 1))}}filled{{/if}}"
+                    data-action="toggleCool"
+                    data-value="{{inspectres-add pip 1}}"
+                    aria-label="{{inspectres-format "INSPECTRES.AriaLabel.CoolToggle" (hash index=(inspectres-add pip 1))}}"
+                  >
+                    ●
+                  </button>
+                {{/each}}
+              </div>
+            </div>
+          {{/if}}
+        </div>
+      </section>
 
-    <!-- Mission Pool Section -->
-    <section class="inspectres-section">
-      <h2>{{localize "INSPECTRES.MissionPool"}}</h2>
-      <p class="mission-pool-display">{{system.missionPool}} franchise {{inspectres-plural system.missionPool "die" "dice"}}</p>
-    </section>
+      <!-- Stress Roll Section -->
+      <section class="inspectres-section">
+        <h2>{{localize "INSPECTRES.StressRoll"}}</h2>
+        <button type="button" class="inspectres-roll-button" data-action="stressRoll">
+          {{localize "INSPECTRES.StressRoll"}}
+        </button>
+      </section>
+
+    </div><!-- /stats tab -->
+
+    <!-- Notes Tab -->
+    <div class="tab" data-tab="notes">
+
+      <!-- Characteristics Section -->
+      <section class="inspectres-section">
+        <h2>{{localize "INSPECTRES.Characteristics"}}</h2>
+        <div class="characteristics-list">
+          {{#each system.characteristics as |characteristic idx|}}
+            <div class="characteristic-row">
+              <input
+                type="checkbox"
+                name="system.characteristics.{{idx}}.used"
+                {{#if characteristic.used}}checked{{/if}}
+                class="characteristic-used"
+              />
+              <input
+                type="text"
+                name="system.characteristics.{{idx}}.text"
+                value="{{characteristic.text}}"
+                placeholder="Characteristic text"
+                class="characteristic-text"
+              />
+              <button type="button" class="btn-remove" data-action="removeCharacteristic" data-idx="{{idx}}" aria-label="{{localize "INSPECTRES.AriaLabel.RemoveCharacteristic"}}">
+                ✕
+              </button>
+            </div>
+          {{/each}}
+        </div>
+        <button type="button" class="btn-add" data-action="addCharacteristic">{{localize "INSPECTRES.AddCharacteristic"}}</button>
+      </section>
+
+      <!-- Mission Pool Section -->
+      <section class="inspectres-section">
+        <h2>{{localize "INSPECTRES.MissionPool"}}</h2>
+        <p class="mission-pool-display">{{system.missionPool}} franchise {{inspectres-plural system.missionPool "die" "dice"}}</p>
+      </section>
+
+    </div><!-- /notes tab -->
+
   </div>
 </form>
