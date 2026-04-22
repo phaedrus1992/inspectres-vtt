@@ -14,7 +14,8 @@
   /* Text */
   --inspectres-text:         #1a2530;
   --inspectres-text-muted:   #5a6a7a;
-  --inspectres-text-faint:   #8a9aaa;
+  --inspectres-text-faint:   #627080;   /* #8a9aaa was ~3.2:1 on white; this is ~5:1 (WCAG AA) */
+  --inspectres-success-text: #1a7a40;   /* darker than --inspectres-success for small-text contrast */
 
   /* Inputs */
   --inspectres-input-bg:     #ffffff;
@@ -707,7 +708,7 @@
     margin: 0.3rem 0 0;
     font-size: 0.78rem;
     font-weight: 600;
-    color: var(--inspectres-success);
+    color: var(--inspectres-success-text);
   }
 
   .roll-card-bank-resolutions {
