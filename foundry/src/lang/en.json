@@ -149,6 +149,58 @@
       "RemoveCharacteristic": "Remove characteristic",
       "StressRoll": "Roll for stress",
       "SkillAdjust": "Adjust {skill} skill"
+    },
+    "ClientPersonality": {
+      "Horny": "Horny",
+      "Bored": "Bored",
+      "Skeptical": "Skeptical",
+      "Angry": "Angry",
+      "Impatient": "Impatient",
+      "Weird": "Weird",
+      "Frantic": "Frantic",
+      "Terrified": "Terrified",
+      "Calm": "Calm",
+      "Enthusiastic": "Enthusiastic",
+      "Blase": "Blasé"
+    },
+    "ClientType": {
+      "GhostMonster": "Ghost/Monster Transformation",
+      "Policeofficer": "Police Officer",
+      "Student": "Student",
+      "CityWorker": "City Worker",
+      "Storekeeper": "Storekeeper",
+      "Housewife": "Housewife",
+      "GovOfficial": "Gov't Official",
+      "Businessman": "Businessman",
+      "HospitalWorker": "Hospital Worker",
+      "Motorist": "Motorist",
+      "Aristocrat": "Aristocrat"
+    },
+    "ClientOccurrence": {
+      "GhostMonster": "Ghost/Monster Transformation",
+      "Appearance": "Appearance",
+      "BizarrePhenomena": "Bizarre phenomena",
+      "AbnormalWeather": "Abnormal weather",
+      "OddSmell": "Odd Smell",
+      "WeirdSound": "Weird Sound",
+      "StrangeLight": "Strange Light",
+      "Haunting": "Haunting",
+      "Destruction": "Destruction",
+      "Infestation": "Infestation",
+      "Abduction": "Abduction"
+    },
+    "ClientLocation": {
+      "Underground": "Underground (sewers/subway)",
+      "InWater": "In the water",
+      "RemoteArea": "Some remote area",
+      "Restaurant": "A restaurant",
+      "MunicipalBuilding": "Municipal building",
+      "ApartmentBuilding": "Apartment building",
+      "StoreOffice": "Store / office",
+      "ResidentialArea": "Residential area",
+      "PublicPark": "Public park or zoo",
+      "SketchyNeighborhood": "Sketchy neighborhood",
+      "ParallelDimension": "Parallel dimension"
     }
   }
 }

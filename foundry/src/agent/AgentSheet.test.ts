@@ -132,6 +132,59 @@ describe("AgentSheet", () => {
     });
   });
 
+  describe("portrait editing", () => {
+    it("updates actor img when portrait is edited", async () => {
+      const mockActor = new MockActorSheetV2().actor;
+      const sheet = Object.create(AgentSheet.prototype);
+      sheet.actor = mockActor;
+      sheet.isEditable = true;
+
+      const event = new MouseEvent("click");
+      const updateSpy = vi.spyOn(sheet.actor, "update").mockResolvedValue(sheet.actor);
+      const filePickerSpy = vi.fn().mockResolvedValue("systems/inspectres/assets/new-portrait.png");
+      global.FilePicker = { fromButton: filePickerSpy } as unknown as any;
+
+      await AgentSheet.onEditPortrait.call(sheet, event, document.createElement("img"));
+
+      expect(updateSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ img: "systems/inspectres/assets/new-portrait.png" }),
+      );
+    });
+
+    it("does not update actor when file picker is cancelled", async () => {
+      const mockActor = new MockActorSheetV2().actor;
+      const sheet = Object.create(AgentSheet.prototype);
+      sheet.actor = mockActor;
+      sheet.isEditable = true;
+
+      const event = new MouseEvent("click");
+      const updateSpy = vi.spyOn(sheet.actor, "update").mockResolvedValue(sheet.actor);
+      const filePickerSpy = vi.fn().mockResolvedValue(null);
+      global.FilePicker = { fromButton: filePickerSpy } as unknown as any;
+
+      await AgentSheet.onEditPortrait.call(sheet, event, document.createElement("img"));
+
+      expect(updateSpy).not.toHaveBeenCalled();
+    });
+
+    it("does not open file picker when sheet is not editable", async () => {
+      const mockActor = new MockActorSheetV2().actor;
+      const sheet = Object.create(AgentSheet.prototype);
+      sheet.actor = mockActor;
+      sheet.isEditable = false;
+
+      const event = new MouseEvent("click");
+      const updateSpy = vi.spyOn(sheet.actor, "update").mockResolvedValue(sheet.actor);
+      const filePickerSpy = vi.fn().mockResolvedValue("systems/inspectres/assets/new-portrait.png");
+      global.FilePicker = { fromButton: filePickerSpy } as unknown as any;
+
+      await AgentSheet.onEditPortrait.call(sheet, event, document.createElement("img"));
+
+      expect(filePickerSpy).not.toHaveBeenCalled();
+      expect(updateSpy).not.toHaveBeenCalled();
+    });
+  });
+
   describe("_onRender", () => {
     it("does not attach change listeners when sheet is not editable", async () => {
       const mockSheet = new MockActorSheetV2();
@@ -230,6 +283,32 @@ describe("AgentSheet", () => {
       checkbox2.dispatchEvent(new Event("change"));
 
       expect(updateSpy).toHaveBeenCalledTimes(2);
+    });
+
+    it("does not accumulate listeners across multiple re-renders", async () => {
+      const mockActor = new MockActorSheetV2().actor;
+      const sheet = Object.create(AgentSheet.prototype);
+      sheet.actor = mockActor;
+      sheet.isEditable = true;
+
+      const checkbox = document.createElement("input");
+      checkbox.className = "weird-checkbox";
+      checkbox.type = "checkbox";
+
+      Object.defineProperty(sheet, "element", {
+        value: {
+          querySelectorAll: vi.fn(() => [checkbox]),
+        },
+      });
+
+      const updateSpy = vi.spyOn(sheet.actor, "update").mockResolvedValue(sheet.actor);
+
+      await sheet._onRender({}, {});
+      await sheet._onRender({}, {});
+      await sheet._onRender({}, {});
+
+      checkbox.dispatchEvent(new Event("change"));
+      expect(updateSpy).toHaveBeenCalledTimes(1);
     });
   });
 

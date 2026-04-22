@@ -428,10 +428,10 @@ describe("executeClientRoll", () => {
     await executeClientRoll(franchise);
     const parsed = JSON.parse(capturedContent) as Record<string, unknown>;
     const client = parsed["client"] as Record<string, string>;
-    expect(client["personality"]).toBe("Horny");
-    expect(client["clientType"]).toBe("Ghost/Monster Transformation");
-    expect(client["occurrence"]).toBe("Ghost/Monster Transformation");
-    expect(client["location"]).toBe("Underground (sewers/subway)");
+    expect(client["personality"]).toBe("INSPECTRES.ClientPersonality.Horny");
+    expect(client["clientType"]).toBe("INSPECTRES.ClientType.GhostMonster");
+    expect(client["occurrence"]).toBe("INSPECTRES.ClientOccurrence.GhostMonster");
+    expect(client["location"]).toBe("INSPECTRES.ClientLocation.Underground");
   });
 });
 
