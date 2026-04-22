@@ -377,6 +377,10 @@ export function buildPenaltyNote(face: 1 | 2 | 3, stressDiceCount: number): stri
       return game.i18n?.localize("INSPECTRES.PenaltyNote.Major") ?? "INSPECTRES.PenaltyNote.Major";
     case 1:
       return game.i18n?.format("INSPECTRES.PenaltyNote.Meltdown", { count: String(stressDiceCount) }) ?? "INSPECTRES.PenaltyNote.Meltdown";
+    default: {
+      const _exhaustive: never = face;
+      throw new Error(`buildPenaltyNote: unexpected face value ${JSON.stringify(_exhaustive)}`);
+    }
   }
 }
 
