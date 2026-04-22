@@ -21,7 +21,7 @@
     "@vitest/coverage-v8": "^3.1.2",
     "fast-check": "^4.7.0",
     "fvtt-types": "github:League-of-Foundry-Developers/foundry-vtt-types#main",
-    "jsdom": "^26.1.0",
+    "jsdom": "^29.0.0",
     "typescript": "^5.7.2",
     "vite": "^6.4.2",
     "vitest": "^3.1.2"
