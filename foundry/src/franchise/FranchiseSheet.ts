@@ -21,6 +21,7 @@ export class FranchiseSheet extends foundry.applications.sheets.ActorSheetV2 {
 
   override async _prepareContext(_options: foundry.applications.api.ApplicationV2Options): Promise<Record<string, unknown>> {
     const base = await super._prepareContext(_options);
+    // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
     const system = this.actor.system as unknown as FranchiseData;
     const isGm = game.user?.isGM ?? false;
     const missionComplete = system.missionGoal > 0 && system.missionPool >= system.missionGoal;
@@ -28,6 +29,8 @@ export class FranchiseSheet extends foundry.applications.sheets.ActorSheetV2 {
   }
 
   static async onBankRoll(this: FranchiseSheet, _event: Event, _target: HTMLElement): Promise<void> {
+    if (!this.isEditable) return;
+    // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
     const system = this.actor.system as unknown as FranchiseData;
     if (system.debtMode) {
       ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnBankRollDebtMode") ?? "Bank rolls are disabled in Debt Mode.");
@@ -39,6 +42,8 @@ export class FranchiseSheet extends foundry.applications.sheets.ActorSheetV2 {
   }
 
   static async onClientRoll(this: FranchiseSheet, _event: Event, _target: HTMLElement): Promise<void> {
+    if (!this.isEditable) return;
+    // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
     const system = this.actor.system as unknown as FranchiseData;
     if (system.debtMode) {
       ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnClientRollDebtMode") ?? "Client rolls are disabled in Debt Mode.");

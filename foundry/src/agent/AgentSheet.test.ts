@@ -12,11 +12,78 @@ describe("AgentSheet", () => {
     Hooks.clearAll();
   });
 
+  describe("action handlers — isEditable guard", () => {
+    function makeSheet(isEditable: boolean) {
+      const actor = new MockActorSheetV2().actor;
+      actor.system = { skills: { academics: { base: 2, penalty: 0 } }, cool: 1, characteristics: [] };
+      const sheet = Object.create(AgentSheet.prototype);
+      sheet.actor = actor;
+      sheet.isEditable = isEditable;
+      const updateSpy = vi.spyOn(actor, "update").mockResolvedValue(actor);
+      return { sheet, updateSpy };
+    }
+
+    it("onSkillStep does not update actor when not editable", async () => {
+      const { sheet, updateSpy } = makeSheet(false);
+      const target = document.createElement("button");
+      target.setAttribute("data-action", "skillIncrease");
+      target.setAttribute("data-skill", "academics");
+      await AgentSheet.onSkillStep.call(sheet, new Event("click"), target);
+      expect(updateSpy).not.toHaveBeenCalled();
+    });
+
+    it("onToggleCool does not update actor when not editable", async () => {
+      const { sheet, updateSpy } = makeSheet(false);
+      const target = document.createElement("button");
+      target.setAttribute("data-value", "1");
+      await AgentSheet.onToggleCool.call(sheet, new Event("click"), target);
+      expect(updateSpy).not.toHaveBeenCalled();
+    });
+
+    it("onAddCharacteristic does not update actor when not editable", async () => {
+      const { sheet, updateSpy } = makeSheet(false);
+      await AgentSheet.onAddCharacteristic.call(sheet, new Event("click"), document.createElement("button"));
+      expect(updateSpy).not.toHaveBeenCalled();
+    });
+
+    it("onRemoveCharacteristic does not update actor when not editable", async () => {
+      const { sheet, updateSpy } = makeSheet(false);
+      const target = document.createElement("button");
+      target.setAttribute("data-idx", "0");
+      await AgentSheet.onRemoveCharacteristic.call(sheet, new Event("click"), target);
+      expect(updateSpy).not.toHaveBeenCalled();
+    });
+  });
+
   describe("_onRender", () => {
+    it("does not attach change listeners when sheet is not editable", async () => {
+      const mockSheet = new MockActorSheetV2();
+      const sheet = Object.create(AgentSheet.prototype);
+      sheet.actor = mockSheet.actor;
+      sheet.isEditable = false;
+
+      const checkbox = document.createElement("input");
+      checkbox.className = "weird-checkbox";
+      checkbox.type = "checkbox";
+
+      const querySelectorAllSpy = vi.fn(() => [checkbox]);
+      Object.defineProperty(sheet, "element", {
+        value: { querySelectorAll: querySelectorAllSpy },
+      });
+
+      const updateSpy = vi.spyOn(sheet.actor, "update").mockResolvedValue(sheet.actor);
+
+      await sheet._onRender({}, {});
+
+      checkbox.dispatchEvent(new Event("change"));
+      expect(updateSpy).not.toHaveBeenCalled();
+    });
+
     it("attaches change listener to weird-checkbox elements", async () => {
       const mockActor = new MockActorSheetV2().actor;
       const sheet = Object.create(AgentSheet.prototype);
       sheet.actor = mockActor;
+      sheet.isEditable = true;
 
       const checkbox = document.createElement("input");
       checkbox.className = "weird-checkbox";
@@ -40,6 +107,7 @@ describe("AgentSheet", () => {
       const mockActor = new MockActorSheetV2().actor;
       const sheet = Object.create(AgentSheet.prototype);
       sheet.actor = mockActor;
+      sheet.isEditable = true;
 
       const checkbox = document.createElement("input");
       checkbox.className = "weird-checkbox";
@@ -64,6 +132,7 @@ describe("AgentSheet", () => {
       const mockActor = new MockActorSheetV2().actor;
       const sheet = Object.create(AgentSheet.prototype);
       sheet.actor = mockActor;
+      sheet.isEditable = true;
 
       const checkbox1 = document.createElement("input");
       const checkbox2 = document.createElement("input");

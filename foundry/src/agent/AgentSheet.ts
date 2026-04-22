@@ -14,6 +14,7 @@ function isSkillName(value: string | null): value is SkillName {
 }
 
 async function buildStressRollDialog(agent: Actor): Promise<void> {
+  // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
   const system = agent.system as unknown as AgentData;
   const maxCool = system.cool;
 
@@ -85,23 +86,25 @@ export class AgentSheet extends foundry.applications.sheets.ActorSheetV2 {
 
   override async _prepareContext(_options: foundry.applications.api.ApplicationV2Options): Promise<Record<string, unknown>> {
     const base = await super._prepareContext(_options);
+    // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
     const system = this.actor.system as unknown as AgentData;
     return { ...base, system };
   }
 
   override async _onRender(context: Record<string, unknown>, options: foundry.applications.api.ApplicationV2Options): Promise<void> {
     await super._onRender(context, options);
+    if (!this.isEditable) return;
 
     // weird-checkbox: change event not covered by DEFAULT_OPTIONS.actions
     for (const el of this.element.querySelectorAll<HTMLInputElement>(".weird-checkbox")) {
       el.addEventListener("change", (event: Event) => {
+        // fvtt-types expects full document data shape for actor.update; partial update path is safe at runtime
         const updateData = { "system.isWeird": (event.target as HTMLInputElement).checked } as unknown as Parameters<typeof this.actor.update>[0];
         void this.actor.update(updateData).catch((err: unknown) => {
           handleActionError(err, "Failed to toggle weird status", "INSPECTRES.ErrorUpdateFailed", "Failed to update actor data");
         });
       });
     }
-
   }
 
   static async onSkillRoll(this: AgentSheet, _event: Event, target: HTMLElement): Promise<void> {
@@ -132,11 +135,13 @@ export class AgentSheet extends foundry.applications.sheets.ActorSheetV2 {
   }
 
   static async onSkillStep(this: AgentSheet, _event: Event, target: HTMLElement): Promise<void> {
+    if (!this.isEditable) return;
     const skillAttr = target.getAttribute("data-skill");
     if (!isSkillName(skillAttr)) {
       console.error("onSkillStep: missing or invalid data-skill attribute", { skillAttr });
       return;
     }
+    // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
     const system = this.actor.system as unknown as AgentData;
     const skillData = system.skills[skillAttr];
     if (!skillData) {
@@ -147,6 +152,7 @@ export class AgentSheet extends foundry.applications.sheets.ActorSheetV2 {
     const delta = target.getAttribute("data-action") === "skillIncrease" ? 1 : -1;
     const next = Math.min(4, Math.max(0, current + delta));
     if (next === current) return;
+    // fvtt-types expects full document data shape for actor.update; partial update path is safe at runtime
     const updateData = { [`system.skills.${skillAttr}.base`]: next } as unknown as Parameters<typeof this.actor.update>[0];
     void this.actor.update(updateData).catch((err: unknown) => {
       handleActionError(err, "Failed to update skill", "INSPECTRES.ErrorUpdateFailed", "Failed to update actor data");
@@ -154,6 +160,7 @@ export class AgentSheet extends foundry.applications.sheets.ActorSheetV2 {
   }
 
   static async onToggleCool(this: AgentSheet, _event: Event, target: HTMLElement): Promise<void> {
+    if (!this.isEditable) return;
     const valueStr = target.getAttribute("data-value");
     if (valueStr == null) {
       console.error("onToggleCool: missing data-value attribute");
@@ -164,8 +171,10 @@ export class AgentSheet extends foundry.applications.sheets.ActorSheetV2 {
       console.error("onToggleCool: invalid data-value", { valueStr });
       return;
     }
+    // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
     const currentCool = (this.actor.system as unknown as AgentData).cool;
     const newCool = currentCool >= pipValue ? pipValue - 1 : pipValue;
+    // fvtt-types expects full document data shape for actor.update; partial update path is safe at runtime
     const updateData = { "system.cool": newCool } as unknown as Parameters<typeof this.actor.update>[0];
     void this.actor.update(updateData).catch((err: unknown) => {
       handleActionError(err, "Failed to set cool dice", "INSPECTRES.ErrorUpdateFailed", "Failed to update actor data");
@@ -173,8 +182,11 @@ export class AgentSheet extends foundry.applications.sheets.ActorSheetV2 {
   }
 
   static async onAddCharacteristic(this: AgentSheet, _event: Event, _target: HTMLElement): Promise<void> {
+    if (!this.isEditable) return;
+    // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
     const currentSystem = this.actor.system as unknown as AgentData;
     const characteristics = (currentSystem.characteristics ?? []) as AgentCharacteristic[];
+    // fvtt-types expects full document data shape for actor.update; partial update path is safe at runtime
     const updateData = { "system.characteristics": [...characteristics, { text: "", used: false }] } as unknown as Parameters<typeof this.actor.update>[0];
     void this.actor.update(updateData).catch((err: unknown) => {
       handleActionError(err, "Failed to add characteristic", "INSPECTRES.ErrorAddCharacteristic", "Failed to add characteristic");
@@ -182,6 +194,7 @@ export class AgentSheet extends foundry.applications.sheets.ActorSheetV2 {
   }
 
   static async onRemoveCharacteristic(this: AgentSheet, _event: Event, target: HTMLElement): Promise<void> {
+    if (!this.isEditable) return;
     const idxStr = target.getAttribute("data-idx");
     if (idxStr == null) {
       console.error("onRemoveCharacteristic: missing data-idx attribute");
@@ -192,8 +205,10 @@ export class AgentSheet extends foundry.applications.sheets.ActorSheetV2 {
       console.error("onRemoveCharacteristic: invalid data-idx value", { idxStr });
       return;
     }
+    // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
     const currentSystem = this.actor.system as unknown as AgentData;
     const characteristics = (currentSystem.characteristics ?? []) as AgentCharacteristic[];
+    // fvtt-types expects full document data shape for actor.update; partial update path is safe at runtime
     const updateData = { "system.characteristics": characteristics.filter((_: AgentCharacteristic, i: number) => i !== idx) } as unknown as Parameters<typeof this.actor.update>[0];
     void this.actor.update(updateData).catch((err: unknown) => {
       handleActionError(err, "Failed to remove characteristic", "INSPECTRES.ErrorRemoveCharacteristic", "Failed to remove characteristic");
