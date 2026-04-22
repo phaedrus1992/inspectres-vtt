@@ -11,12 +11,12 @@
     </div>
     {{#if franchiseDiceEarned}}
       {{#unless isWeird}}
-        <p class="roll-card-franchise">+{{franchiseDiceEarned}} franchise {{inspectres-plural franchiseDiceEarned "die" "dice"}} added to mission pool</p>
+        <p class="roll-card-franchise">+{{franchiseDiceEarned}} {{inspectres-plural franchiseDiceEarned (localize "INSPECTRES.DieSingular") (localize "INSPECTRES.DiePlural")}} {{localize "INSPECTRES.RollCardAddedToPool"}}</p>
       {{/unless}}
     {{/if}}
     {{#if bankResolutions.length}}
       <div class="roll-card-bank-resolutions">
-        <h4>Bank Dice Results</h4>
+        <h4>{{localize "INSPECTRES.RollCardBankDiceResults"}}</h4>
         {{#each bankResolutions as |resolution|}}
           <p class="bank-die-result {{#if resolution.loseAllBank}}lose-all{{/if}}">
             {{resolution.face}}: {{resolution.result}} — {{resolution.narration}}
@@ -34,7 +34,7 @@
         </p>
       {{/each}}
     </div>
-    <p class="roll-card-bank-total">Bank total: {{finalBankTotal}}</p>
+    <p class="roll-card-bank-total">{{localize "INSPECTRES.RollCardBankTotal"}}: {{finalBankTotal}}</p>
   {{/if}}
 
   {{#if (eq rollType "stress")}}
@@ -49,10 +49,10 @@
 
   {{#if (eq rollType "client")}}
     <div class="roll-card-client">
-      <p><strong>Personality:</strong> {{client.personality}}</p>
-      <p><strong>Client Type:</strong> {{client.clientType}}</p>
-      <p><strong>Occurrence:</strong> {{client.occurrence}}</p>
-      <p><strong>Location:</strong> {{client.location}}</p>
+      <p><strong>{{localize "INSPECTRES.RollCardPersonality"}}:</strong> {{client.personality}}</p>
+      <p><strong>{{localize "INSPECTRES.RollCardClientType"}}:</strong> {{client.clientType}}</p>
+      <p><strong>{{localize "INSPECTRES.RollCardOccurrence"}}:</strong> {{client.occurrence}}</p>
+      <p><strong>{{localize "INSPECTRES.RollCardLocation"}}:</strong> {{client.location}}</p>
     </div>
   {{/if}}
 </div>

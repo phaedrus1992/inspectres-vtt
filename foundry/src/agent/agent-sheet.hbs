@@ -37,7 +37,7 @@
                 <span class="skill-base-value">{{skill.base}}</span>
                 <button type="button" class="skill-step" data-action="skillIncrease" data-skill="{{skillName}}">+</button>
               </div>
-              <span class="skill-effective-value">({{inspectres-subtract skill.base skill.penalty}} effective)</span>
+              <span class="skill-effective-value">({{inspectres-subtract skill.base skill.penalty}} {{localize "INSPECTRES.SkillEffective"}})</span>
               <button
                 type="button"
                 class="skill-roll-button"
@@ -85,7 +85,7 @@
           </div>
         {{else}}
           <div class="cool-pips">
-            <span class="cool-label">Cool Dice (0–3)</span>
+            <span class="cool-label">{{localize "INSPECTRES.CoolDiceLabel"}}</span>
             <div class="pip-container">
               {{#each (inspectres-range 0 2) as |pip|}}
                 <button
