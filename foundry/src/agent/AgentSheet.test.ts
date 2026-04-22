@@ -12,6 +12,49 @@ describe("AgentSheet", () => {
     Hooks.clearAll();
   });
 
+  describe("action handlers — isEditable guard", () => {
+    function makeSheet(isEditable: boolean) {
+      const actor = new MockActorSheetV2().actor;
+      actor.system = { skills: { academics: { base: 2, penalty: 0 } }, cool: 1, characteristics: [] };
+      const sheet = Object.create(AgentSheet.prototype);
+      sheet.actor = actor;
+      sheet.isEditable = isEditable;
+      const updateSpy = vi.spyOn(actor, "update").mockResolvedValue(actor);
+      return { sheet, updateSpy };
+    }
+
+    it("onSkillStep does not update actor when not editable", async () => {
+      const { sheet, updateSpy } = makeSheet(false);
+      const target = document.createElement("button");
+      target.setAttribute("data-action", "skillIncrease");
+      target.setAttribute("data-skill", "academics");
+      await AgentSheet.onSkillStep.call(sheet, new Event("click"), target);
+      expect(updateSpy).not.toHaveBeenCalled();
+    });
+
+    it("onToggleCool does not update actor when not editable", async () => {
+      const { sheet, updateSpy } = makeSheet(false);
+      const target = document.createElement("button");
+      target.setAttribute("data-value", "1");
+      await AgentSheet.onToggleCool.call(sheet, new Event("click"), target);
+      expect(updateSpy).not.toHaveBeenCalled();
+    });
+
+    it("onAddCharacteristic does not update actor when not editable", async () => {
+      const { sheet, updateSpy } = makeSheet(false);
+      await AgentSheet.onAddCharacteristic.call(sheet, new Event("click"), document.createElement("button"));
+      expect(updateSpy).not.toHaveBeenCalled();
+    });
+
+    it("onRemoveCharacteristic does not update actor when not editable", async () => {
+      const { sheet, updateSpy } = makeSheet(false);
+      const target = document.createElement("button");
+      target.setAttribute("data-idx", "0");
+      await AgentSheet.onRemoveCharacteristic.call(sheet, new Event("click"), target);
+      expect(updateSpy).not.toHaveBeenCalled();
+    });
+  });
+
   describe("_onRender", () => {
     it("does not attach change listeners when sheet is not editable", async () => {
       const mockSheet = new MockActorSheetV2();

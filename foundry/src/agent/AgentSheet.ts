@@ -136,6 +136,7 @@ export class AgentSheet extends foundry.applications.sheets.ActorSheetV2 {
   }
 
   static async onSkillStep(this: AgentSheet, _event: Event, target: HTMLElement): Promise<void> {
+    if (!this.isEditable) return;
     const skillAttr = target.getAttribute("data-skill");
     if (!isSkillName(skillAttr)) {
       console.error("onSkillStep: missing or invalid data-skill attribute", { skillAttr });
@@ -160,6 +161,7 @@ export class AgentSheet extends foundry.applications.sheets.ActorSheetV2 {
   }
 
   static async onToggleCool(this: AgentSheet, _event: Event, target: HTMLElement): Promise<void> {
+    if (!this.isEditable) return;
     const valueStr = target.getAttribute("data-value");
     if (valueStr == null) {
       console.error("onToggleCool: missing data-value attribute");
@@ -181,6 +183,7 @@ export class AgentSheet extends foundry.applications.sheets.ActorSheetV2 {
   }
 
   static async onAddCharacteristic(this: AgentSheet, _event: Event, _target: HTMLElement): Promise<void> {
+    if (!this.isEditable) return;
     // fvtt-types v13 + template.json: actor.system resolves to UnknownSystem; cast required until DataModelConfig migration
     const currentSystem = this.actor.system as unknown as AgentData;
     const characteristics = (currentSystem.characteristics ?? []) as AgentCharacteristic[];
@@ -192,6 +195,7 @@ export class AgentSheet extends foundry.applications.sheets.ActorSheetV2 {
   }
 
   static async onRemoveCharacteristic(this: AgentSheet, _event: Event, target: HTMLElement): Promise<void> {
+    if (!this.isEditable) return;
     const idxStr = target.getAttribute("data-idx");
     if (idxStr == null) {
       console.error("onRemoveCharacteristic: missing data-idx attribute");
