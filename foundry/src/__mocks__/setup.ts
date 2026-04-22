@@ -237,6 +237,8 @@ Object.assign(globalThis, {
       api: {
         ApplicationV2: MockApplicationV2,
         DialogV2: MockDialogV2,
+        // Identity mixin — returns the base class unchanged so sheet class definitions type-check
+        HandlebarsApplicationMixin: <T>(Base: T): T => Base,
       },
       sheets: {
         ActorSheetV2: MockActorSheetV2,
