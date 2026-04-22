@@ -394,6 +394,7 @@ describe("executeClientRoll", () => {
   });
 
   it("looks up valid table entries for all four attributes", async () => {
+    vi.restoreAllMocks(); // Clear beforeEach spy setup
     let callCount = 0;
     const faces = [[4, 3], [2, 5], [6, 1], [3, 4]]; // sums: 7, 7, 7, 7
     (globalThis as unknown as { Roll: typeof MockRoll }).Roll = class extends MockRoll {
