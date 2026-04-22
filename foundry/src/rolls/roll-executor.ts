@@ -281,8 +281,8 @@ async function buildSkillRollDialog(opts: SkillRollDialogOptions): Promise<Skill
         callback: (_event: Event, _button: HTMLButtonElement, dialog: HTMLDialogElement) => {
           const form = dialog.querySelector("form") as HTMLFormElement | null;
           if (!form) {
-            console.error("buildSkillRollDialog: form element not found in dialog; using defaults");
-            return { cardDice: 0, bankDice: 0, coolDice: 0, talentDie: false, takesFour: false };
+            console.error("buildSkillRollDialog: form element not found in dialog");
+            return null;
           }
           const data = new FormData(form);
           const cardDice = data.has("cardDice") ? opts.availableCardDice : 0;
@@ -381,11 +381,11 @@ export async function executeStressRoll(agent: RollActor, params: StressRollPara
 export function buildPenaltyNote(face: 1 | 2 | 3, stressDiceCount: number): string {
   switch (face) {
     case 3:
-      return game.i18n?.localize("INSPECTRES.PenaltyNote.Minor") ?? "INSPECTRES.PenaltyNote.Minor";
+      return game.i18n?.localize("INSPECTRES.PenaltyNote.Minor") ?? "Minor consequence";
     case 2:
-      return game.i18n?.localize("INSPECTRES.PenaltyNote.Major") ?? "INSPECTRES.PenaltyNote.Major";
+      return game.i18n?.localize("INSPECTRES.PenaltyNote.Major") ?? "Major consequence";
     case 1:
-      return game.i18n?.format("INSPECTRES.PenaltyNote.Meltdown", { count: String(stressDiceCount) }) ?? "INSPECTRES.PenaltyNote.Meltdown";
+      return game.i18n?.format("INSPECTRES.PenaltyNote.Meltdown", { count: String(stressDiceCount) }) ?? `Meltdown (${stressDiceCount} stress dice)`;
     default: {
       const _exhaustive: never = face;
       throw new Error(`buildPenaltyNote: unexpected face value ${JSON.stringify(_exhaustive)}`);

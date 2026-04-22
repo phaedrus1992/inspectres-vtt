@@ -40,7 +40,7 @@ async function buildStressRollDialog(agent: Actor): Promise<void> {
           const form = dialog.querySelector("form") as HTMLFormElement | null;
           if (!form) {
             console.error("buildStressRollDialog: form element not found in dialog");
-            return { stressDiceCount: 1, coolDiceUsed: 0 };
+            return null;
           }
           const data = new FormData(form);
           const stressDiceCount = Math.max(1, Math.min(5, Number(data.get("stressDice") ?? 1)));
