@@ -15,7 +15,7 @@ export const SKILL_ROLL_CHART = {
 
 /** Stress Roll Chart: read the LOWEST die from a stress roll (#71) */
 export const STRESS_ROLL_CHART = {
-  6: { result: "INSPECTRES.StressRollResult.TooCooll", narration: "INSPECTRES.StressRollNarration.TooCool", coolGain: 1, skillPenalty: 0 },
+  6: { result: "INSPECTRES.StressRollResult.TooCool", narration: "INSPECTRES.StressRollNarration.TooCool", coolGain: 1, skillPenalty: 0 },
   5: { result: "INSPECTRES.StressRollResult.Blase", narration: "INSPECTRES.StressRollNarration.Blase", coolGain: 0, skillPenalty: 0 },
   4: { result: "INSPECTRES.StressRollResult.Annoyed", narration: "INSPECTRES.StressRollNarration.Annoyed", coolGain: 0, skillPenalty: 1 },
   3: { result: "INSPECTRES.StressRollResult.Stressed", narration: "INSPECTRES.StressRollNarration.Stressed", coolGain: 0, skillPenalty: 1 },

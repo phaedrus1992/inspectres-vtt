@@ -491,7 +491,8 @@
     line-height: 1.45;
     resize: none;
     overflow: hidden;
-    /* Auto-height on content change (#72) */
+    /* Auto-height on content change (#72). field-sizing is CSS 2024; fallback to
+       computed height for older browsers via JavaScript in sheet handler. */
     field-sizing: content;
   }
 

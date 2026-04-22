@@ -47,6 +47,14 @@ export function registerHandlebarsHelpers(): void {
     for (const [k, v] of Object.entries(data)) {
       stringData[k] = String(v);
     }
-    return game.i18n?.format(key, stringData) ?? key;
+    if (!game.i18n) {
+      console.warn(`[InSpectres] game.i18n unavailable when formatting key: ${key}`);
+      return key;
+    }
+    const result = game.i18n.format(key, stringData);
+    if (result === key) {
+      console.warn(`[InSpectres] Missing localization key: ${key}`);
+    }
+    return result;
   });
 }

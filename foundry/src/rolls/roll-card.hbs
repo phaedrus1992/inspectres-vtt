@@ -30,7 +30,7 @@
     <div class="roll-card-bank-resolutions">
       {{#each resolutions as |resolution|}}
         <p class="bank-die-result {{#if resolution.loseAllBank}}lose-all{{/if}}">
-          {{resolution.face}}: {{resolution.result}} — {{resolution.narration}}
+          {{resolution.face}}: {{localize resolution.result}} — {{localize resolution.narration}}
         </p>
       {{/each}}
     </div>

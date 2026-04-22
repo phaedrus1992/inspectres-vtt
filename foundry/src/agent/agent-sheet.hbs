@@ -33,9 +33,9 @@
             <div class="skill-main-line">
               <label class="skill-name">{{localize (inspectres-concat "INSPECTRES." (inspectres-capitalize skillName))}}</label>
               <div class="skill-stepper">
-                <button type="button" class="skill-step" data-action="skillDecrease" data-skill="{{skillName}}">−</button>
+                <button type="button" class="skill-step" data-action="skillDecrease" data-skill="{{skillName}}" aria-label="{{inspectres-format "INSPECTRES.AriaLabel.SkillAdjust" (hash skill=skillName)}} decrease">−</button>
                 <span class="skill-base-value">{{skill.base}}</span>
-                <button type="button" class="skill-step" data-action="skillIncrease" data-skill="{{skillName}}">+</button>
+                <button type="button" class="skill-step" data-action="skillIncrease" data-skill="{{skillName}}" aria-label="{{inspectres-format "INSPECTRES.AriaLabel.SkillAdjust" (hash skill=skillName)}} increase">+</button>
               </div>
               <span class="skill-effective-value">({{inspectres-subtract skill.base skill.penalty}} {{localize "INSPECTRES.SkillEffective"}})</span>
               <button
