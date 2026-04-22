@@ -58,7 +58,6 @@ describe("AgentSheet", () => {
   describe("_onRender", () => {
     it("does not attach change listeners when sheet is not editable", async () => {
       const mockSheet = new MockActorSheetV2();
-      mockSheet.isEditable = false;
       const sheet = Object.create(AgentSheet.prototype);
       sheet.actor = mockSheet.actor;
       sheet.isEditable = false;

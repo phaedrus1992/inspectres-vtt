@@ -127,12 +127,12 @@ export async function executeSkillRoll(
   franchise: RollActor | null,
   skillName: SkillName,
 ): Promise<void> {
-  // fvtt-types v13 + template.json: actor.system resolves to UnknownSystem; cast required until DataModelConfig migration
+  // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
   const system = agent.system as unknown as AgentData;
   const skill = system.skills[skillName];
   const effectiveDice = Math.max(0, skill.base - skill.penalty);
 
-  // fvtt-types v13 + template.json: actor.system resolves to UnknownSystem; cast required until DataModelConfig migration
+  // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
   const franchiseSystem = franchise ? (franchise.system as unknown as FranchiseData) : null;
   const cardType = CARD_FOR_SKILL[skillName];
   const availableCardDice = franchiseSystem && cardType ? franchiseSystem.cards[cardType] : 0;
@@ -309,7 +309,7 @@ async function buildSkillRollDialog(opts: SkillRollDialogOptions): Promise<Skill
 // ---------------------------------------------------------------------------
 
 export async function executeBankRoll(franchise: RollActor): Promise<void> {
-  // fvtt-types v13 + template.json: actor.system resolves to UnknownSystem; cast required until DataModelConfig migration
+  // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
   const system = franchise.system as unknown as FranchiseData;
   const currentBank = system.bank;
 
@@ -339,7 +339,7 @@ export async function executeBankRoll(franchise: RollActor): Promise<void> {
 // ---------------------------------------------------------------------------
 
 export async function executeStressRoll(agent: RollActor, params: StressRollParams): Promise<void> {
-  // fvtt-types v13 + template.json: actor.system resolves to UnknownSystem; cast required until DataModelConfig migration
+  // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
   const system = agent.system as unknown as AgentData;
   const { stressDiceCount, coolDiceUsed } = params;
 

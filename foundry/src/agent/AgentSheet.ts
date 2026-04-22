@@ -14,7 +14,7 @@ function isSkillName(value: string | null): value is SkillName {
 }
 
 async function buildStressRollDialog(agent: Actor): Promise<void> {
-  // fvtt-types v13 + template.json: actor.system resolves to UnknownSystem; cast required until DataModelConfig migration
+  // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
   const system = agent.system as unknown as AgentData;
   const maxCool = system.cool;
 
@@ -86,7 +86,7 @@ export class AgentSheet extends foundry.applications.sheets.ActorSheetV2 {
 
   override async _prepareContext(_options: foundry.applications.api.ApplicationV2Options): Promise<Record<string, unknown>> {
     const base = await super._prepareContext(_options);
-    // fvtt-types v13 + template.json: actor.system resolves to UnknownSystem; cast required until DataModelConfig migration
+    // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
     const system = this.actor.system as unknown as AgentData;
     return { ...base, system };
   }
@@ -105,7 +105,6 @@ export class AgentSheet extends foundry.applications.sheets.ActorSheetV2 {
         });
       });
     }
-
   }
 
   static async onSkillRoll(this: AgentSheet, _event: Event, target: HTMLElement): Promise<void> {
@@ -142,7 +141,7 @@ export class AgentSheet extends foundry.applications.sheets.ActorSheetV2 {
       console.error("onSkillStep: missing or invalid data-skill attribute", { skillAttr });
       return;
     }
-    // fvtt-types v13 + template.json: actor.system resolves to UnknownSystem; cast required until DataModelConfig migration
+    // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
     const system = this.actor.system as unknown as AgentData;
     const skillData = system.skills[skillAttr];
     if (!skillData) {
@@ -172,7 +171,7 @@ export class AgentSheet extends foundry.applications.sheets.ActorSheetV2 {
       console.error("onToggleCool: invalid data-value", { valueStr });
       return;
     }
-    // fvtt-types v13 + template.json: actor.system resolves to UnknownSystem; cast required until DataModelConfig migration
+    // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
     const currentCool = (this.actor.system as unknown as AgentData).cool;
     const newCool = currentCool >= pipValue ? pipValue - 1 : pipValue;
     // fvtt-types expects full document data shape for actor.update; partial update path is safe at runtime
@@ -184,7 +183,7 @@ export class AgentSheet extends foundry.applications.sheets.ActorSheetV2 {
 
   static async onAddCharacteristic(this: AgentSheet, _event: Event, _target: HTMLElement): Promise<void> {
     if (!this.isEditable) return;
-    // fvtt-types v13 + template.json: actor.system resolves to UnknownSystem; cast required until DataModelConfig migration
+    // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
     const currentSystem = this.actor.system as unknown as AgentData;
     const characteristics = (currentSystem.characteristics ?? []) as AgentCharacteristic[];
     // fvtt-types expects full document data shape for actor.update; partial update path is safe at runtime
@@ -206,7 +205,7 @@ export class AgentSheet extends foundry.applications.sheets.ActorSheetV2 {
       console.error("onRemoveCharacteristic: invalid data-idx value", { idxStr });
       return;
     }
-    // fvtt-types v13 + template.json: actor.system resolves to UnknownSystem; cast required until DataModelConfig migration
+    // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
     const currentSystem = this.actor.system as unknown as AgentData;
     const characteristics = (currentSystem.characteristics ?? []) as AgentCharacteristic[];
     // fvtt-types expects full document data shape for actor.update; partial update path is safe at runtime
