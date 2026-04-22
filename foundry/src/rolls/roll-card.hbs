@@ -3,7 +3,7 @@
 
   {{#if (eq rollType "skill")}}
     {{#if takesFour}}
-      <p class="roll-card-note">Took a 4 — automatic Fair result.</p>
+      <p class="roll-card-note">{{localize "INSPECTRES.RollCardTookFour"}}</p>
     {{/if}}
     <div class="roll-card-outcome">
       <span class="roll-card-result">{{result}}</span>
@@ -43,7 +43,7 @@
       <p class="roll-card-narration">{{narration}}</p>
     </div>
     {{#if penaltyNote}}
-      <p class="roll-card-penalty-note">⚠ {{penaltyNote}}</p>
+      <p class="roll-card-penalty-note">⚠ {{localize penaltyNote}}</p>
     {{/if}}
   {{/if}}
 

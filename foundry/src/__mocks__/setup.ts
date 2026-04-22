@@ -209,7 +209,24 @@ Object.assign(globalThis, {
   loadTemplates,
   foundry: {
     abstract: {
-      TypeDataModel: class {},
+      TypeDataModel: class {
+        static defineSchema(): Record<string, unknown> { return {}; }
+      },
+    },
+    data: {
+      fields: {
+        StringField: class { constructor(opts?: unknown) { void opts; } },
+        NumberField: class { constructor(opts?: unknown) { void opts; } },
+        BooleanField: class { constructor(opts?: unknown) { void opts; } },
+        ArrayField: class { constructor(element?: unknown, opts?: unknown) { void element; void opts; } },
+        SchemaField: class {
+          fields: Record<string, unknown>;
+          constructor(fields: Record<string, unknown>, opts?: unknown) {
+            this.fields = fields;
+            void opts;
+          }
+        },
+      },
     },
     utils: {
       mergeObject: (target: Record<string, unknown>, source: Record<string, unknown>) => {

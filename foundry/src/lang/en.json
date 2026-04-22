@@ -78,6 +78,13 @@
     "WarnBankRollDebtMode": "Bank rolls are disabled in Debt Mode.",
     "WarnClientRollDebtMode": "Client rolls are disabled in Debt Mode.",
     "Roll": "Roll",
-    "PenaltyFromStress": "penalty from stress"
+    "PenaltyFromStress": "penalty from stress",
+    "CoolUnlimited": "Unlimited Cool",
+    "RollCardTookFour": "Took a 4 — automatic Fair result.",
+    "PenaltyNote": {
+      "Minor": "Reduce 1 die from one skill of your choice on your character sheet.",
+      "Major": "Reduce 2 dice from one skill, or 1 die from each of two skills on your character sheet.",
+      "Meltdown": "Meltdown! Cool dice reset to 0. Reduce {count} skill dice total (distributed as you choose) on your character sheet."
+    }
   }
 }

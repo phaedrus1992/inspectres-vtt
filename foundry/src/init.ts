@@ -7,6 +7,8 @@ import { InSpectresAgent } from "./agent/InSpectresAgent.js";
 import { AgentSheet } from "./agent/AgentSheet.js";
 import { InSpectresFranchise } from "./franchise/InSpectresFranchise.js";
 import { FranchiseSheet } from "./franchise/FranchiseSheet.js";
+import { AgentDataModel } from "./data/AgentDataModel.js";
+import { FranchiseDataModel } from "./data/FranchiseDataModel.js";
 import { registerHandlebarsHelpers } from "./utils/handlebars-helpers.js";
 import { MissionTrackerApp } from "./mission/MissionTrackerApp.js";
 import { onMissionSocketEvent } from "./mission/socket.js";
@@ -25,6 +27,13 @@ Hooks.once("init", async function () {
     console.error("Failed to load templates:", message);
     ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorTemplateLoad") ?? `Template load failed: ${message}`);
   }
+
+  // Register TypeDataModel classes — provides server-side validation and typed actor.system
+  // fvtt-types v13: CONFIG.Actor.dataModels not typed; cast through unknown to assign
+  (CONFIG.Actor as unknown as { dataModels: Record<string, unknown> }).dataModels = {
+    agent: AgentDataModel,
+    franchise: FranchiseDataModel,
+  };
 
   // Register per-type actor document classes (Foundry V12+)
   // fvtt-types doesn't know about documentClasses; cast through unknown to assign
