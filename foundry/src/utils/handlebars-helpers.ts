@@ -40,4 +40,13 @@ export function registerHandlebarsHelpers(): void {
     // Last argument is the Handlebars options object, exclude it
     return args.slice(0, -1).join("");
   });
+
+  // Localization with placeholder substitution (#75)
+  Handlebars.registerHelper("inspectres-format", (key: string, data: Record<string, string | number>) => {
+    const stringData: Record<string, string> = {};
+    for (const [k, v] of Object.entries(data)) {
+      stringData[k] = String(v);
+    }
+    return game.i18n?.format(key, stringData) ?? key;
+  });
 }

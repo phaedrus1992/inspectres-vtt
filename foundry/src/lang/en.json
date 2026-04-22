@@ -88,12 +88,65 @@
     "RollCardOccurrence": "Occurrence",
     "RollCardLocation": "Location",
     "RollCardAddedToPool": "added to mission pool",
-    "CoolDiceLabel": "Cool Dice (0–3)",
+    "CoolDiceLabel": "Cool Dice (0–{max})",
     "SkillEffective": "effective",
     "PenaltyNote": {
       "Minor": "Reduce 1 die from one skill of your choice on your character sheet.",
       "Major": "Reduce 2 dice from one skill, or 1 die from each of two skills on your character sheet.",
       "Meltdown": "Meltdown! Cool dice reset to 0. Reduce {count} skill dice total (distributed as you choose) on your character sheet."
+    },
+    "SkillRollResult": {
+      "Amazing": "Amazing!",
+      "Good": "Good",
+      "Fair": "Fair",
+      "NotGreat": "Not Great",
+      "Bad": "Bad",
+      "Terrible": "Terrible!"
+    },
+    "SkillRollNarration": {
+      "Amazing": "Player narrates the result in full detail",
+      "Good": "Player narrates the result",
+      "Fair": "Player narrates mostly positive but must include a complication",
+      "NotGreat": "GM narrates your fate; you may suggest one minor positive effect",
+      "Bad": "GM narrates your fate (or you may suggest something negative)",
+      "Terrible": "GM gets to hose you with a dire situation"
+    },
+    "StressRollResult": {
+      "TooCooll": "Too Cool for School",
+      "Blase": "Blasé",
+      "Annoyed": "Annoyed",
+      "Stressed": "Stressed",
+      "Frazzled": "Frazzled",
+      "Meltdown": "Meltdown"
+    },
+    "StressRollNarration": {
+      "TooCool": "Gain 1 Cool die; no stress penalties",
+      "Blase": "No effect; you don't care",
+      "Annoyed": "–1 die penalty to your next skill roll",
+      "Stressed": "Lose 1 die from one skill of your choice",
+      "Frazzled": "Lose 2 dice from one skill OR 1 die from each of two skills",
+      "Meltdown": "Lose all Cool dice; lose skill dice equal to the number of stress dice you rolled"
+    },
+    "BankRollResult": {
+      "CompoundedInterest": "Compounded Interest",
+      "Interest": "Interest",
+      "Withdrawal": "Withdrawal",
+      "ServiceCharge": "Service Charge",
+      "AccountOverrun": "Account Overrun"
+    },
+    "BankRollNarration": {
+      "CompoundedInterest": "Return this die + add 1 Bank die",
+      "Interest": "Return this die to Bank",
+      "Withdrawal": "Lose this die",
+      "ServiceCharge": "Lose this die + 1 additional Bank die",
+      "AccountOverrun": "Lose ALL Bank dice"
+    },
+    "AriaLabel": {
+      "SkillRoll": "Roll this skill",
+      "CoolToggle": "Toggle cool die at pip {{index}}",
+      "RemoveCharacteristic": "Remove characteristic",
+      "StressRoll": "Roll for stress",
+      "SkillAdjust": "Adjust {{skill}} skill"
     }
   }
 }
