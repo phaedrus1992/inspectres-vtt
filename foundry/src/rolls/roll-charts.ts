@@ -36,10 +36,6 @@ export const BANK_ROLL_CHART = {
 /**
  * Client Generation Table: Roll 2d6 for each of four attributes
  * This is NOT an outcome resolution table; it randomly generates client characteristics
- */
-/**
- * Client Generation Table: Roll 2d6 for each of four attributes
- * This is NOT an outcome resolution table; it randomly generates client characteristics
  *
  * NOTE: Both ClientType[2] and ClientOccurrence[2] map to "Ghost/Monster Transformation" in locale files.
  * This duplication is intentional: they represent different semantic contexts of the same phenomenon.
