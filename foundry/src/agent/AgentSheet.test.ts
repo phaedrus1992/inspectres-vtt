@@ -13,10 +13,35 @@ describe("AgentSheet", () => {
   });
 
   describe("_onRender", () => {
+    it("does not attach change listeners when sheet is not editable", async () => {
+      const mockSheet = new MockActorSheetV2();
+      mockSheet.isEditable = false;
+      const sheet = Object.create(AgentSheet.prototype);
+      sheet.actor = mockSheet.actor;
+      sheet.isEditable = false;
+
+      const checkbox = document.createElement("input");
+      checkbox.className = "weird-checkbox";
+      checkbox.type = "checkbox";
+
+      const querySelectorAllSpy = vi.fn(() => [checkbox]);
+      Object.defineProperty(sheet, "element", {
+        value: { querySelectorAll: querySelectorAllSpy },
+      });
+
+      const updateSpy = vi.spyOn(sheet.actor, "update").mockResolvedValue(sheet.actor);
+
+      await sheet._onRender({}, {});
+
+      checkbox.dispatchEvent(new Event("change"));
+      expect(updateSpy).not.toHaveBeenCalled();
+    });
+
     it("attaches change listener to weird-checkbox elements", async () => {
       const mockActor = new MockActorSheetV2().actor;
       const sheet = Object.create(AgentSheet.prototype);
       sheet.actor = mockActor;
+      sheet.isEditable = true;
 
       const checkbox = document.createElement("input");
       checkbox.className = "weird-checkbox";
@@ -40,6 +65,7 @@ describe("AgentSheet", () => {
       const mockActor = new MockActorSheetV2().actor;
       const sheet = Object.create(AgentSheet.prototype);
       sheet.actor = mockActor;
+      sheet.isEditable = true;
 
       const checkbox = document.createElement("input");
       checkbox.className = "weird-checkbox";
@@ -64,6 +90,7 @@ describe("AgentSheet", () => {
       const mockActor = new MockActorSheetV2().actor;
       const sheet = Object.create(AgentSheet.prototype);
       sheet.actor = mockActor;
+      sheet.isEditable = true;
 
       const checkbox1 = document.createElement("input");
       const checkbox2 = document.createElement("input");

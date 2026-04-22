@@ -56,6 +56,7 @@ function extractFaces(roll: Roll): number[] {
 }
 
 async function actorUpdate(actor: RollActor, data: Record<string, unknown>): Promise<void> {
+  // fvtt-types expects full document data shape for actor.update; partial dot-notation paths are safe at runtime
   const updateData = data as unknown as Parameters<typeof actor.update>[0];
   await actor.update(updateData);
 }
@@ -71,6 +72,7 @@ async function postChatCard(
   speaker: ReturnType<typeof ChatMessage.getSpeaker>,
   rolls: Roll[],
 ): Promise<void> {
+  // fvtt-types ChatMessage.create expects strict DocumentData; whisper/rolls fields are valid at runtime
   await ChatMessage.create({ content, speaker, rolls } as unknown as Parameters<typeof ChatMessage.create>[0]);
 }
 
@@ -125,10 +127,12 @@ export async function executeSkillRoll(
   franchise: RollActor | null,
   skillName: SkillName,
 ): Promise<void> {
+  // fvtt-types v13 + template.json: actor.system resolves to UnknownSystem; cast required until DataModelConfig migration
   const system = agent.system as unknown as AgentData;
   const skill = system.skills[skillName];
   const effectiveDice = Math.max(0, skill.base - skill.penalty);
 
+  // fvtt-types v13 + template.json: actor.system resolves to UnknownSystem; cast required until DataModelConfig migration
   const franchiseSystem = franchise ? (franchise.system as unknown as FranchiseData) : null;
   const cardType = CARD_FOR_SKILL[skillName];
   const availableCardDice = franchiseSystem && cardType ? franchiseSystem.cards[cardType] : 0;
@@ -210,6 +214,7 @@ export async function executeSkillRoll(
     if (franchise.id !== null) emitMissionPoolUpdated(franchise.id);
   }
 
+  // ChatMessage.getSpeaker requires the full Actor type; RollActor satisfies the needed fields at runtime
   const speaker = ChatMessage.getSpeaker({ actor: agent as Actor });
   const content = await renderTemplate("systems/inspectres/templates/roll-card.hbs", {
     rollType: "skill",
@@ -304,6 +309,7 @@ async function buildSkillRollDialog(opts: SkillRollDialogOptions): Promise<Skill
 // ---------------------------------------------------------------------------
 
 export async function executeBankRoll(franchise: RollActor): Promise<void> {
+  // fvtt-types v13 + template.json: actor.system resolves to UnknownSystem; cast required until DataModelConfig migration
   const system = franchise.system as unknown as FranchiseData;
   const currentBank = system.bank;
 
@@ -317,6 +323,7 @@ export async function executeBankRoll(franchise: RollActor): Promise<void> {
 
   await actorUpdate(franchise, { "system.bank": summary.finalBankTotal });
 
+  // ChatMessage.getSpeaker requires the full Actor type; RollActor satisfies the needed fields at runtime
   const speaker = ChatMessage.getSpeaker({ actor: franchise as Actor });
   const content = await renderTemplate("systems/inspectres/templates/roll-card.hbs", {
     rollType: "bank",
@@ -332,6 +339,7 @@ export async function executeBankRoll(franchise: RollActor): Promise<void> {
 // ---------------------------------------------------------------------------
 
 export async function executeStressRoll(agent: RollActor, params: StressRollParams): Promise<void> {
+  // fvtt-types v13 + template.json: actor.system resolves to UnknownSystem; cast required until DataModelConfig migration
   const system = agent.system as unknown as AgentData;
   const { stressDiceCount, coolDiceUsed } = params;
 
@@ -354,6 +362,7 @@ export async function executeStressRoll(agent: RollActor, params: StressRollPara
     await actorUpdate(agent, { "system.cool": system.cool + outcome.coolGain });
   }
 
+  // ChatMessage.getSpeaker requires the full Actor type; RollActor satisfies the needed fields at runtime
   const speaker = ChatMessage.getSpeaker({ actor: agent as Actor });
   const content = await renderTemplate("systems/inspectres/templates/roll-card.hbs", {
     rollType: "stress",
@@ -403,6 +412,7 @@ export async function executeClientRoll(franchise: RollActor): Promise<void> {
     generated[attr] = table[key] ?? "";
   }
 
+  // ChatMessage.getSpeaker requires the full Actor type; RollActor satisfies the needed fields at runtime
   const speaker = ChatMessage.getSpeaker({ actor: franchise as Actor });
   const content = await renderTemplate("systems/inspectres/templates/roll-card.hbs", {
     rollType: "client",
@@ -411,5 +421,6 @@ export async function executeClientRoll(franchise: RollActor): Promise<void> {
   });
   // Client roll results are GM prep — whisper to all GMs only
   const gmIds = (game.users?.filter((u) => u.isGM).map((u) => u.id).filter((id): id is string => id !== null)) ?? [];
+  // fvtt-types ChatMessage.create expects strict DocumentData; whisper/rolls fields are valid at runtime
   await ChatMessage.create({ content, speaker, rolls, whisper: gmIds } as unknown as Parameters<typeof ChatMessage.create>[0]);
 }
