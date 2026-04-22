@@ -40,4 +40,21 @@ export function registerHandlebarsHelpers(): void {
     // Last argument is the Handlebars options object, exclude it
     return args.slice(0, -1).join("");
   });
+
+  // Localization with placeholder substitution (#75)
+  Handlebars.registerHelper("inspectres-format", (key: string, data: Record<string, string | number>) => {
+    const stringData: Record<string, string> = {};
+    for (const [k, v] of Object.entries(data)) {
+      stringData[k] = String(v);
+    }
+    if (!game.i18n) {
+      console.warn(`[InSpectres] game.i18n unavailable when formatting key: ${key}`);
+      return key;
+    }
+    const result = game.i18n.format(key, stringData);
+    if (result === key) {
+      console.warn(`[InSpectres] Missing localization key: ${key}`);
+    }
+    return result;
+  });
 }

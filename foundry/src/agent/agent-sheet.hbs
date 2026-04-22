@@ -33,9 +33,9 @@
             <div class="skill-main-line">
               <label class="skill-name">{{localize (inspectres-concat "INSPECTRES." (inspectres-capitalize skillName))}}</label>
               <div class="skill-stepper">
-                <button type="button" class="skill-step" data-action="skillDecrease" data-skill="{{skillName}}">−</button>
+                <button type="button" class="skill-step" data-action="skillDecrease" data-skill="{{skillName}}" aria-label="{{inspectres-format "INSPECTRES.AriaLabel.SkillAdjust" (hash skill=skillName)}} decrease">−</button>
                 <span class="skill-base-value">{{skill.base}}</span>
-                <button type="button" class="skill-step" data-action="skillIncrease" data-skill="{{skillName}}">+</button>
+                <button type="button" class="skill-step" data-action="skillIncrease" data-skill="{{skillName}}" aria-label="{{inspectres-format "INSPECTRES.AriaLabel.SkillAdjust" (hash skill=skillName)}} increase">+</button>
               </div>
               <span class="skill-effective-value">({{inspectres-subtract skill.base skill.penalty}} {{localize "INSPECTRES.SkillEffective"}})</span>
               <button
@@ -43,7 +43,7 @@
                 class="skill-roll-button"
                 data-action="skillRoll"
                 data-skill="{{skillName}}"
-                title="{{localize "INSPECTRES.Roll"}}"
+                aria-label="{{localize "INSPECTRES.AriaLabel.SkillRoll"}}"
               ><i class="fas fa-dice"></i></button>
             </div>
             {{#if skill.penalty}}
@@ -85,7 +85,7 @@
           </div>
         {{else}}
           <div class="cool-pips">
-            <span class="cool-label">{{localize "INSPECTRES.CoolDiceLabel"}}</span>
+            <span class="cool-label">{{inspectres-format "INSPECTRES.CoolDiceLabel" (hash max=3)}}</span>
             <div class="pip-container">
               {{#each (inspectres-range 0 2) as |pip|}}
                 <button
@@ -93,6 +93,7 @@
                   class="cool-pip {{#if (inspectres-gte ../system.cool (inspectres-add pip 1))}}filled{{/if}}"
                   data-action="toggleCool"
                   data-value="{{inspectres-add pip 1}}"
+                  aria-label="{{inspectres-format "INSPECTRES.AriaLabel.CoolToggle" (hash index=(inspectres-add pip 1))}}"
                 >
                   ●
                 </button>
@@ -122,7 +123,7 @@
               placeholder="Characteristic text"
               class="characteristic-text"
             />
-            <button type="button" class="btn-remove" data-action="removeCharacteristic" data-idx="{{idx}}">
+            <button type="button" class="btn-remove" data-action="removeCharacteristic" data-idx="{{idx}}" aria-label="{{localize "INSPECTRES.AriaLabel.RemoveCharacteristic"}}">
               ✕
             </button>
           </div>

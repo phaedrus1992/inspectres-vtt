@@ -3,34 +3,34 @@
  * Maps die face (1–6) to outcomes per the official rules
  */
 
-/** Skill Roll Chart: read the HIGHEST die from a skill roll */
+/** Skill Roll Chart: read the HIGHEST die from a skill roll (#71) */
 export const SKILL_ROLL_CHART = {
-  6: { result: "Amazing!", narration: "Player narrates the result in full detail", franchiseDice: 2 },
-  5: { result: "Good", narration: "Player narrates the result", franchiseDice: 1 },
-  4: { result: "Fair", narration: "Player narrates mostly positive but must include a complication", franchiseDice: 0 },
-  3: { result: "Not Great", narration: "GM narrates your fate; you may suggest one minor positive effect", franchiseDice: 0 },
-  2: { result: "Bad", narration: "GM narrates your fate (or you may suggest something negative)", franchiseDice: 0 },
-  1: { result: "Terrible!", narration: "GM gets to hose you with a dire situation", franchiseDice: 0 },
+  6: { result: "INSPECTRES.SkillRollResult.Amazing", narration: "INSPECTRES.SkillRollNarration.Amazing", franchiseDice: 2 },
+  5: { result: "INSPECTRES.SkillRollResult.Good", narration: "INSPECTRES.SkillRollNarration.Good", franchiseDice: 1 },
+  4: { result: "INSPECTRES.SkillRollResult.Fair", narration: "INSPECTRES.SkillRollNarration.Fair", franchiseDice: 0 },
+  3: { result: "INSPECTRES.SkillRollResult.NotGreat", narration: "INSPECTRES.SkillRollNarration.NotGreat", franchiseDice: 0 },
+  2: { result: "INSPECTRES.SkillRollResult.Bad", narration: "INSPECTRES.SkillRollNarration.Bad", franchiseDice: 0 },
+  1: { result: "INSPECTRES.SkillRollResult.Terrible", narration: "INSPECTRES.SkillRollNarration.Terrible", franchiseDice: 0 },
 } as const;
 
-/** Stress Roll Chart: read the LOWEST die from a stress roll */
+/** Stress Roll Chart: read the LOWEST die from a stress roll (#71) */
 export const STRESS_ROLL_CHART = {
-  6: { result: "Too Cool for School", narration: "Gain 1 Cool die; no stress penalties", coolGain: 1, skillPenalty: 0 },
-  5: { result: "Blasé", narration: "No effect; you don't care", coolGain: 0, skillPenalty: 0 },
-  4: { result: "Annoyed", narration: "–1 die penalty to your next skill roll", coolGain: 0, skillPenalty: 1 },
-  3: { result: "Stressed", narration: "Lose 1 die from one skill of your choice", coolGain: 0, skillPenalty: 1 },
-  2: { result: "Frazzled", narration: "Lose 2 dice from one skill OR 1 die from each of two skills", coolGain: 0, skillPenalty: 2 },
-  1: { result: "Meltdown", narration: "Lose all Cool dice; lose skill dice equal to the number of stress dice you rolled", coolGain: 0, skillPenalty: -1 },
+  6: { result: "INSPECTRES.StressRollResult.TooCool", narration: "INSPECTRES.StressRollNarration.TooCool", coolGain: 1, skillPenalty: 0 },
+  5: { result: "INSPECTRES.StressRollResult.Blase", narration: "INSPECTRES.StressRollNarration.Blase", coolGain: 0, skillPenalty: 0 },
+  4: { result: "INSPECTRES.StressRollResult.Annoyed", narration: "INSPECTRES.StressRollNarration.Annoyed", coolGain: 0, skillPenalty: 1 },
+  3: { result: "INSPECTRES.StressRollResult.Stressed", narration: "INSPECTRES.StressRollNarration.Stressed", coolGain: 0, skillPenalty: 1 },
+  2: { result: "INSPECTRES.StressRollResult.Frazzled", narration: "INSPECTRES.StressRollNarration.Frazzled", coolGain: 0, skillPenalty: 2 },
+  1: { result: "INSPECTRES.StressRollResult.Meltdown", narration: "INSPECTRES.StressRollNarration.Meltdown", coolGain: 0, skillPenalty: -1 },
 } as const;
 
-/** Bank Roll Chart: evaluated per die spent from Bank */
+/** Bank Roll Chart: evaluated per die spent from Bank (#71) */
 export const BANK_ROLL_CHART = {
-  6: { result: "Compounded Interest", narration: "Return this die + add 1 Bank die", diceReturned: 1, diceAdded: 1 },
-  5: { result: "Interest", narration: "Return this die to Bank", diceReturned: 1, diceAdded: 0 },
-  4: { result: "Withdrawal", narration: "Lose this die", diceReturned: 0, diceAdded: 0 },
-  3: { result: "Withdrawal", narration: "Lose this die", diceReturned: 0, diceAdded: 0 },
-  2: { result: "Service Charge", narration: "Lose this die + 1 additional Bank die", diceReturned: 0, diceAdded: -1 },
-  1: { result: "Account Overrun", narration: "Lose ALL Bank dice", diceReturned: 0, diceAdded: 0, loseAllBank: true },
+  6: { result: "INSPECTRES.BankRollResult.CompoundedInterest", narration: "INSPECTRES.BankRollNarration.CompoundedInterest", diceReturned: 1, diceAdded: 1 },
+  5: { result: "INSPECTRES.BankRollResult.Interest", narration: "INSPECTRES.BankRollNarration.Interest", diceReturned: 1, diceAdded: 0 },
+  4: { result: "INSPECTRES.BankRollResult.Withdrawal", narration: "INSPECTRES.BankRollNarration.Withdrawal", diceReturned: 0, diceAdded: 0 },
+  3: { result: "INSPECTRES.BankRollResult.Withdrawal", narration: "INSPECTRES.BankRollNarration.Withdrawal", diceReturned: 0, diceAdded: 0 },
+  2: { result: "INSPECTRES.BankRollResult.ServiceCharge", narration: "INSPECTRES.BankRollNarration.ServiceCharge", diceReturned: 0, diceAdded: -1 },
+  1: { result: "INSPECTRES.BankRollResult.AccountOverrun", narration: "INSPECTRES.BankRollNarration.AccountOverrun", diceReturned: 0, diceAdded: 0, loseAllBank: true },
 } as const;
 
 /**

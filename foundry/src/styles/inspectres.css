@@ -488,8 +488,12 @@
     min-height: 4rem;
     padding: 0.35rem 0.5rem;
     font-size: 0.82rem;
-    resize: vertical;
     line-height: 1.45;
+    resize: none;
+    overflow: hidden;
+    /* Auto-height on content change (#72). field-sizing is CSS 2024; fallback to
+       computed height for older browsers via JavaScript in sheet handler. */
+    field-sizing: content;
   }
 
   /* Cards grid */
