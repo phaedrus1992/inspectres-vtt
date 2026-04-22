@@ -98,8 +98,8 @@ declare namespace foundry.applications.api {
   }
 
   /**
-   * Mixin that provides Handlebars template rendering (_renderHTML / _replaceHTML) to an
-   * ApplicationV2 subclass. Required for any ApplicationV2-based sheet that uses PARTS.
+   * Mixin that provides Handlebars template rendering to an ApplicationV2 subclass.
+   * Required for any ApplicationV2-based sheet that uses PARTS.
    *
    * Usage: `class MySheet extends HandlebarsApplicationMixin(foundry.applications.sheets.ActorSheetV2)`
    *
@@ -107,29 +107,12 @@ declare namespace foundry.applications.api {
    *
    * LIMITATION: TypeScript's mixin typing cannot express the type-level addition of _renderHTML
    * and _replaceHTML. At runtime, the mixin's prototype augmentation adds these methods safely,
-   * but TypeScript sees only the return type TBase.
-   *
-   * If you need to call these methods from sheet code, cast to ApplicationV2Handlebars (below).
-   * In practice, these methods are only called by ApplicationV2 internals, so user code rarely
-   * needs them. The mixin is required for PARTS support, not for direct method access.
+   * but TypeScript sees only the return type TBase. In practice, these methods are only called
+   * by ApplicationV2 internals, so user code rarely needs them directly.
    */
   function HandlebarsApplicationMixin<TBase extends abstract new (...args: never[]) => ApplicationV2>(
     Base: TBase,
   ): TBase;
-
-  /**
-   * Type marker for ApplicationV2 subclasses enhanced by HandlebarsApplicationMixin.
-   * Use this to cast when accessing mixin methods that TypeScript cannot statically resolve:
-   *
-   *     const app = this as ApplicationV2Handlebars;
-   *     const html = await app._renderHTML("part-id");
-   *
-   * In most cases this cast is not needed — ApplicationV2 internals manage the methods.
-   */
-  interface ApplicationV2Handlebars extends ApplicationV2 {
-    protected _renderHTML(partId: string): Promise<string>;
-    protected _replaceHTML(partId: string): Promise<void>;
-  }
 }
 
 declare namespace foundry.applications.sheets {
