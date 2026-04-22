@@ -7,6 +7,7 @@ import { executeSkillRoll, executeStressRoll, type SkillName } from "../rolls/ro
 import { findFranchiseActor, franchiseSystemData } from "../franchise/franchise-utils.js";
 import { handleActionError } from "../utils/ui-errors.js";
 import { activateTabs } from "../utils/sheet-tabs.js";
+import { getOrCreateListenerController } from "../utils/listener-cleanup.js";
 
 const SKILL_NAMES = ["academics", "athletics", "technology", "contact"] as const;
 
@@ -16,6 +17,7 @@ function isSkillName(value: string | null): value is SkillName {
 
 // Store AbortController for each sheet instance to manage checkbox listeners
 const checkboxControllers = new WeakMap<AgentSheet, AbortController>();
+
 
 async function buildStressRollDialog(agent: Actor): Promise<void> {
   // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
@@ -105,13 +107,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
 
     if (!this.isEditable) return;
 
-    // Abort previous listeners before attaching new ones (prevents accumulation on re-render)
-    const prevController = checkboxControllers.get(this);
-    if (prevController) {
-      prevController.abort();
-    }
-    const newController = new AbortController();
-    checkboxControllers.set(this, newController);
+    const controller = getOrCreateListenerController(checkboxControllers, this);
 
     // weird-checkbox: change event not covered by DEFAULT_OPTIONS.actions
     for (const el of this.element.querySelectorAll<HTMLInputElement>(".weird-checkbox")) {
@@ -121,7 +117,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
         void this.actor.update(updateData).catch((err: unknown) => {
           handleActionError(err, "Failed to toggle weird status", "INSPECTRES.ErrorUpdateFailed", "Failed to update actor data");
         });
-      }, { signal: newController.signal });
+      }, { signal: controller.signal });
     }
   }
 

@@ -1,3 +1,5 @@
+import { getOrCreateListenerController } from "./listener-cleanup.js";
+
 // Keyed by element instance so previous listeners are aborted before re-attaching.
 const tabControllers = new WeakMap<HTMLElement, AbortController>();
 
@@ -28,9 +30,7 @@ export function activateTabs(element: HTMLElement, defaultTab: string): void {
 
   applyActiveTab(buttons, tabs, element, activeTab);
 
-  tabControllers.get(element)?.abort();
-  const controller = new AbortController();
-  tabControllers.set(element, controller);
+  const controller = getOrCreateListenerController(tabControllers, element);
   const { signal } = controller;
 
   const buttonArray = Array.from(buttons);
