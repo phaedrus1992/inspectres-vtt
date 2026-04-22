@@ -233,13 +233,21 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     });
   }
 
-  static async onEditPortrait(this: AgentSheet, event: Event, _target: HTMLElement): Promise<void> {
+  static async onEditPortrait(this: AgentSheet, _event: Event, target: HTMLElement): Promise<void> {
     if (!this.isEditable) return;
-    const newPath = await (FilePicker as unknown as { fromButton: (e: Event) => Promise<string | null> }).fromButton(event);
-    if (!newPath) return;
-    const updateData = { img: newPath } as unknown as Parameters<typeof this.actor.update>[0];
-    void this.actor.update(updateData).catch((err: unknown) => {
-      handleActionError(err, "Failed to update portrait", "INSPECTRES.ErrorUpdateFailed", "Failed to update actor image");
+    const type = target.dataset["type"] ?? "image";
+    const current = this.actor.img ?? undefined;
+    const FilePicker = (foundry.applications.api as unknown as { FilePicker: unknown }).FilePicker as unknown as { new (options: { current?: string | undefined; type: string; callback?: (path: string) => void }): { browse(): void } };
+    const picker = new FilePicker({
+      current,
+      type,
+      callback: (path: string) => {
+        const updateData = { img: path } as unknown as Parameters<typeof this.actor.update>[0];
+        void this.actor.update(updateData).catch((err: unknown) => {
+          handleActionError(err, "Failed to update portrait", "INSPECTRES.ErrorUpdateFailed", "Failed to update actor image");
+        });
+      },
     });
+    picker.browse();
   }
 }

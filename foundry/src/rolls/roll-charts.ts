@@ -53,7 +53,7 @@ export const CLIENT_GENERATION_TABLE = {
   },
   clientType: {
     2: "INSPECTRES.ClientType.GhostMonster",
-    3: "INSPECTRES.ClientType.Policeofficer",
+    3: "INSPECTRES.ClientType.PoliceOfficer",
     4: "INSPECTRES.ClientType.Student",
     5: "INSPECTRES.ClientType.CityWorker",
     6: "INSPECTRES.ClientType.Storekeeper",

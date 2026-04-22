@@ -148,7 +148,8 @@
       "CoolToggle": "Toggle cool die at pip {index}",
       "RemoveCharacteristic": "Remove characteristic",
       "StressRoll": "Roll for stress",
-      "SkillAdjust": "Adjust {skill} skill"
+      "SkillAdjust": "Adjust {skill} skill",
+      "EditPortrait": "Click to change portrait"
     },
     "ClientPersonality": {
       "Horny": "Horny",
@@ -165,7 +166,7 @@
     },
     "ClientType": {
       "GhostMonster": "Ghost/Monster Transformation",
-      "Policeofficer": "Police Officer",
+      "PoliceOfficer": "Police Officer",
       "Student": "Student",
       "CityWorker": "City Worker",
       "Storekeeper": "Storekeeper",

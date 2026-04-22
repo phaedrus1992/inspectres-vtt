@@ -139,31 +139,67 @@ describe("AgentSheet", () => {
       sheet.actor = mockActor;
       sheet.isEditable = true;
 
-      const event = new MouseEvent("click");
       const updateSpy = vi.spyOn(sheet.actor, "update").mockResolvedValue(sheet.actor);
-      const filePickerSpy = vi.fn().mockResolvedValue("systems/inspectres/assets/new-portrait.png");
-      global.FilePicker = { fromButton: filePickerSpy } as unknown as any;
+      const target = document.createElement("img");
+      target.dataset["type"] = "image";
 
-      await AgentSheet.onEditPortrait.call(sheet, event, document.createElement("img"));
+      let pickerCallback: ((path: string) => void) | undefined;
+      const mockFilePicker = {
+        browse: vi.fn(),
+      };
+      class MockFilePicker {
+        constructor(options: { callback?: (path: string) => void }) {
+          pickerCallback = options.callback;
+        }
+        browse() {
+          mockFilePicker.browse();
+        }
+      }
+      global.foundry = {
+        applications: {
+          api: {
+            FilePicker: MockFilePicker,
+          },
+        },
+      } as unknown as typeof foundry;
 
+      await AgentSheet.onEditPortrait.call(sheet, new MouseEvent("click"), target);
+      expect(mockFilePicker.browse).toHaveBeenCalled();
+
+      if (pickerCallback) pickerCallback("systems/inspectres/assets/new-portrait.png");
+      await new Promise(resolve => setTimeout(resolve, 10));
       expect(updateSpy).toHaveBeenCalledWith(
         expect.objectContaining({ img: "systems/inspectres/assets/new-portrait.png" }),
       );
     });
 
-    it("does not update actor when file picker is cancelled", async () => {
+    it("does not update actor when file picker is dismissed without selection", async () => {
       const mockActor = new MockActorSheetV2().actor;
       const sheet = Object.create(AgentSheet.prototype);
       sheet.actor = mockActor;
       sheet.isEditable = true;
 
-      const event = new MouseEvent("click");
       const updateSpy = vi.spyOn(sheet.actor, "update").mockResolvedValue(sheet.actor);
-      const filePickerSpy = vi.fn().mockResolvedValue(null);
-      global.FilePicker = { fromButton: filePickerSpy } as unknown as any;
+      const target = document.createElement("img");
 
-      await AgentSheet.onEditPortrait.call(sheet, event, document.createElement("img"));
+      const mockFilePicker = {
+        browse: vi.fn(),
+      };
+      class MockFilePicker {
+        browse() {
+          mockFilePicker.browse();
+        }
+      }
+      global.foundry = {
+        applications: {
+          api: {
+            FilePicker: MockFilePicker,
+          },
+        },
+      } as unknown as typeof foundry;
 
+      await AgentSheet.onEditPortrait.call(sheet, new MouseEvent("click"), target);
+      expect(mockFilePicker.browse).toHaveBeenCalled();
       expect(updateSpy).not.toHaveBeenCalled();
     });
 
@@ -173,15 +209,24 @@ describe("AgentSheet", () => {
       sheet.actor = mockActor;
       sheet.isEditable = false;
 
-      const event = new MouseEvent("click");
-      const updateSpy = vi.spyOn(sheet.actor, "update").mockResolvedValue(sheet.actor);
-      const filePickerSpy = vi.fn().mockResolvedValue("systems/inspectres/assets/new-portrait.png");
-      global.FilePicker = { fromButton: filePickerSpy } as unknown as any;
+      const filePickerConstructor = vi.fn();
+      class TrackingFilePicker {
+        constructor() {
+          filePickerConstructor();
+        }
+        browse() {}
+      }
+      global.foundry = {
+        applications: {
+          api: {
+            FilePicker: TrackingFilePicker,
+          },
+        },
+      } as unknown as typeof foundry;
 
-      await AgentSheet.onEditPortrait.call(sheet, event, document.createElement("img"));
+      await AgentSheet.onEditPortrait.call(sheet, new MouseEvent("click"), document.createElement("img"));
 
-      expect(filePickerSpy).not.toHaveBeenCalled();
-      expect(updateSpy).not.toHaveBeenCalled();
+      expect(filePickerConstructor).not.toHaveBeenCalled();
     });
   });
 
