@@ -3,7 +3,8 @@ import { executeBankRoll, executeClientRoll } from "../rolls/roll-executor.js";
 import { MissionTrackerApp } from "../mission/MissionTrackerApp.js";
 import { handleActionError } from "../utils/ui-errors.js";
 
-export class FranchiseSheet extends foundry.applications.sheets.ActorSheetV2 {
+// HandlebarsApplicationMixin provides _renderHTML/_replaceHTML required by ApplicationV2 for PARTS-based sheets
+export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.sheets.ActorSheetV2) {
   static override DEFAULT_OPTIONS = {
     classes: ["inspectres", "sheet", "actor", "franchise"],
     position: { width: 600, height: 600 as number | "auto" },

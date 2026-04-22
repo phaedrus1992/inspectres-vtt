@@ -98,6 +98,20 @@ declare namespace foundry.applications.api {
   }
 }
 
+declare namespace foundry.applications.api {
+  /**
+   * Mixin that provides Handlebars template rendering (_renderHTML / _replaceHTML) to an
+   * ApplicationV2 subclass. Required for any ApplicationV2-based sheet that uses PARTS.
+   *
+   * Usage: `class MySheet extends HandlebarsApplicationMixin(foundry.applications.sheets.ActorSheetV2)`
+   *
+   * fvtt-types v13 does not yet declare this mixin — declared here until the library catches up.
+   */
+  function HandlebarsApplicationMixin<TBase extends abstract new (...args: never[]) => ApplicationV2>(
+    Base: TBase,
+  ): TBase;
+}
+
 declare namespace foundry.applications.sheets {
   interface ActorSheetV2Options extends foundry.applications.api.ApplicationV2Options {
     document?: Actor;

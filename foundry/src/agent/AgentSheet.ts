@@ -64,7 +64,8 @@ async function buildStressRollDialog(agent: Actor): Promise<void> {
   await executeStressRoll(agent, params);
 }
 
-export class AgentSheet extends foundry.applications.sheets.ActorSheetV2 {
+// HandlebarsApplicationMixin provides _renderHTML/_replaceHTML required by ApplicationV2 for PARTS-based sheets
+export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.sheets.ActorSheetV2) {
   static override DEFAULT_OPTIONS = {
     classes: ["inspectres", "sheet", "actor", "agent"],
     position: { width: 600, height: 700 as number | "auto" },

@@ -1,37 +1,125 @@
 /* InSpectres System Stylesheet */
 
 :root {
+  /* Brand */
   --inspectres-primary: #2c3e50;
   --inspectres-secondary: #3498db;
   --inspectres-accent: #e74c3c;
-  --inspectres-light: #ecf0f1;
+
+  /* Sheet chrome */
+  --inspectres-sheet-bg: #ecf0f1;
+  --inspectres-light: #ecf0f1;        /* alias kept for compatibility */
   --inspectres-dark: #1a252f;
-  --inspectres-disabled: #95a5a6;
+
+  /* Text — explicit so Foundry's theme cannot bleed in */
+  --inspectres-text: #191813;
   --inspectres-label-muted: #555;
+
+  /* Input surfaces — light bg, dark text, subtle border */
+  --inspectres-input-bg: #ffffff;
+  --inspectres-input-border: #b0bec5;
+
+  /* Button surfaces */
+  --inspectres-btn-bg: #dce3e8;
+  --inspectres-btn-color: var(--inspectres-text);
+  --inspectres-btn-border: #90a4ae;
+
+  /* State colors */
+  --inspectres-disabled: #95a5a6;
+  --inspectres-inactive: #bdc3c7;
+  --inspectres-success: #27ae60;
+
+  /* Info/warning banner */
   --inspectres-info-bg: #fef3cd;
   --inspectres-info-border: #f0ad4e;
   --inspectres-info-text: #856404;
-  --inspectres-inactive: #bdc3c7;
-  --inspectres-success: #27ae60;
 }
 
-.inspectres {
-  /* Base sheet styles */
-  &.inspectres-sheet {
-    background: var(--inspectres-light);
-    border: 1px solid var(--inspectres-primary);
+/* ─── Outer V2 shell ────────────────────────────────────────────────────── */
+
+/* V13 ActorSheetV2: outer wrapper is form.application, inner is section.window-content. */
+.application.sheet.inspectres .window-content {
+  overflow-y: auto;
+  padding: 0;
+}
+
+/* Inner form owns all colors — Foundry's theme must not bleed past this boundary. */
+.application.sheet.inspectres .window-content > form {
+  min-height: 100%;
+  color: var(--inspectres-text);
+  background: var(--inspectres-sheet-bg);
+}
+
+/* ─── Inner sheet reset ─────────────────────────────────────────────────── */
+
+.inspectres.inspectres-sheet {
+  background: var(--inspectres-sheet-bg);
+  border: 1px solid var(--inspectres-primary);
+  color: var(--inspectres-text);
+
+  /* Reset ALL text-bearing elements so Foundry's global rules can't win */
+  h1, h2, h3, h4, h5, h6,
+  p, span, label, legend {
+    color: var(--inspectres-text);
   }
 
+  /* Reset inputs: Foundry sets a dark bg globally; we want light inputs on our light sheet */
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  textarea,
+  select {
+    color: var(--inspectres-text);
+    background: var(--inspectres-input-bg);
+    border: 1px solid var(--inspectres-input-border);
+    border-radius: 3px;
+  }
+
+  /* Checkboxes: leave browser default rendering, just ensure label color is right */
+  input[type="checkbox"] {
+    accent-color: var(--inspectres-primary);
+  }
+
+  /* Generic buttons: override Foundry's dark button defaults.
+     Named buttons (.btn-add, .btn-remove, .cool-pip, roll/step buttons) are styled individually. */
+  button:not(.inspectres-roll-button):not(.skill-step):not(.skill-roll-button):not(.cool-pip):not(.btn-add):not(.btn-remove) {
+    color: var(--inspectres-btn-color);
+    background: var(--inspectres-btn-bg);
+    border: 1px solid var(--inspectres-btn-border);
+    border-radius: 3px;
+    cursor: pointer;
+
+    &:hover { background: #c8d6dd; }
+  }
+}
+
+/* ─── Sheet sections ────────────────────────────────────────────────────── */
+
+.inspectres {
   .inspectres-header {
     background: linear-gradient(135deg, var(--inspectres-primary), var(--inspectres-secondary));
     color: white;
     padding: 1rem;
     border-radius: 4px 4px 0 0;
+
+    /* Inputs inside the dark header get a glass treatment — must beat the sheet-level reset */
+    input[type="text"],
+    input[type="number"],
+    input[type="email"],
+    textarea {
+      color: white !important;
+      background: rgba(255, 255, 255, 0.15) !important;
+      border-color: rgba(255, 255, 255, 0.4) !important;
+
+      &::placeholder { color: rgba(255, 255, 255, 0.6); }
+    }
+
+    h1, h2, h3, p, span, label { color: white; }
   }
 
   .inspectres-section {
     padding: 1rem;
-    border-bottom: 1px solid var(--inspectres-light);
+    border-bottom: 1px solid var(--inspectres-input-border);
   }
 
   .inspectres-section:last-child {
@@ -48,19 +136,12 @@
     cursor: pointer;
     font-weight: bold;
     transition: background 0.2s;
+
+    &:hover { background: var(--inspectres-accent); }
+    &:disabled { background: var(--inspectres-disabled); cursor: not-allowed; }
   }
 
-  .inspectres-roll-button:hover {
-    background: var(--inspectres-accent);
-  }
-
-  .inspectres-roll-button:disabled {
-    background: var(--inspectres-disabled);
-    cursor: not-allowed;
-  }
-
-  /* Skills grid — scoped under the agent sheet to override Foundry's global
-     button { width: 100% } and display: block resets */
+  /* ── Agent sheet specifics ── */
   &.inspectres-agent-sheet {
     .skills-grid {
       display: flex;
@@ -105,10 +186,8 @@
       border-radius: 3px;
       cursor: pointer;
       flex-shrink: 0;
-    }
 
-    .skill-step:hover {
-      background: var(--inspectres-secondary);
+      &:hover { background: var(--inspectres-secondary); }
     }
 
     .skill-base-value {
@@ -140,10 +219,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
-    }
 
-    .skill-roll-button:hover {
-      background: var(--inspectres-accent);
+      &:hover { background: var(--inspectres-accent); }
     }
 
     .skill-penalty-line {
@@ -152,6 +229,63 @@
       color: var(--inspectres-accent);
       font-style: italic;
     }
+
+    .cool-pip {
+      background: var(--inspectres-btn-bg);
+      color: var(--inspectres-text);
+      border: 1px solid var(--inspectres-btn-border);
+      border-radius: 50%;
+      width: 1.8rem;
+      height: 1.8rem;
+      padding: 0;
+      cursor: pointer;
+      font-size: 1rem;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, color 0.15s;
+
+      &.filled {
+        background: var(--inspectres-primary);
+        color: white;
+        border-color: var(--inspectres-primary);
+      }
+
+      &:hover { background: var(--inspectres-secondary); color: white; }
+    }
+
+    .btn-add {
+      background: var(--inspectres-success);
+      color: white;
+      border: none;
+      border-radius: 3px;
+      padding: 0.25rem 0.75rem;
+      cursor: pointer;
+      font-size: 0.85rem;
+
+      &:hover { filter: brightness(1.1); }
+    }
+
+    .btn-remove {
+      background: transparent;
+      color: var(--inspectres-accent);
+      border: none;
+      cursor: pointer;
+      font-size: 0.85rem;
+      padding: 0 0.25rem;
+
+      &:hover { color: darken(var(--inspectres-accent), 15%); }
+    }
+
+    .characteristic-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .characteristic-text { flex: 1; }
   }
 
   /* Debt mode warning banner */
@@ -225,7 +359,9 @@
   }
 }
 
-/* Foundry's DialogV2 measures height before paint; ensure create-document dialog is tall enough */
-.application:has(form#document-create) {
+/* ─── DialogV2 create-document dialog ──────────────────────────────────── */
+
+/* Foundry measures height before paint; form.dialog-form is V13's class (no id). */
+.application:has(form.dialog-form) {
   height: auto !important;
 }
