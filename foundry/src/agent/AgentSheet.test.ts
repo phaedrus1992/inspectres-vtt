@@ -132,6 +132,104 @@ describe("AgentSheet", () => {
     });
   });
 
+  describe("portrait editing", () => {
+    it("updates actor img when portrait is edited", async () => {
+      const mockActor = new MockActorSheetV2().actor;
+      const sheet = Object.create(AgentSheet.prototype);
+      sheet.actor = mockActor;
+      sheet.isEditable = true;
+
+      const updateSpy = vi.spyOn(sheet.actor, "update").mockResolvedValue(sheet.actor);
+      const target = document.createElement("img");
+      target.dataset["type"] = "image";
+
+      let pickerCallback: ((path: string) => void) | undefined;
+      const mockFilePicker = {
+        browse: vi.fn(),
+      };
+      class MockFilePicker {
+        constructor(options: { callback?: (path: string) => void }) {
+          pickerCallback = options.callback;
+        }
+        browse() {
+          mockFilePicker.browse();
+        }
+      }
+      global.foundry = {
+        applications: {
+          api: {
+            FilePicker: MockFilePicker,
+          },
+        },
+      } as unknown as typeof foundry;
+
+      await AgentSheet.onEditPortrait.call(sheet, new MouseEvent("click"), target);
+      expect(mockFilePicker.browse).toHaveBeenCalled();
+
+      if (pickerCallback) pickerCallback("systems/inspectres/assets/new-portrait.png");
+      await new Promise(resolve => setTimeout(resolve, 10));
+      expect(updateSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ img: "systems/inspectres/assets/new-portrait.png" }),
+      );
+    });
+
+    it("does not update actor when file picker is dismissed without selection", async () => {
+      const mockActor = new MockActorSheetV2().actor;
+      const sheet = Object.create(AgentSheet.prototype);
+      sheet.actor = mockActor;
+      sheet.isEditable = true;
+
+      const updateSpy = vi.spyOn(sheet.actor, "update").mockResolvedValue(sheet.actor);
+      const target = document.createElement("img");
+
+      const mockFilePicker = {
+        browse: vi.fn(),
+      };
+      class MockFilePicker {
+        browse() {
+          mockFilePicker.browse();
+        }
+      }
+      global.foundry = {
+        applications: {
+          api: {
+            FilePicker: MockFilePicker,
+          },
+        },
+      } as unknown as typeof foundry;
+
+      await AgentSheet.onEditPortrait.call(sheet, new MouseEvent("click"), target);
+      expect(mockFilePicker.browse).toHaveBeenCalled();
+      expect(updateSpy).not.toHaveBeenCalled();
+    });
+
+    it("does not open file picker when sheet is not editable", async () => {
+      const mockActor = new MockActorSheetV2().actor;
+      const sheet = Object.create(AgentSheet.prototype);
+      sheet.actor = mockActor;
+      sheet.isEditable = false;
+
+      const filePickerConstructor = vi.fn();
+      class TrackingFilePicker {
+        constructor() {
+          filePickerConstructor();
+        }
+        browse() {}
+      }
+      global.foundry = {
+        applications: {
+          api: {
+            FilePicker: TrackingFilePicker,
+          },
+        },
+      } as unknown as typeof foundry;
+
+      await AgentSheet.onEditPortrait.call(sheet, new MouseEvent("click"), document.createElement("img"));
+
+      expect(filePickerConstructor).not.toHaveBeenCalled();
+    });
+  });
+
   describe("_onRender", () => {
     it("does not attach change listeners when sheet is not editable", async () => {
       const mockSheet = new MockActorSheetV2();
@@ -230,6 +328,32 @@ describe("AgentSheet", () => {
       checkbox2.dispatchEvent(new Event("change"));
 
       expect(updateSpy).toHaveBeenCalledTimes(2);
+    });
+
+    it("does not accumulate listeners across multiple re-renders", async () => {
+      const mockActor = new MockActorSheetV2().actor;
+      const sheet = Object.create(AgentSheet.prototype);
+      sheet.actor = mockActor;
+      sheet.isEditable = true;
+
+      const checkbox = document.createElement("input");
+      checkbox.className = "weird-checkbox";
+      checkbox.type = "checkbox";
+
+      Object.defineProperty(sheet, "element", {
+        value: {
+          querySelectorAll: vi.fn(() => [checkbox]),
+        },
+      });
+
+      const updateSpy = vi.spyOn(sheet.actor, "update").mockResolvedValue(sheet.actor);
+
+      await sheet._onRender({}, {});
+      await sheet._onRender({}, {});
+      await sheet._onRender({}, {});
+
+      checkbox.dispatchEvent(new Event("change"));
+      expect(updateSpy).toHaveBeenCalledTimes(1);
     });
   });
 

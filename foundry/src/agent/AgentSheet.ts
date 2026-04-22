@@ -14,6 +14,9 @@ function isSkillName(value: string | null): value is SkillName {
   return SKILL_NAMES.includes(value as SkillName);
 }
 
+// Store AbortController for each sheet instance to manage checkbox listeners
+const checkboxControllers = new WeakMap<AgentSheet, AbortController>();
+
 async function buildStressRollDialog(agent: Actor): Promise<void> {
   // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
   const system = agent.system as unknown as AgentData;
@@ -67,6 +70,7 @@ async function buildStressRollDialog(agent: Actor): Promise<void> {
 
 // HandlebarsApplicationMixin provides _renderHTML/_replaceHTML required by ApplicationV2 for PARTS-based sheets
 export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.sheets.ActorSheetV2) {
+
   static override DEFAULT_OPTIONS = {
     classes: ["inspectres", "sheet", "actor", "agent"],
     position: { width: 600, height: 700 as number | "auto" },
@@ -79,6 +83,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
       toggleCool: AgentSheet.onToggleCool,
       addCharacteristic: AgentSheet.onAddCharacteristic,
       removeCharacteristic: AgentSheet.onRemoveCharacteristic,
+      editPortrait: AgentSheet.onEditPortrait,
     },
   };
 
@@ -100,6 +105,14 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
 
     if (!this.isEditable) return;
 
+    // Abort previous listeners before attaching new ones (prevents accumulation on re-render)
+    const prevController = checkboxControllers.get(this);
+    if (prevController) {
+      prevController.abort();
+    }
+    const newController = new AbortController();
+    checkboxControllers.set(this, newController);
+
     // weird-checkbox: change event not covered by DEFAULT_OPTIONS.actions
     for (const el of this.element.querySelectorAll<HTMLInputElement>(".weird-checkbox")) {
       el.addEventListener("change", (event: Event) => {
@@ -108,7 +121,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
         void this.actor.update(updateData).catch((err: unknown) => {
           handleActionError(err, "Failed to toggle weird status", "INSPECTRES.ErrorUpdateFailed", "Failed to update actor data");
         });
-      });
+      }, { signal: newController.signal });
     }
   }
 
@@ -218,5 +231,23 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     void this.actor.update(updateData).catch((err: unknown) => {
       handleActionError(err, "Failed to remove characteristic", "INSPECTRES.ErrorRemoveCharacteristic", "Failed to remove characteristic");
     });
+  }
+
+  static async onEditPortrait(this: AgentSheet, _event: Event, target: HTMLElement): Promise<void> {
+    if (!this.isEditable) return;
+    const type = target.dataset["type"] ?? "image";
+    const current = this.actor.img ?? undefined;
+    const FilePicker = (foundry.applications.api as unknown as { FilePicker: unknown }).FilePicker as unknown as { new (options: { current?: string | undefined; type: string; callback?: (path: string) => void }): { browse(): void } };
+    const picker = new FilePicker({
+      current,
+      type,
+      callback: (path: string) => {
+        const updateData = { img: path } as unknown as Parameters<typeof this.actor.update>[0];
+        void this.actor.update(updateData).catch((err: unknown) => {
+          handleActionError(err, "Failed to update portrait", "INSPECTRES.ErrorUpdateFailed", "Failed to update actor image");
+        });
+      },
+    });
+    picker.browse();
   }
 }
