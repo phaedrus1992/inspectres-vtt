@@ -17,13 +17,13 @@
   },
   "devDependencies": {
     "@foundryvtt/foundryvtt-cli": "^3.0.3",
-    "@types/node": "^20.11.19",
+    "@types/node": "^24.12.2",
     "@vitest/coverage-v8": "^4.1.4",
     "fast-check": "^4.7.0",
     "fvtt-types": "github:League-of-Foundry-Developers/foundry-vtt-types#main",
-    "jsdom": "^26.1.0",
-    "typescript": "^5.9.3",
-    "vite": "^6.4.2",
+    "jsdom": "^29.0.2",
+    "typescript": "^5.7.2",
+    "vite": "^8.0.8",
     "vitest": "^4.1.4"
   }
 }
