@@ -23,7 +23,7 @@
     "fvtt-types": "github:League-of-Foundry-Developers/foundry-vtt-types#main",
     "jsdom": "^26.1.0",
     "typescript": "^5.7.2",
-    "vite": "^6.4.2",
+    "vite": "^8.0.0",
     "vitest": "^3.1.2"
   }
 }
