@@ -224,3 +224,8 @@
     text-align: center;
   }
 }
+
+/* Foundry's DialogV2 measures height before paint; ensure create-document dialog is tall enough */
+.application:has(form#document-create) {
+  height: auto !important;
+}

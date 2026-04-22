@@ -65,18 +65,6 @@ Hooks.once("init", async function () {
   });
 });
 
-// The Create Actor/Item dialog (DialogV2.prompt) can render at an incorrect height because
-// _updatePosition runs before the browser paints the form content. Re-measure after layout
-// by deferring setPosition to the next animation frame so the browser has committed the DOM.
-Hooks.on("renderDialogV2", function (app, html: HTMLElement) {
-  if (html.querySelector("form#document-create")) {
-    requestAnimationFrame(() => {
-      // fvtt-types types the hook's app param as Any; cast through unknown to call setPosition
-      (app as unknown as foundry.applications.api.ApplicationV2).setPosition({ height: "auto" });
-    });
-  }
-});
-
 Hooks.once("ready", function () {
   onMissionSocketEvent(() => {
     if (MissionTrackerApp.instance) {
