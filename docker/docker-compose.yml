@@ -6,7 +6,7 @@ services:
   foundry:
     # Pinned to V13 — system.json minimum is 13, so we develop and verify against it.
     # To upgrade to V14+: change to ghcr.io/felddy/foundryvtt:release
-    image: ghcr.io/felddy/foundryvtt:13
+    image: ghcr.io/felddy/foundryvtt:14
     hostname: foundry
     ports:
       - "30000:30000"
