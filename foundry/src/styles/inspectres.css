@@ -37,9 +37,8 @@
   --inspectres-warn-text:   #7a5000;
 
   /* Misc */
-  --inspectres-radius:      4px;
-  --inspectres-radius-lg:   6px;
-  --inspectres-section-gap: 0;
+  --inspectres-radius:    4px;
+  --inspectres-radius-lg: 6px;
 }
 
 /* ─── Outer V2 shell ────────────────────────────────────────────────────── */
@@ -162,11 +161,13 @@
     color: rgba(255, 255, 255, 0.6);
   }
 
-  /* Franchise header has no portrait */
+  /* Franchise header has no portrait — h1 must stretch to fill available width */
   &:not(:has(.actor-portrait)) .sheet-header {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
     gap: 0.25rem;
+
+    h1 { width: 100%; }
   }
 }
 
@@ -662,7 +663,6 @@
   background: color-mix(in srgb, var(--inspectres-secondary), white 94%);
   border-radius: 0 var(--inspectres-radius) var(--inspectres-radius) 0;
 
-  &--skill  { border-left-color: var(--inspectres-secondary); background: color-mix(in srgb, var(--inspectres-secondary), white 94%); }
   &--bank   { border-left-color: var(--inspectres-primary);   background: color-mix(in srgb, var(--inspectres-primary), white 94%); }
   &--stress { border-left-color: var(--inspectres-accent);    background: color-mix(in srgb, var(--inspectres-accent), white 94%); }
   &--client { border-left-color: var(--inspectres-success);   background: color-mix(in srgb, var(--inspectres-success), white 94%); }
