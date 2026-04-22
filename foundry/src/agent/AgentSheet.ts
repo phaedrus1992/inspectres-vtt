@@ -40,7 +40,7 @@ async function buildStressRollDialog(agent: Actor): Promise<void> {
           const form = dialog.querySelector("form") as HTMLFormElement | null;
           if (!form) {
             console.error("buildStressRollDialog: form element not found in dialog");
-            return { stressDiceCount: 1, coolDiceUsed: 0 };
+            return null;
           }
           const data = new FormData(form);
           const stressDiceCount = Math.max(1, Math.min(5, Number(data.get("stressDice") ?? 1)));
@@ -64,7 +64,8 @@ async function buildStressRollDialog(agent: Actor): Promise<void> {
   await executeStressRoll(agent, params);
 }
 
-export class AgentSheet extends foundry.applications.sheets.ActorSheetV2 {
+// HandlebarsApplicationMixin provides _renderHTML/_replaceHTML required by ApplicationV2 for PARTS-based sheets
+export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.sheets.ActorSheetV2) {
   static override DEFAULT_OPTIONS = {
     classes: ["inspectres", "sheet", "actor", "agent"],
     position: { width: 600, height: 700 as number | "auto" },

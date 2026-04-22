@@ -65,15 +65,6 @@ Hooks.once("init", async function () {
   });
 });
 
-// The Create Actor dialog defaults to a fixed height too small to show all fields.
-// renderDialogV2 fires for ApplicationV2-based dialogs (Foundry V13+).
-// Match on the select[name="type"] presence — unique to document-creation dialogs.
-Hooks.on("renderDialogV2", function (_app, html: HTMLElement) {
-  if (html.querySelector("select[name='type']")) {
-    html.style.height = "auto";
-  }
-});
-
 Hooks.once("ready", function () {
   onMissionSocketEvent(() => {
     if (MissionTrackerApp.instance) {

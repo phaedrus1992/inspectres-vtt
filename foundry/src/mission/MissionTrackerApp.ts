@@ -46,12 +46,14 @@ export class MissionTrackerApp extends foundry.applications.api.ApplicationV2 {
   }
 
   static async onBeginCleanUp(this: MissionTrackerApp, _event: Event, _target: HTMLElement): Promise<void> {
+    if (!(game.user?.isGM ?? false)) return;
     void this.openDistributionDialog().catch((err: unknown) => {
-      handleActionError(err, "Distribution dialog failed", "INSPECTRES.ErrorRollFailed", "Operation failed");
+      handleActionError(err, "Distribution dialog failed", "INSPECTRES.ErrorUpdateFailed", "Failed to update actor data");
     });
   }
 
   static async onEndEarly(this: MissionTrackerApp, _event: Event, _target: HTMLElement): Promise<void> {
+    if (!(game.user?.isGM ?? false)) return;
     void this.endEarly().catch((err: unknown) => {
       handleActionError(err, "End mission early failed", "INSPECTRES.ErrorUpdateFailed", "Failed to update actor data");
     });
