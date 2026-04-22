@@ -10,6 +10,7 @@ import { FranchiseSheet } from "./franchise/FranchiseSheet.js";
 import { registerHandlebarsHelpers } from "./utils/handlebars-helpers.js";
 import { MissionTrackerApp } from "./mission/MissionTrackerApp.js";
 import { onMissionSocketEvent } from "./mission/socket.js";
+import { handleActionError } from "./utils/ui-errors.js";
 
 Hooks.once("init", async function () {
   try {
@@ -68,7 +69,7 @@ Hooks.once("ready", function () {
   onMissionSocketEvent(() => {
     if (MissionTrackerApp.instance) {
       void MissionTrackerApp.instance.render().catch((err: unknown) => {
-        console.error("Mission tracker re-render failed (socket event):", err);
+        handleActionError(err, "Mission tracker re-render failed (socket event)", "INSPECTRES.ErrorMissionTrackerOpen", "Mission Tracker failed to update");
       });
     }
   });
@@ -77,7 +78,7 @@ Hooks.once("ready", function () {
 Hooks.on("updateActor", function (actor: Actor) {
   if ((actor.type as string) === "franchise" && MissionTrackerApp.instance) {
     void MissionTrackerApp.instance.render().catch((err: unknown) => {
-      console.error("Mission tracker re-render failed (actor update):", err);
+      handleActionError(err, "Mission tracker re-render failed (actor update)", "INSPECTRES.ErrorMissionTrackerOpen", "Mission Tracker failed to update");
     });
   }
 });

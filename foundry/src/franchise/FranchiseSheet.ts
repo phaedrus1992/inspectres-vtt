@@ -34,7 +34,7 @@ export class FranchiseSheet extends foundry.applications.sheets.ActorSheetV2 {
       return;
     }
     void executeBankRoll(this.actor).catch((err: unknown) => {
-      handleActionError(err, "Bank roll failed", "INSPECTRES.ErrorRollFailed", "Roll failed");
+      handleActionError(err, "Bank roll failed", "INSPECTRES.ErrorBankRollFailed", "Bank roll failed");
     });
   }
 
@@ -45,7 +45,7 @@ export class FranchiseSheet extends foundry.applications.sheets.ActorSheetV2 {
       return;
     }
     void executeClientRoll(this.actor).catch((err: unknown) => {
-      handleActionError(err, "Client roll failed", "INSPECTRES.ErrorRollFailed", "Roll failed");
+      handleActionError(err, "Client roll failed", "INSPECTRES.ErrorClientRollFailed", "Client roll failed");
     });
   }
 
