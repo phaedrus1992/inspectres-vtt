@@ -70,11 +70,11 @@ describe("AgentSheet", () => {
       notesTab.setAttribute("data-tab", "notes");
       notesTab.classList.add("tab");
 
-      const statsBtn = document.createElement("a");
+      const statsBtn = document.createElement("button");
       statsBtn.setAttribute("data-tab", "stats");
       statsBtn.classList.add("sheet-tab");
 
-      const notesBtn = document.createElement("a");
+      const notesBtn = document.createElement("button");
       notesBtn.setAttribute("data-tab", "notes");
       notesBtn.classList.add("sheet-tab");
 

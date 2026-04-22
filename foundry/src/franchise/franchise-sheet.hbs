@@ -8,16 +8,16 @@
   </header>
 
   <!-- Tab strip -->
-  <nav class="inspectres-tabs">
-    <a class="sheet-tab" data-tab="stats">{{localize "INSPECTRES.TabStats"}}</a>
-    <a class="sheet-tab" data-tab="notes">{{localize "INSPECTRES.TabNotes"}}</a>
+  <nav class="inspectres-tabs" role="tablist">
+    <button type="button" class="sheet-tab" data-tab="stats" role="tab" aria-selected="true" aria-controls="tab-stats">{{localize "INSPECTRES.TabStats"}}</button>
+    <button type="button" class="sheet-tab" data-tab="notes" role="tab" aria-selected="false" aria-controls="tab-notes">{{localize "INSPECTRES.TabNotes"}}</button>
   </nav>
 
   <!-- Content -->
   <div class="sheet-body">
 
     <!-- Stats Tab -->
-    <div class="tab" data-tab="stats">
+    <div class="tab" data-tab="stats" id="tab-stats" role="tabpanel">
 
       {{#if system.debtMode}}
         <div class="inspectres-debt-warning">
@@ -120,7 +120,7 @@
     </div><!-- /stats tab -->
 
     <!-- Notes Tab -->
-    <div class="tab" data-tab="notes">
+    <div class="tab" data-tab="notes" id="tab-notes" role="tabpanel">
 
       <!-- Description -->
       <section class="inspectres-section">
