@@ -369,14 +369,14 @@ export async function executeStressRoll(agent: RollActor, params: StressRollPara
   await postChatCard(content, speaker, [roll]);
 }
 
-function buildPenaltyNote(face: 1 | 2 | 3, stressDiceCount: number): string {
+export function buildPenaltyNote(face: 1 | 2 | 3, stressDiceCount: number): string {
   switch (face) {
     case 3:
-      return "Reduce 1 die from one skill of your choice on your character sheet.";
+      return game.i18n?.localize("INSPECTRES.PenaltyNote.Minor") ?? "INSPECTRES.PenaltyNote.Minor";
     case 2:
-      return "Reduce 2 dice from one skill, or 1 die from each of two skills on your character sheet.";
+      return game.i18n?.localize("INSPECTRES.PenaltyNote.Major") ?? "INSPECTRES.PenaltyNote.Major";
     case 1:
-      return `Meltdown! Cool dice reset to 0. Reduce ${stressDiceCount} skill dice total (distributed as you choose) on your character sheet.`;
+      return game.i18n?.format("INSPECTRES.PenaltyNote.Meltdown", { count: String(stressDiceCount) }) ?? "INSPECTRES.PenaltyNote.Meltdown";
   }
 }
 

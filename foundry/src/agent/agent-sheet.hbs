@@ -1,4 +1,4 @@
-<form class="inspectres-sheet inspectres-agent-sheet" autocomplete="off">
+<form class="inspectres inspectres-sheet inspectres-agent-sheet" autocomplete="off">
   <!-- Header -->
   <header class="inspectres-header">
     <div class="sheet-header">
@@ -74,7 +74,7 @@
       <div class="cool-tracker">
         {{#if system.isWeird}}
           <div class="cool-counter">
-            <span class="cool-label">Unlimited Cool</span>
+            <span class="cool-label">{{localize "INSPECTRES.CoolUnlimited"}}</span>
             <input
               type="number"
               name="system.cool"

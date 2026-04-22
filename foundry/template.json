@@ -3,52 +3,6 @@
     "types": [
       "agent",
       "franchise"
-    ],
-    "agent": {
-      "templates": [
-        "base"
-      ],
-      "skills": {
-        "academics": {
-          "base": 2,
-          "penalty": 0
-        },
-        "athletics": {
-          "base": 2,
-          "penalty": 0
-        },
-        "technology": {
-          "base": 2,
-          "penalty": 0
-        },
-        "contact": {
-          "base": 2,
-          "penalty": 0
-        }
-      },
-      "talent": "",
-      "cool": 0,
-      "isWeird": false,
-      "characteristics": [],
-      "missionPool": 0
-    },
-    "franchise": {
-      "templates": [
-        "base"
-      ],
-      "cards": {
-        "library": 0,
-        "gym": 0,
-        "credit": 0
-      },
-      "bank": 0,
-      "missionPool": 0,
-      "missionGoal": 0,
-      "debtMode": false,
-      "loanAmount": 0
-    },
-    "base": {
-      "description": ""
-    }
+    ]
   }
 }
