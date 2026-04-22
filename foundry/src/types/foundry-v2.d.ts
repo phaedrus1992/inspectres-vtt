@@ -133,3 +133,30 @@ type RenderDialogV2Callback = (
   app: foundry.applications.api.ApplicationV2,
   html: HTMLElement,
 ) => void;
+
+/**
+ * Register InSpectres actor system types with fvtt-types.
+ *
+ * fvtt-types v13 resolves Actor.system based on runtime CONFIG registration, which
+ * is unknowable at compile time. Actor subtypes only enter the type system via
+ * DataModelConfig (TypeDataModel subclasses) — template.json systems have no compile-time
+ * hook that makes "agent" and "franchise" valid SubType values.
+ *
+ * As a result, `actor.system as AgentData` remains a type error (the union doesn't
+ * include AgentData) and `as unknown as AgentData` casts are unavoidable until the
+ * project migrates to TypeDataModel. These casts are intentional boundary crossings,
+ * not type-system shortcuts — document them with justification comments at each site.
+ *
+ * DataConfig is included for reference; it has no effect on cast safety without
+ * DataModelConfig. If the project ever migrates to TypeDataModel, replace `DataConfig`
+ * with `DataModelConfig` pointing at the model constructors, and delete the `as unknown`
+ * casts.
+ */
+declare module "fvtt-types/configuration" {
+  interface DataConfig {
+    Actor: {
+      agent: import("../agent/agent-schema.js").AgentData;
+      franchise: import("../franchise/franchise-schema.js").FranchiseData;
+    };
+  }
+}

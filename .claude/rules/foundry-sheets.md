@@ -34,7 +34,8 @@ export class AgentSheet extends foundry.applications.sheets.ActorSheetV2 {
 
   override async _prepareContext(_options: foundry.applications.api.ApplicationV2Options): Promise<Record<string, unknown>> {
     const base = await super._prepareContext(_options);
-    return { ...base, system: this.actor.system as AgentData };
+    // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md.
+    return { ...base, system: this.actor.system as unknown as AgentData };
   }
 
   override async _onRender(context: Record<string, unknown>, options: foundry.applications.api.ApplicationV2Options): Promise<void> {
@@ -120,7 +121,8 @@ Hooks.once("init", () => {
 ```typescript
 getData() {
   const base = super.getData();
-  const system = this.actor.system as AgentData;
+  // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md.
+  const system = this.actor.system as unknown as AgentData;
 
   // Pre-sort items by type for template convenience
   const abilities = this.actor.items

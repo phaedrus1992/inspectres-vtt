@@ -60,6 +60,36 @@ Hooks.on("renderDialogV2", function (_app, html: HTMLElement) { ... });
 (`<div class="app">` = V1, `<dialog>` or `<section>` element = V2) and use the matching hook
 (`renderDialog` vs `renderDialogV2`, `renderActorSheet` vs `renderActorSheetV2`).
 
+### actor.system casting and fvtt-types v13 limitations
+
+**fvtt-types v13 cannot statically resolve `actor.system` to `AgentData` or `FranchiseData`**
+when the project uses `template.json` rather than `TypeDataModel` subclasses.
+
+In fvtt-types v13, `Actor.system` resolves to `SystemOfType<"base" | ModuleSubType>` — a union
+of `EmptyObject` and `UnknownSystem`. The subtypes `"agent"` and `"franchise"` are only registered
+at runtime via `CONFIG.Actor.typeLabels`; there is no compile-time hook that promotes them into
+the `SubType` union unless you use `DataModelConfig` (TypeDataModel) or `SourceConfig` (which only
+affects `ConfiguredSubTypeOf`, not the system union itself).
+
+**Consequence:** `actor.system as AgentData` is a compile-time error because `AgentData` and
+`UnknownSystem` don't overlap. The double-cast `actor.system as unknown as AgentData` is
+unavoidable for template.json systems. These casts are legitimate and must be documented with
+justification comments — they are not shortcuts around the type system, they are explicit
+acknowledgments that the type boundary exists.
+
+**Configuration hooks summary (fvtt-types v13):**
+
+| Hook | Used for | Effect on `actor.system` |
+|------|----------|--------------------------|
+| `DataModelConfig.Actor` | TypeDataModel class constructors | Makes subtypes known; eliminates `as unknown` |
+| `SourceConfig.Actor` | template.json raw shapes | Adds keys to `ConfiguredSubTypeOf`; does NOT add them to the SubType union |
+| `DataConfig.Actor` | Initialized runtime shapes | Used in SystemMap once subtypes are in SubType |
+| `SystemConfig.Actor.discriminate` | Union narrowing mode | Does not help without TypeDataModel |
+
+**The path to eliminating `as unknown as` casts** is migrating `template.json` schemas to
+`TypeDataModel` subclasses and registering them in `CONFIG.Actor.dataModels` + `DataModelConfig`.
+Until then, every `actor.system as unknown as AgentData` cast is correct and necessary.
+
 ## Module Entry and Hook Registration
 
 All initialization must go through Foundry's lifecycle hooks. Never run setup code at module
@@ -177,7 +207,9 @@ export class AgentSheet extends foundry.applications.sheets.ActorSheetV2 {
   // Replaces getData() — return plain object, never the document itself
   override async _prepareContext(_options: unknown): Promise<Record<string, unknown>> {
     const base = await super._prepareContext(_options);
-    return { ...base, system: this.actor.system as AgentData };
+    // fvtt-types v13 + template.json: system is UnknownSystem without TypeDataModel registration;
+    // as unknown as AgentData is the required cast until migration to TypeDataModel.
+    return { ...base, system: this.actor.system as unknown as AgentData };
   }
 
   // Replaces activateListeners() for non-action event handling
@@ -202,7 +234,8 @@ export class AgentSheet extends foundry.applications.sheets.ActorSheetV2 {
 export class AgentSheet extends ActorSheet {
   override async getData() {
     const context = await super.getData();
-    return { ...context, system: this.actor.system as AgentData };
+    // fvtt-types v13 + template.json requires double-cast; see foundry-vite.md for explanation.
+    return { ...context, system: this.actor.system as unknown as AgentData };
   }
   override activateListeners(html: JQuery<HTMLElement>) {
     super.activateListeners(html);
@@ -285,6 +318,52 @@ class AgentDataModel extends foundry.abstract.TypeDataModel {
 
 When using `template.json`, keep it minimal — only fields that genuinely need default values. Do
 not use `template.json` to document the schema; that belongs in TypeScript types.
+
+## Testing Patterns — Avoiding Full Actor Fixtures
+
+**Never use `as unknown as Actor` in tests.** Full `Actor` has 130+ properties; creating a fixture
+that satisfies it is impractical and brittle. Instead, define a structural interface with only the
+properties the code under test actually uses:
+
+```typescript
+// In the module being tested — exported so tests can use it directly
+export interface RollActor {
+  readonly id: string | null;
+  readonly name: string;
+  readonly system: object;
+  update(data: Record<string, unknown>): Promise<unknown>;
+}
+
+// Function signatures use the interface, not Actor
+export async function executeSkillRoll(
+  agent: RollActor,
+  franchise: RollActor | null,
+  skillName: SkillName,
+): Promise<void> { ... }
+```
+
+```typescript
+// In tests — fixtures satisfy RollActor without casting
+function makeAgent(overrides: Record<string, unknown> = {}): RollActor {
+  return {
+    id: "test-agent-id",
+    name: "Test Agent",
+    system: { cool: 1, skills: { ... }, ...overrides },
+    async update(_data) {},
+  };
+}
+```
+
+Calling `actor.system` in tests still requires a cast since `system: object` has no index
+signature. Use bracket notation with a cast for clarity: `(agent.system as Record<string, unknown>)["cool"]`.
+
+**For production code that must call Foundry APIs accepting `Actor`**, cast at the boundary
+with a justification comment:
+
+```typescript
+// ChatMessage.getSpeaker requires the full Actor type — boundary cast from RollActor
+const speaker = ChatMessage.getSpeaker({ actor: agent as Actor });
+```
 
 ## Flags vs System Data
 
