@@ -73,8 +73,10 @@ describe("getOrCreateListenerController", () => {
       createdControllers.push(controller);
     }
 
-    expect(controllers.get(instance)).toBe(createdControllers[2]);
-    expect(createdControllers[2].signal.aborted).toBe(false);
+    expect(createdControllers.length).toBe(3);
+    const lastController = createdControllers[2]!;
+    expect(controllers.get(instance)).toBe(lastController);
+    expect(lastController.signal.aborted).toBe(false);
   });
 
   it("isolates controllers for distinct instances across multiple bindings", () => {
