@@ -38,16 +38,18 @@
 /* ─── Outer V2 shell ────────────────────────────────────────────────────── */
 
 /* V13 ActorSheetV2: outer wrapper is form.application, inner is section.window-content. */
-.application.sheet.inspectres .window-content {
-  overflow-y: auto;
-  padding: 0;
-}
+.application.sheet.inspectres {
+  .window-content {
+    overflow-y: auto;
+    padding: 0;
 
-/* Inner form owns all colors — Foundry's theme must not bleed past this boundary. */
-.application.sheet.inspectres .window-content > form {
-  min-height: 100%;
-  color: var(--inspectres-text);
-  background: var(--inspectres-sheet-bg);
+    /* Inner form owns all colors — Foundry's theme must not bleed past this boundary. */
+    > form {
+      min-height: 100%;
+      color: var(--inspectres-text);
+      background: var(--inspectres-sheet-bg);
+    }
+  }
 }
 
 /* ─── Inner sheet reset ─────────────────────────────────────────────────── */

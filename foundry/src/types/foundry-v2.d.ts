@@ -104,6 +104,7 @@ declare namespace foundry.applications.api {
    * Usage: `class MySheet extends HandlebarsApplicationMixin(foundry.applications.sheets.ActorSheetV2)`
    *
    * fvtt-types v13 does not yet declare this mixin — declared here until the library catches up.
+   * Returns TBase unchanged so the subclass constructor type is preserved.
    */
   function HandlebarsApplicationMixin<TBase extends abstract new (...args: never[]) => ApplicationV2>(
     Base: TBase,
