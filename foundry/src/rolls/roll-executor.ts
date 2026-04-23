@@ -367,31 +367,31 @@ export async function executeStressRoll(
   if (deathModeActive && effectiveFace <= 2) {
     // Death mode activated: roll d3 for death outcomes (1=Maimed, 2=Crippled, 3=Killed)
     const deathRoll = Math.floor(Math.random() * 3) + 1;
+    if (deathRoll < 1 || deathRoll > 3) {
+      throw new Error(`Invalid d3 result: ${deathRoll}`);
+    }
     const deathKey = deathRoll as 1 | 2 | 3;
     deathOutcome = DEATH_DISMEMBERMENT_CHART[deathKey];
+    if (!deathOutcome) {
+      throw new Error(`Death outcome missing for key ${deathKey}`);
+    }
   }
 
   // Apply updates — meltdown takes precedence over coolGain
   const updateData: Record<string, unknown> = {};
   if (effectiveFace === 1) {
-    // Meltdown: zero cool, skill penalty = stress dice count
+    // Meltdown: zero cool, skill penalty pool = stress dice count (applied to academics; player reallocates)
     updateData["system.cool"] = 0;
-    // Apply meltdown penalty (stress dice count) to all skills
-    const skillPenalty = stressDiceCount;
-    updateData["system.skills.academics.penalty"] = system.skills.academics.penalty + skillPenalty;
-    updateData["system.skills.athletics.penalty"] = system.skills.athletics.penalty + skillPenalty;
-    updateData["system.skills.technology.penalty"] = system.skills.technology.penalty + skillPenalty;
-    updateData["system.skills.contact.penalty"] = system.skills.contact.penalty + skillPenalty;
+    const academicsPenalty = system.skills.academics?.penalty ?? 0;
+    updateData["system.skills.academics.penalty"] = academicsPenalty + stressDiceCount;
   } else {
     if (outcome.coolGain > 0) {
       updateData["system.cool"] = system.cool + outcome.coolGain;
     }
-    // Apply outcome-based skill penalty
+    // Apply outcome-based skill penalty (applied to academics; player reallocates)
     if (outcome.skillPenalty > 0) {
-      updateData["system.skills.academics.penalty"] = system.skills.academics.penalty + outcome.skillPenalty;
-      updateData["system.skills.athletics.penalty"] = system.skills.athletics.penalty + outcome.skillPenalty;
-      updateData["system.skills.technology.penalty"] = system.skills.technology.penalty + outcome.skillPenalty;
-      updateData["system.skills.contact.penalty"] = system.skills.contact.penalty + outcome.skillPenalty;
+      const academicsPenalty = system.skills.academics?.penalty ?? 0;
+      updateData["system.skills.academics.penalty"] = academicsPenalty + outcome.skillPenalty;
     }
   }
 
@@ -406,14 +406,16 @@ export async function executeStressRoll(
   }
 
   if (Object.keys(updateData).length > 0) {
-    await actorUpdate(agent, updateData);
+    try {
+      await actorUpdate(agent, updateData);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      throw new Error(`Failed to apply stress roll updates to agent: ${message}`);
+    }
   }
 
-  // If hazard pay applies (agent died/was maimed/crippled), award franchise dice
-  if (deathOutcome && franchise && franchiseSystem && !system.isWeird) {
-    await actorUpdate(franchise, { "system.missionPool": franchiseSystem.missionPool + 1 });
-    if (franchise.id !== null) emitMissionPoolUpdated(franchise.id);
-  }
+  // Hazard pay (rules: +1 franchise die per non-Weird agent at mission end) is deferred to mission resolution.
+  // See GitHub issue for implementation of mission-end hazard pay calculation.
 
   // ChatMessage.getSpeaker requires the full Actor type; RollActor satisfies the needed fields at runtime
   const speaker = ChatMessage.getSpeaker({ actor: agent as Actor });

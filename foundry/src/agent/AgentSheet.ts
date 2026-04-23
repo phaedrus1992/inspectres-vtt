@@ -67,7 +67,8 @@ async function buildStressRollDialog(agent: Actor): Promise<void> {
 
   if (result === null || result === undefined) return;
   const params = result as { stressDiceCount: number; coolDiceUsed: number };
-  await executeStressRoll(agent, params);
+  const franchise = findFranchiseActor();
+  await executeStressRoll(agent, params, franchise);
 }
 
 // HandlebarsApplicationMixin provides _renderHTML/_replaceHTML required by ApplicationV2 for PARTS-based sheets
