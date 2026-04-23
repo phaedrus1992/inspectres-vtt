@@ -1,118 +1,127 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, vi } from "vitest";
+import { autoClearRecoveredAgents } from "./recovery-utils.js";
 import { type AgentData } from "./agent-schema.js";
 
-interface TestActor {
-  type: string;
-  system: AgentData;
-  update: (data: Record<string, unknown>) => Promise<void>;
+function makeAgent(overrides: Partial<AgentData> = {}): AgentData {
+  return {
+    description: "",
+    skills: {
+      academics: { base: 0, penalty: 0 },
+      athletics: { base: 0, penalty: 0 },
+      technology: { base: 0, penalty: 0 },
+      contact: { base: 0, penalty: 0 },
+    },
+    talent: "",
+    cool: 0,
+    isWeird: false,
+    characteristics: [],
+    missionPool: 0,
+    isDead: false,
+    daysOutOfAction: 0,
+    recoveryStartedAt: 0,
+    ...overrides,
+  };
 }
 
-function makeTestActor(system: Partial<AgentData> = {}): TestActor {
+interface TestActor {
+  id: string;
+  name: string;
+  type: string;
+  system: AgentData;
+  update: ReturnType<typeof vi.fn>;
+}
+
+function makeTestActor(id: string, system: Partial<AgentData> = {}): TestActor {
   return {
+    id,
+    name: `Agent ${id}`,
     type: "agent",
-    system: {
-      description: "",
-      skills: { academics: { base: 0, penalty: 0 }, athletics: { base: 0, penalty: 0 }, technology: { base: 0, penalty: 0 }, contact: { base: 0, penalty: 0 } },
-      talent: "",
-      cool: 0,
-      isWeird: false,
-      characteristics: [],
-      missionPool: 0,
-      isDead: false,
-      daysOutOfAction: 0,
-      recoveryStartedAt: 0,
-      ...system,
-    },
+    system: makeAgent(system),
     update: vi.fn(),
   };
 }
 
-describe("autoClearRecoveryOnDayAdvance", () => {
-  describe("clearing recovery fields when deadline passed", () => {
-    it("clears daysOutOfAction when currentDay >= recoveryStartedAt + daysOutOfAction", async () => {
-      // Agent recovers on day 8 (started day 5, 3-day recovery)
-      const actor = makeTestActor({ daysOutOfAction: 3, recoveryStartedAt: 5 });
+describe("autoClearRecoveredAgents", () => {
+  function setupGameMock(actors: TestActor[], isGM: boolean = true) {
+    const gameObj = globalThis as Record<string, unknown>;
+    gameObj["game"] = {
+      user: { isGM },
+      actors: {
+        *[Symbol.iterator]() {
+          for (const actor of actors) {
+            yield actor;
+          }
+        },
+        get: (id: string) => actors.find((a) => a.id === id) ?? null,
+      },
+    };
+  }
 
-      // Simulate the onChange handler logic
-      const oldDay = 7;
-      const newDay = 8;
-      const daysElapsed = newDay - actor.system.recoveryStartedAt;
-      const isRecoveryExpired = daysElapsed >= actor.system.daysOutOfAction;
+  it("calls actor.update for agents with expired recovery", async () => {
+    const agent = makeTestActor("agent-1", { daysOutOfAction: 3, recoveryStartedAt: 5 });
+    setupGameMock([agent], true);
 
-      expect(isRecoveryExpired).toBe(true);
+    await autoClearRecoveredAgents(8);
 
-      if (isRecoveryExpired && actor.system.daysOutOfAction > 0) {
-        await actor.update({ "system.daysOutOfAction": 0, "system.recoveryStartedAt": 0 });
-      }
-
-      expect(actor.update).toHaveBeenCalledWith({
-        "system.daysOutOfAction": 0,
-        "system.recoveryStartedAt": 0,
-      });
+    expect(agent.update).toHaveBeenCalledWith({
+      "system.daysOutOfAction": 0,
+      "system.recoveryStartedAt": 0,
     });
+  });
 
-    it("does not clear if still recovering", async () => {
-      const actor = makeTestActor({ daysOutOfAction: 3, recoveryStartedAt: 5 });
-      const newDay = 7; // Still 1 day remaining
-      const daysElapsed = newDay - actor.system.recoveryStartedAt;
-      const isRecoveryExpired = daysElapsed >= actor.system.daysOutOfAction;
+  it("skips agents that are still recovering", async () => {
+    const agent = makeTestActor("agent-1", { daysOutOfAction: 3, recoveryStartedAt: 5 });
+    setupGameMock([agent], true);
 
-      expect(isRecoveryExpired).toBe(false);
+    await autoClearRecoveredAgents(7);
 
-      if (isRecoveryExpired && actor.system.daysOutOfAction > 0) {
-        await actor.update({ "system.daysOutOfAction": 0, "system.recoveryStartedAt": 0 });
-      }
+    expect(agent.update).not.toHaveBeenCalled();
+  });
 
-      expect(actor.update).not.toHaveBeenCalled();
+  it("skips dead agents", async () => {
+    const agent = makeTestActor("agent-1", { isDead: true, daysOutOfAction: 3, recoveryStartedAt: 5 });
+    setupGameMock([agent], true);
+
+    await autoClearRecoveredAgents(8);
+
+    expect(agent.update).not.toHaveBeenCalled();
+  });
+
+  it("skips uninjured agents", async () => {
+    const agent = makeTestActor("agent-1", { daysOutOfAction: 0, recoveryStartedAt: 0 });
+    setupGameMock([agent], true);
+
+    await autoClearRecoveredAgents(8);
+
+    expect(agent.update).not.toHaveBeenCalled();
+  });
+
+  it("returns early if current user is not GM", async () => {
+    const agent = makeTestActor("agent-1", { daysOutOfAction: 3, recoveryStartedAt: 5 });
+    setupGameMock([agent], false);
+
+    await autoClearRecoveredAgents(8);
+
+    expect(agent.update).not.toHaveBeenCalled();
+  });
+
+  it("handles multiple agents and clears all that are ready", async () => {
+    const agent1 = makeTestActor("agent-1", { daysOutOfAction: 3, recoveryStartedAt: 5 });
+    const agent2 = makeTestActor("agent-2", { daysOutOfAction: 2, recoveryStartedAt: 6 });
+    const agent3 = makeTestActor("agent-3", { daysOutOfAction: 0, recoveryStartedAt: 0 });
+
+    setupGameMock([agent1, agent2, agent3], true);
+
+    await autoClearRecoveredAgents(8);
+
+    expect(agent1.update).toHaveBeenCalledWith({
+      "system.daysOutOfAction": 0,
+      "system.recoveryStartedAt": 0,
     });
-
-    it("ignores agents with daysOutOfAction === 0 (never injured)", async () => {
-      const actor = makeTestActor({ daysOutOfAction: 0, recoveryStartedAt: 0 });
-      const newDay = 10;
-
-      if (actor.system.daysOutOfAction > 0) {
-        await actor.update({ "system.daysOutOfAction": 0, "system.recoveryStartedAt": 0 });
-      }
-
-      expect(actor.update).not.toHaveBeenCalled();
+    expect(agent2.update).toHaveBeenCalledWith({
+      "system.daysOutOfAction": 0,
+      "system.recoveryStartedAt": 0,
     });
-
-    it("ignores dead agents", async () => {
-      const actor = makeTestActor({ isDead: true, daysOutOfAction: 3, recoveryStartedAt: 5 });
-      const newDay = 8;
-
-      // Dead agents should not auto-clear (they stay dead)
-      if (actor.system.isDead) {
-        // Skip recovery clearance
-        expect(actor.update).not.toHaveBeenCalled();
-        return;
-      }
-
-      if (actor.system.daysOutOfAction > 0) {
-        await actor.update({ "system.daysOutOfAction": 0, "system.recoveryStartedAt": 0 });
-      }
-
-      expect(actor.update).not.toHaveBeenCalled();
-    });
-
-    it("batches multiple agents into one updateDocuments call", async () => {
-      // When multiple agents recover on the same day, update them all at once
-      // actor1: started day 5, 2-day recovery = recovered by day 7
-      // actor2: started day 5, 3-day recovery = recovered by day 8
-      const actor1 = makeTestActor({ daysOutOfAction: 2, recoveryStartedAt: 5 });
-      const actor2 = makeTestActor({ daysOutOfAction: 3, recoveryStartedAt: 5 });
-      const newDay = 8; // Both are expired
-
-      const updates: Array<{ daysOutOfAction: 0; recoveryStartedAt: 0 }> = [];
-
-      for (const actor of [actor1, actor2]) {
-        const daysElapsed = newDay - actor.system.recoveryStartedAt;
-        if (daysElapsed >= actor.system.daysOutOfAction && actor.system.daysOutOfAction > 0 && !actor.system.isDead) {
-          updates.push({ daysOutOfAction: 0, recoveryStartedAt: 0 });
-        }
-      }
-
-      expect(updates.length).toBe(2);
-    });
+    expect(agent3.update).not.toHaveBeenCalled();
   });
 });

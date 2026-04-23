@@ -418,7 +418,16 @@ export async function executeStressRoll(
       await actorUpdate(agent, updateData);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
-      throw new Error(`Failed to apply stress roll updates to agent: ${message}`);
+      const failedFields = Object.keys(updateData).join(", ");
+      console.error("[INSPECTRES] Stress roll update failed:", {
+        agentId: agent.id,
+        agentName: agent.name,
+        failedFields,
+        error: err,
+        errorMessage: message,
+      });
+      ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorStressRollFailed") ?? "Failed to apply stress roll to agent");
+      return;
     }
   }
 

@@ -62,9 +62,21 @@ Hooks.once("init", async function () {
     default: 1,
     onChange: (newDay: unknown) => {
       if (typeof newDay !== "number") return;
-      void autoClearRecoveredAgents(newDay as number).catch((err: unknown) => {
-        handleActionError(err, "Failed to auto-clear recovered agents", "INSPECTRES.ErrorAutoRecoverFailed", "Auto-recovery update failed");
-      });
+      if (!Number.isInteger(newDay) || newDay < 1) {
+        console.warn("[INSPECTRES] Invalid currentDay value; ignoring:", { newDay });
+        return;
+      }
+      void (async () => {
+        try {
+          await autoClearRecoveredAgents(newDay);
+        } catch (err: unknown) {
+          const message = err instanceof Error ? err.message : String(err);
+          console.error("[INSPECTRES] Auto-clear recovered agents failed:", { newDay, error: err, errorMessage: message });
+          if (ui.notifications) {
+            ui.notifications.error(game.i18n?.localize("INSPECTRES.ErrorAutoRecoverFailed") ?? "Auto-recovery update failed");
+          }
+        }
+      })();
     },
   });
 

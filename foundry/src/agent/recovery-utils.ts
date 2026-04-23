@@ -16,8 +16,11 @@ export function getCurrentDay(): number {
         "currentDay",
       ) as number
     ) ?? DEFAULT_IN_GAME_DAY;
-  } catch {
-    // Setting not yet registered (pre-init) or other access error; use default
+  } catch (err: unknown) {
+    if (game.ready) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.warn("[INSPECTRES] Failed to get currentDay setting; using default:", { error: err, errorMessage: message });
+    }
     return DEFAULT_IN_GAME_DAY;
   }
 }
@@ -77,6 +80,7 @@ export function computeRecoveryStatus(
 
 export async function autoClearRecoveredAgents(currentDay: number): Promise<void> {
   if (typeof game === "undefined" || !game.actors) return;
+  if (!game.user?.isGM) return;
 
   const updates: Array<{ id: string; changes: Record<string, number> }> = [];
 
