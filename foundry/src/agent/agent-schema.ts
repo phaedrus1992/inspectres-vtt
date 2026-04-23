@@ -27,5 +27,5 @@ export interface AgentData {
   missionPool: number;
   isDead: boolean;
   daysOutOfAction: number;
-  recoveryStartedAt: string | null;
+  recoveryStartedAt: number;
 }

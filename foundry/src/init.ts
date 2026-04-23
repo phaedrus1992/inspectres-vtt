@@ -51,6 +51,17 @@ Hooks.once("init", async function () {
   // Register Handlebars helpers
   registerHandlebarsHelpers();
 
+  // Register game settings — cast needed because fvtt-types only knows core settings
+  (game.settings as unknown as { register: (namespace: string, key: string, data: unknown) => void }).register("inspectres", "currentDay", {
+    name: "INSPECTRES.SettingCurrentDay",
+    hint: "INSPECTRES.SettingCurrentDayHint",
+    scope: "world",
+    config: true,
+    type: Number,
+    default: 1,
+    onChange: () => { /* no reload needed */ },
+  });
+
   // Register sheets — cast needed because fvtt-types' registerSheet expects V1 constructor type
   Actors.registerSheet("inspectres", AgentSheet as never, {
     types: ["agent" as never],

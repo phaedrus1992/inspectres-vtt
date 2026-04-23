@@ -36,6 +36,11 @@
   --inspectres-warn-border: #f0ad4e;
   --inspectres-warn-text:   #7a5000;
 
+  /* Death / recovery banner */
+  --inspectres-dead-bg:     #ffeaea;
+  --inspectres-dead-border: #c41e3a;
+  --inspectres-dead-text:   #7a0000;
+
   /* Misc */
   --inspectres-radius:    4px;
   --inspectres-radius-lg: 6px;
@@ -517,6 +522,33 @@
     color: var(--inspectres-warn-text);
     font-size: 0.8rem;
     font-weight: 600;
+  }
+
+  /* Recovery status banner */
+  .recovery-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-bottom: 2px solid;
+
+    &.dead {
+      background: var(--inspectres-dead-bg);
+      border-color: var(--inspectres-dead-border);
+      color: var(--inspectres-dead-text);
+    }
+
+    &.recovering {
+      background: var(--inspectres-warn-bg);
+      border-color: var(--inspectres-warn-border);
+      color: var(--inspectres-warn-text);
+    }
+
+    i {
+      flex-shrink: 0;
+    }
   }
 
   /* Description */

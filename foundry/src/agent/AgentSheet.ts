@@ -8,6 +8,7 @@ import { findFranchiseActor, franchiseSystemData } from "../franchise/franchise-
 import { handleActionError } from "../utils/ui-errors.js";
 import { activateTabs } from "../utils/sheet-tabs.js";
 import { getOrCreateListenerController } from "../utils/listener-cleanup.js";
+import { computeRecoveryStatus, getCurrentDay } from "./recovery-utils.js";
 
 const SKILL_NAMES = ["academics", "athletics", "technology", "contact"] as const;
 
@@ -98,7 +99,9 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     const base = await super._prepareContext(_options);
     // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
     const system = this.actor.system as unknown as AgentData;
-    return { ...base, system };
+    const currentDay = getCurrentDay();
+    const recoveryStatus = computeRecoveryStatus(system, currentDay);
+    return { ...base, system, recoveryStatus };
   }
 
   override async _onRender(context: Record<string, unknown>, options: foundry.applications.api.ApplicationV2Options): Promise<void> {
@@ -128,6 +131,17 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
       console.error("onSkillRoll: missing or invalid data-skill attribute", { skillAttr });
       return;
     }
+    const system = this.actor.system as unknown as AgentData;
+    const currentDay = getCurrentDay();
+    const recovery = computeRecoveryStatus(system, currentDay);
+    if (recovery.status === "dead") {
+      ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnSkillRollDead") ?? "Dead agents cannot roll.");
+      return;
+    }
+    if (recovery.status === "recovering") {
+      ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnSkillRollRecovering") ?? "Agents out of action cannot roll.");
+      return;
+    }
     const franchise = findFranchiseActor();
     if (franchise && franchiseSystemData(franchise).debtMode) {
       ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnSkillRollDebtMode") ?? "Skill rolls are blocked while in Debt Mode.");
@@ -139,6 +153,17 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
   }
 
   static async onStressRoll(this: AgentSheet, _event: Event, _target: HTMLElement): Promise<void> {
+    const system = this.actor.system as unknown as AgentData;
+    const currentDay = getCurrentDay();
+    const recovery = computeRecoveryStatus(system, currentDay);
+    if (recovery.status === "dead") {
+      ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnStressRollDead") ?? "Dead agents cannot roll.");
+      return;
+    }
+    if (recovery.status === "recovering") {
+      ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnStressRollRecovering") ?? "Agents out of action cannot roll.");
+      return;
+    }
     const franchise = findFranchiseActor();
     if (franchise && franchiseSystemData(franchise).debtMode) {
       ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnStressRollDebtMode") ?? "Stress rolls are blocked while in Debt Mode.");
