@@ -6,18 +6,15 @@ paths:
   - "foundry/**/*.scss"
 ---
 
-# Foundry VTT Patterns from Reference Systems
+# Foundry Patterns
 
-Patterns extracted from `reference/dnd5e/` and `reference/pf2e/` that apply to InSpectres.
-Companion to `foundry-api.md` and `foundry-sheets.md`.
+From `reference/dnd5e/`, `reference/pf2e/`. Companion to `foundry-api.md`, `foundry-sheets.md`.
 
-## Custom HTML Elements
+## Custom Elements
 
-Both reference systems use `AbstractFormInputElement` for interactive form widgets. This is
-the right approach for stress pips, skill rank selectors, and franchise dice toggles — they
-need to integrate with Foundry's form update pipeline, not just fire events.
+Use `AbstractFormInputElement` for interactive widgets (stress, ranks, toggles). Integrates with Foundry form pipeline, not just events.
 
-### Element skeleton
+### Stress Meter Pattern
 
 ```typescript
 import AbstractFormInputElement = foundry.applications.elements.AbstractFormInputElement;
@@ -128,13 +125,11 @@ export class SkillRankSelector extends AdoptedStyleSheetMixin(AbstractFormInputE
 }
 ```
 
-### Stylesheet caching
+### Styles
 
-The `AdoptedStyleSheetMixin` handles per-document stylesheet caching automatically — just
-define `static CSS`. Do not manually manage `CSSStyleSheet` instances unless not using the
-mixin.
+`AdoptedStyleSheetMixin` auto-caches `static CSS`. Don't manually manage `CSSStyleSheet`.
 
-### Usage in templates
+### Template Usage
 
 ```handlebars
 <stress-meter name="system.stress" value="{{systemData.stress}}" max="6"></stress-meter>
@@ -143,9 +138,9 @@ mixin.
 
 ---
 
-## Roll Architecture
+## Roll Workflow
 
-Use a three-stage workflow (from dnd5e `BasicRoll`) for all rolls:
+Three stages (from dnd5e):
 
 ```typescript
 export class SkillRoll {

@@ -4,28 +4,21 @@ paths:
   - "foundry/**/*.hbs"
 ---
 
-# Foundry VTT v12 API Patterns
+# Foundry v12 API
 
-Reference for the Foundry VTT v12 public API. Companion to `foundry-vite.md` (build/tooling)
-and `typescript.md` (TypeScript rules). Covers document architecture, data models, sheets,
-hooks, dice, and chat.
+See `foundry-vite.md`, `typescript.md`.
 
-## Document Hierarchy
+## Documents
 
-World-level documents (live in `game.*` collections):
-`Actor`, `Item`, `ChatMessage`, `Combat`, `JournalEntry`, `Macro`, `Playlist`, `RollTable`,
-`Scene`, `Setting`, `User`, `Folder`, `Cards`
+World: `Actor`, `Item`, `ChatMessage`, `Combat`, `JournalEntry`, `Macro`, `Playlist`, `RollTable`, `Scene`, `Setting`, `User`, `Folder`, `Cards`
 
-Embedded documents (live inside a parent document):
-`ActiveEffect` (in Actor/Item), `Combatant` (in Combat), `Token`, `AmbientLight`,
-`AmbientSound`, `Drawing`, `MeasuredTemplate`, `Note`, `Tile`, `Wall` (in Scene)
+Embedded: `ActiveEffect`, `Combatant`, `Token`, `AmbientLight`, `AmbientSound`, `Drawing`, `MeasuredTemplate`, `Note`, `Tile`, `Wall`
 
-Always use `createEmbeddedDocuments` / `updateEmbeddedDocuments` / `deleteEmbeddedDocuments`
-on the parent — never manipulate embedded document arrays directly.
+Use `createEmbeddedDocuments` / `updateEmbeddedDocuments` / `deleteEmbeddedDocuments` on parent. Never mutate arrays directly.
 
-## Data Models
+## DataModel
 
-### Always extend TypeDataModel for system data
+### TypeDataModel
 
 ```typescript
 import { fields } from "@league-of-foundry-developers/foundry-vtt-types/...";
@@ -48,36 +41,33 @@ class AgentDataModel extends foundry.abstract.TypeDataModel {
 }
 ```
 
-`TypeDataModel` vs `DataModel`: always use `TypeDataModel` for Actor/Item type data.
-`DataModel` is for lower-level schema objects not tied to a document type.
+Use `TypeDataModel` for Actor/Item type data. `DataModel` for lower-level schema objects.
 
-### Data preparation order
+Data prep order:
+1. `prepareBaseData()` — before embedded & effects
+2. `applyActiveEffects()` — effect transforms
+3. `prepareDerivedData()` — after effects
 
-1. `prepareBaseData()` — before embedded documents and ActiveEffects
-2. `applyActiveEffects()` — effect transformations applied
-3. `prepareDerivedData()` — after effects; compute derived values here
+Override in both document class AND DataModel. DataModel version runs first.
 
-Override `prepareDerivedData()` in both the document class AND the DataModel class.
-The DataModel's version runs first within each step.
+### Fields
 
-### Field types quick reference
+| Field | Use |
+|-------|-----|
+| `StringField` | Text/identifiers |
+| `NumberField` | Numbers, `min`/`max`/`integer`/`positive` |
+| `BooleanField` | Flags |
+| `SchemaField` | Nested object |
+| `ArrayField` | Homogeneous array |
+| `SetField` | Unique values |
+| `ObjectField` | Untyped (avoid) |
+| `HTMLField` | Rich text |
+| `FilePathField` | Media paths |
+| `ForeignDocumentField` | Cross-doc ref |
+| `EmbeddedDocumentField` | Single embed |
+| `EmbeddedCollectionField` | Collection |
 
-| Field | Use for |
-|-------|---------|
-| `StringField` | Text, identifiers |
-| `NumberField` | Numbers (options: `min`, `max`, `integer`, `positive`) |
-| `BooleanField` | True/false flags |
-| `SchemaField({...})` | Nested object with typed fields |
-| `ArrayField(elementField)` | Homogeneous array |
-| `SetField(elementField)` | Unique-value set |
-| `ObjectField` | Untyped free-form object (avoid when possible) |
-| `HTMLField` | Rich text / HTML content |
-| `FilePathField` | Image/audio/video paths |
-| `ForeignDocumentField` | Reference to another document |
-| `EmbeddedDocumentField` | Single embedded document |
-| `EmbeddedCollectionField` | Collection of embedded documents |
-
-### Registration pattern
+### Registration
 
 ```typescript
 // system.json
@@ -95,9 +85,7 @@ Hooks.once("init", () => {
 });
 ```
 
-### Migrations
-
-Use `static migrateData(source)` for schema version changes:
+### Migration
 
 ```typescript
 static migrateData(source: Record<string, unknown>): Record<string, unknown> {
@@ -110,33 +98,25 @@ static migrateData(source: Record<string, unknown>): Record<string, unknown> {
 }
 ```
 
-## Actor and Item
+## Actor & Item
 
-### Never write directly to system fields
+### System data
 
+Never write directly: `actor.system.field = val` bypasses validation.
+
+Use update:
 ```typescript
-// Bad — bypasses validation and won't persist
-actor.system.franchise = 3;
-
-// Good
 await actor.update({ "system.franchise": 3 });
-
-// Good — for multiple fields
-await actor.update({
-  "system.franchise": 3,
-  "system.stress": 1,
-});
 ```
 
-### Accessing system data (typed)
+### Typed access
 
 ```typescript
-// Cast through your DataModel type
 const data = actor.system as AgentDataModel;
 const stress = data.stress;
 ```
 
-### Lifecycle hooks (call super)
+### Lifecycle
 
 ```typescript
 class SystemActor extends Actor {
@@ -160,132 +140,55 @@ class SystemActor extends Actor {
 }
 ```
 
-Return `false` from `_preCreate` / `_preUpdate` / `_preDelete` to cancel the operation.
+Return `false` from `_pre*` to cancel.
 
-### Roll data
+### Rolls
 
-Override `getRollData()` to expose system data to dice formulas:
-
-```typescript
-override getRollData(): Record<string, unknown> {
-  const base = super.getRollData();
-  return { ...base, ...this.system };
-}
-```
+Override `getRollData()` to expose system data to formulas.
 
 ## Hooks
 
-### System lifecycle
+### Lifecycle
 
-```typescript
-// Register document classes, sheets, data models, CONFIG, settings
-Hooks.once("init", () => { ... });
+- `init`: Register classes, sheets, CONFIG
+- `setup`: Post-init, pre-ready module interaction
+- `ready`: Access world data + UI
 
-// Interact with other modules/systems (post-init, pre-ready)
-Hooks.once("setup", () => { ... });
+### Intercept
 
-// Access game world data, UI elements
-Hooks.once("ready", () => { ... });
-```
+Return `false` from `Hooks.call` handler to cancel. `Hooks.callAll` ignores return values.
 
-### Intercept and cancel
-
-Any handler registered via `Hooks.call` that returns `false` stops execution and cancels the action:
-
-```typescript
-Hooks.on("preCreateActor", (actor, data, options, userId) => {
-  if (someCondition) return false; // cancel creation
-});
-```
-
-`Hooks.callAll` ignores return values — use when you want all handlers to always run.
-
-### Remove listeners
-
+Remove listeners on close to prevent leaks:
 ```typescript
 const id = Hooks.on("updateActor", handler);
-// later:
-Hooks.off("updateActor", id);
+Hooks.off("updateActor", id);  // on close
 ```
 
-Always remove listeners registered on document-level hooks when the document/sheet is closed,
-to prevent memory leaks and duplicate handler accumulation.
+## Rolls
 
-## Rolls and Dice
+### Evaluate
 
-### Basic evaluation
+Async required before accessing results. Access: `roll.total`, `roll.dice`, `roll.result`.
 
-```typescript
-// Async evaluate (required before accessing results)
-const roll = await new Roll("2d6 + @franchise", rollData).evaluate();
+### Inline rolls
 
-// Access results
-roll.total;          // number
-roll.dice;           // DiceTerm[]
-roll.result;         // formula string with values
+Use `roll.render()` for HTML table.
 
-// Create chat message with roll
-await roll.toMessage({
-  speaker: ChatMessage.getSpeaker({ actor }),
-  flavor: game.i18n.localize("INSPECTRES.RollFlavor"),
-});
-```
+### Modes
 
-### Inline rolls in ChatMessage
+Respect `game.settings.get("core", "rollMode")` via `ChatMessage.applyRollMode()`.
 
-```typescript
-const roll = await new Roll(formula).evaluate();
-await ChatMessage.create({
-  content: await roll.render(),   // HTML dice table
-  rolls: [roll],
-  speaker: ChatMessage.getSpeaker({ actor }),
-  type: CONST.CHAT_MESSAGE_TYPES.ROLL,
-});
-```
+## Messages
 
-### Roll modes
+Simple: `await ChatMessage.create({ content: "...", speaker: ... })`
 
-Respect the user's preferred roll mode:
-
-```typescript
-const rollMode = game.settings.get("core", "rollMode");
-const messageData = ChatMessage.applyRollMode({}, rollMode);
-await ChatMessage.create({ ...messageData, rolls: [roll], content: ... });
-```
-
-## Chat Messages
-
-```typescript
-// Simple
-await ChatMessage.create({
-  content: `<p>${game.i18n.localize("INSPECTRES.SomeMessage")}</p>`,
-  speaker: ChatMessage.getSpeaker({ actor }),
-});
-
-// Whisper to GM
-await ChatMessage.create({
-  content: "Private info",
-  whisper: ChatMessage.getWhisperRecipients("GM"),
-});
-```
+Whisper: `whisper: ChatMessage.getWhisperRecipients("GM")`
 
 ## Flags
 
-Use flags for optional, module/system-specific data that isn't part of the core schema:
+Optional module-specific data (not schema core):
 
-```typescript
-// Store
-await actor.setFlag("inspectres", "someKey", value);
-
-// Read
-const value = actor.getFlag("inspectres", "someKey");
-
-// Remove
-await actor.unsetFlag("inspectres", "someKey");
-```
-
-Use `system.*` data (DataModel) for data that must be indexed, queried, or validated.
-Use `flags.*` for optional extension data.
+Use `system.*` for indexed/queryable. Use `flags.*` for optional.
 
 ## Settings
 
@@ -425,108 +328,36 @@ Other utilities:
 
 ## Settings
 
-```typescript
-Hooks.once("init", () => {
-  game.settings.register("inspectres", "myKey", {
-    name: "INSPECTRES.SettingName",
-    hint: "INSPECTRES.SettingHint",
-    scope: "world",          // "world" = GM-controlled; "client" = per-user
-    config: true,
-    type: Number,
-    default: 0,
-    choices: { 0: "Low", 1: "High" },   // renders as <select>
-    requiresReload: false,
-    onChange: (value) => { /* react immediately */ },
-  });
-});
+Register in `init`: `scope: "world"` (GM) or `"client"` (per-user).
 
-const val = game.settings.get("inspectres", "myKey");
-await game.settings.set("inspectres", "myKey", newValue);
-```
+Read: `game.settings.get()`, Write: `game.settings.set()`.
 
 ## Notifications
 
-```typescript
-// Always use localization keys; always use ?. (may be null during early init)
-ui.notifications?.info(game.i18n.localize("INSPECTRES.SomeInfo"));
-ui.notifications?.warn(game.i18n.localize("INSPECTRES.SomeWarning"));
-ui.notifications?.error(game.i18n.localize("INSPECTRES.SomeError"));
+Always use `ui.notifications?.info()` — may be null early.
 
-// Remove a specific notification
-const id = ui.notifications?.info("Loading...");
-ui.notifications?.remove(id);
-```
+## Compendium
 
-## Compendium Packs
+Get: `game.packs.get()`, index: `pack.getIndex()`, import: `pack.importDocument()`.
 
-```typescript
-const pack = game.packs.get("inspectres.abilities"); // "system.packname"
-const docs  = await pack.getDocuments();
-const weapons = await pack.getDocuments({ type: "weapon" });
-const doc   = await pack.getDocument(id);
+## Token
 
-// Lightweight index (no full data load)
-const index = await pack.getIndex({ fields: ["name", "img", "system.type"] });
-for (const entry of index) { /* entry.name, entry.img */ }
-
-// Import into world
-await pack.importDocument(doc);
-```
-
-## TokenDocument
-
-```typescript
-// Tokens for an actor
-const tokens = actor.getActiveTokens(true); // true = linked only
-
-// Linked vs synthetic
-token.isLinked;    // true = shares actor data; false = independent copy
-token.actor;       // synthetic or linked Actor
-token.baseActor;   // always the world-level Actor
-
-// Update token appearance
-await token.update({ img: "path/to/img.png" });
-
-// Toggle into combat
-await token.toggleCombatant();
-
-// Status effect check
-token.hasStatusEffect("dead");
-token.inCombat;
-```
+Active tokens: `actor.getActiveTokens(true)` (linked only). Properties: `isLinked`, `baseActor`. Update: `token.update()`. Combat: `toggleCombatant()`.
 
 ## RollTable
 
-```typescript
-const table = game.tables.getName("Weird Occurrences");
+Get: `game.tables.getName()`, draw: `table.draw()`, many: `table.drawMany()`, reset: `table.resetResults()`.
 
-// Draw one result (posts to chat by default)
-const { roll, results } = await table.draw();
+## Gotchas
 
-// Draw without chat
-const { roll, results } = await table.draw({ displayChat: false });
-
-// Draw multiple
-const { roll, results } = await table.drawMany(3);
-
-// Reset all drawn items
-await table.resetResults();
-```
-
-## Common Gotchas
-
-| Gotcha | Correct pattern |
-|--------|-----------------|
-| `actor.system.field = value` | `await actor.update({ "system.field": value })` |
-| Returning document instance from `getData()` | Return plain object: `{ ...super.getData(), systemData: this.actor.system }` |
-| `Hooks.on` for one-time setup | `Hooks.once` |
-| `Roll.evaluate()` without `await` | Always `await new Roll(formula).evaluate()` |
-| Accessing `game.*` at module parse time | Wrap in `Hooks.once("init", ...)` |
-| Forgetting `super._onUpdate()` etc. | Always call `super` in lifecycle overrides |
-| Hardcoded actor/item types as strings | Define as string enum constants |
-| `TextEditor.enrichHTML` without `await` | Always `await`; make `getData()` async |
-| `ui.notifications.info(...)` | Use `ui.notifications?.info(...)` — may be null early |
-| `foundry.utils.mergeObject` mutates first arg | Pass `{inplace: false}` or use it for `defaultOptions` only |
-| Roll class URL | `foundry.dice.Roll`, not `client.Roll` |
-| `new Roll(...).total` before evaluate | `total` is only defined after `await roll.evaluate()` |
-| Combat turn hooks on every client | `_onStartTurn` etc. only execute on one GM client |
+| Gotcha | Fix |
+|--------|-----|
+| `actor.system.field = val` | `await actor.update({ "system.field": val })` |
+| `Hooks.on` one-time | Use `Hooks.once` |
+| `Roll.evaluate()` no await | Always await |
+| `game.*` at parse time | Wrap in `Hooks.once("init", ...)` |
+| Forget `super._onUpdate()` | Always call super |
+| `ui.notifications.info()` | Use `ui.notifications?.info()` |
+| `Roll.total` before eval | Total only after `await evaluate()` |
+| Combat hooks every client | `_onStartTurn` = GM client only |
+| `mergeObject` mutates | Pass `{inplace: false}` |

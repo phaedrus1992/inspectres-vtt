@@ -5,16 +5,15 @@ paths:
   - "foundry/**/*.css"
 ---
 
-# Foundry VTT Sheet Development
+# Foundry Sheets
 
-Patterns for building Actor and Item sheets. Companion to `foundry-api.md` and `foundry-vite.md`.
+Actor + Item sheet patterns. Companion to `foundry-api.md` and `foundry-vite.md`.
 
-## Application Version
+## ApplicationV2 (V13+)
 
-All InSpectres sheets use **ApplicationV2** (`ActorSheetV2` / `ItemSheetV2`), targeting Foundry V13+.
-Do not write new sheets extending V1 `ActorSheet` / `ItemSheet` — those are deprecated in V13 and removed in V15.
+Use `ActorSheetV2` / `ItemSheetV2`. V1 `ActorSheet` / `ItemSheet` deprecated V13, removed V15. No new V1.
 
-## ActorSheetV2 Pattern
+## ActorSheetV2
 
 ```typescript
 export class AgentSheet extends foundry.applications.sheets.ActorSheetV2 {
@@ -66,7 +65,7 @@ export class AgentSheet extends foundry.applications.sheets.ActorSheetV2 {
 }
 ```
 
-## ItemSheetV2 Pattern
+## ItemSheetV2
 
 ```typescript
 export class AbilitySheet extends foundry.applications.sheets.ItemSheetV2 {
@@ -74,12 +73,10 @@ export class AbilitySheet extends foundry.applications.sheets.ItemSheetV2 {
     classes: ["inspectres", "sheet", "item", "ability"],
     position: { width: 520, height: 380 },
   };
-
   static override PARTS = {
     sheet: { template: "systems/inspectres/templates/items/ability-sheet.hbs" },
   };
-
-  override async _prepareContext(_options: foundry.applications.api.ApplicationV2Options): Promise<Record<string, unknown>> {
+  override async _prepareContext(_options): Promise<Record<string, unknown>> {
     const base = await super._prepareContext(_options);
     return { ...base, system: this.item.system as AbilityData };
   }
@@ -88,19 +85,13 @@ export class AbilitySheet extends foundry.applications.sheets.ItemSheetV2 {
 
 ## Registration
 
-Register all sheets in the `init` hook:
-
+Register in `init`:
 ```typescript
 Hooks.once("init", () => {
   Actors.registerSheet("inspectres", AgentSheet, {
     types: ["agent"],
     makeDefault: true,
     label: "INSPECTRES.SheetAgent",
-  });
-  Actors.registerSheet("inspectres", FranchiseSheet, {
-    types: ["franchise"],
-    makeDefault: true,
-    label: "INSPECTRES.SheetFranchise",
   });
   Items.registerSheet("inspectres", AbilitySheet, {
     types: ["ability"],
@@ -110,157 +101,70 @@ Hooks.once("init", () => {
 });
 ```
 
-## getData() Rules
+## Context Preparation
 
-- Always call `super.getData()` and spread it
-- Never return the document itself — pass pre-computed values
-- Pre-process: sort arrays, compute derived display values, format numbers
-- Pre-enrich HTML fields with `TextEditor.enrichHTML` before passing to template
-- `this.isEditable` is already in `super.getData()` — use it to gate edit-only UI
+Pre-compute in `_prepareContext()` / `getData()`:
+- Sort arrays
+- Compute derived values
+- Format numbers
+- Pre-enrich HTML fields
+- Use `this.isEditable` for edit-only UI
 
 ```typescript
-getData() {
-  const base = super.getData();
-  // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md.
+override async _prepareContext(_options): Promise<Record<string, unknown>> {
+  const base = await super._prepareContext(_options);
   const system = this.actor.system as unknown as AgentData;
-
-  // Pre-sort items by type for template convenience
   const abilities = this.actor.items
     .filter(i => i.type === "ability")
     .sort((a, b) => a.name.localeCompare(b.name));
-
-  return {
-    ...base,
-    systemData: system,
-    abilities,
-    stressArray: Array.from({ length: 6 }, (_, i) => i < system.stress),
-  };
+  return { ...base, system, abilities };
 }
 ```
 
-## Handlebars Template Conventions
+## Handlebars
 
-Templates receive the object returned by `getData()`. Access fields with dot notation.
+- `name="system.field"` auto-binds via form update
+- `data-action="..."` for delegation (not classes)
+- `data-item-id="{{item.id}}"` for item rows
+- `autocomplete="off"` on forms (prevent browser autofill)
+- All text via `{{localize "KEY"}}`
 
-```handlebars
-{{!-- agent-sheet.hbs --}}
-<form class="inspectres inspectres-sheet inspectres-agent-sheet" autocomplete="off">
-  <header class="sheet-header">
-    <img class="profile-img" src="{{actor.img}}" data-action="edit-image" title="{{actor.name}}">
-    <div class="header-fields">
-      <h1><input type="text" name="name" value="{{actor.name}}" placeholder="Name"></h1>
-      <div class="franchise-dice">
-        <label>{{localize "INSPECTRES.Franchise"}}</label>
-        <input type="number" name="system.franchise" value="{{systemData.franchise}}" min="0">
-      </div>
-    </div>
-  </header>
+## CSS
 
-  <nav class="sheet-tabs tabs" data-group="primary">
-    <a class="item" data-tab="stats">{{localize "INSPECTRES.TabStats"}}</a>
-    <a class="item" data-tab="abilities">{{localize "INSPECTRES.TabAbilities"}}</a>
-  </nav>
-
-  <section class="sheet-body">
-    <div class="tab" data-tab="stats">
-      {{!-- stress track --}}
-      {{#each stressArray as |checked index|}}
-        <input type="checkbox" name="system.stress" value="{{index}}"
-               {{#if checked}}checked{{/if}}>
-      {{/each}}
-    </div>
-
-    <div class="tab" data-tab="abilities">
-      <button type="button" data-action="item-create">
-        {{localize "INSPECTRES.AddAbility"}}
-      </button>
-      {{#each abilities as |item|}}
-        <div class="item" data-item-id="{{item.id}}">
-          <span class="item-name">{{item.name}}</span>
-          <a data-action="item-edit"><i class="fas fa-edit"></i></a>
-          <a data-action="item-delete"><i class="fas fa-trash"></i></a>
-        </div>
-      {{/each}}
-    </div>
-  </section>
-</form>
-```
-
-### Template rules
-- Use `name="system.field"` for fields that auto-bind via `_updateObject`
-- Use `data-action="..."` attributes for JS event delegation (not `class` hooks)
-- Use `data-item-id="{{item.id}}"` on item rows so handlers can find the document
-- Always `autocomplete="off"` on `<form>` — browsers try to fill RPG fields with contacts
-- All text through `{{localize "KEY"}}` — no hardcoded English
-
-## CSS Structure
-
-Nest all rules under the system prefix to avoid global collisions:
-
+Nest under system prefix. Use Foundry CSS vars (`--color-*`, `--font-*`), never hardcode colors:
 ```css
 .inspectres.sheet {
-  .sheet-header {
-    display: flex;
-    gap: 0.5rem;
-
-    .profile-img {
-      width: 100px;
-      height: 100px;
-      border: 1px solid var(--color-border-light-primary);
-    }
-  }
-
-  .sheet-tabs { border-bottom: 1px solid var(--color-border-light-primary); }
-
+  .sheet-header { display: flex; }
   .tab { display: none; }
   .tab.active { display: block; }
-
-  .item-list {
-    .item { display: flex; align-items: center; gap: 0.25rem; }
-  }
 }
 ```
 
-Use Foundry CSS variables (`--color-*`, `--font-*`) for theme compatibility.
-Never hardcode color values — they break dark mode and user themes.
+## Dialogs
 
-## Dialog Patterns
-
-Use `foundry.applications.api.DialogV2` (V2 API). `Dialog` is deprecated in V13.
-
+Use `DialogV2` (V1 deprecated V13):
 ```typescript
-// Simple confirmation
 const confirmed = await foundry.applications.api.DialogV2.confirm({
-  window: { title: game.i18n.localize("INSPECTRES.DeleteTitle") },
-  content: `<p>${game.i18n.localize("INSPECTRES.DeleteConfirm")}</p>`,
+  window: { title: game.i18n.localize("KEY") },
+  content: `<p>Message</p>`,
 });
 if (!confirmed) return;
 
-// Custom dialog with form — buttons is an array, callback receives native HTMLDialogElement
 const result = await foundry.applications.api.DialogV2.wait({
-  window: { title: game.i18n.localize("INSPECTRES.DicePool") },
-  content: `<form>
-    <label>${game.i18n.localize("INSPECTRES.DiceCount")}</label>
-    <input type="number" name="count" value="2" min="1" max="6">
-  </form>`,
+  window: { title: game.i18n.localize("KEY") },
+  content: `<form><input type="number" name="count"></form>`,
   buttons: [
     {
       action: "roll",
-      label: game.i18n.localize("INSPECTRES.Roll"),
-      default: true,
+      label: game.i18n.localize("KEY"),
       callback: (_event, _button, dialog) => {
-        const form = dialog.querySelector("form") as HTMLFormElement | null;
-        return form ? Number(new FormData(form).get("count")) : null;
+        const form = dialog.querySelector("form") as HTMLFormElement;
+        return Number(new FormData(form).get("count"));
       },
-    },
-    {
-      action: "cancel",
-      label: game.i18n.localize("INSPECTRES.Cancel"),
-      callback: () => null,
     },
   ],
 });
-if (result === null || result === undefined) return;
+if (!result) return;
 ```
 
 ## Anti-Patterns
