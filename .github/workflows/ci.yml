@@ -79,11 +79,43 @@ jobs:
           path: foundry/dist/
           if-no-files-found: error
 
-  docs:
-    name: Docs build
+  check-docs:
+    name: Check if docs changed
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    outputs:
+      changed: ${{ steps.check.outputs.changed }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Check docs paths
+        id: check
+        run: |
+          if [ '${{ github.event_name }}' = 'pull_request' ]; then
+            # For PRs, always run
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            # For pushes, check if docs or rules changed
+            CHANGED=$(git diff --name-only '${{ github.event.before }}' '${{ github.sha }}' | grep -E '^(docs/|\.claude/rules/documentation\.md)' | wc -l)
+            if [ "$CHANGED" -gt 0 ]; then
+              echo "changed=true" >> $GITHUB_OUTPUT
+            else
+              echo "changed=false" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+  docs:
+    name: Docs build
+    runs-on: ubuntu-latest
+    needs: check-docs
+    permissions:
+      contents: read
+    if: needs.check-docs.outputs.changed == 'true'
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
