@@ -47,15 +47,15 @@ export class InSpectresAgent extends Actor {
   }
 
   override async _preUpdate(
-    changed: Record<string, unknown>,
-    options: Record<string, unknown>,
-    userId: string,
+    changed: unknown,
+    options: unknown,
+    userId: unknown,
   ): Promise<boolean | void> {
-    const result = await super._preUpdate(changed, options, userId);
-    const user = game.users?.get(userId as never);
+    const result = await super._preUpdate(changed as Parameters<Actor["_preUpdate"]>[0], options as Parameters<Actor["_preUpdate"]>[1], userId as string);
+    const user = game.users?.get(userId as unknown as string);
     if (user?.isGM) return result;
-    const system = changed["system"] as Record<string, unknown> | undefined;
-    if (system && ("isDead" in system || "daysOutOfAction" in system || "recoveryStartedAt" in system)) {
+    const systemChanges = (changed as Record<string, unknown>)["system"] as Record<string, unknown> | undefined;
+    if (systemChanges && ("isDead" in systemChanges || "daysOutOfAction" in systemChanges || "recoveryStartedAt" in systemChanges)) {
       throw new Error("Recovery state can only be modified by the GM");
     }
     return result;
