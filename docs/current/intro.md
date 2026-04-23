@@ -4,7 +4,7 @@ sidebar_position: 1
 
 # Welcome to InSpectres
 
-InSpectres is a paranormal investigation RPG system for [Foundry VTT](https://foundryvtt.com/). It provides tools to run long-running campaigns investigating mysteries, managing an investigation agency, and tracking the agents and interesting characters that come and go throughout play.
+InSpectres is a paranormal investigation RPG system for [Foundry VTT](https://foundryvtt.com/). You play as investigators running a paranormal investigation **Franchise** (agency), handling cases, managing stress and resources, and dealing with agent death and recovery.
 
 ## What You'll Find Here
 

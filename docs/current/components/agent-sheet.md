@@ -10,7 +10,7 @@ The **Agent Sheet** is the character sheet for player characters (paranormal inv
 
 [Screenshot: Agent Sheet goes here]
 
-The agent sheet displays all information about an investigator: skills, stress, recovery status, and actions.
+The agent sheet shows everything about your investigator: skills (0-3 ratings), current **Stress** (0-6), **Recovery** status if out of action, and access to **Skill Rolls**.
 
 ## Sections
 
@@ -43,19 +43,13 @@ Additional agent information:
 - **Role** — Type of investigator (e.g., field agent, analyst, specialist)
 - **Notes** — Freeform notes, personality, background
 
-## Making a Roll
+## Making a Skill Roll
 
-### Skill Roll
+[Screenshot: Skill Dialog goes here]
 
-1. **Click the skill** you want to use (e.g., "Cool")
-2. **A dialog appears** showing:
-   - Your dice pool (skill + franchise bonus - stress penalty)
-   - Option to have franchise help (+1 die)
-3. **Click "Roll"** — Dice roll and chat message appears with results
-4. **Interpret the result**:
-   - **All successes** — You succeed
-   - **Some successes** — Succeed at cost (gain stress, complication)
-   - **No successes** — Fail and things get worse (gain stress)
+To make a **Skill Roll**: Click a skill (Cool, Guts, Psyche, Savvy, Weird, or Tough). A dialog appears showing your **Dice Pool** and asking if the **Franchise** should help (adds +1 die, costs 1 **Resource**). Click "Roll" and Foundry displays the result in chat.
+
+**Interpret your result:** Count successes (rolling 4-6 = 1 success). 0 successes = failure. 1-2 = marginal success (gain **Stress**). 3+ = clear success.
 
 ### Understanding Your Dice Pool
 
@@ -87,20 +81,15 @@ Stress naturally decreases very slowly (about 1 per mission) when you rest betwe
 
 **At 6+ stress**, the agent is incapacitated and must recover (see [Recovery System](../gameplay/mechanics.md#recovery-system)).
 
-## Recovery
+## Recovery System
 
-When an agent reaches 6 stress (or gets wounded), they enter recovery:
+When **Stress** reaches 6+, the agent is incapacitated and needs **Recovery**: a wall-clock number of days before they can act again (set by the GM). During recovery, the agent is out of action; other agents handle the mission.
 
-1. **GM sets duration** — "You need 2 days to recover"
-2. **Agent is out of action** — Other agents handle the mission
-3. **GM advances calendar** — When enough in-game time passes, recovery clears
-4. **Agent rejoins** — Stress resets to 0, agent is back in action
+**Recovery fields:**
+- **recoveryStartedAt** — The day recovery began
+- **daysOutOfAction** — How many days until the agent is ready
 
-The recovery fields are:
-- **recoveryStartedAt** — Day recovery began (set by GM)
-- **daysOutOfAction** — How many days recovery takes (set by GM)
-
-Recovery clears automatically when `currentDay >= recoveryStartedAt + daysOutOfAction`.
+Recovery clears automatically when the GM advances the calendar past the deadline. The agent's stress resets to 0 and they rejoin the team.
 
 ## Tips
 

@@ -4,7 +4,7 @@ sidebar_position: 2
 
 # Mechanics & Rules
 
-InSpectres runs on a failure-driven system where rolls and complications shape the investigation. This section covers the core mechanics.
+InSpectres uses **Dice Pools** (skill + **Franchise** bonus − **Stress** penalty) to resolve risky actions. **Stress** is the central resource: it accumulates from failures and when it hits 6+, agents need **Recovery**. **Franchise** operations (managing **Resources** and **Stress**) create ongoing campaign pressure.
 
 ## Complete Rules Reference
 
@@ -16,24 +16,11 @@ This section provides an overview. **For disputes or ambiguities, consult the of
 
 ## Dice Pools & Rolling
 
-### Skill Check
+### Skill Roll
 
-When an agent does something risky, they roll a **skill check**:
+When an agent tries something risky, they roll a **Skill Roll**. Calculate **Dice Pool**: Skill rating (0-3) + **Franchise** bonus (if helping, +1) − **Stress** penalty (1 per point above 3). Roll that many d6; each 4-6 = 1 **Success**.
 
-1. **Gather your dice**
-   - **Base:** Your skill rating (0-3 dice)
-   - **Franchise bonus:** +1 die if the franchise is helping
-   - **Minus penalties:** Subtract 1 die per point of stress above 3
-
-2. **Roll the pool**
-   - Roll that many d6
-   - **4-6 = success**
-   - **1-3 = failure**
-
-3. **Interpret the result**
-   - **All successes:** You succeed cleanly
-   - **Some successes:** You succeed but at a cost (gain stress, discover unexpected complication)
-   - **No successes:** You fail; things get worse (gain stress, enemy advantage, discovery)
+**Interpret:** 0 **Successes** = failure (gain **Stress**). 1-2 = marginal success (gain **Stress**, complication). 3+ = clear success.
 
 ### Difficulty Modifiers
 
@@ -48,35 +35,17 @@ Modifiers are applied **before rolling**.
 
 ### Gaining Stress
 
-Agents gain stress from:
-- **Failed rolls** — Usually 1 stress per point of failure
-- **Gruesome discoveries** — At GM discretion, 1-2 stress
-- **Traumatic events** — Story-based, 1-3 stress
-- **Losing a mission resource** — 1 stress
+**Agents gain Stress from:** Failed **Skill Rolls** (1-2 **Stress**), gruesome discoveries (GM discretion, 1-2 **Stress**), traumatic events (story-based, 1-3 **Stress**), or losing mission resources (1 **Stress**).
 
 ### Managing Stress
 
-- **Stress at 6+:** Agent is **incapacitated** and requires recovery
-- **Stress 0-5:** Normal play
-- **Passive recovery:** Stress naturally decreases very slowly (about 1 per mission)
-- **Active recovery:** Agent rests/takes time off (see Recovery, below)
+At **Stress 0-5**, agents play normally. **Stress naturally decreases slowly** (about 1 per mission) when resting between investigations. At 6+, the agent is **incapacitated** and requires **Recovery** (see below).
 
-### Stress in Rolls
-
-For every point of stress above 3, **reduce your dice pool by 1**. This represents the psychological toll of the job.
+**Stress penalty:** For every **Stress** above 3, lose 1 die from your **Dice Pool**. Example: 5 **Stress** = 2-point penalty. 6 **Stress** = 3-point penalty (minimum 0 dice).
 
 ## Recovery System
 
-When an agent reaches 6 stress (or higher), they are **out of action** and need recovery time.
-
-### How Recovery Works
-
-1. Agent triggers recovery (reaches 6 stress, gets wounded, etc.)
-2. GM sets **days of recovery** (typically 1-3 days of real-world play)
-3. Agent rests in the narrative
-4. After the recovery period, the agent's stress resets and they return to action
-
-### Example
+When an agent reaches 6+ **Stress**, they are **out of action** and need **Recovery**. The GM sets a recovery duration in **wall-clock days** (real-time, not in-game rounds). The agent rests and is unavailable for missions. When the deadline passes, the agent's **Stress** resets to 0 and they rejoin the team. **Recovery clears automatically** when the calendar advances past the deadline.
 
 > Agent hits 6 stress during a bad investigation. GM decides: "You need 2 days of downtime to recover."
 > 

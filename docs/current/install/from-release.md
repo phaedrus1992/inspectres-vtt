@@ -8,8 +8,8 @@ Download and install the latest stable release of InSpectres.
 
 ## Prerequisites
 
-- Foundry VTT 13 or later (self-hosted or using Foundry's license)
-- A Foundry data folder (you'll know where this is if you've set up Foundry before)
+- **Foundry VTT 13+** — [Download from foundryvtt.com](https://foundryvtt.com/) if you don't have it
+- **Foundry data folder location** — You need to know where your Foundry system files are stored
 
 ## Installation Steps
 
@@ -49,10 +49,10 @@ systems/
 
 ### 4. Verify Installation
 
-Once in the world:
-- You should see the InSpectres system is active (check System in Settings)
-- You can create a new **Agent** actor (the character sheet for player characters)
-- You can create a new **Franchise** actor (the agency/organization)
+Once in the world, you're ready to play. Check that:
+- InSpectres is listed in **World Settings → System**
+- You can create a new **Agent** (player character)
+- You can create a new **Franchise** (your investigation agency)
 
 ## Troubleshooting
 

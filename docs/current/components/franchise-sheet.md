@@ -10,46 +10,29 @@ The **Franchise Sheet** represents your investigation agency (the organization a
 
 [Screenshot: Franchise Sheet goes here]
 
-The franchise sheet shows agency-level information: resources, stress, and capabilities that affect all agents.
+The **Franchise Sheet** represents your investigation agency. It tracks **Resources** (pool available to agents), **Stress** (agency pressure from failed missions), and operational info that affects all agents.
 
 ## Sections
 
 ### Agency Info
 
-- **Name** — Your agency name (e.g., "Echo Investigations")
-- **Franchising Level** — How established your agency is (1-5)
-  - Level 1: Startup, few connections
-  - Level 5: Legendary, massive resources
-- **Reputation** — How well-known the agency is in paranormal circles
+**Name** — Your agency's name (e.g., "Echo Investigations").
+
+**Franchising Level** (1-5) — How established you are. Level 1 = startup; Level 5 = legendary with massive resources.
+
+**Reputation** — How well-known your agency is in paranormal circles (narrative detail).
 
 ### Resources
 
-- **Current Resources** — Pool of resources available (0-5)
-  - Agents spend resources to add +1 die to rolls
-  - Refresh between missions (1-2 per successful mission)
-  - When depleted, agents operate without agency support
+**Current Resources** (0-5) — Pool of **Resources** available to agents. When agents make a **Skill Roll**, they can spend 1 **Resource** to add +1 die. **Resources** refresh between missions (1-2 per successful mission). When depleted, agents roll without agency support.
 
-**Using Resources:**
-1. During an agent's skill roll, agent selects "Franchise Helps"
-2. Spend 1 resource
-3. Add +1 die to agent's dice pool
+**Using Resources:** During a **Skill Roll**, agent selects "Franchise Helps" → spend 1 **Resource** → add +1 die to the **Dice Pool**.
 
 ### Stress
 
-- **Franchise Stress** — Agency stress level (0-6)
-  - Increases when missions fail or resources are wasted
-  - Decreases slowly between missions
-  - Reduces available resources (high stress = fewer resources available)
+**Franchise Stress** (0-6) — Agency pressure from failed missions and wasted resources. High **Stress** reduces available **Resources** (fewer dice pools for agents). At 6+, the agency is in crisis: operations barely function, agents are demoralized, and **Bankruptcy** is at risk.
 
-When **Franchise Stress reaches 6+**, the agency is in crisis:
-- Operations barely function
-- Agents are demoralized
-- Risk of bankruptcy
-
-**Franchise Bankruptcy** — If stress stays at 6 without recovery, the agency fails:
-- Agents lose their jobs
-- Campaign likely ends or resets
-- New campaign with new franchise possible
+**Franchise Bankruptcy** — If **Stress** stays at 6+ without recovery, the agency fails. Agents lose their jobs and the campaign likely ends or resets. Bankruptcy is an ending state, not a failure to avoid.
 
 ### Missions & Operations
 

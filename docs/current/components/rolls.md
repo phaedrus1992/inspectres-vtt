@@ -10,17 +10,13 @@ How dice rolls work in InSpectres.
 
 The most common roll. When an agent tries something risky, they make a **skill roll**.
 
-### How to Roll
+[Screenshot: Skill Dialog goes here]
 
-1. **Open agent sheet**
-2. **Click a skill** (Cool, Guts, Psyche, Savvy, Weird, Tough)
-3. **Dialog shows your dice pool** (skill + franchise bonus - stress penalty)
-4. **Choose if franchise helps** (adds +1 die, costs 1 resource)
-5. **Click "Roll"** — Dice roll and chat message appears
+**To make a Skill Roll:** Click a skill on your agent sheet. A dialog appears showing your **Dice Pool** (skill + **Franchise** bonus − **Stress** penalty). Choose whether the **Franchise** helps (+1 die, costs 1 **Resource**). Click "Roll" and view results in chat.
 
 ### Interpreting Results
 
-The system rolls your dice pool and counts **successes** (4-6 = success, 1-3 = failure):
+The system rolls your **Dice Pool** and counts **Successes** (rolling 4-6 = 1 success):
 
 | Result | Interpretation |
 |--------|-----------------|
@@ -64,14 +60,7 @@ The **GM describes what happens** based on the fiction and dice result.
 
 ## Stress Roll
 
-When encountering something frightening, agents make a **stress roll** to resist taking stress.
-
-**Mechanics:**
-- Roll **Psyche** (or sometimes Guts/Weird, GM's choice)
-- **Success:** Gain 1 stress
-- **Failure:** Gain 2 stress
-
-This represents the psychological toll of paranormal investigation.
+When encountering something terrifying, agents make a **Stress Roll** using **Psyche** (or Guts/Weird, GM's choice) to resist taking **Stress**. Success means gain 1 **Stress**; failure means gain 2 **Stress**. This represents the psychological toll of paranormal investigation.
 
 **Example:**
 > Agents discover a mutilated body.

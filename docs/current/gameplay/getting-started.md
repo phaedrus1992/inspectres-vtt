@@ -21,11 +21,11 @@ The **Franchise** is your investigation agency — the organization your agents 
 3. Give it a name (e.g., "Echo Agency")
 4. Click **Create**
 
-Open the Franchise sheet:
-- **Name** — Your agency name
-- **Resources** — How many resources the agency has (used for missions and team capabilities)
-- **Stress** — Agency stress from failed investigations (impacts dice pools)
-- **Franchising Level** — How established your agency is (affects funding and mission difficulty)
+You'll see the Franchise sheet with these key fields:
+- **Name** — Your agency's name
+- **Franchising Level** — How established you are (1-5); higher = more resources
+- **Resources** — How many agency resources you have (spend to add +1 die to agent rolls)
+- **Stress** — Agency stress from failed missions; high stress reduces available resources
 
 ### Step 2: Create Agent Characters
 
@@ -36,22 +36,17 @@ Open the Franchise sheet:
 3. Give it a name (e.g., "Jordan Blake")
 4. Click **Create**
 
-Open the Agent sheet:
-- **Role** — What type of investigator they are (field agent, analyst, specialist, etc.)
-- **Skills** — 6 skills (Cool, Guts, Psyche, Savvy, Weird, Tough). Each has a score (0-3)
-- **Stress** — Current stress level (0-6). At 6, the agent needs recovery time
-- **Recovery** — If the agent is out of action, when they'll be back
+The Agent sheet shows:
+- **Skills** — 6 skills (Cool, Guts, Psyche, Savvy, Weird, Tough), each rated 0-3 (higher = better)
+- **Stress** — Current **Stress** level (0-6); at 6+, the agent is incapacitated and needs **Recovery**
+- **Recovery** — If the agent is out of action, displays when they'll be available again
 
-### Step 3: Understand the Dice Pool
+### Step 3: Understand Skill Rolls
 
-When you make a roll, your **dice pool** is:
-- **Your skill** (number of dice)
-- **Plus franchise bonus** (if the franchise is helping)
-- **Minus penalties** (from stress, equipment failure, etc.)
+When an agent tries something risky, they roll a **Skill Roll**. The number of dice they roll is:
+- **Skill rating** (0-3) + **Franchise bonus** (if helping, +1 die) − **Stress penalty** (1 die per point above 3)
 
-For example:
-- Agent has **Cool 2** and the Franchise adds **+1** → 3 dice total
-- Roll 3d6, count successes (4-6 are successes)
+Example: Agent with **Cool 2**, Franchise helping (+1), and Stress 2 → rolls **3 dice**. Each die showing 4-6 is a **Success**; count them and compare to difficulty.
 
 ### Step 4: Run a Mission
 
