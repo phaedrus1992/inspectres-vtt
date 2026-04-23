@@ -120,7 +120,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
         const system = this.actor.system as unknown as AgentData;
         const status = computeRecoveryStatus(system, getCurrentDay());
         if (status.status === "recovering" || status.status === "dead") {
-          ui.notifications?.warn(game.i18n.localize("INSPECTRES.WarnActionBlockedRecovery"));
+          ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnActionBlockedRecovery") ?? "Cannot act while recovering");
           target.checked = !target.checked;
           return;
         }
@@ -193,7 +193,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     const system = this.actor.system as unknown as AgentData;
     const status = computeRecoveryStatus(system, getCurrentDay());
     if (status.status === "recovering" || status.status === "dead") {
-      ui.notifications?.warn(game.i18n.localize("INSPECTRES.WarnSkillBlockedRecovery"));
+      ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnSkillBlockedRecovery") ?? "Cannot act while recovering");
       return;
     }
     const skillData = system.skills[skillAttr];
@@ -228,7 +228,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     const system = this.actor.system as unknown as AgentData;
     const status = computeRecoveryStatus(system, getCurrentDay());
     if (status.status === "recovering" || status.status === "dead") {
-      ui.notifications?.warn(game.i18n.localize("INSPECTRES.WarnSkillBlockedRecovery"));
+      ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnSkillBlockedRecovery") ?? "Cannot act while recovering");
       return;
     }
     const currentCool = system.cool;
@@ -246,7 +246,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     const currentSystem = this.actor.system as unknown as AgentData;
     const status = computeRecoveryStatus(currentSystem, getCurrentDay());
     if (status.status === "recovering" || status.status === "dead") {
-      ui.notifications?.warn(game.i18n.localize("INSPECTRES.WarnActionBlockedRecovery"));
+      ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnActionBlockedRecovery") ?? "Cannot act while recovering");
       return;
     }
     const characteristics = (currentSystem.characteristics ?? []) as AgentCharacteristic[];
@@ -273,7 +273,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     const currentSystem = this.actor.system as unknown as AgentData;
     const status = computeRecoveryStatus(currentSystem, getCurrentDay());
     if (status.status === "recovering" || status.status === "dead") {
-      ui.notifications?.warn(game.i18n.localize("INSPECTRES.WarnActionBlockedRecovery"));
+      ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnActionBlockedRecovery") ?? "Cannot act while recovering");
       return;
     }
     const characteristics = (currentSystem.characteristics ?? []) as AgentCharacteristic[];
@@ -289,7 +289,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     const system = this.actor.system as unknown as AgentData;
     const status = computeRecoveryStatus(system, getCurrentDay());
     if (status.status === "recovering" || status.status === "dead") {
-      ui.notifications?.warn(game.i18n.localize("INSPECTRES.WarnActionBlockedRecovery"));
+      ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnActionBlockedRecovery") ?? "Cannot act while recovering");
       return;
     }
     const type = target.dataset["type"] ?? "image";
