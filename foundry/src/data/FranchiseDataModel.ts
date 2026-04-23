@@ -16,6 +16,7 @@ export class FranchiseDataModel extends (foundry.abstract.TypeDataModel as unkno
       missionGoal: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
       debtMode: new BooleanField({ required: true, initial: false }),
       loanAmount: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
+      deathMode: new BooleanField({ required: true, initial: false }),
     };
   }
 }

@@ -9,6 +9,7 @@ import {
 import { type AgentData } from "../agent/agent-schema.js";
 import { type FranchiseData } from "../franchise/franchise-schema.js";
 import { emitMissionPoolUpdated } from "../mission/socket.js";
+import { getCurrentDay } from "../agent/recovery-utils.js";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -401,7 +402,7 @@ export async function executeStressRoll(
       updateData["system.isDead"] = true;
     } else if ("daysOutOfAction" in deathOutcome) {
       updateData["system.daysOutOfAction"] = deathOutcome.daysOutOfAction;
-      updateData["system.recoveryStartedAt"] = new Date().toISOString();
+      updateData["system.recoveryStartedAt"] = getCurrentDay();
     }
   }
 

@@ -202,6 +202,22 @@
       "PublicPark": "Public park or zoo",
       "SketchyNeighborhood": "Sketchy neighborhood",
       "ParallelDimension": "Parallel dimension"
-    }
+    },
+    "DeathResult": {
+      "Maimed": "Maimed",
+      "Crippled": "Crippled",
+      "Killed": "Killed"
+    },
+    "DeathNarration": {
+      "Maimed": "Recovering from injuries for 2 in-game days",
+      "Crippled": "Recovering from injuries for 3 in-game days",
+      "Killed": "Agent has been killed"
+    },
+    "WarnSkillRollDead": "Dead agents cannot roll.",
+    "WarnStressRollDead": "Dead agents cannot roll.",
+    "WarnSkillRollRecovering": "Agents out of action cannot roll.",
+    "WarnStressRollRecovering": "Agents out of action cannot roll.",
+    "SettingCurrentDay": "In-Game Day",
+    "SettingCurrentDayHint": "Current in-game day for recovery tracking. Agents recover based on this count."
   }
 }

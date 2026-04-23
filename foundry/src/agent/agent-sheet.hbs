@@ -1,4 +1,12 @@
 <form class="inspectres inspectres-sheet inspectres-agent-sheet" autocomplete="off">
+  {{!-- Recovery Status Banner --}}
+  {{#if (or (eq recoveryStatus.status "dead") (eq recoveryStatus.status "recovering"))}}
+    <div class="recovery-banner {{recoveryStatus.status}}">
+      <i class="fas {{#if (eq recoveryStatus.status "dead")}}fa-skull{{else}}fa-bed{{/if}}"></i>
+      <span>{{recoveryStatus.description}}</span>
+    </div>
+  {{/if}}
+
   <!-- Header -->
   <header class="inspectres-header">
     <div class="sheet-header">
