@@ -25,4 +25,7 @@ export interface AgentData {
   isWeird: boolean;
   characteristics: AgentCharacteristic[];
   missionPool: number;
+  isDead: boolean;
+  daysOutOfAction: number;
+  recoveryStartedAt: string | null;
 }

@@ -3,6 +3,8 @@ import {
   STRESS_ROLL_CHART,
   BANK_ROLL_CHART,
   CLIENT_GENERATION_TABLE,
+  DEATH_DISMEMBERMENT_CHART,
+  type DeathDismembermentOutcome,
 } from "./roll-charts.js";
 import { type AgentData } from "../agent/agent-schema.js";
 import { type FranchiseData } from "../franchise/franchise-schema.js";
@@ -338,7 +340,11 @@ export async function executeBankRoll(franchise: RollActor): Promise<void> {
 // executeStressRoll
 // ---------------------------------------------------------------------------
 
-export async function executeStressRoll(agent: RollActor, params: StressRollParams): Promise<void> {
+export async function executeStressRoll(
+  agent: RollActor,
+  params: StressRollParams,
+  franchise: RollActor | null = null,
+): Promise<void> {
   // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
   const system = agent.system as unknown as AgentData;
   const { stressDiceCount, coolDiceUsed } = params;
@@ -354,26 +360,76 @@ export async function executeStressRoll(agent: RollActor, params: StressRollPara
   const effectiveFace: DieFace = isDieFace(rawLowest) ? rawLowest : 1;
   const outcome = STRESS_ROLL_CHART[effectiveFace];
 
-  // Apply updates — meltdown takes precedence over coolGain
-  if (effectiveFace === 1) {
-    // Meltdown: zero cool, skill penalty = stress dice count (narrated in chat)
-    await actorUpdate(agent, { "system.cool": 0 });
-  } else if (outcome.coolGain > 0) {
-    await actorUpdate(agent, { "system.cool": system.cool + outcome.coolGain });
+  // Check if death mode is active and this is a death-level outcome
+  const franchiseSystem = franchise ? (franchise.system as unknown as FranchiseData) : null;
+  const deathModeActive = franchiseSystem?.deathMode ?? false;
+  let deathOutcome: DeathDismembermentOutcome | null = null;
+  if (deathModeActive && effectiveFace <= 2) {
+    // Death mode activated: roll d3 for death outcomes (1=Maimed, 2=Crippled, 3=Killed)
+    const deathRoll = Math.floor(Math.random() * 3) + 1;
+    if (deathRoll < 1 || deathRoll > 3) {
+      throw new Error(`Invalid d3 result: ${deathRoll}`);
+    }
+    const deathKey = deathRoll as 1 | 2 | 3;
+    deathOutcome = DEATH_DISMEMBERMENT_CHART[deathKey];
+    if (!deathOutcome) {
+      throw new Error(`Death outcome missing for key ${deathKey}`);
+    }
   }
+
+  // Apply updates — meltdown takes precedence over coolGain
+  const updateData: Record<string, unknown> = {};
+  if (effectiveFace === 1) {
+    // Meltdown: zero cool, skill penalty pool = stress dice count (applied to academics; player reallocates)
+    updateData["system.cool"] = 0;
+    const academicsPenalty = system.skills.academics?.penalty ?? 0;
+    updateData["system.skills.academics.penalty"] = academicsPenalty + stressDiceCount;
+  } else {
+    if (outcome.coolGain > 0) {
+      updateData["system.cool"] = system.cool + outcome.coolGain;
+    }
+    // Apply outcome-based skill penalty (applied to academics; player reallocates)
+    if (outcome.skillPenalty > 0) {
+      const academicsPenalty = system.skills.academics?.penalty ?? 0;
+      updateData["system.skills.academics.penalty"] = academicsPenalty + outcome.skillPenalty;
+    }
+  }
+
+  // Apply death outcomes if active
+  if (deathOutcome) {
+    if ("isDead" in deathOutcome && deathOutcome.isDead) {
+      updateData["system.isDead"] = true;
+    } else if ("daysOutOfAction" in deathOutcome) {
+      updateData["system.daysOutOfAction"] = deathOutcome.daysOutOfAction;
+      updateData["system.recoveryStartedAt"] = new Date().toISOString();
+    }
+  }
+
+  if (Object.keys(updateData).length > 0) {
+    try {
+      await actorUpdate(agent, updateData);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      throw new Error(`Failed to apply stress roll updates to agent: ${message}`);
+    }
+  }
+
+  // Hazard pay (rules: +1 franchise die per non-Weird agent at mission end) is deferred to mission resolution.
+  // See GitHub issue for implementation of mission-end hazard pay calculation.
 
   // ChatMessage.getSpeaker requires the full Actor type; RollActor satisfies the needed fields at runtime
   const speaker = ChatMessage.getSpeaker({ actor: agent as Actor });
   const content = await renderTemplate("systems/inspectres/templates/roll-card.hbs", {
     rollType: "stress",
     title: game.i18n?.localize("INSPECTRES.StressRoll") ?? "Stress Roll",
-    result: outcome.result,
-    narration: outcome.narration,
+    result: deathOutcome?.result ?? outcome.result,
+    narration: deathOutcome?.narration ?? outcome.narration,
     stressDiceCount,
     coolDiceUsed,
     diceRolled: faces,
     effectiveFace,
-    penaltyNote: effectiveFace <= 3 ? buildPenaltyNote(effectiveFace as 1 | 2 | 3, stressDiceCount) : null,
+    deathOutcome: deathOutcome ?? null,
+    penaltyNote: !deathOutcome && effectiveFace <= 3 ? buildPenaltyNote(effectiveFace as 1 | 2 | 3, stressDiceCount) : null,
   });
   await postChatCard(content, speaker, [roll]);
 }

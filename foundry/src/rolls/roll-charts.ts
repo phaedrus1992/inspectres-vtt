@@ -97,7 +97,15 @@ export const CLIENT_GENERATION_TABLE = {
   },
 } as const;
 
+/** Death & Dismemberment Chart: optional variant outcome when death mode is active (#71) */
+export const DEATH_DISMEMBERMENT_CHART = {
+  1: { result: "INSPECTRES.DeathResult.Maimed", narration: "INSPECTRES.DeathNarration.Maimed", daysOutOfAction: 2 },
+  2: { result: "INSPECTRES.DeathResult.Crippled", narration: "INSPECTRES.DeathNarration.Crippled", daysOutOfAction: 3 },
+  3: { result: "INSPECTRES.DeathResult.Killed", narration: "INSPECTRES.DeathNarration.Killed", isDead: true },
+} as const;
+
 /** Type for chart entries */
 export type SkillRollOutcome = typeof SKILL_ROLL_CHART[keyof typeof SKILL_ROLL_CHART];
 export type StressRollOutcome = typeof STRESS_ROLL_CHART[keyof typeof STRESS_ROLL_CHART];
 export type BankRollOutcome = typeof BANK_ROLL_CHART[keyof typeof BANK_ROLL_CHART];
+export type DeathDismembermentOutcome = typeof DEATH_DISMEMBERMENT_CHART[keyof typeof DEATH_DISMEMBERMENT_CHART];
