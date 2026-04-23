@@ -54,6 +54,34 @@ gh api repos/:owner/:repo/issues/$PARENT/sub_issues \
 
 Where `$CHILD_ID` is the **issue ID** (not number — get it from `gh issue view $NUMBER --json id --jq .id`). Repeat for each constituent issue. This lets them appear and resolve together in GitHub's UI.
 
+## Changelog and Versioning
+
+This project uses [Semantic Versioning](https://semver.org/) and [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format.
+
+### Versioning Rules
+
+| Change type | Version component |
+|-------------|-------------------|
+| Backwards-incompatible data model or API change | MAJOR |
+| New functionality (new actor type, new sheet, new mechanic) | MINOR |
+| Bug fixes, internal refactors, documentation, CI | PATCH |
+
+The version lives in `foundry/system.json` under the `"version"` field.
+
+### When to Update Changelog
+
+- **Every PR with user-facing changes**: Add entry to `[Unreleased]` in `CHANGELOG.md` in the same commit.
+- **Pure tooling/CI/docs PRs**: No changelog entry required (unless beneficial to document for users).
+- **Cutting a release**: Move `[Unreleased]` to dated section `[x.y.z] - YYYY-MM-DD` and bump version.
+
+### How to Update
+
+Use the `/changelog` skill:
+- **Adding a feature entry**: `/changelog feature`
+- **Cutting a release**: `/changelog release`
+
+The skill guides semver decision, category selection, and changelog/version formatting.
+
 ## Issue Labels
 
 All issues use a three-tier label system for searchability and organization:
