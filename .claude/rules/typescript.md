@@ -6,10 +6,9 @@ paths:
 
 # TypeScript Rules
 
-## Compiler Strictness
+## Compiler
 
-Enable all of these in `tsconfig.json`:
-
+Enable in `tsconfig.json`:
 ```jsonc
 "strict": true,
 "noUncheckedIndexedAccess": true,
@@ -20,33 +19,28 @@ Enable all of these in `tsconfig.json`:
 "isolatedModules": true
 ```
 
-ESM only (`"type": "module"` in `package.json`). No CommonJS, no `require`.
+ESM only. No CommonJS, no `require`.
 
 ## Naming
 
 | Style | Use for |
 |-------|---------|
-| `UpperCamelCase` | Classes, interfaces, types, enums, type parameters, React components |
-| `lowerCamelCase` | Variables, parameters, functions, methods, properties |
-| `CONSTANT_CASE` | Global constants, enum values, `static readonly` class properties |
+| `UpperCamelCase` | Classes, interfaces, types, enums, components |
+| `lowerCamelCase` | Variables, functions, methods, properties |
+| `CONSTANT_CASE` | Constants, enum values, `static readonly` |
 
-- Treat acronyms as whole words: `loadHttpUrl`, not `loadHTTPURL`
-- No `_` prefix/suffix for private members — use `private` keyword
-- No Hungarian notation or type-encoding in names (`strName`, `IFoo`, `EBar`)
-- Names must be descriptive to a new reader. No ambiguous abbreviations. Short names (single letter) only in scopes under 10 lines
-- Avoid vague names (`Manager`, `Service`, `Handler`, `Processor`) when a domain-specific name exists
+- Acronyms as whole words: `loadHttpUrl` not `loadHTTPURL`
+- No `_` prefix/suffix; use `private` keyword
+- No Hungarian notation (`strName`, `IFoo`, `EBar`)
+- Names descriptive to new reader. No ambiguous abbreviations. Single-letter only in scopes under 10 lines
+- Domain-specific names, not vague (`Manager`, `Service`, `Handler`)
 
-## Type Design
+## Types
 
 ### No `any`
 
-Never use `any`. Use `unknown` when the type is genuinely unknown, then narrow with type guards before use:
-
+Use `unknown` + type guards:
 ```typescript
-// Bad
-function parse(input: any): void { input.foo(); }
-
-// Good
 function parse(input: unknown): void {
   if (typeof input === "object" && input !== null && "foo" in input) {
     (input as { foo: () => void }).foo();
@@ -54,140 +48,77 @@ function parse(input: unknown): void {
 }
 ```
 
-If `any` is truly unavoidable (e.g., test mocks), add an inline suppression comment explaining why.
+### Assertions: Justify
 
-### Type Assertions: Justify, Don't Chain
+Use `as T` only with justification. No `as unknown as T` chains — refactor instead.
 
-Use type assertions (`as T`) sparingly and only with a clear justification comment. Never chain through `unknown` as a workaround (`as unknown as T`) — this defeats narrowing and should trigger refactoring instead:
+**Exception:** `actor.system as unknown as AgentData` at fvtt-types boundary (template.json systems, unavoidable until TypeDataModel migration). Use justification comment.
 
-```typescript
-// Bad — bypasses type system entirely
-const agent = makeTestFixture() as unknown as Actor;
+### Interface vs Type
 
-// Good — narrow with runtime check or add a proper helper
-const agent = makeTestFixture();
-if (!isValidActor(agent)) throw new Error("Invalid fixture");
-// agent is now properly narrowed to Actor type
+- `interface`: object shapes
+- `type`: unions, tuples, primitives
 
-// Acceptable — minimal fixture for test with justification
-// Type narrowing: test fixture implements minimal Actor interface needed for roll execution.
-// Full Actor type includes 128+ Foundry properties unused in this test context.
-const agent = makeTestFixture() as unknown as Actor;
-```
-
-If you find yourself writing `as unknown as`, stop and ask: (1) Is there a type wrapper or constructor I can use instead? (2) Can I add a runtime check to properly narrow? (3) Is my fixture/data model incomplete? Fix the root cause rather than bypassing the type system.
-
-**Exception — fvtt-types boundary:** `actor.system as unknown as AgentData` is currently
-unavoidable because fvtt-types v13 cannot resolve `Actor.system` to project types for
-`template.json` systems (requires `TypeDataModel` migration). These casts are accepted with a
-justification comment; see `.claude/rules/foundry-vite.md` for full context.
-
-### Interfaces vs Type Aliases
-
-- Use `interface` for object shapes — they have better display, performance, and extensibility
-- Use `type` for unions, intersections, tuples, mapped types, and primitive aliases
-
-```typescript
-// Object shapes → interface
-interface User {
-  name: string;
-  email: string;
-}
-
-// Unions, tuples, primitives → type
-type Result = Success | Failure;
-type Pair = [string, number];
-type UserId = string;
-```
-
-### Branded/Opaque Types
-
-For domain identifiers, prefer branded types over raw primitives — the same principle as Rust newtypes:
+### Branded Types
 
 ```typescript
 type UserId = string & { readonly __brand: unique symbol };
-type TenantId = string & { readonly __brand: unique symbol };
-
-function createUserId(raw: string): UserId {
-  return raw as UserId;
-}
+function createUserId(raw: string): UserId { return raw as UserId; }
 ```
-
-This prevents mixing `UserId` and `TenantId` at call sites.
 
 ### Nullability
 
-- Use `T | null` or `T | undefined` at the point of use. Never bake nullability into type aliases
-- Use optional (`?`) for fields/params that can be omitted. Use `| undefined` for fields that are always present but may lack a value
-- Deal with null close to the source — don't propagate nullable types through many layers
+- `T | null` or `T | undefined` at point of use (never in aliases)
+- `?` for optional fields/params. `| undefined` for always-present but nullable
+- Handle null close to source
 
-### No Wrapper Types
+### No Wrappers
 
-Never use `String`, `Boolean`, `Number`, `Object`. Always use lowercase primitives: `string`, `boolean`, `number`, `object`.
+No `String`, `Boolean`, `Number`, `Object`. Use lowercase: `string`, `boolean`, `number`, `object`.
 
 ### Arrays
 
-Use `T[]` for simple element types. Use `Array<T>` when the element type is complex (unions, objects):
-
-```typescript
-const names: string[];
-const items: Array<string | number>;
-```
+- `T[]` for simple types
+- `Array<T>` for complex (unions, objects)
 
 ### Enums
 
-Use `enum`, not `const enum`. Always include a `default` or exhaustive check when switching over enums.
+Use `enum`, not `const enum`. Always default/exhaustive check.
 
 ### Generics
 
-Every type parameter must be used. No phantom generics. Avoid return-type-only generics — when using APIs that have them, always specify the type argument explicitly.
-
-### Prefer Simplest Type Construct
-
-Avoid `Pick`, `Omit`, mapped types, and conditional types when spelling out the fields is simpler and more readable. Complex utility types hurt IDE support and readability.
+All type params must be used. No phantom generics.
 
 ## Error Handling
 
-- **Fail fast with context.** Throw `new Error("message")` (never bare `Error()`). Include what operation failed, what input caused it, and a suggested fix when possible
-- **Never swallow exceptions.** Every `catch` must either rethrow, log and rethrow, or handle meaningfully. Empty `catch {}` blocks are forbidden
-- **Use `unknown` for caught errors.** TypeScript catch binds as `unknown` — narrow before accessing properties:
+- Fail fast: `throw new Error("context")`. Include what failed, input, fix suggestion
+- Never swallow: every `catch` rethrows, logs+rethrows, or handles
+- Use `unknown` in catch, narrow before access
+- Callbacks ignoring errors use `void` return type
+- Validate at boundaries (user input, APIs, files). Trust internal types
 
-```typescript
-try {
-  await fetchData();
-} catch (err: unknown) {
-  const message = err instanceof Error ? err.message : String(err);
-  throw new Error(`Failed to fetch data: ${message}`);
-}
-```
+## Imports/Exports
 
-- **Callbacks that ignore errors must use `void` return type**, not `any`
-- **Validate at system boundaries** (user input, API responses, file reads). Trust internal types
-
-## Imports and Exports
-
-- **Named exports only.** No `export default` — it produces inconsistent import names and defeats find-references tooling
-- **No mutable exports.** Never `export let`. Use getter functions if the value changes
-- **No container classes.** Don't wrap static methods/constants in a class for namespacing — export them individually
-- **No `import type` / `export type`.** TypeScript tooling distinguishes type vs value usage automatically. Exception: `export type Foo = ...` (defining a type alias) is fine
-- **No namespace or `require`.** ESM `import`/`export` only
-- **Prefer destructured imports** for frequently used symbols (test utilities, framework primitives). Use namespace imports (`import * as foo`) for large APIs to avoid import churn
+- Named exports only. No `export default`
+- No `export let`. Use getters
+- No container classes. Export individually
+- No `import type` / `export type` (exception: `export type Foo = ...`)
+- No `namespace`, no `require`. ESM only
+- Prefer destructured for common symbols. Namespace imports (`import * as`) for large APIs
 
 ## Control Flow
 
-### Strict Equality
+### Equality
 
-Always `===` and `!==`. The only exception: `== null` to check both `null` and `undefined`.
+Always `===` / `!==`. Exception: `== null` for both null + undefined.
 
-### Exhaustive Switches
+### Switches
 
-Every `switch` must have a `default` case. For discriminated unions, use an exhaustiveness check:
-
+Every `switch` has `default`. Discriminated unions use `assertNever`:
 ```typescript
 function assertNever(x: never): never {
-  throw new Error(`Unexpected value: ${JSON.stringify(x)}`);
+  throw new Error(`Unexpected: ${JSON.stringify(x)}`);
 }
-
 switch (action.type) {
   case "create": return handleCreate(action);
   case "delete": return handleDelete(action);
@@ -195,17 +126,12 @@ switch (action.type) {
 }
 ```
 
-Non-empty cases must not fall through. Empty cases may group.
+No fall-through non-empty cases. Empty cases may group.
 
 ### No `forEach`
 
-Never use `Array.prototype.forEach`, `Set.prototype.forEach`, or `Map.prototype.forEach`. They prevent early returns, break compiler reachability analysis, and make debugging harder. Use `for...of`:
-
+Use `for...of`:
 ```typescript
-// Bad
-items.forEach((item) => { process(item); });
-
-// Good
 for (const item of items) {
   process(item);
 }
@@ -213,93 +139,88 @@ for (const item of items) {
 
 ### No `for...in`
 
-Never use `for...in` — it iterates prototype chain properties and gives string indices for arrays. Use `for...of`, `Object.keys()`, or `Object.entries()`.
+Use `for...of`, `Object.keys()`, `Object.entries()`.
 
 ### Blocks Required
 
-Multi-line control flow must use braces. Single-statement `if` on one line is acceptable: `if (done) return;`
+Multi-line must use braces. Single-statement OK on one line: `if (done) return;`
 
 ## Variables
 
-- Always `const` or `let`, never `var`
-- Default to `const`; use `let` only when reassignment is needed
-- No use before declaration
+Always `const` or `let`. Default to `const`. No `var`.
 
-## Classes and Visibility
+## Classes
 
-- **Minimize exported surface.** Only export what consumers need. Convert private methods to non-exported module functions when possible
-- **Never write `public` explicitly** — it's the default. Exception: non-readonly constructor parameter properties
-- **Use `readonly`** on every property not reassigned after construction
-- **Use parameter properties** to avoid boilerplate constructor-to-field plumbing
-- **Initialize fields at declaration** when possible, eliminating the constructor
-- **No `#private` fields.** Use TypeScript `private` keyword — `#` fields cause size/perf regressions when downleveled
-- **Getters must be pure** (no side effects). Avoid trivial pass-through getter/setter pairs — just make the property `readonly` or public
-- **No arrow-function class properties** unless you need a stable `this` reference for event handler unregistration
+- Minimize exported surface
+- Never write `public` explicitly (it's default; exception: non-readonly constructor params)
+- Use `readonly` on non-reassigned properties
+- Use parameter properties to avoid boilerplate
+- Initialize fields at declaration when possible
+- No `#private`. Use TypeScript `private` (better size/perf)
+- Getters pure (no side effects)
+- No arrow-function properties unless need stable `this` for unregistration
 
 ## Functions
 
-- Use `function` declarations for named functions (top-level and nested). They can't be reassigned
-- Use arrow functions for callbacks and expressions
-- Arrow function callbacks that ignore their return value must use block body, not expression body
-- Never use `bind()` for event handlers — it creates unreferenceable temporary functions. Use arrow functions or arrow-function properties
-- Semicolons required — do not rely on ASI
+- `function` declarations for named functions. Can't be reassigned
+- Arrow functions for callbacks/expressions
+- Arrow callbacks ignoring return must use block body
+- Never `bind()` for handlers. Use arrow functions
+- Semicolons required
 
 ## Magic Values
 
-Hardcoded numbers, strings, and timeouts require a comment explaining *why that value*:
-
+Comment explaining why:
 ```typescript
-// 30s matches the server-side request timeout
-const POLL_TIMEOUT_MS = 30_000;
+const POLL_TIMEOUT_MS = 30_000; // 30s = server-side request timeout
 ```
 
-## Comments and Documentation
+## Comments
 
-- **JSDoc (`/** */`)** for public API consumed by other modules — document purpose, not types (TypeScript already has them)
-- **Line comments (`//`)** for implementation notes only
-- No `@param` / `@return` tags that just restate the parameter name or type. Only add them when providing information beyond what the signature shows
-- No `@override` — it's not compiler-enforced and drifts from implementation
-- No commented-out code — delete it. Git has history
-- Place JSDoc before decorators, not between decorator and declaration
+- JSDoc (`/** */`) for public API (document purpose, not types)
+- Line comments (`//`) for implementation notes
+- No `@param`/`@return` restating signature. Only info beyond signature
+- No `@override`, no commented-out code
+- JSDoc before decorators
 
 ## Coercion
 
-- String: `String(x)` or template literals. Never `"" + x`
-- Number: `Number(x)`, then check `isNaN`. Never unary `+`. Use `parseInt` only for non-base-10
-- Boolean: rely on implicit truthiness in conditionals. No `!!x` inside `if`/`while`/`for`. Explicit comparisons (`arr.length > 0`) are fine
+- String: `String(x)` or template literals. No `"" + x`
+- Number: `Number(x)` then check `isNaN`. No unary `+`. `parseInt` only non-base-10
+- Boolean: implicit truthiness in conditionals. No `!!x`. Explicit comparisons (`arr.length > 0`) fine
 
 ## Spread
 
-- Only spread objects into objects, iterables into arrays
-- Never spread `null`, `undefined`, or primitives
-- Use ternary for conditional spread: `{ ...base, ...(condition ? extra : {}) }`, not `...(condition && extra)`
+- Objects into objects, iterables into arrays only
+- Never spread `null`, `undefined`, primitives
+- Ternary for conditional: `{ ...base, ...(cond ? extra : {}) }`
 
 ## Testing
 
-- **Test behavior, not implementation.** Refactors should not break tests
-- **Test edges and errors.** Empty inputs, boundaries, malformed data, missing values
-- **Mock boundaries only.** Network, filesystem, external services. Never mock internal logic
-- **Colocate tests.** `*.test.ts` next to the source file
-- **Use `vitest`** as the test runner
+- Test behavior, not implementation
+- Test edges + errors (empty, boundaries, malformed, missing)
+- Mock boundaries only (network, filesystem, external)
+- Colocate tests (`*.test.ts` next to source)
+- Use `vitest`
 
 ## Anti-Patterns
 
-| Never do this | Do this instead |
-|---------------|-----------------|
-| `any` | `unknown` + type narrowing |
+| Never | Use |
+|-------|-----|
+| `any` | `unknown` + narrowing |
 | `export default` | Named exports |
 | `var` | `const` / `let` |
 | `.forEach()` | `for...of` |
 | `for...in` | `for...of` / `Object.entries()` |
-| `@ts-ignore` | Fix the type error |
-| Type assertions (`as Foo`) without justification | Runtime type guards / narrowing |
-| `as unknown as Foo` chains | Create type-safe wrappers or add proper narrowing — chaining through `unknown` bypasses the type system |
-| Non-null assertions (`x!`) without justification | Null checks |
-| `== ` / `!=` (except `== null`) | `===` / `!==` |
-| `new String()` / `new Boolean()` / `new Number()` | Primitive literals |
-| `Array()` constructor | Array literals `[]` |
+| `@ts-ignore` | Fix error |
+| `as Foo` unjustified | Type guards / narrowing |
+| `as unknown as Foo` | Type-safe wrappers or narrowing |
+| `x!` unjustified | Null checks |
+| `==` / `!=` (except `== null`) | `===` / `!==` |
+| `new String()` / `new Boolean()` / `new Number()` | Primitives |
+| `Array()` constructor | `[]` |
 | `namespace` | ES modules |
 | `require()` | `import` |
 | `debugger` | Remove before commit |
 | Empty `catch {}` | Handle or rethrow |
-| `console.log` in production code | Structured logging |
+| `console.log` in production | Structured logging |

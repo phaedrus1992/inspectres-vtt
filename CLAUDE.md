@@ -1,160 +1,147 @@
 # InSpectres Project Instructions
 
-## Answering Mechanics Questions
+## Quick Start
 
-Before asking the user about any game mechanics (roll procedures, augmentation rules, chart lookups, stress outcomes, franchise rules, etc.):
+From `foundry/` directory:
+```bash
+npm install
+npm run dev        # Watch build
+npm run build      # Production build
+npm run check      # Type check
+npm run test       # Run tests
+npm run test:watch # Watch mode
+```
 
-1. **Check `reference/inspectres-rules-spec.md`** — complete rules reference derived from the official rulebook. Contains all charts, edge cases, and critical rules interactions.
-2. **Query MemPalace** (`mempalace_search` / `mempalace_kg_query`) for prior design decisions and session context.
+## Game Mechanics Questions
 
-Only escalate to the user if the rules spec and MemPalace are both silent on a question.
+For roll procedures, augmentations, stress, franchises, etc.:
+1. Check `reference/inspectres-rules-spec.md` (complete rulebook reference)
+2. Query project memory for prior design decisions
+3. Escalate to user if both silent
 
-## Issue Tracking
+## Domain Rules (`.claude/rules/`)
 
-All issue tracking is in GitHub (`gh issue`).
+Patterns split by domain. Each file scoped to specific paths:
 
-When code review, pre-PR analysis, or any other process surfaces a finding that gets deferred or set aside, **always create a GitHub issue immediately** — do not ask the user first, do not leave it as a task note, do not skip it. Use the `/github-issues` skill to guide creation and labeling.
+| File | Scope | Purpose |
+|------|-------|---------|
+| `typescript.md` | `**/*.ts` `**/*.tsx` | TS strictness, naming, types, errors |
+| `foundry-vite.md` | `foundry/**/*` | Foundry globals, V2 API, data models, tests |
+| `foundry-sheets.md` | `foundry/**/*` | Sheets (ApplicationV2, templates, dialogs) |
+| `foundry-patterns.md` | `foundry/**/*` | Elements, rolls, enrichers, CSS, migrations |
+| `foundry-api.md` | `foundry/**/*` | Document API, hooks, updates |
+| `playwright-foundry.md` | `foundry/**/*.test.ts` | Foundry testing |
+| `changelog.md` | `CHANGELOG.md` | Semver & changelog format |
 
-This applies to:
+Auto-loaded by Claude Code. Supplement main CLAUDE.md.
+
+## Issues
+
+All tracking via GitHub (`gh issue`).
+
+**Create GitHub issue immediately for:**
 - Deferred pre-pr-review findings (Step 7)
-- Security audit items not fixed in the current PR
+- Security audit items not fixed in current PR
 - Pre-existing bugs found while working on related code
 - Simplification opportunities
-- Any other actionable work that isn't done right now
+- Any actionable work not done right now
 
-### Current Milestones
+Use `/github-issues` skill to guide creation + labeling.
+
+### Composite Issues
+
+Add constituent issues as sub-issues via GitHub API:
+
+```bash
+gh api repos/:owner/:repo/issues/$PARENT/sub_issues \
+  -X POST -f sub_issue_id=$CHILD_ID
+```
+
+Where `$CHILD_ID` from `gh issue view $NUMBER --json id --jq .id`.
+
+### Milestones
 
 - **Economy: Vacation & Bankruptcy** — stress recovery, debt, financial mechanics
 - **Character: Recovery & Death** — character continuity, death flows, incapacity
 - **Content & Variants: Weird Agents** — special powers, archetypes, content expansions
 - **Infrastructure: Multiplayer & DevTools** — socket sync, real-time features, developer tooling
 
-## Sprint (composite) Issues
+## Versioning
 
-When creating a sprint/composite issue that groups constituent issues together (as in `dev-sprint`), add each constituent issue as a sub-issue of the composite using the GitHub sub-issues API:
+Semantic Versioning. Version in `foundry/system.json`.
 
-```bash
-# After creating the composite issue (number = $PARENT):
-gh api repos/:owner/:repo/issues/$PARENT/sub_issues \
-  -X POST -f sub_issue_id=$CHILD_ID
-```
+| Change | Version |
+|--------|---------|
+| Backwards-incompatible data/API | MAJOR |
+| New functionality | MINOR |
+| Bug fixes, refactors, docs, CI | PATCH |
 
-Where `$CHILD_ID` is the **issue ID** (not number — get it from `gh issue view $NUMBER --json id --jq .id`). Repeat for each constituent issue. This lets them appear and resolve together in GitHub's UI.
+**Changelog updates:**
+- Every PR with user-facing changes → add to `[Unreleased]` in `CHANGELOG.md`
+- Pure tooling/CI/docs → no entry required (unless user-visible)
+- Release → move `[Unreleased]` to dated section, bump version
 
-## Changelog and Versioning
-
-This project uses [Semantic Versioning](https://semver.org/) and [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format.
-
-### Versioning Rules
-
-| Change type | Version component |
-|-------------|-------------------|
-| Backwards-incompatible data model or API change | MAJOR |
-| New functionality (new actor type, new sheet, new mechanic) | MINOR |
-| Bug fixes, internal refactors, documentation, CI | PATCH |
-
-The version lives in `foundry/system.json` under the `"version"` field.
-
-### When to Update Changelog
-
-- **Every PR with user-facing changes**: Add entry to `[Unreleased]` in `CHANGELOG.md` in the same commit.
-- **Pure tooling/CI/docs PRs**: No changelog entry required (unless beneficial to document for users).
-- **Cutting a release**: Move `[Unreleased]` to dated section `[x.y.z] - YYYY-MM-DD` and bump version.
-
-### How to Update
-
-Use the `/changelog` skill:
-- **Adding a feature entry**: `/changelog feature`
-- **Cutting a release**: `/changelog release`
-
-The skill guides semver decision, category selection, and changelog/version formatting.
+Use `/changelog` skill for guidance.
 
 ## Issue Labels
 
-All issues use a three-tier label system for searchability and organization:
+Three-tier system:
 
-### Priority Labels (Mutually Exclusive)
-- **P0**: Critical blocker — production bug or feature that blocks releases
-- **P1**: High priority — important feature or bug affecting UX/correctness (default for new issues without P0/P2)
-- **P2**: Nice-to-have / technical debt — code quality, refactoring, i18n, test gaps
+**Priority** (pick one):
+- P0: Critical blocker
+- P1: High priority (default)
+- P2: Nice-to-have / tech debt
 
-### Area Labels (Multiple per issue; prefix: `area-`)
-- **area-core**: Core mechanics (actors, franchises, rolls, stress system)
-- **area-sheets**: Actor/item sheets and UI components
-- **area-chat**: Chat rolls and messaging
-- **area-missions**: Mission tracking and mechanics
-- **area-character**: Character death, recovery, bankruptcy, vacation
-- **area-compendium**: Compendium packs and content
-- **area-multiplayer**: Socket sync and real-time features
-- **area-devtools**: Developer tooling and debug features
-- **area-testing**: Test infrastructure and coverage
-- **area-docs**: Documentation, comments, i18n, and rules specs
+**Area** (one or more):
+- area-core: Mechanics, rolls, stress
+- area-sheets: Actor/item sheets, UI
+- area-chat: Chat rolls, messaging
+- area-missions: Mission tracking
+- area-character: Death, recovery, bankruptcy
+- area-compendium: Packs, content
+- area-multiplayer: Socket sync, real-time
+- area-devtools: Dev tooling
+- area-testing: Test infrastructure
+- area-docs: Docs, comments, i18n, rules
 
-### Type Labels (Typically One; Convention)
-- **bug**: Bug fix or defect remediation
-- **enhancement**: New feature or improvement
-- **refactor**: Code cleanup, restructuring, or consolidation
-- **chore**: Maintenance, automation, or tooling changes
+**Type** (for code changes):
+- bug, enhancement, refactor, chore
 
-### Phase Labels (Organizational; for milestones)
-- **phase-1**: Initial system foundation (completed: core sheets, rolls, error handling, testing)
-- **phase-2**: UI polish and mission mechanics (in progress or completed)
+**Phase** (sprint/composite only):
+- phase-1: Core foundation (done)
+- phase-2: UI polish, missions (in progress)
 
-### Label Application Rules
+### Label Commands
 
-When creating or updating issues:
-1. **Always assign exactly one priority** (P0, P1, or P2) — if none is specified, treat as P1
-2. **Always assign at least one area** — pick the primary subsystem touched
-3. **Assign one type label** if the work is a code change (bug, enhancement, refactor, or chore)
-4. **Assign phase labels** only for sprint/composite issues that represent major milestones
-
-Example: Issue #21 (Death & Dismemberment mode)
-```
-Labels: area-character, enhancement, P1
-```
-
-Example: Issue #112 (Reduce skill penalty duplication)
-```
-Labels: area-character, refactor, P2
-```
-
-### Searching by Label
-
-Common searches:
 ```bash
-# Find all open character-related issues
-gh issue list --state open --label "area-character"
-
-# Find all P0 bugs
-gh issue list --state open --label "P0" --label "bug"
-
-# Find all open core mechanics work
-gh issue list --state open --label "area-core"
-
-# Find all technical debt
-gh issue list --state all --label "P2"
+gh issue list --state open --label "area-character"  # All character issues
+gh issue list --state open --label "P0" --label "bug" # All P0 bugs
+gh issue list --state all --label "P2"                # All tech debt
 ```
 
-## Recovery Mechanics (Death & Dismemberment)
+## Recovery System (Death & Dismemberment)
 
-### Wall-Clock Time vs Game Time
+### Wall-Clock Time, Not Game Time
 
-The recovery countdown system uses **wall-clock time** (the `currentDay` setting in Foundry) rather than game-time (simulation of turns/rounds during combat). This design choice ensures:
+System uses `currentDay` (Foundry setting), not in-game combat rounds.
 
-1. **Consistent recovery timing** across sessions — agents recover based on calendar days, not mission variables
-2. **GM control** — the GM advances `currentDay` manually via settings, providing explicit pacing control
-3. **Simple state** — agents store only `recoveryStartedAt` (day number) and `daysOutOfAction` (count), avoiding complex Combat/Round tracking
+**Why:**
+- Consistent timing across sessions
+- GM explicit control (manual `currentDay` advance)
+- Simple state (no Combat/Round tracking)
 
-**Implementation:**
-- `recoveryStartedAt` stores the day number when recovery began (e.g., day 5)
-- `daysOutOfAction` specifies duration in days (e.g., 2 days = recovered by day 7)
-- `computeRecoveryStatus(system, currentDay)` calculates remaining days: `max(0, daysOutOfAction - (currentDay - recoveryStartedAt))`
-- When `currentDay` advances past the recovery deadline, `autoClearRecoveredAgents()` clears both fields
+**State:**
+- `recoveryStartedAt`: day number when recovery started
+- `daysOutOfAction`: duration in days
+- Recovery done when: `currentDay >= recoveryStartedAt + daysOutOfAction`
+- Auto-clear: `autoClearRecoveredAgents()` fires on day advance
 
-**Not using game time because:** Missions can span multiple in-game days with varying narrative pacing. Recovery should be real-time (measured by calendar days), not paused or accelerated by mission events.
+**Why not game time:** Missions span multiple in-game days with variable pacing. Recovery should be calendar-based, not paused/accelerated by mission events.
 
-### Auto-Clear on Day Advance
+### Auto-Clear Mechanism
 
-When the GM changes the `currentDay` setting, the `onChange` hook automatically clears recovery fields for agents whose recovery window has expired. This prevents:
-- Agents getting "stuck" in recovery if the GM forgets to manually reset fields
-- Stale `recoveryStartedAt` causing recovery to never expire (invariant violation)
+`currentDay` setting change → auto-clears expired recovery fields.
+
+**Prevents:**
+- Agents stuck in recovery (GM forgot to reset)
+- Stale `recoveryStartedAt` blocking recovery expiry
