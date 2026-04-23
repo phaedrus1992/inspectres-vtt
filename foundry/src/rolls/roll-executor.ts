@@ -3,6 +3,8 @@ import {
   STRESS_ROLL_CHART,
   BANK_ROLL_CHART,
   CLIENT_GENERATION_TABLE,
+  DEATH_DISMEMBERMENT_CHART,
+  type DeathDismembermentOutcome,
 } from "./roll-charts.js";
 import { type AgentData } from "../agent/agent-schema.js";
 import { type FranchiseData } from "../franchise/franchise-schema.js";
@@ -338,7 +340,11 @@ export async function executeBankRoll(franchise: RollActor): Promise<void> {
 // executeStressRoll
 // ---------------------------------------------------------------------------
 
-export async function executeStressRoll(agent: RollActor, params: StressRollParams): Promise<void> {
+export async function executeStressRoll(
+  agent: RollActor,
+  params: StressRollParams,
+  franchise: RollActor | null = null,
+): Promise<void> {
   // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
   const system = agent.system as unknown as AgentData;
   const { stressDiceCount, coolDiceUsed } = params;
@@ -354,12 +360,59 @@ export async function executeStressRoll(agent: RollActor, params: StressRollPara
   const effectiveFace: DieFace = isDieFace(rawLowest) ? rawLowest : 1;
   const outcome = STRESS_ROLL_CHART[effectiveFace];
 
+  // Check if death mode is active and this is a death-level outcome
+  const franchiseSystem = franchise ? (franchise.system as unknown as FranchiseData) : null;
+  const deathModeActive = franchiseSystem?.deathMode ?? false;
+  let deathOutcome: DeathDismembermentOutcome | null = null;
+  if (deathModeActive && effectiveFace <= 2) {
+    // Death mode activated: roll d3 for death outcomes (1=Maimed, 2=Crippled, 3=Killed)
+    const deathRoll = Math.floor(Math.random() * 3) + 1;
+    const deathKey = deathRoll as 1 | 2 | 3;
+    deathOutcome = DEATH_DISMEMBERMENT_CHART[deathKey];
+  }
+
   // Apply updates — meltdown takes precedence over coolGain
+  const updateData: Record<string, unknown> = {};
   if (effectiveFace === 1) {
-    // Meltdown: zero cool, skill penalty = stress dice count (narrated in chat)
-    await actorUpdate(agent, { "system.cool": 0 });
-  } else if (outcome.coolGain > 0) {
-    await actorUpdate(agent, { "system.cool": system.cool + outcome.coolGain });
+    // Meltdown: zero cool, skill penalty = stress dice count
+    updateData["system.cool"] = 0;
+    // Apply meltdown penalty (stress dice count) to all skills
+    const skillPenalty = stressDiceCount;
+    updateData["system.skills.academics.penalty"] = system.skills.academics.penalty + skillPenalty;
+    updateData["system.skills.athletics.penalty"] = system.skills.athletics.penalty + skillPenalty;
+    updateData["system.skills.technology.penalty"] = system.skills.technology.penalty + skillPenalty;
+    updateData["system.skills.contact.penalty"] = system.skills.contact.penalty + skillPenalty;
+  } else {
+    if (outcome.coolGain > 0) {
+      updateData["system.cool"] = system.cool + outcome.coolGain;
+    }
+    // Apply outcome-based skill penalty
+    if (outcome.skillPenalty > 0) {
+      updateData["system.skills.academics.penalty"] = system.skills.academics.penalty + outcome.skillPenalty;
+      updateData["system.skills.athletics.penalty"] = system.skills.athletics.penalty + outcome.skillPenalty;
+      updateData["system.skills.technology.penalty"] = system.skills.technology.penalty + outcome.skillPenalty;
+      updateData["system.skills.contact.penalty"] = system.skills.contact.penalty + outcome.skillPenalty;
+    }
+  }
+
+  // Apply death outcomes if active
+  if (deathOutcome) {
+    if ("isDead" in deathOutcome && deathOutcome.isDead) {
+      updateData["system.isDead"] = true;
+    } else if ("daysOutOfAction" in deathOutcome) {
+      updateData["system.daysOutOfAction"] = deathOutcome.daysOutOfAction;
+      updateData["system.recoveryStartedAt"] = new Date().toISOString();
+    }
+  }
+
+  if (Object.keys(updateData).length > 0) {
+    await actorUpdate(agent, updateData);
+  }
+
+  // If hazard pay applies (agent died/was maimed/crippled), award franchise dice
+  if (deathOutcome && franchise && franchiseSystem && !system.isWeird) {
+    await actorUpdate(franchise, { "system.missionPool": franchiseSystem.missionPool + 1 });
+    if (franchise.id !== null) emitMissionPoolUpdated(franchise.id);
   }
 
   // ChatMessage.getSpeaker requires the full Actor type; RollActor satisfies the needed fields at runtime
@@ -367,13 +420,14 @@ export async function executeStressRoll(agent: RollActor, params: StressRollPara
   const content = await renderTemplate("systems/inspectres/templates/roll-card.hbs", {
     rollType: "stress",
     title: game.i18n?.localize("INSPECTRES.StressRoll") ?? "Stress Roll",
-    result: outcome.result,
-    narration: outcome.narration,
+    result: deathOutcome?.result ?? outcome.result,
+    narration: deathOutcome?.narration ?? outcome.narration,
     stressDiceCount,
     coolDiceUsed,
     diceRolled: faces,
     effectiveFace,
-    penaltyNote: effectiveFace <= 3 ? buildPenaltyNote(effectiveFace as 1 | 2 | 3, stressDiceCount) : null,
+    deathOutcome: deathOutcome ?? null,
+    penaltyNote: !deathOutcome && effectiveFace <= 3 ? buildPenaltyNote(effectiveFace as 1 | 2 | 3, stressDiceCount) : null,
   });
   await postChatCard(content, speaker, [roll]);
 }
