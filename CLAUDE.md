@@ -13,11 +13,7 @@ Only escalate to the user if the rules spec and MemPalace are both silent on a q
 
 All issue tracking is in GitHub (`gh issue`).
 
-When code review, pre-PR analysis, or any other process surfaces a finding that gets deferred or set aside, **always create a GitHub issue immediately** — do not ask the user first, do not leave it as a task note, do not skip it:
-
-```bash
-gh issue create --title "..." --body "..." --milestone "..." --label "..."
-```
+When code review, pre-PR analysis, or any other process surfaces a finding that gets deferred or set aside, **always create a GitHub issue immediately** — do not ask the user first, do not leave it as a task note, do not skip it. Use the `/github-issues` skill to guide creation and labeling.
 
 This applies to:
 - Deferred pre-pr-review findings (Step 7)
@@ -26,17 +22,8 @@ This applies to:
 - Simplification opportunities
 - Any other actionable work that isn't done right now
 
-After creating the issue, report its URL to the user.
+### Current Milestones
 
-### Milestone Assignment
-
-**Every new issue must be assigned to a milestone.** When creating or updating an issue:
-- Check if an existing milestone describes the issue's domain (Economy, Character, Content, Infrastructure, etc.)
-- If an existing milestone fits, assign the issue to it
-- If no existing milestone aligns with the issue's content, create a new milestone first, then assign the issue
-- Never leave issues without a milestone — milestones organize work into achievable sprints
-
-Current milestones:
 - **Economy: Vacation & Bankruptcy** — stress recovery, debt, financial mechanics
 - **Character: Recovery & Death** — character continuity, death flows, incapacity
 - **Content & Variants: Weird Agents** — special powers, archetypes, content expansions
