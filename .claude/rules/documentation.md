@@ -86,6 +86,16 @@ Use these terms consistently. Don't invent synonyms.
 
 **Regular review.** When fixing a bug or adding a feature, check if docs need updating. If docs are out of sync with code, update docs immediately.
 
+## Workflow & Branching
+
+**Never commit directly to `main`.** The main branch is protected — all changes must go through feature branches and pull requests. Always:
+1. Create a feature branch (`fix/`, `docs/`, etc.)
+2. Make changes on that branch
+3. Create a PR for review
+4. Merge via PR only
+
+This ensures all documentation changes are reviewed before reaching production.
+
 ## Quality Checklist
 
 Before publishing:
