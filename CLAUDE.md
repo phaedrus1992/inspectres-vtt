@@ -119,6 +119,18 @@ gh issue list --state open --label "P0" --label "bug" # All P0 bugs
 gh issue list --state all --label "P2"                # All tech debt
 ```
 
+## Workflow & Branching
+
+**NEVER commit directly to `main`** — it's a protected branch. All changes go through feature branches and pull requests.
+
+**Branch workflow:**
+1. Create feature branch (`fix/`, `docs/`, `feat/`, etc.) **before** starting work
+2. Push to origin and create PR
+3. Merge via PR UI only
+4. When assigning work to subagents: if currently on main, create feature branch first; subagents will work on the current branch
+
+**Why:** Ensures all changes are reviewed, tested via CI, and have clean commit history.
+
 ## Recovery System (Death & Dismemberment)
 
 ### Wall-Clock Time, Not Game Time
