@@ -51,6 +51,8 @@ When an agent reaches 6+ **Stress**, they are **out of action** and need **Recov
 > 
 > GM advances the calendar 2 days. The other agents handle other activities. When the calendar catches up, the recovering agent rejoins at 0 stress.
 
+**See [Recovery: Incapacity & Downtime](recovery.md) for complete mechanics, examples, and how to track recovery in Foundry.**
+
 ## Franchise Operations
 
 Your agency has **resources** that determine how much help you can offer in rolls.

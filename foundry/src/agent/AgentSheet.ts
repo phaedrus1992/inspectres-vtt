@@ -116,8 +116,16 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     // weird-checkbox: change event not covered by DEFAULT_OPTIONS.actions
     for (const el of this.element.querySelectorAll<HTMLInputElement>(".weird-checkbox")) {
       el.addEventListener("change", (event: Event) => {
+        const target = event.target as HTMLInputElement;
+        const system = this.actor.system as unknown as AgentData;
+        const status = computeRecoveryStatus(system, getCurrentDay());
+        if (status.status === "recovering" || status.status === "dead") {
+          ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnActionBlockedRecovery") ?? "Cannot act while recovering");
+          target.checked = !target.checked;
+          return;
+        }
         // fvtt-types expects full document data shape for actor.update; partial update path is safe at runtime
-        const updateData = { "system.isWeird": (event.target as HTMLInputElement).checked } as unknown as Parameters<typeof this.actor.update>[0];
+        const updateData = { "system.isWeird": target.checked } as unknown as Parameters<typeof this.actor.update>[0];
         void this.actor.update(updateData).catch((err: unknown) => {
           handleActionError(err, "Failed to toggle weird status", "INSPECTRES.ErrorUpdateFailed", "Failed to update actor data");
         });
@@ -183,6 +191,11 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     }
     // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
     const system = this.actor.system as unknown as AgentData;
+    const status = computeRecoveryStatus(system, getCurrentDay());
+    if (status.status === "recovering" || status.status === "dead") {
+      ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnSkillBlockedRecovery") ?? "Cannot act while recovering");
+      return;
+    }
     const skillData = system.skills[skillAttr];
     if (!skillData) {
       console.error("onSkillStep: skill data missing", { skillAttr, actorId: this.actor.id });
@@ -212,7 +225,13 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
       return;
     }
     // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
-    const currentCool = (this.actor.system as unknown as AgentData).cool;
+    const system = this.actor.system as unknown as AgentData;
+    const status = computeRecoveryStatus(system, getCurrentDay());
+    if (status.status === "recovering" || status.status === "dead") {
+      ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnSkillBlockedRecovery") ?? "Cannot act while recovering");
+      return;
+    }
+    const currentCool = system.cool;
     const newCool = currentCool >= pipValue ? pipValue - 1 : pipValue;
     // fvtt-types expects full document data shape for actor.update; partial update path is safe at runtime
     const updateData = { "system.cool": newCool } as unknown as Parameters<typeof this.actor.update>[0];
@@ -225,6 +244,11 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     if (!this.isEditable) return;
     // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
     const currentSystem = this.actor.system as unknown as AgentData;
+    const status = computeRecoveryStatus(currentSystem, getCurrentDay());
+    if (status.status === "recovering" || status.status === "dead") {
+      ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnActionBlockedRecovery") ?? "Cannot act while recovering");
+      return;
+    }
     const characteristics = (currentSystem.characteristics ?? []) as AgentCharacteristic[];
     // fvtt-types expects full document data shape for actor.update; partial update path is safe at runtime
     const updateData = { "system.characteristics": [...characteristics, { text: "", used: false }] } as unknown as Parameters<typeof this.actor.update>[0];
@@ -247,6 +271,11 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     }
     // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
     const currentSystem = this.actor.system as unknown as AgentData;
+    const status = computeRecoveryStatus(currentSystem, getCurrentDay());
+    if (status.status === "recovering" || status.status === "dead") {
+      ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnActionBlockedRecovery") ?? "Cannot act while recovering");
+      return;
+    }
     const characteristics = (currentSystem.characteristics ?? []) as AgentCharacteristic[];
     // fvtt-types expects full document data shape for actor.update; partial update path is safe at runtime
     const updateData = { "system.characteristics": characteristics.filter((_: AgentCharacteristic, i: number) => i !== idx) } as unknown as Parameters<typeof this.actor.update>[0];
@@ -257,6 +286,12 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
 
   static async onEditPortrait(this: AgentSheet, _event: Event, target: HTMLElement): Promise<void> {
     if (!this.isEditable) return;
+    const system = this.actor.system as unknown as AgentData;
+    const status = computeRecoveryStatus(system, getCurrentDay());
+    if (status.status === "recovering" || status.status === "dead") {
+      ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnActionBlockedRecovery") ?? "Cannot act while recovering");
+      return;
+    }
     const type = target.dataset["type"] ?? "image";
     const current = this.actor.img ?? undefined;
     const FilePicker = (foundry.applications.api as unknown as { FilePicker: unknown }).FilePicker as unknown as { new (options: { current?: string | undefined; type: string; callback?: (path: string) => void }): { browse(): void } };

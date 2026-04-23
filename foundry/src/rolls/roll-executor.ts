@@ -9,7 +9,7 @@ import {
 import { type AgentData } from "../agent/agent-schema.js";
 import { type FranchiseData } from "../franchise/franchise-schema.js";
 import { emitMissionPoolUpdated } from "../mission/socket.js";
-import { getCurrentDay } from "../agent/recovery-utils.js";
+import { getCurrentDay, computeRecoveryStatus } from "../agent/recovery-utils.js";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -88,6 +88,16 @@ async function postChatCard(
   await ChatMessage.create({ content, speaker, rolls } as unknown as Parameters<typeof ChatMessage.create>[0]);
 }
 
+function checkRecoveryBlock(agent: RollActor): void {
+  const system = agent.system as unknown as AgentData;
+  const currentDay = getCurrentDay();
+  const status = computeRecoveryStatus(system, currentDay);
+
+  if (status.status === "recovering" || status.status === "dead") {
+    throw new Error(`${agent.name} is ${status.status} and cannot act. ${status.description}`);
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Pure: resolveBankDice
 // ---------------------------------------------------------------------------
@@ -139,6 +149,8 @@ export async function executeSkillRoll(
   franchise: RollActor | null,
   skillName: SkillName,
 ): Promise<void> {
+  checkRecoveryBlock(agent);
+
   // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
   const system = agent.system as unknown as AgentData;
   const skill = system.skills[skillName];
@@ -355,6 +367,8 @@ export async function executeStressRoll(
   params: StressRollParams,
   franchise: RollActor | null = null,
 ): Promise<void> {
+  checkRecoveryBlock(agent);
+
   // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
   const system = agent.system as unknown as AgentData;
   const { stressDiceCount, coolDiceUsed } = params;

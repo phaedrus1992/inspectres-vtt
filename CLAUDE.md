@@ -83,6 +83,25 @@ Semantic Versioning. Version in `foundry/system.json`.
 
 Use `/changelog` skill for guidance.
 
+## Documentation
+
+**Every new feature or fix must include appropriate documentation updates.**
+
+**When to document:**
+- **New feature** — Add explanation to `docs/current/` (gameplay, components, or development as appropriate)
+- **Mechanic change** — Update the relevant gameplay page
+- **Sheet/UI change** — Update component or development docs
+- **New public API** — Add to development docs
+- **Bug fix affecting users** — If user-facing behavior changed, update docs
+
+**How to document:**
+1. Add/update `.md` files in `docs/current/` matching the feature domain
+2. Link from relevant index pages and cross-references
+3. Include examples and workflows, not just API definitions
+4. Update `docs/current/gameplay/mechanics.md` if core mechanics changed
+
+**Why:** InSpectres is a system that users need to understand. Documentation is part of "done."
+
 ## Issue Labels
 
 Three-tier system:
