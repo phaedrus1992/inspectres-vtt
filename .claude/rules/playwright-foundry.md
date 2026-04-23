@@ -5,16 +5,13 @@ paths:
   - "/tmp/inspect-*.js"
 ---
 
-# Playwright + Foundry VTT Testing
+# Playwright + Foundry
 
-Use Playwright (`playwright` v1.59+ is installed globally) for browser-based inspection and
-end-to-end testing of the Foundry system. **Prefer this over the agent browser** — it runs
-headless, produces structured output, and is far faster.
+Browser-based inspection + E2E testing (Playwright v1.59+). Prefer over agent browser: headless, structured output, fast.
 
-## Login boilerplate
+## Login Boilerplate
 
-Every script starts the same way. Foundry takes ~6 seconds to finish loading after the join
-redirect:
+6sec load time after join redirect:
 
 ```js
 const { chromium } = require('playwright');
@@ -36,10 +33,9 @@ const { chromium } = require('playwright');
 
 Run with `node /tmp/my-script.js`. No build step needed — `playwright` is a CommonJS require.
 
-## Accessing Foundry globals inside `page.evaluate`
+## Foundry Globals
 
-Everything inside `page.evaluate(() => { ... })` runs in the browser context and has full access
-to Foundry globals: `game`, `CONFIG`, `Hooks`, `ui`, `foundry`, `Actor`, etc.
+`page.evaluate()` = browser context. Full access to `game`, `CONFIG`, `Hooks`, `ui`, `foundry`, `Actor`.
 
 ```js
 const result = await page.evaluate(async () => {
@@ -63,7 +59,7 @@ const result = await page.evaluate(async () => {
 console.log(JSON.stringify(result, null, 2));
 ```
 
-Anything returned from `page.evaluate` must be JSON-serializable. Wrap errors:
+Must return JSON-serializable. Wrap errors:
 
 ```js
 const result = await page.evaluate(() => {
@@ -75,9 +71,7 @@ const result = await page.evaluate(() => {
 });
 ```
 
-## V13 ActorSheetV2 DOM structure
-
-Foundry V13's `ApplicationV2` renders actor sheets with this nesting:
+## V13 Sheet DOM
 
 ```
 form.application.sheet.inspectres.actor.<type>   ← outer app wrapper (Foundry-managed)
@@ -90,13 +84,10 @@ form.application.sheet.inspectres.actor.<type>   ← outer app wrapper (Foundry-
         ...
 ```
 
-Key facts:
-- The **outer element is `<form>`**, not `<section>` — `.application.sheet` is the outer form.
-- `section.window-content` clips at the sheet's configured `height` with `overflow: hidden` by
-  default. Set `overflow-y: auto` on it to enable scrolling.
-- Classes in `DEFAULT_OPTIONS.classes` land on the outer `form.application`, not the inner form.
-- Foundry's dark theme sets `--color-text-primary` to a cream color — it bleeds into any element
-  without an explicit `color`. Always set `color` explicitly on inner sheet forms.
+- Outer: `<form>` (not `<section>`). Classes land here
+- `section.window-content` clips at `height`, default `overflow: hidden`
+- Set `overflow-y: auto` for scrolling
+- Dark theme `--color-text-primary` = cream. Always set `color` explicitly
 
 ## CSS inspection patterns
 
@@ -167,12 +158,9 @@ const messages = await page.evaluate(() =>
 );
 ```
 
-## Temporary scripts
+## Scratch Scripts
 
-Write one-off inspection scripts to `/tmp/inspect-<thing>.js` and run with `node`. Previous
-scripts in `/tmp/inspect-dialog*.js` have working login boilerplate — copy and adapt.
-
-Do not commit these scratch scripts. If a pattern proves durable, move it to `e2e/`.
+Write to `/tmp/inspect-<thing>.js`, run `node`. Copy boilerplate from `/tmp/inspect-dialog*.js`. Don't commit. Move durable patterns to `e2e/`.
 
 ## Timing notes
 
@@ -184,5 +172,4 @@ Do not commit these scratch scripts. If a pattern proves durable, move it to `e2
 | Actor update propagation | 500ms |
 | CSS change (after build + browser refresh) | — (manual) |
 
-Avoid `waitForSelector` on Foundry UI elements unless you know the exact selector — Foundry's
-dynamic rendering makes selectors fragile. Prefer a fixed timeout after triggering an action.
+Avoid `waitForSelector` on Foundry UI (fragile). Prefer fixed timeout after action.
