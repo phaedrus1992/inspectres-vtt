@@ -4,28 +4,21 @@ paths:
   - "foundry/**/*.hbs"
 ---
 
-# Foundry VTT v12 API Patterns
+# Foundry v12 API
 
-Reference for the Foundry VTT v12 public API. Companion to `foundry-vite.md` (build/tooling)
-and `typescript.md` (TypeScript rules). Covers document architecture, data models, sheets,
-hooks, dice, and chat.
+Companion to `foundry-vite.md` (build) and `typescript.md` (types).
 
-## Document Hierarchy
+## Documents
 
-World-level documents (live in `game.*` collections):
-`Actor`, `Item`, `ChatMessage`, `Combat`, `JournalEntry`, `Macro`, `Playlist`, `RollTable`,
-`Scene`, `Setting`, `User`, `Folder`, `Cards`
+**World-level:** `Actor`, `Item`, `ChatMessage`, `Combat`, `JournalEntry`, `Macro`, `Playlist`, `RollTable`, `Scene`, `Setting`, `User`, `Folder`, `Cards`
 
-Embedded documents (live inside a parent document):
-`ActiveEffect` (in Actor/Item), `Combatant` (in Combat), `Token`, `AmbientLight`,
-`AmbientSound`, `Drawing`, `MeasuredTemplate`, `Note`, `Tile`, `Wall` (in Scene)
+**Embedded:** `ActiveEffect` (Actor/Item), `Combatant` (Combat), `Token`, `AmbientLight`, `AmbientSound`, `Drawing`, `MeasuredTemplate`, `Note`, `Tile`, `Wall` (Scene)
 
-Always use `createEmbeddedDocuments` / `updateEmbeddedDocuments` / `deleteEmbeddedDocuments`
-on the parent — never manipulate embedded document arrays directly.
+Always use `createEmbeddedDocuments` / `updateEmbeddedDocuments` / `deleteEmbeddedDocuments` on parent. Never manipulate arrays directly.
 
-## Data Models
+## DataModel
 
-### Always extend TypeDataModel for system data
+### TypeDataModel for System Data
 
 ```typescript
 import { fields } from "@league-of-foundry-developers/foundry-vtt-types/...";
