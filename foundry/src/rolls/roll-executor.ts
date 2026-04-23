@@ -93,10 +93,8 @@ function checkRecoveryBlock(agent: RollActor): void {
   const currentDay = getCurrentDay();
   const status = computeRecoveryStatus(system, currentDay);
 
-  if (status.status === "recovering") {
-    const message = `${agent.name} is recovering and cannot act. ${status.description}`;
-    ui.notifications?.warn(message);
-    throw new Error(message);
+  if (status.status === "recovering" || status.status === "dead") {
+    throw new Error(`${agent.name} is ${status.status} and cannot act. ${status.description}`);
   }
 }
 
