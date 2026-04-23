@@ -71,6 +71,8 @@
     "ErrorNoFranchise": "No franchise actor found in this world.",
     "ErrorTemplateLoad": "Failed to load system templates",
     "ErrorMissionTrackerOpen": "Failed to open Mission Tracker",
+    "ErrorAutoRecoverFailed": "Failed to auto-clear recovered agents",
+    "ErrorStressRollFailed": "Failed to apply stress roll to agent",
     "DistributeDialogPoolChanged": "Mission pool changed while the dialog was open. Please review the distribution and try again.",
     "WarnNoBankDice": "No bank dice to roll.",
     "WarnSkillRollDebtMode": "Skill rolls are blocked while in Debt Mode.",

@@ -16,8 +16,11 @@ export function getCurrentDay(): number {
         "currentDay",
       ) as number
     ) ?? DEFAULT_IN_GAME_DAY;
-  } catch {
-    // Setting not yet registered (pre-init) or other access error; use default
+  } catch (err: unknown) {
+    if (game.ready) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.warn("[INSPECTRES] Failed to get currentDay setting; using default:", { error: err, errorMessage: message });
+    }
     return DEFAULT_IN_GAME_DAY;
   }
 }
@@ -73,4 +76,37 @@ export function computeRecoveryStatus(
     daysRemaining: 0,
     description: "Agent recovered and ready to return",
   };
+}
+
+export async function autoClearRecoveredAgents(currentDay: number): Promise<void> {
+  if (typeof game === "undefined" || !game.actors) return;
+  if (!game.user?.isGM) return;
+
+  const updates: Array<{ id: string; changes: Record<string, number> }> = [];
+
+  for (const actor of game.actors) {
+    if ((actor.type as string) !== "agent") continue;
+    const system = actor.system as unknown as AgentData;
+
+    // Skip dead agents (stay dead) and uninjured agents (nothing to clear)
+    if (system.isDead || system.daysOutOfAction === 0) continue;
+
+    const daysElapsed = currentDay - system.recoveryStartedAt;
+    if (daysElapsed >= system.daysOutOfAction) {
+      updates.push({
+        id: actor.id ?? "",
+        changes: { "system.daysOutOfAction": 0, "system.recoveryStartedAt": 0 },
+      });
+    }
+  }
+
+  if (updates.length === 0) return;
+
+  // Batch update all recovered agents in one call
+  for (const { id, changes } of updates) {
+    const actor = game.actors?.get(id);
+    if (actor) {
+      await actor.update(changes);
+    }
+  }
 }

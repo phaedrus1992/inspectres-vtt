@@ -45,4 +45,20 @@ export class InSpectresAgent extends Actor {
   async awardFranchiseDice(amount: number): Promise<void> {
     return addToMissionPool(this, amount);
   }
+
+  override async _preUpdate(
+    changed: unknown,
+    options: unknown,
+    userId: unknown,
+  ): Promise<boolean | void> {
+    const result = await super._preUpdate(changed as Parameters<Actor["_preUpdate"]>[0], options as Parameters<Actor["_preUpdate"]>[1], userId as Parameters<Actor["_preUpdate"]>[2]);
+    const userIdStr = String(userId);
+    const user = game.users?.get(userIdStr as never);
+    if (user?.isGM) return result;
+    const systemChanges = (changed as Record<string, unknown>)["system"] as Record<string, unknown> | undefined;
+    if (systemChanges && ("isDead" in systemChanges || "daysOutOfAction" in systemChanges || "recoveryStartedAt" in systemChanges)) {
+      throw new Error("Recovery state can only be modified by the GM");
+    }
+    return result;
+  }
 }

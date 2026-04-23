@@ -13,6 +13,7 @@ import { registerHandlebarsHelpers } from "./utils/handlebars-helpers.js";
 import { MissionTrackerApp } from "./mission/MissionTrackerApp.js";
 import { onMissionSocketEvent } from "./mission/socket.js";
 import { handleActionError } from "./utils/ui-errors.js";
+import { autoClearRecoveredAgents } from "./agent/recovery-utils.js";
 
 Hooks.once("init", async function () {
   try {
@@ -59,7 +60,24 @@ Hooks.once("init", async function () {
     config: true,
     type: Number,
     default: 1,
-    onChange: () => { /* no reload needed */ },
+    onChange: (newDay: unknown) => {
+      if (typeof newDay !== "number") return;
+      if (!Number.isInteger(newDay) || newDay < 1) {
+        console.warn("[INSPECTRES] Invalid currentDay value; ignoring:", { newDay });
+        return;
+      }
+      void (async () => {
+        try {
+          await autoClearRecoveredAgents(newDay);
+        } catch (err: unknown) {
+          const message = err instanceof Error ? err.message : String(err);
+          console.error("[INSPECTRES] Auto-clear recovered agents failed:", { newDay, error: err, errorMessage: message });
+          if (ui.notifications) {
+            ui.notifications.error(game.i18n?.localize("INSPECTRES.ErrorAutoRecoverFailed") ?? "Auto-recovery update failed");
+          }
+        }
+      })();
+    },
   });
 
   // Register sheets — cast needed because fvtt-types' registerSheet expects V1 constructor type
