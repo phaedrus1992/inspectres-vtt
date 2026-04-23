@@ -50,7 +50,7 @@ Guidelines for InSpectres documentation, synthesized from industry best practice
 
 ## Terminology & Glossary
 
-Define game-specific terms where they're first used in a section, bold on first mention. Maintain a consistent glossary of core terms:
+Define game-specific terms where they're first used in a section, bold on first mention only. Maintain a consistent glossary of core terms:
 
 - **Agent** — A paranormal investigator working for the franchise
 - **Franchise** — The investigation agency that agents work for
@@ -62,6 +62,20 @@ Define game-specific terms where they're first used in a section, bold on first 
 - **Skill Roll** — Test of an agent's ability when attempting something risky
 
 Use these terms consistently. Don't invent synonyms.
+
+### Bolding Convention
+
+**Bold glossary terms on their first appearance in each section or page.** Subsequent uses in the same context should use plain text unless emphasis is needed for other reasons (e.g., direct instruction). This prevents visual noise and reserves bold for true information hierarchy.
+
+**Example — Correct:**
+"You play as **Agents** (paranormal investigators) running a paranormal investigation **Franchise** (agency), handling cases, managing **Stress** and resources, and dealing with agent death and **Recovery**."
+
+(Note: "agent" in "agent death" is not re-bolded after "Agents" introduces the term.)
+
+**Example — Avoid:**
+"You play as **Agents** (paranormal investigators) running a paranormal investigation **Franchise** (agency), handling cases, managing **Stress** and resources, and dealing with **Agent** death and **Recovery**."
+
+(Double-bolding "Agent" in the same sentence is redundant.)
 
 ## Structure & Organization
 
