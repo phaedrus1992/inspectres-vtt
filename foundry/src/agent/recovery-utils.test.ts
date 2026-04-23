@@ -196,4 +196,20 @@ describe("computeRecoveryStatus", () => {
       }
     });
   });
+
+  describe("autoClearRecoveredAgents", () => {
+    it("identifies agents ready to clear", () => {
+      // Agent #1: recovered on day 8
+      const agent1System = makeAgent({ daysOutOfAction: 3, recoveryStartedAt: 5 });
+      // Agent #2: still recovering
+      const agent2System = makeAgent({ daysOutOfAction: 3, recoveryStartedAt: 6 });
+
+      // On day 8
+      const status1 = computeRecoveryStatus(agent1System, 8);
+      const status2 = computeRecoveryStatus(agent2System, 8);
+
+      expect(status1.status).toBe("returned");
+      expect(status2.status).toBe("recovering");
+    });
+  });
 });

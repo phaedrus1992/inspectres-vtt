@@ -74,3 +74,35 @@ export function computeRecoveryStatus(
     description: "Agent recovered and ready to return",
   };
 }
+
+export async function autoClearRecoveredAgents(currentDay: number): Promise<void> {
+  if (typeof game === "undefined" || !game.actors) return;
+
+  const updates: Array<{ id: string; changes: Record<string, number> }> = [];
+
+  for (const actor of game.actors) {
+    if ((actor.type as string) !== "agent") continue;
+    const system = actor.system as unknown as AgentData;
+
+    // Skip dead agents (stay dead) and uninjured agents (nothing to clear)
+    if (system.isDead || system.daysOutOfAction === 0) continue;
+
+    const daysElapsed = currentDay - system.recoveryStartedAt;
+    if (daysElapsed >= system.daysOutOfAction) {
+      updates.push({
+        id: actor.id ?? "",
+        changes: { "system.daysOutOfAction": 0, "system.recoveryStartedAt": 0 },
+      });
+    }
+  }
+
+  if (updates.length === 0) return;
+
+  // Batch update all recovered agents in one call
+  for (const { id, changes } of updates) {
+    const actor = game.actors?.get(id);
+    if (actor) {
+      await actor.update(changes);
+    }
+  }
+}

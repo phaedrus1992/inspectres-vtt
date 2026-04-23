@@ -134,3 +134,27 @@ gh issue list --state open --label "area-core"
 # Find all technical debt
 gh issue list --state all --label "P2"
 ```
+
+## Recovery Mechanics (Death & Dismemberment)
+
+### Wall-Clock Time vs Game Time
+
+The recovery countdown system uses **wall-clock time** (the `currentDay` setting in Foundry) rather than game-time (simulation of turns/rounds during combat). This design choice ensures:
+
+1. **Consistent recovery timing** across sessions — agents recover based on calendar days, not mission variables
+2. **GM control** — the GM advances `currentDay` manually via settings, providing explicit pacing control
+3. **Simple state** — agents store only `recoveryStartedAt` (day number) and `daysOutOfAction` (count), avoiding complex Combat/Round tracking
+
+**Implementation:**
+- `recoveryStartedAt` stores the day number when recovery began (e.g., day 5)
+- `daysOutOfAction` specifies duration in days (e.g., 2 days = recovered by day 7)
+- `computeRecoveryStatus(system, currentDay)` calculates remaining days: `max(0, daysOutOfAction - (currentDay - recoveryStartedAt))`
+- When `currentDay` advances past the recovery deadline, `autoClearRecoveredAgents()` clears both fields
+
+**Not using game time because:** Missions can span multiple in-game days with varying narrative pacing. Recovery should be real-time (measured by calendar days), not paused or accelerated by mission events.
+
+### Auto-Clear on Day Advance
+
+When the GM changes the `currentDay` setting, the `onChange` hook automatically clears recovery fields for agents whose recovery window has expired. This prevents:
+- Agents getting "stuck" in recovery if the GM forgets to manually reset fields
+- Stale `recoveryStartedAt` causing recovery to never expire (invariant violation)

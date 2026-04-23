@@ -58,6 +58,15 @@ function extractFaces(roll: Roll): number[] {
   return roll.dice.flatMap((t) => t.results).filter((r) => r.active !== false).map((r) => r.result);
 }
 
+function applySkillPenalty(
+  updateData: Record<string, unknown>,
+  system: AgentData,
+  penaltyAmount: number,
+): void {
+  const academicsPenalty = system.skills.academics?.penalty ?? 0;
+  updateData["system.skills.academics.penalty"] = academicsPenalty + penaltyAmount;
+}
+
 async function actorUpdate(actor: RollActor, data: Record<string, unknown>): Promise<void> {
   // fvtt-types expects full document data shape for actor.update; partial dot-notation paths are safe at runtime
   const updateData = data as unknown as Parameters<typeof actor.update>[0];
@@ -383,16 +392,14 @@ export async function executeStressRoll(
   if (effectiveFace === 1) {
     // Meltdown: zero cool, skill penalty pool = stress dice count (applied to academics; player reallocates)
     updateData["system.cool"] = 0;
-    const academicsPenalty = system.skills.academics?.penalty ?? 0;
-    updateData["system.skills.academics.penalty"] = academicsPenalty + stressDiceCount;
+    applySkillPenalty(updateData, system, stressDiceCount);
   } else {
     if (outcome.coolGain > 0) {
       updateData["system.cool"] = system.cool + outcome.coolGain;
     }
     // Apply outcome-based skill penalty (applied to academics; player reallocates)
     if (outcome.skillPenalty > 0) {
-      const academicsPenalty = system.skills.academics?.penalty ?? 0;
-      updateData["system.skills.academics.penalty"] = academicsPenalty + outcome.skillPenalty;
+      applySkillPenalty(updateData, system, outcome.skillPenalty);
     }
   }
 

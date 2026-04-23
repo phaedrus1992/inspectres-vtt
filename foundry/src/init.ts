@@ -13,6 +13,7 @@ import { registerHandlebarsHelpers } from "./utils/handlebars-helpers.js";
 import { MissionTrackerApp } from "./mission/MissionTrackerApp.js";
 import { onMissionSocketEvent } from "./mission/socket.js";
 import { handleActionError } from "./utils/ui-errors.js";
+import { autoClearRecoveredAgents } from "./agent/recovery-utils.js";
 
 Hooks.once("init", async function () {
   try {
@@ -59,7 +60,12 @@ Hooks.once("init", async function () {
     config: true,
     type: Number,
     default: 1,
-    onChange: () => { /* no reload needed */ },
+    onChange: (newDay: unknown) => {
+      if (typeof newDay !== "number") return;
+      void autoClearRecoveredAgents(newDay as number).catch((err: unknown) => {
+        handleActionError(err, "Failed to auto-clear recovered agents", "INSPECTRES.ErrorAutoRecoverFailed", "Auto-recovery update failed");
+      });
+    },
   });
 
   // Register sheets — cast needed because fvtt-types' registerSheet expects V1 constructor type
