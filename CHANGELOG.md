@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-04-23
+
 ### Added
 
 - **Character Continuity**: Agents can now recover from injuries over multiple in-game days. The GM controls the global "in-game day" setting, allowing flexible pacing of recovery narratively rather than wall-clock time.
