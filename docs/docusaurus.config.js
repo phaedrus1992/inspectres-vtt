@@ -1,6 +1,10 @@
 // @ts-check
 // `@type` JSDoc annotations allow better IDE autocompletion and type checking
 // @type {import('@docusaurus/types').Config}
+
+// Note: This uses CommonJS syntax (not ESM) because Docusaurus 3.10's webpack SSR build
+// cannot support "type": "module" in package.json. Webpack internally requires
+// CommonJS for server-side rendering and does not provide require.resolveWeak in ESM mode.
 const config = {
   title: 'InSpectres',
   tagline: 'Paranormal investigation RPG system for Foundry VTT',
@@ -20,7 +24,11 @@ const config = {
   trailingSlash: false,
 
   onBrokenLinks: 'throw',
-  onBrokenMarkdownLinks: 'warn',
+  markdown: {
+    hooks: {
+      onBrokenMarkdownLinks: 'throw',
+    },
+  },
 
   // Even if you don't use internalization, you can use this field to set useful
   // metadata like html lang. For example, if your site is Chinese, you may want
