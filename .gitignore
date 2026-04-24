@@ -1,2 +1,4 @@
-docker/docker-compose.override.yml
-docker/.env
+/.claude/skill-improver.*
+
+/docker/docker-compose.override.yml
+/docker/.env
