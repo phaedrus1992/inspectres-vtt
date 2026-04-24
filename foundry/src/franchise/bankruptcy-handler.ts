@@ -137,13 +137,21 @@ export async function attemptLoanRepayment(
     );
 
     return { success: true, debtCleared: true };
+  } else {
+    // Franchise ends mission with negative total after repayment: permanent bankruptcy
+    const updateData = {
+      "system.debtMode": false,
+      "system.cardsLocked": false,
+      "system.loanAmount": 0,
+      "system.bank": 0,
+    } as unknown as Parameters<typeof franchiseActor.update>[0];
+    await franchiseActor.update(updateData);
+
+    ui.notifications?.error(
+      game.i18n?.localize("INSPECTRES.NotifyFranchiseBankrupt") ??
+        "Franchise bankrupt! Must restart with new franchise.",
+    );
+
+    return { success: true, debtCleared: false };
   }
-
-  // Still negative — franchise bankrupt
-  ui.notifications?.error(
-    game.i18n?.localize("INSPECTRES.NotifyFranchiseBankrupt") ??
-      "Franchise bankrupt! Must restart with new franchise.",
-  );
-
-  return { success: true, debtCleared: false };
 }

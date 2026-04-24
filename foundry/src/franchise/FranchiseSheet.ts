@@ -70,7 +70,14 @@ export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicati
   static async onEnterDebt(this: FranchiseSheet, _event: Event, _target: HTMLElement): Promise<void> {
     if (!this.isEditable) return;
     const system = this.actor.system as unknown as FranchiseData;
-    const shortfall = -system.bank;
+    if (system.bank > 0) {
+      ui.notifications?.warn(
+        game.i18n?.localize("INSPECTRES.WarnCantEnterDebtWithPositiveBank") ??
+          "Franchise must have zero or negative Bank to enter Debt Mode.",
+      );
+      return;
+    }
+    const shortfall = Math.abs(system.bank);
     void enterDebtMode(this.actor, shortfall).catch((err: unknown) => {
       handleActionError(err, "Debt mode entry failed", "INSPECTRES.ErrorEnterDebtModeFailed", "Failed to enter debt mode");
     });

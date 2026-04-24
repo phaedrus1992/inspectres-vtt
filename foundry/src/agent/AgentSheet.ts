@@ -332,15 +332,27 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
       franchiseInDebt: franchiseSystem.debtMode,
     });
     if (!result) return;
+    if (result.bankDiceSpent === 0) {
+      ui.notifications?.info(
+        game.i18n?.localize("INSPECTRES.InfoVacationNoSpending") ?? "No Bank dice spent. Agent stress unchanged.",
+      );
+      return;
+    }
     const newStress = Math.max(0, system.stress - result.stressReduction);
     const newBank = Math.max(0, franchiseSystem.bank - result.bankDiceSpent);
     const agentUpdateData = { "system.stress": newStress } as unknown as Parameters<typeof this.actor.update>[0];
     const franchiseUpdateData = { "system.bank": newBank } as unknown as Parameters<typeof franchise.update>[0];
-    void Promise.all([
-      this.actor.update(agentUpdateData),
-      franchise.update(franchiseUpdateData),
-    ]).catch((err: unknown) => {
+    try {
+      await Promise.all([
+        this.actor.update(agentUpdateData),
+        franchise.update(franchiseUpdateData),
+      ]);
+      ui.notifications?.info(
+        game.i18n?.localize("INSPECTRES.InfoVacationComplete") ??
+          `Vacation: spent ${result.bankDiceSpent} dice, reduced stress by ${result.stressReduction}.`,
+      );
+    } catch (err: unknown) {
       handleActionError(err, "Vacation failed", "INSPECTRES.ErrorVacationFailed", "Failed to apply vacation");
-    });
+    }
   }
 }
