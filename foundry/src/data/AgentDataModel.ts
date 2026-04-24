@@ -32,6 +32,7 @@ export class AgentDataModel extends (foundry.abstract.TypeDataModel as unknown a
         used: new BooleanField({ required: true, initial: false }),
       })),
       missionPool: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
+      stress: new NumberField({ required: true, integer: true, min: 0, max: 6, initial: 0 }),
       isDead: new BooleanField({ required: true, initial: false }),
       daysOutOfAction: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
       recoveryStartedAt: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),

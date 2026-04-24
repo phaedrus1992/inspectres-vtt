@@ -28,4 +28,5 @@ export interface AgentData {
   isDead: boolean;
   daysOutOfAction: number;
   recoveryStartedAt: number;
+  stress: number;
 }

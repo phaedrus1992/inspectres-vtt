@@ -9,6 +9,8 @@ import { handleActionError } from "../utils/ui-errors.js";
 import { activateTabs } from "../utils/sheet-tabs.js";
 import { getOrCreateListenerController } from "../utils/listener-cleanup.js";
 import { computeRecoveryStatus, getCurrentDay } from "./recovery-utils.js";
+import { buildVacationDialog } from "./vacation-dialog.js";
+import { type FranchiseData } from "../franchise/franchise-schema.js";
 
 const SKILL_NAMES = ["academics", "athletics", "technology", "contact"] as const;
 
@@ -82,6 +84,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     actions: {
       skillRoll: AgentSheet.onSkillRoll,
       stressRoll: AgentSheet.onStressRoll,
+      vacation: AgentSheet.onVacation,
       skillIncrease: AgentSheet.onSkillStep,
       skillDecrease: AgentSheet.onSkillStep,
       toggleCool: AgentSheet.onToggleCool,
@@ -306,5 +309,50 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
       },
     });
     picker.browse();
+  }
+
+  static async onVacation(this: AgentSheet, _event: Event, _target: HTMLElement): Promise<void> {
+    if (!this.isEditable) return;
+    const system = this.actor.system as unknown as AgentData;
+    const franchise = findFranchiseActor();
+    if (!franchise) {
+      ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnFranchiseNotFound") ?? "Franchise actor not found.");
+      return;
+    }
+    const franchiseSystem = franchise.system as unknown as FranchiseData;
+    const status = computeRecoveryStatus(system, getCurrentDay());
+    if (status.status === "recovering" || status.status === "dead") {
+      ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnActionBlockedRecovery") ?? "Cannot act while recovering");
+      return;
+    }
+    const result = await buildVacationDialog({
+      agentStress: system.stress,
+      agentName: this.actor.name ?? "Unknown",
+      franchiseBank: franchiseSystem.bank,
+      franchiseInDebt: franchiseSystem.debtMode,
+    });
+    if (!result) return;
+    if (result.bankDiceSpent === 0) {
+      ui.notifications?.info(
+        game.i18n?.localize("INSPECTRES.InfoVacationNoSpending") ?? "No Bank dice spent. Agent stress unchanged.",
+      );
+      return;
+    }
+    const newStress = Math.max(0, system.stress - result.stressReduction);
+    const newBank = Math.max(0, franchiseSystem.bank - result.bankDiceSpent);
+    const agentUpdateData = { "system.stress": newStress } as unknown as Parameters<typeof this.actor.update>[0];
+    const franchiseUpdateData = { "system.bank": newBank } as unknown as Parameters<typeof franchise.update>[0];
+    try {
+      await Promise.all([
+        this.actor.update(agentUpdateData),
+        franchise.update(franchiseUpdateData),
+      ]);
+      ui.notifications?.info(
+        game.i18n?.localize("INSPECTRES.InfoVacationComplete") ??
+          `Vacation: spent ${result.bankDiceSpent} dice, reduced stress by ${result.stressReduction}.`,
+      );
+    } catch (err: unknown) {
+      handleActionError(err, "Vacation failed", "INSPECTRES.ErrorVacationFailed", "Failed to apply vacation");
+    }
   }
 }
