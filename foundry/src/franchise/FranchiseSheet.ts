@@ -87,12 +87,16 @@ export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicati
 
   static async onToggleDebtMode(this: FranchiseSheet, _event: Event, _target: HTMLElement): Promise<void> {
     const system = this.actor.system as unknown as FranchiseData;
-    await FranchiseSheet.toggleFlag(this, "system.debtMode", system.debtMode);
+    void FranchiseSheet.toggleFlag.call(this, "system.debtMode", system.debtMode).catch((err: unknown) => {
+      handleActionError(err, "Toggle debt mode failed", "INSPECTRES.ErrorToggleDebtModeFailed", "Failed to toggle debt mode");
+    });
   }
 
   static async onToggleCardsLocked(this: FranchiseSheet, _event: Event, _target: HTMLElement): Promise<void> {
     const system = this.actor.system as unknown as FranchiseData;
-    await FranchiseSheet.toggleFlag(this, "system.cardsLocked", system.cardsLocked);
+    void FranchiseSheet.toggleFlag.call(this, "system.cardsLocked", system.cardsLocked).catch((err: unknown) => {
+      handleActionError(err, "Toggle cards locked failed", "INSPECTRES.ErrorToggleCardsLockedFailed", "Failed to toggle cards locked");
+    });
   }
 
   static async onAttemptRepayment(this: FranchiseSheet, _event: Event, _target: HTMLElement): Promise<void> {
@@ -104,15 +108,11 @@ export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicati
     }
 
     const earnedInput = await FranchiseSheet.promptNumberInput({
-      titleKey: "INSPECTRES.DialogRepaymentTitle",
-      titleFallback: "Loan Repayment",
-      labelKey: "INSPECTRES.EarnedDiceThisMission",
-      labelFallback: "Earned Dice This Mission",
+      title: FranchiseSheet.localize("INSPECTRES.DialogRepaymentTitle", "Loan Repayment"),
+      label: FranchiseSheet.localize("INSPECTRES.EarnedDiceThisMission", "Earned Dice This Mission"),
       fieldName: "earnedDice",
-      confirmKey: "INSPECTRES.ButtonAttemptRepayment",
-      confirmFallback: "Attempt Repayment",
-      cancelKey: "INSPECTRES.Cancel",
-      cancelFallback: "Cancel",
+      confirmLabel: FranchiseSheet.localize("INSPECTRES.ButtonAttemptRepayment", "Attempt Repayment"),
+      cancelLabel: FranchiseSheet.localize("INSPECTRES.Cancel", "Cancel"),
     });
 
     if (earnedInput === null) return;
@@ -126,51 +126,48 @@ export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicati
     return game.i18n?.localize(key) ?? fallback;
   }
 
-  private static async toggleFlag(sheet: FranchiseSheet, field: string, current: boolean): Promise<void> {
-    if (!sheet.isEditable || !game.user?.isGM) return;
-    const updateData = { [field]: !current } as unknown as Parameters<typeof sheet.actor.update>[0];
-    await sheet.actor.update(updateData);
+  private static async toggleFlag(this: FranchiseSheet, field: string, current: boolean): Promise<void> {
+    if (!this.isEditable || !game.user?.isGM) return;
+    const updateData = { [field]: !current } as unknown as Parameters<typeof this.actor.update>[0];
+    await this.actor.update(updateData);
   }
 
   private static async promptNumberInput(opts: {
-    titleKey: string;
-    titleFallback: string;
-    labelKey: string;
-    labelFallback: string;
+    title: string;
+    label: string;
     fieldName: string;
-    confirmKey: string;
-    confirmFallback: string;
-    cancelKey: string;
-    cancelFallback: string;
+    confirmLabel: string;
+    cancelLabel: string;
   }): Promise<number | null> {
-    const label = FranchiseSheet.localize(opts.labelKey, opts.labelFallback);
-    const result = await foundry.applications.api.DialogV2.wait({
-      window: { title: FranchiseSheet.localize(opts.titleKey, opts.titleFallback) },
-      content: `
-        <form>
-          <div class="form-group">
-            <label for="${opts.fieldName}">${label}</label>
-            <input type="number" name="${opts.fieldName}" id="${opts.fieldName}" min="0" value="0" required />
-          </div>
-        </form>
-      `,
-      buttons: [
-        {
-          action: "confirm",
-          label: FranchiseSheet.localize(opts.confirmKey, opts.confirmFallback),
-          default: true,
-          callback: (_event, _button, dialog) => {
-            const form = dialog.querySelector("form") as HTMLFormElement;
-            return Math.max(0, Number(new FormData(form).get(opts.fieldName) ?? 0));
+    try {
+      const result = await foundry.applications.api.DialogV2.wait({
+        window: { title: opts.title },
+        content: `
+          <form>
+            <div class="form-group">
+              <label for="${opts.fieldName}">${opts.label}</label>
+              <input type="number" name="${opts.fieldName}" id="${opts.fieldName}" min="0" value="0" required />
+            </div>
+          </form>
+        `,
+        buttons: [
+          {
+            action: "confirm",
+            label: opts.confirmLabel,
+            default: true,
+            callback: (_event, _button, dialog) => {
+              const form = dialog.querySelector("form");
+              return Math.max(0, Number(new FormData(form ?? undefined).get(opts.fieldName) ?? 0));
+            },
           },
-        },
-        {
-          action: "cancel",
-          label: FranchiseSheet.localize(opts.cancelKey, opts.cancelFallback),
-        },
-      ],
-    });
-    if (result === null || result === "cancel" || typeof result !== "number") return null;
-    return result;
+          { action: "cancel", label: opts.cancelLabel },
+        ],
+      });
+      if (result === null || result === "cancel" || typeof result !== "number") return null;
+      return result;
+    } catch (err: unknown) {
+      handleActionError(err, "Repayment dialog failed", "INSPECTRES.ErrorRepaymentDialogFailed", "Repayment dialog failed");
+      return null;
+    }
   }
 }
