@@ -176,3 +176,41 @@ System uses `currentDay` (Foundry setting), not in-game combat rounds.
 **Prevents:**
 - Agents stuck in recovery (GM forgot to reset)
 - Stale `recoveryStartedAt` blocking recovery expiry
+
+## GM Control Surface Design
+
+### Principle: No Settings-Only Gameplay State
+
+Game-critical operations **must have discoverable UI buttons**, not require navigating Foundry settings or using console.
+
+**Why:** GMs need fast, confident access during play. Settings are for configuration (once per campaign), not moment-to-moment gameplay.
+
+**Rule:** If a flag affects gameplay (death mode, recovery state, debt mode, day counter, mission status), it must have:
+1. **Visible indicator** on the relevant sheet (what's the current state?)
+2. **Direct button/control** to change it (how do I adjust this?)
+3. **Clear labeling** (what does this do, in game terms not technical terms?)
+4. **Context-appropriate placement** (recovery controls on agent sheet, financial on franchise sheet, day on toolbar)
+
+### Examples
+
+✅ **Good:**
+- Agent sheet: "Status: Recovering (2 days left)" + "Revive Agent" button
+- Franchise sheet: Visible "Death Mode" checkbox + explanation
+- Toolbar: Day display + "+1 Day" / "-1 Day" buttons
+- Mission Tracker: "End Mission & Vacation" button
+
+❌ **Bad:**
+- `currentDay` only in Settings
+- `isDead` field with no UI to toggle
+- `cardsLocked` state auto-set by code, no override button
+- Vacation trigger requires navigation through Mission Tracker + dialog
+
+### Architecture Decision: Distributed vs. Centralized
+
+**Current approach (distributed):** Each control lives on its natural sheet (agent sheet for recovery, franchise sheet for financial).
+
+**Trade-off:** GMs must navigate multiple sheets during fast play.
+
+**If play-testing shows high access frequency:** Consider hybrid approach with toolbar widget for day/mission/vacation quick-access, keeping detailed controls on sheets.
+
+**See also:** GitHub issues #159–#168 (GM control audit results)
