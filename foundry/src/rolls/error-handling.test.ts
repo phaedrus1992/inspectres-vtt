@@ -205,7 +205,8 @@ describe("Error handling in rolls", () => {
     });
 
     it("rethrows update failures with user-facing error message", async () => {
-      const notificationSpy = vi.spyOn(ui.notifications, "error");
+      // ui.notifications is mocked and guaranteed to exist (defined at line 35-38)
+      const notificationSpy = vi.spyOn(ui.notifications as any, "error");
       const agent = makeAgent();
       const franchise = makeFranchise();
 
