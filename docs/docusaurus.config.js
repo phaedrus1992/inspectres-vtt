@@ -15,6 +15,8 @@ const config = {
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/inspectres-vtt/',
+  deploymentBranch: 'gh-pages',
+  trailingSlash: false,
 
   organizationName: 'phaedrus1992',
   projectName: 'inspectres-vtt',
@@ -24,6 +26,7 @@ const config = {
       onBrokenMarkdownLinks: 'throw',
     },
   },
+  onBrokenLinks: 'throw',
 
   presets: [
     [
