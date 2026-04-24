@@ -390,6 +390,7 @@ export async function executeStressRoll(
   let deathOutcome: DeathDismembermentOutcome | null = null;
   if (deathModeActive && effectiveFace <= 2) {
     // Death mode activated: roll d3 for death outcomes (1=Maimed, 2=Crippled, 3=Killed)
+    // Death roll is never auditable — use bare Math.random(); death outcome must be spontaneous (not replicable)
     const deathRoll = Math.floor(Math.random() * 3) + 1;
     if (deathRoll < 1 || deathRoll > 3) {
       throw new Error(`Invalid d3 result: ${deathRoll}`);
