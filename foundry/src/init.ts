@@ -53,7 +53,9 @@ Hooks.once("init", async function () {
   registerHandlebarsHelpers();
 
   // Register game settings — cast needed because fvtt-types only knows core settings
-  (game.settings as unknown as { register: (namespace: string, key: string, data: unknown) => void }).register("inspectres", "currentDay", {
+  const settingsRegistry = game.settings as unknown as { register: (namespace: string, key: string, data: unknown) => void };
+
+  settingsRegistry.register("inspectres", "currentDay", {
     name: "INSPECTRES.SettingCurrentDay",
     hint: "INSPECTRES.SettingCurrentDayHint",
     scope: "world",
@@ -78,6 +80,15 @@ Hooks.once("init", async function () {
         }
       })();
     },
+  });
+
+  settingsRegistry.register("inspectres", "devMode", {
+    name: "INSPECTRES.SettingDevMode",
+    hint: "INSPECTRES.SettingDevModeHint",
+    scope: "client",
+    config: true,
+    type: Boolean,
+    default: false,
   });
 
   // Register sheets — cast needed because fvtt-types' registerSheet expects V1 constructor type
