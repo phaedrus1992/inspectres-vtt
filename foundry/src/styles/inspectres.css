@@ -846,3 +846,47 @@
 .application:has(form.dialog-form) {
   height: auto !important;
 }
+
+/* ─── Franchise sheet day controls ──────────────────────────────────────── */
+
+.inspectres-franchise-sheet {
+  .day-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .day-display {
+    font-size: 1.1rem;
+    font-weight: 600;
+    flex: 1;
+    padding: 0.5rem;
+    background: var(--inspectres-section-bg);
+    border: 1px solid var(--inspectres-input-border);
+    border-radius: var(--inspectres-radius);
+  }
+
+  .day-controls {
+    display: flex;
+    gap: 0.25rem;
+  }
+
+  .day-controls button {
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  .mission-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    button {
+      flex: 1;
+    }
+  }
+}

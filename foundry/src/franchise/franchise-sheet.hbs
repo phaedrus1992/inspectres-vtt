@@ -85,6 +85,20 @@
         </div>
       </section>
 
+      <!-- Day Display Section (GM only) -->
+      {{#if isGm}}
+        <section class="inspectres-section">
+          <h2>{{localize "INSPECTRES.InGameDay"}}</h2>
+          <div class="day-row">
+            <span class="day-display">Day {{currentDay}}</span>
+            <div class="day-controls">
+              <button type="button" class="inspectres-button" data-action="regressDay" title="Previous day">−</button>
+              <button type="button" class="inspectres-button" data-action="advanceDay" title="Next day">+</button>
+            </div>
+          </div>
+        </section>
+      {{/if}}
+
       <!-- Mission Section -->
       <section class="inspectres-section">
         <h2>{{localize "INSPECTRES.Mission"}}</h2>
@@ -104,9 +118,16 @@
             <div class="inspectres-progress-fill" style="width: {{inspectres-multiply (inspectres-divide system.missionPool (inspectres-max system.missionGoal 1)) 100}}%"></div>
           </div>
         </div>
-        <button type="button" class="inspectres-roll-button" data-action="openMissionTracker">
-          {{localize "INSPECTRES.OpenMissionTracker"}}
-        </button>
+        <div class="mission-controls">
+          <button type="button" class="inspectres-roll-button" data-action="openMissionTracker">
+            {{localize "INSPECTRES.OpenMissionTracker"}}
+          </button>
+          {{#if isGm}}
+            <button type="button" class="inspectres-roll-button" data-action="beginVacation" {{#if (eq system.missionPool 0)}}disabled{{/if}}>
+              {{localize "INSPECTRES.BeginVacation"}}
+            </button>
+          {{/if}}
+        </div>
       </section>
 
       <!-- Client Roll Section -->
