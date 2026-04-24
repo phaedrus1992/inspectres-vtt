@@ -8,7 +8,13 @@ import { getCurrentDay } from "../agent/recovery-utils.js";
 
 // Mock Foundry globals
 class MockRoll {
-  dice = [{ results: [{ active: true, result: 4 }] }];
+  dice: Array<{ results: Array<{ active: boolean; result: number }> }>;
+
+  constructor(lowFace?: number) {
+    // Default to face 4 (no death roll). If lowFace provided, use it for death-roll testing.
+    const face = lowFace ?? 4;
+    this.dice = [{ results: [{ active: true, result: face }] }];
+  }
 
   async evaluate() {
     return this;
@@ -97,14 +103,15 @@ describe("Error handling in rolls", () => {
       });
       const franchise = makeFranchise();
 
-      // Executor no longer checks recovery — that's the UI's job
-      // Executor will proceed with skill roll (though UI should prevent this)
-      // If roll completes without error, this test passes
+      // Executor no longer checks recovery — that's the UI's job.
+      // The roll should proceed (UI layer prevents the call entirely).
+      expect.assertions(1);
       try {
         await executeSkillRoll(agent, franchise, "academics");
-        // No recovery check in executor, so roll may complete
+        // Executor proceeds without recovery block, so we reach here
+        expect(true).toBe(true); // positive assertion: roll completed
       } catch (err) {
-        // If error is NOT about recovery, that's expected (e.g., update failure)
+        // If error is NOT about recovery, update failure is acceptable
         expect(String(err)).not.toMatch(/recovering|dead/);
       }
     });
@@ -120,9 +127,11 @@ describe("Error handling in rolls", () => {
       });
       const franchise = makeFranchise();
 
-      // Executor should not throw recovery-specific error
+      expect.assertions(1);
       try {
         await executeStressRoll(agent, { stressDiceCount: 1, coolDiceUsed: 0 }, franchise);
+        // Executor proceeds without recovery block
+        expect(true).toBe(true); // positive assertion: roll completed
       } catch (err) {
         // Any error should NOT be a recovery block error
         expect(String(err)).not.toMatch(/is recovering|is dead/);
@@ -135,24 +144,27 @@ describe("Error handling in rolls", () => {
       const agent = makeAgent({ isDead: false });
       const franchise = makeFranchise({ deathMode: true });
 
-      // Mock Math.random to produce out-of-bounds value
-      // We need to trigger death roll (low stress face) and invalid d3
-      const originalRandom = Math.random;
-      (Math as any).random = () => -0.1; // Produces 0 from Math.floor(x*3)+1, which is invalid
+      // Mock Math.random to produce invalid d3 (0 or 4+, not 1–3)
+      const randomSpy = vi.spyOn(Math, "random").mockReturnValue(-0.1);
+      // Math.floor(-0.1 * 3) + 1 = Math.floor(-0.3) + 1 = -1 + 1 = 0 (invalid)
 
       try {
-        // Stress roll with deathMode should check d3 bounds
-        // If it doesn't throw, the validation is missing/broken
-        try {
-          await executeStressRoll(agent, { stressDiceCount: 1, coolDiceUsed: 0 }, franchise);
-          // If we get here without throwing, the validation wasn't checked
-          // This test documents that currently validation errors are swallowed
-        } catch (err) {
-          // Expected to throw validation error
-          expect(String(err)).toMatch(/Invalid d3 result/);
-        }
+        // Create Roll mock that returns face 1, triggering death-roll evaluation
+        vi.stubGlobal("Roll", class extends MockRoll {
+          constructor() {
+            super(1); // face 1 triggers deathMode branch (effectiveFace <= 2)
+          }
+        });
+
+        // executeStressRoll should hit death-roll code with mocked Math.random producing 0
+        await expect(
+          executeStressRoll(agent, { stressDiceCount: 1, coolDiceUsed: 0 }, franchise),
+        ).rejects.toThrow(/Invalid d3 result.*0/);
+
+        expect(randomSpy).toHaveBeenCalled();
       } finally {
-        (Math as any).random = originalRandom;
+        randomSpy.mockRestore();
+        vi.stubGlobal("Roll", MockRoll);
       }
     });
   });
@@ -193,7 +205,7 @@ describe("Error handling in rolls", () => {
     });
 
     it("rethrows update failures with user-facing error message", async () => {
-      const notificationSpy = (ui.notifications as any).error as any;
+      const notificationSpy = vi.spyOn(ui.notifications, "error");
       const agent = makeAgent();
       const franchise = makeFranchise();
 
