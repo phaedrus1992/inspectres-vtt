@@ -38,4 +38,49 @@ describe("FranchiseSheet", () => {
       expect(chatSpy).not.toHaveBeenCalled();
     });
   });
+
+  describe("debt control actions", () => {
+    function makeSheetWithGM(isGM: boolean, debtMode: boolean = false) {
+      const actor = new MockActorSheetV2().actor;
+      actor.system = { bank: 3, debtMode, cardsLocked: false, missionPool: 0, missionGoal: 5 };
+      const sheet = Object.create(FranchiseSheet.prototype);
+      sheet.actor = actor;
+      sheet.isEditable = true;
+      (globalThis as any).game = { user: { isGM } };
+      const updateSpy = vi.spyOn(actor, "update").mockResolvedValue(actor);
+      return { sheet, updateSpy };
+    }
+
+    it("onToggleDebtMode requires GM permission", async () => {
+      const { sheet, updateSpy } = makeSheetWithGM(false);
+      await FranchiseSheet.onToggleDebtMode.call(sheet, new Event("click"), document.createElement("button"));
+      expect(updateSpy).not.toHaveBeenCalled();
+    });
+
+    it("onToggleDebtMode toggles debtMode when GM", async () => {
+      const { sheet, updateSpy } = makeSheetWithGM(true, false);
+      await FranchiseSheet.onToggleDebtMode.call(sheet, new Event("click"), document.createElement("button"));
+      expect(updateSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          "system.debtMode": true,
+        }),
+      );
+    });
+
+    it("onToggleCardsLocked requires GM permission", async () => {
+      const { sheet, updateSpy } = makeSheetWithGM(false, true);
+      await FranchiseSheet.onToggleCardsLocked.call(sheet, new Event("click"), document.createElement("button"));
+      expect(updateSpy).not.toHaveBeenCalled();
+    });
+
+    it("onToggleCardsLocked toggles cardsLocked when GM", async () => {
+      const { sheet, updateSpy } = makeSheetWithGM(true, true);
+      await FranchiseSheet.onToggleCardsLocked.call(sheet, new Event("click"), document.createElement("button"));
+      expect(updateSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          "system.cardsLocked": true,
+        }),
+      );
+    });
+  });
 });
