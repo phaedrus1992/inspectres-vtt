@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { MockActorSheetV2, Hooks } from "../__mocks__/setup.js";
 import { AgentSheet } from "./AgentSheet.js";
+import type { AgentData } from "./agent-schema.js";
 
 describe("AgentSheet", () => {
   beforeEach(() => {
@@ -354,6 +355,113 @@ describe("AgentSheet", () => {
 
       checkbox.dispatchEvent(new Event("change"));
       expect(updateSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("onActivatePower guards", () => {
+    it("does not activate power when sheet is not editable", async () => {
+      const mockActor = new MockActorSheetV2().actor;
+      const sheet = Object.create(AgentSheet.prototype);
+      sheet.actor = mockActor;
+      sheet.isEditable = false;
+
+      const updateSpy = vi.spyOn(sheet.actor, "update").mockResolvedValue(sheet.actor);
+
+      await AgentSheet.onActivatePower.call(sheet, new Event("click"), document.createElement("button"));
+
+      expect(updateSpy).not.toHaveBeenCalled();
+    });
+
+    it("does not activate power while agent is recovering", async () => {
+      const mockActor = new MockActorSheetV2().actor;
+      const sheet = Object.create(AgentSheet.prototype);
+      sheet.actor = mockActor;
+      sheet.isEditable = true;
+
+      const agentData: AgentData = {
+        description: "",
+        skills: { academics: { base: 1, penalty: 0 }, athletics: { base: 1, penalty: 0 }, technology: { base: 1, penalty: 0 }, contact: { base: 1, penalty: 0 } },
+        talent: "",
+        cool: 3,
+        isWeird: true,
+        power: { name: "Test Power", description: "Test", baseSkill: "athletics", coolCost: 1 },
+        characteristics: [],
+        missionPool: 0,
+        isDead: false,
+        daysOutOfAction: 2,
+        recoveryStartedAt: 5,
+        stress: 0,
+      };
+
+      Object.defineProperty(sheet.actor, "system", { value: agentData });
+
+      const updateSpy = vi.spyOn(sheet.actor, "update").mockResolvedValue(sheet.actor);
+
+      await AgentSheet.onActivatePower.call(sheet, new Event("click"), document.createElement("button"));
+
+      expect(updateSpy).not.toHaveBeenCalled();
+    });
+
+    it("activates power and deducts cool when conditions are met", async () => {
+      const mockActor = new MockActorSheetV2().actor;
+      const sheet = Object.create(AgentSheet.prototype);
+      sheet.actor = mockActor;
+      sheet.isEditable = true;
+
+      const agentData: AgentData = {
+        description: "",
+        skills: { academics: { base: 1, penalty: 0 }, athletics: { base: 1, penalty: 0 }, technology: { base: 1, penalty: 0 }, contact: { base: 1, penalty: 0 } },
+        talent: "",
+        cool: 3,
+        isWeird: true,
+        power: { name: "Test Power", description: "Test", baseSkill: "athletics", coolCost: 1 },
+        characteristics: [],
+        missionPool: 0,
+        isDead: false,
+        daysOutOfAction: 0,
+        recoveryStartedAt: 0,
+        stress: 0,
+      };
+
+      Object.defineProperty(sheet.actor, "system", { value: agentData });
+
+      const updateSpy = vi.spyOn(sheet.actor, "update").mockResolvedValue(sheet.actor);
+      const createChatSpy = vi.spyOn(ChatMessage, "create").mockResolvedValue({} as ChatMessage);
+
+      await AgentSheet.onActivatePower.call(sheet, new Event("click"), document.createElement("button"));
+
+      expect(updateSpy).toHaveBeenCalledWith(expect.objectContaining({ "system.cool": 2 }));
+      expect(createChatSpy).toHaveBeenCalled();
+    });
+
+    it("prevents power activation if cool is insufficient", async () => {
+      const mockActor = new MockActorSheetV2().actor;
+      const sheet = Object.create(AgentSheet.prototype);
+      sheet.actor = mockActor;
+      sheet.isEditable = true;
+
+      const agentData: AgentData = {
+        description: "",
+        skills: { academics: { base: 1, penalty: 0 }, athletics: { base: 1, penalty: 0 }, technology: { base: 1, penalty: 0 }, contact: { base: 1, penalty: 0 } },
+        talent: "",
+        cool: 0,
+        isWeird: true,
+        power: { name: "Test Power", description: "Test", baseSkill: "athletics", coolCost: 1 },
+        characteristics: [],
+        missionPool: 0,
+        isDead: false,
+        daysOutOfAction: 0,
+        recoveryStartedAt: 0,
+        stress: 0,
+      };
+
+      Object.defineProperty(sheet.actor, "system", { value: agentData });
+
+      const updateSpy = vi.spyOn(sheet.actor, "update").mockResolvedValue(sheet.actor);
+
+      await AgentSheet.onActivatePower.call(sheet, new Event("click"), document.createElement("button"));
+
+      expect(updateSpy).not.toHaveBeenCalled();
     });
   });
 

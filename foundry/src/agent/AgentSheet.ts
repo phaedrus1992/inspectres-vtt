@@ -358,8 +358,21 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
   }
 
   static async onActivatePower(this: AgentSheet, _event: Event, _target: HTMLElement): Promise<void> {
+    // Like other state-mutating handlers on this sheet, power activation requires:
+    // 1. Sheet to be in edit mode (not read-only, e.g., compendium actors)
+    // 2. Agent to be alive and not recovering
+    // 3. Sufficient cool to pay the cost
+    if (!this.isEditable) return;
+
     try {
       const system = this.actor.system as unknown as AgentData;
+      const currentDay = getCurrentDay();
+      const recoveryStatus = computeRecoveryStatus(system, currentDay);
+      if (recoveryStatus.status === "recovering" || recoveryStatus.status === "dead") {
+        ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnActionBlockedRecovery") ?? "Cannot act while recovering");
+        return;
+      }
+
       if (!system.isWeird || !system.power) {
         ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnNoPower") ?? "No power to activate");
         return;
