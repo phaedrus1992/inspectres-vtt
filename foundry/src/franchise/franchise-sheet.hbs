@@ -156,6 +156,34 @@
             </label>
           {{/if}}
         </div>
+        {{#if isGm}}
+          <div class="debt-controls">
+            <p class="debt-controls-label">{{localize "INSPECTRES.GMDebtOverride"}}</p>
+            <button
+              type="button"
+              class="inspectres-button"
+              data-action="toggleDebtMode"
+            >
+              {{#if system.debtMode}}{{localize "INSPECTRES.ExitDebtMode"}}{{else}}{{localize "INSPECTRES.EnterDebtMode"}}{{/if}}
+            </button>
+            {{#if system.debtMode}}
+              <button
+                type="button"
+                class="inspectres-button"
+                data-action="toggleCardsLocked"
+              >
+                {{#if system.cardsLocked}}{{localize "INSPECTRES.UnlockCards"}}{{else}}{{localize "INSPECTRES.LockCards"}}{{/if}}
+              </button>
+              <button
+                type="button"
+                class="inspectres-button"
+                data-action="attemptRepayment"
+              >
+                {{localize "INSPECTRES.AttemptRepayment"}}
+              </button>
+            {{/if}}
+          </div>
+        {{/if}}
       </section>
 
     </div><!-- /notes tab -->

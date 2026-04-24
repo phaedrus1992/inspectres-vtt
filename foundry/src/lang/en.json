@@ -249,6 +249,17 @@
     "ErrorAlreadyInDebt": "Franchise is already in debt.",
     "WarnCantEnterDebtWithPositiveBank": "Franchise must have zero or negative Bank to enter Debt Mode.",
     "SettingCurrentDay": "In-Game Day",
-    "SettingCurrentDayHint": "Current in-game day for recovery tracking. Agents recover based on this count."
+    "SettingCurrentDayHint": "Current in-game day for recovery tracking. Agents recover based on this count.",
+    "GMDebtOverride": "GM Controls",
+    "EnterDebtMode": "Enter Debt Mode",
+    "ExitDebtMode": "Exit Debt Mode",
+    "LockCards": "Lock Cards",
+    "UnlockCards": "Unlock Cards",
+    "AttemptRepayment": "Attempt Repayment",
+    "DialogRepaymentTitle": "Loan Repayment",
+    "EarnedDiceThisMission": "Earned Dice This Mission",
+    "ButtonAttemptRepayment": "Attempt Repayment",
+    "Cancel": "Cancel",
+    "ErrorRepaymentFailed": "Loan repayment failed"
   }
 }
