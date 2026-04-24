@@ -3,6 +3,7 @@ import { executeBankRoll, executeClientRoll } from "../rolls/roll-executor.js";
 import { MissionTrackerApp } from "../mission/MissionTrackerApp.js";
 import { handleActionError } from "../utils/ui-errors.js";
 import { activateTabs } from "../utils/sheet-tabs.js";
+import { enterDebtMode } from "./bankruptcy-handler.js";
 
 // HandlebarsApplicationMixin provides _renderHTML/_replaceHTML required by ApplicationV2 for PARTS-based sheets
 export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.sheets.ActorSheetV2) {
@@ -14,6 +15,7 @@ export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicati
       bankRoll: FranchiseSheet.onBankRoll,
       clientRoll: FranchiseSheet.onClientRoll,
       openMissionTracker: FranchiseSheet.onOpenMissionTracker,
+      enterDebt: FranchiseSheet.onEnterDebt,
     },
   };
 
@@ -63,5 +65,14 @@ export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicati
 
   static onOpenMissionTracker(_event: Event, _target: HTMLElement): void {
     MissionTrackerApp.open();
+  }
+
+  static async onEnterDebt(this: FranchiseSheet, _event: Event, _target: HTMLElement): Promise<void> {
+    if (!this.isEditable) return;
+    const system = this.actor.system as unknown as FranchiseData;
+    const shortfall = -system.bank;
+    void enterDebtMode(this.actor, shortfall).catch((err: unknown) => {
+      handleActionError(err, "Debt mode entry failed", "INSPECTRES.ErrorEnterDebtModeFailed", "Failed to enter debt mode");
+    });
   }
 }
