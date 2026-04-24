@@ -12,6 +12,13 @@ export interface AgentCharacteristic {
   used: boolean;
 }
 
+export interface WeirdPower {
+  name: string;
+  description: string;
+  baseSkill: "athletics" | "contact";
+  coolCost: number;
+}
+
 export interface AgentData {
   description: string;
   skills: {
@@ -23,6 +30,7 @@ export interface AgentData {
   talent: string;
   cool: number;
   isWeird: boolean;
+  power?: WeirdPower;
   characteristics: AgentCharacteristic[];
   missionPool: number;
   isDead: boolean;

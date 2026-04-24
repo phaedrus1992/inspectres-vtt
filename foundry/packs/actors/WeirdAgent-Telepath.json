@@ -1,0 +1,47 @@
+{
+  "_id": "WeirdAgent0002",
+  "name": "Telepath (Weird Agent Sample)",
+  "type": "agent",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+    "description": "A weird agent with the supernatural ability to read and influence minds. This archetype demonstrates a power that adds to Contact (social influence) instead of Athletics, showcasing the flexibility of the weird agent system.",
+    "skills": {
+      "academics": { "base": 3, "penalty": 0 },
+      "athletics": { "base": 1, "penalty": 0 },
+      "technology": { "base": 1, "penalty": 0 },
+      "contact": { "base": 5, "penalty": 0 }
+    },
+    "talent": "",
+    "cool": 3,
+    "isWeird": true,
+    "power": {
+      "name": "Mind Touch",
+      "description": "Make skin-to-skin contact to read surface thoughts or implant a suggestion. The subject gets a Contact roll to resist; you get +1d6 from this power on your Contact roll when using it.",
+      "baseSkill": "contact",
+      "coolCost": 1
+    },
+    "characteristics": [
+      { "text": "Requires physical contact to use power", "used": false },
+      { "text": "Psychic echoes of violence cause stress (optional house rule)", "used": false }
+    ],
+    "missionPool": 0,
+    "isDead": false,
+    "daysOutOfAction": 0,
+    "recoveryStartedAt": 0,
+    "stress": 0
+  },
+  "flags": {
+    "inspectres": {
+      "archetype": "WeirdAgent-Telepath",
+      "version": "1.0"
+    }
+  },
+  "_stats": {
+    "systemId": "inspectres",
+    "systemVersion": "0.1.0",
+    "coreVersion": "12.0.0",
+    "createdTime": null,
+    "modifiedTime": null,
+    "lastModifiedBy": null
+  }
+}

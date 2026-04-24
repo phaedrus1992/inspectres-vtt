@@ -1,0 +1,47 @@
+{
+  "_id": "WeirdAgent0001",
+  "name": "Shapeshifter (Weird Agent Sample)",
+  "type": "agent",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+    "description": "A weird agent with the supernatural ability to shift into the form of other humanoids. This archetype demonstrates the weird agent power system: powers cost 1 Cool die to activate, add to a base skill (Athletics or Contact), and don't earn franchise dice on successes.",
+    "skills": {
+      "academics": { "base": 2, "penalty": 0 },
+      "athletics": { "base": 3, "penalty": 0 },
+      "technology": { "base": 1, "penalty": 0 },
+      "contact": { "base": 4, "penalty": 0 }
+    },
+    "talent": "",
+    "cool": 2,
+    "isWeird": true,
+    "power": {
+      "name": "Shapeshift",
+      "description": "Transform into the form of another humanoid you've studied. Lasts until you transform again or fall unconscious.",
+      "baseSkill": "athletics",
+      "coolCost": 1
+    },
+    "characteristics": [
+      { "text": "Can only maintain one form at a time", "used": false },
+      { "text": "Maintains physical limitations of the form (height, mass)", "used": false }
+    ],
+    "missionPool": 0,
+    "isDead": false,
+    "daysOutOfAction": 0,
+    "recoveryStartedAt": 0,
+    "stress": 0
+  },
+  "flags": {
+    "inspectres": {
+      "archetype": "WeirdAgent-Shapeshifter",
+      "version": "1.0"
+    }
+  },
+  "_stats": {
+    "systemId": "inspectres",
+    "systemVersion": "0.1.0",
+    "coreVersion": "12.0.0",
+    "createdTime": null,
+    "modifiedTime": null,
+    "lastModifiedBy": null
+  }
+}
