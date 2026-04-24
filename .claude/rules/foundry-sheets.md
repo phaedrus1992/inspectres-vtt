@@ -167,6 +167,23 @@ const result = await foundry.applications.api.DialogV2.wait({
 if (!result) return;
 ```
 
+## GM Control Surfaces
+
+**Principle:** Game-critical operations must have visible UI buttons on sheets, not be hidden in settings or require console access.
+
+**When adding a new feature that GMs control:**
+1. If it affects gameplay rules, add a visible control/indicator to the relevant sheet
+2. Label it clearly in game terms, not technical jargon
+3. Group related controls (recovery controls on Agent sheet, financial on Franchise sheet)
+4. Never hide critical state behind code paths or auto-set it without override buttons
+
+**Examples:**
+- Agent recovery state (`isDead`, `daysOutOfAction`) → needs "Revive" button and recovery status display
+- Franchise debt/cards (`debtMode`, `cardsLocked`) → needs visible toggles/overrides on Franchise sheet
+- Mission end/vacation → needs direct button, not buried in Mission Tracker dialog
+
+See CLAUDE.md "GM Control Surface Design" for full principles.
+
 ## Anti-Patterns
 
 | Never do this | Do this instead |
@@ -181,3 +198,5 @@ if (!result) return;
 | `new Dialog(...)` / `Dialog.wait()` (V1, deprecated V13) | `foundry.applications.api.DialogV2.wait()` |
 | Registering sheets outside `init` hook | Always register in `Hooks.once("init", ...)` |
 | `extends ActorSheet` / `extends ItemSheet` (V1, deprecated V13) | `foundry.applications.sheets.ActorSheetV2` |
+| Game state controllable only via settings | Add direct button/control to relevant sheet |
+| Auto-setting critical flags with no override | Always provide GM button to change state |
