@@ -88,15 +88,6 @@ async function postChatCard(
   await ChatMessage.create({ content, speaker, rolls } as unknown as Parameters<typeof ChatMessage.create>[0]);
 }
 
-function checkRecoveryBlock(agent: RollActor): void {
-  const system = agent.system as unknown as AgentData;
-  const currentDay = getCurrentDay();
-  const status = computeRecoveryStatus(system, currentDay);
-
-  if (status.status === "recovering" || status.status === "dead") {
-    throw new Error(`${agent.name} is ${status.status} and cannot act. ${status.description}`);
-  }
-}
 
 // ---------------------------------------------------------------------------
 // Pure: resolveBankDice
@@ -149,7 +140,10 @@ export async function executeSkillRoll(
   franchise: RollActor | null,
   skillName: SkillName,
 ): Promise<void> {
-  checkRecoveryBlock(agent);
+  // Recovery check is the responsibility of the UI layer (AgentSheet).
+  // The UI displays warnings and prevents roll initiation for agents who are recovering/dead.
+  // Removing this defensive check prevents error translation loss and focuses validation at the boundary.
+  // If an agent somehow rolls while recovering due to a UI race condition, the error should propagate to the caller.
 
   // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
   const system = agent.system as unknown as AgentData;
@@ -367,7 +361,10 @@ export async function executeStressRoll(
   params: StressRollParams,
   franchise: RollActor | null = null,
 ): Promise<void> {
-  checkRecoveryBlock(agent);
+  // Recovery check is the responsibility of the UI layer (AgentSheet).
+  // The UI displays warnings and prevents roll initiation for agents who are recovering/dead.
+  // Removing this defensive check prevents error translation loss and focuses validation at the boundary.
+  // If an agent somehow rolls while recovering due to a UI race condition, the error should propagate to the caller.
 
   // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
   const system = agent.system as unknown as AgentData;
@@ -393,12 +390,16 @@ export async function executeStressRoll(
     // Death roll is never auditable — use bare Math.random(); death outcome must be spontaneous (not replicable)
     const deathRoll = Math.floor(Math.random() * 3) + 1;
     if (deathRoll < 1 || deathRoll > 3) {
-      throw new Error(`Invalid d3 result: ${deathRoll}`);
+      const errorMsg = `Invalid d3 result in death roll: ${deathRoll} (expected 1–3). Stress roll aborted. Agent: ${agent.name} (${agent.id})`;
+      console.error("[INSPECTRES] Death roll validation failed:", { agentId: agent.id, agentName: agent.name, deathRoll });
+      throw new Error(errorMsg);
     }
     const deathKey = deathRoll as 1 | 2 | 3;
     deathOutcome = DEATH_DISMEMBERMENT_CHART[deathKey];
     if (!deathOutcome) {
-      throw new Error(`Death outcome missing for key ${deathKey}`);
+      const errorMsg = `Death outcome missing for d3 result ${deathKey}. This indicates corrupted DEATH_DISMEMBERMENT_CHART. Agent: ${agent.name} (${agent.id})`;
+      console.error("[INSPECTRES] Death chart lookup failed:", { agentId: agent.id, agentName: agent.name, deathKey, chartKeys: Object.keys(DEATH_DISMEMBERMENT_CHART) });
+      throw new Error(errorMsg);
     }
   }
 
@@ -441,8 +442,11 @@ export async function executeStressRoll(
         error: err,
         errorMessage: message,
       });
+      const userError = new Error(
+        `Failed to apply stress roll to ${agent.name}: ${message}. Failed fields: ${failedFields}`,
+      );
       ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorStressRollFailed") ?? "Failed to apply stress roll to agent");
-      return;
+      throw userError;
     }
   }
 
