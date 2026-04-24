@@ -15,28 +15,18 @@ const config = {
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/inspectres-vtt/',
-
-  // GitHub pages deployment config.
-  // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'phaedrus1992', // Usually your GitHub org/username.
-  projectName: 'inspectres-vtt', // Usually your repo name.
   deploymentBranch: 'gh-pages',
   trailingSlash: false,
 
-  onBrokenLinks: 'throw',
+  organizationName: 'phaedrus1992',
+  projectName: 'inspectres-vtt',
+
   markdown: {
     hooks: {
       onBrokenMarkdownLinks: 'throw',
     },
   },
-
-  // Even if you don't use internalization, you can use this field to set useful
-  // metadata like html lang. For example, if your site is Chinese, you may want
-  // to replace "en" with "zh-Hans".
-  i18n: {
-    defaultLocale: 'en',
-    locales: ['en'],
-  },
+  onBrokenLinks: 'throw',
 
   presets: [
     [
@@ -61,8 +51,6 @@ const config = {
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
-      // Replace with your project's social card
-      image: 'img/docusaurus-social-card.jpg',
       navbar: {
         title: 'InSpectres',
         logo: {

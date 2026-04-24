@@ -34,6 +34,7 @@ const sidebars = {
       type: 'category',
       items: [
         'gameplay/mechanics',
+        'gameplay/recovery',
         'gameplay/troubleshooting',
       ],
     },
