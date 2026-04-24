@@ -88,6 +88,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
       skillIncrease: AgentSheet.onSkillStep,
       skillDecrease: AgentSheet.onSkillStep,
       toggleCool: AgentSheet.onToggleCool,
+      activatePower: AgentSheet.onActivatePower,
       addCharacteristic: AgentSheet.onAddCharacteristic,
       removeCharacteristic: AgentSheet.onRemoveCharacteristic,
       editPortrait: AgentSheet.onEditPortrait,
@@ -353,6 +354,54 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
       );
     } catch (err: unknown) {
       handleActionError(err, "Vacation failed", "INSPECTRES.ErrorVacationFailed", "Failed to apply vacation");
+    }
+  }
+
+  static async onActivatePower(this: AgentSheet, _event: Event, _target: HTMLElement): Promise<void> {
+    // Like other state-mutating handlers on this sheet, power activation requires:
+    // 1. Sheet to be in edit mode (not read-only, e.g., compendium actors)
+    // 2. Agent to be alive and not recovering
+    // 3. Sufficient cool to pay the cost
+    if (!this.isEditable) return;
+
+    try {
+      const system = this.actor.system as unknown as AgentData;
+      const currentDay = getCurrentDay();
+      const recoveryStatus = computeRecoveryStatus(system, currentDay);
+      if (recoveryStatus.status === "recovering" || recoveryStatus.status === "dead") {
+        ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnActionBlockedRecovery") ?? "Cannot act while recovering");
+        return;
+      }
+
+      if (!system.isWeird || !system.power) {
+        ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnNoPower") ?? "No power to activate");
+        return;
+      }
+
+      const { power } = system;
+      if (system.cool < power.coolCost) {
+        ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnInsufficientCool") ?? "Insufficient cool to activate power");
+        return;
+      }
+
+      // Deduct cool cost
+      const newCool = system.cool - power.coolCost;
+      const updateData: Record<string, number> = {};
+      updateData["system.cool"] = newCool;
+      await this.actor.update(updateData);
+
+      // Announce power activation in chat
+      const flavor = game.i18n?.format("INSPECTRES.PowerActivated", { name: power.name, actor: this.actor.name }) ?? `${this.actor.name} activated ${power.name}`;
+      await ChatMessage.create({
+        content: `<p>${flavor}</p>`,
+        speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+      });
+
+      ui.notifications?.info(
+        game.i18n?.format("INSPECTRES.InfoPowerActivated", { name: power.name, remaining: String(newCool) }) ?? `${power.name} activated. Cool: ${newCool}`,
+      );
+    } catch (err: unknown) {
+      handleActionError(err, "Power activation failed", "INSPECTRES.ErrorPowerActivationFailed", "Failed to activate power");
     }
   }
 }

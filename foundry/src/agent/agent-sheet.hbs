@@ -122,6 +122,38 @@
         </div>
       </section>
 
+      <!-- Weird Agent Powers Section -->
+      {{#if system.isWeird}}
+        <section class="inspectres-section inspectres-powers">
+          <h2>{{localize "INSPECTRES.WeirdPower"}}</h2>
+          {{#if system.power}}
+            <div class="power-display">
+              <h3 class="power-name">{{system.power.name}}</h3>
+              <p class="power-description">{{system.power.description}}</p>
+              <div class="power-meta">
+                <span class="power-skill">{{localize (inspectres-concat "INSPECTRES." (inspectres-capitalize system.power.baseSkill))}}</span>
+                <span class="power-cost">{{localize "INSPECTRES.CoolCost"}}: {{system.power.coolCost}}</span>
+              </div>
+              <button
+                type="button"
+                class="power-activate-button"
+                data-action="activatePower"
+                {{#unless (gte system.cool system.power.coolCost)}}disabled{{/unless}}
+                aria-label="{{localize "INSPECTRES.AriaLabel.ActivatePower"}}"
+              >
+                {{#if (gte system.cool system.power.coolCost)}}
+                  {{localize "INSPECTRES.ActivatePower"}}
+                {{else}}
+                  {{localize "INSPECTRES.InsufficientCool"}}
+                {{/if}}
+              </button>
+            </div>
+          {{else}}
+            <p class="power-placeholder">{{localize "INSPECTRES.NoPowerSelected"}}</p>
+          {{/if}}
+        </section>
+      {{/if}}
+
       <!-- Stress Roll Section -->
       <section class="inspectres-section">
         <h2>{{localize "INSPECTRES.StressRoll"}}</h2>
