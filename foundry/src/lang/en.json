@@ -264,6 +264,8 @@
     "WarnCantEnterDebtWithPositiveBank": "Franchise must have zero or negative Bank to enter Debt Mode.",
     "SettingCurrentDay": "In-Game Day",
     "SettingCurrentDayHint": "Current in-game day for recovery tracking. Agents recover based on this count.",
+    "SettingDevMode": "Developer Mode",
+    "SettingDevModeHint": "Enable structured logging for mission sync, multiplayer coordination, and state changes. Check browser console.",
     "GMDebtOverride": "GM Controls",
     "EnterDebtMode": "Enter Debt Mode",
     "ExitDebtMode": "Exit Debt Mode",
