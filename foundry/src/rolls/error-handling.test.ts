@@ -64,6 +64,7 @@ function makeAgent(overrides: Record<string, unknown> = {}): RollActor {
       isDead: false,
       daysOutOfAction: 0,
       recoveryStartedAt: 0,
+      stress: 0,
       ...overrides,
     },
     async update(_data: Record<string, unknown>) {

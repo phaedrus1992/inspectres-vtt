@@ -33,6 +33,7 @@ function makeAgent(overrides: Record<string, unknown> = {}): RollActor {
       cool: 2,
       isWeird: false,
       missionPool: 0,
+      stress: 0,
       ...overrides,
     },
     async update(data: Record<string, unknown>) {

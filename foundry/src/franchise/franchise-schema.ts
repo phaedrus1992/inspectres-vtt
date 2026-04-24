@@ -16,5 +16,6 @@ export interface FranchiseData {
   missionGoal: number;
   debtMode: boolean;
   loanAmount: number;
+  cardsLocked: boolean;
   deathMode: boolean;
 }
