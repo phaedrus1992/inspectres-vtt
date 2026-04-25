@@ -284,6 +284,26 @@
     "ConfirmVacationBody": "End mission and begin vacation? This will open the distribution dialog.",
     "WarnNoMissionPool": "No mission pool to distribute.",
     "ErrorDayAdvanceFailed": "Failed to advance day",
-    "ErrorDayRegressFailed": "Failed to revert day"
+    "ErrorDayRegressFailed": "Failed to revert day",
+    "RecoveryStatus": "Recovery Status",
+    "Status": "Status",
+    "RecoveryStatusActive": "Active",
+    "RecoveryStatusDead": "Dead",
+    "RecoveryStatusRecovering": "Recovering",
+    "RecoveryStatusReturned": "Recovered",
+    "RecoveryNoteDead": "Agent is permanently dead. Use Revive to restore.",
+    "RecoveryNoteRecovering": "Agent returns to active duty on",
+    "ReviveAgent": "Revive Agent",
+    "EmergencyRecovery": "Emergency Recovery",
+    "DaysOutOfAction": "Days out of action",
+    "DialogSet": "Set",
+    "OverrideRecoveryDay": "Override recovery end day",
+    "WarnInvalidDay": "Invalid day number",
+    "InfoAgentRevived": "{actor} has been revived",
+    "InfoRecoveryStarted": "{actor} on emergency recovery for {days} day{s}",
+    "InfoRecoveryDayOverride": "{actor} recovery adjusted to day {day}",
+    "ErrorReviveFailed": "Could not revive agent",
+    "ErrorRecoveryFailed": "Could not update recovery status",
+    "ErrorOverrideFailed": "Could not override recovery day"
   }
 }

@@ -465,4 +465,104 @@ describe("AgentSheet", () => {
     });
   });
 
+  describe("recovery management handlers", () => {
+    it("onReviveAgent clears death state", async () => {
+      const mockActor = new MockActorSheetV2().actor;
+      const sheet = Object.create(AgentSheet.prototype);
+      sheet.actor = mockActor;
+      sheet.isEditable = true;
+
+      const updateSpy = vi.spyOn(sheet.actor, "update").mockResolvedValue(sheet.actor);
+      const target = document.createElement("button");
+      target.setAttribute("data-action", "reviveAgent");
+
+      await AgentSheet.onReviveAgent.call(sheet, new Event("click"), target);
+
+      expect(updateSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          "system.isDead": false,
+          "system.daysOutOfAction": 0,
+          "system.recoveryStartedAt": 0,
+        })
+      );
+    });
+
+    it("onEmergencyRecovery opens dialog and sets recovery fields", async () => {
+      const mockActor = new MockActorSheetV2().actor;
+      const sheet = Object.create(AgentSheet.prototype);
+      sheet.actor = mockActor;
+      sheet.isEditable = true;
+
+      const updateSpy = vi.spyOn(sheet.actor, "update").mockResolvedValue(sheet.actor);
+
+      const mockDialogWait = vi.fn().mockResolvedValue({ days: 2 });
+      global.foundry = {
+        applications: {
+          api: {
+            DialogV2: { wait: mockDialogWait },
+          },
+        },
+      } as unknown as typeof foundry;
+
+      const target = document.createElement("button");
+      target.setAttribute("data-action", "emergencyRecovery");
+
+      await AgentSheet.onEmergencyRecovery.call(sheet, new Event("click"), target);
+
+      expect(mockDialogWait).toHaveBeenCalled();
+      expect(updateSpy).toHaveBeenCalled();
+    });
+
+    it("onOverrideRecoveryDay updates recovery end day", async () => {
+      const mockActor = new MockActorSheetV2().actor;
+      const sheet = Object.create(AgentSheet.prototype);
+      sheet.actor = mockActor;
+      sheet.isEditable = true;
+
+      const agentData: AgentData = {
+        description: "",
+        skills: { academics: { base: 1, penalty: 0 }, athletics: { base: 1, penalty: 0 }, technology: { base: 1, penalty: 0 }, contact: { base: 1, penalty: 0 } },
+        talent: "",
+        cool: 0,
+        isWeird: false,
+        characteristics: [],
+        missionPool: 0,
+        isDead: false,
+        daysOutOfAction: 3,
+        recoveryStartedAt: 5,
+        stress: 0,
+      };
+      Object.defineProperty(sheet.actor, "system", { value: agentData });
+
+      const updateSpy = vi.spyOn(sheet.actor, "update").mockResolvedValue(sheet.actor);
+
+      const input = document.createElement("input");
+      input.type = "number";
+      input.value = "10";
+      input.setAttribute("data-action", "overrideRecoveryDay");
+
+      await AgentSheet.onOverrideRecoveryDay.call(sheet, new Event("change"), input);
+
+      expect(updateSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          "system.daysOutOfAction": 5,
+        })
+      );
+    });
+
+    it("does not perform recovery actions when sheet is not editable", async () => {
+      const mockActor = new MockActorSheetV2().actor;
+      const sheet = Object.create(AgentSheet.prototype);
+      sheet.actor = mockActor;
+      sheet.isEditable = false;
+
+      const updateSpy = vi.spyOn(sheet.actor, "update").mockResolvedValue(sheet.actor);
+
+      await AgentSheet.onReviveAgent.call(sheet, new Event("click"), document.createElement("button"));
+      await AgentSheet.onEmergencyRecovery.call(sheet, new Event("click"), document.createElement("button"));
+
+      expect(updateSpy).not.toHaveBeenCalled();
+    });
+  });
+
 });
