@@ -1,0 +1,12 @@
+# See https://pre-commit.com for more information
+# Configuration for prek pre-commit hooks
+
+repos:
+  # Typos spell checker
+  - repo: https://github.com/crate-ci/typos
+    rev: v1.23.1
+    hooks:
+      - id: typos
+        name: Spell check (typos)
+        args: [--config, .typos.toml, --exclude, "*semgrep-results*", --exclude, "*node_modules*", --exclude, "*dist*", --exclude, "*packs-compiled*"]
+        stages: [commit, push]
