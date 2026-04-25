@@ -9,9 +9,8 @@ repos:
     hooks:
       - id: typos
         name: Spell check (typos)
-        args: [--config, .typos.toml, --exclude, "*semgrep-results*", --exclude, "*node_modules*", --exclude, "*dist*", --exclude, "*packs-compiled*"]
-        stages: [commit, push]
-        additional_dependencies: []
+        args: [--config, .typos.toml]
+        stages: [pre-commit, pre-push]
 
   # TypeScript type checking
   - repo: local
@@ -22,4 +21,4 @@ repos:
         language: system
         files: ^foundry/src/.*\.ts$
         pass_filenames: false
-        stages: [push]
+        stages: [pre-push]

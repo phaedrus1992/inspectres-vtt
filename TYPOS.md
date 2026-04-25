@@ -5,16 +5,8 @@ This project uses [typos-cli](https://github.com/crate-ci/typos) to catch spelli
 ## Running typos locally
 
 ```bash
-# Basic check
+# Basic check (excludes configured in .typos.toml)
 typos --config .typos.toml
-
-# Check with excluded directories (recommended)
-typos \
-  --config .typos.toml \
-  --exclude "*semgrep-results*" \
-  --exclude "*node_modules*" \
-  --exclude "*dist*" \
-  --exclude "*packs-compiled*"
 
 # Fix errors automatically (use with caution, review changes)
 typos --config .typos.toml --write
@@ -29,28 +21,30 @@ brew install typos-cli
 # Other platforms: https://github.com/crate-ci/typos#install
 ```
 
-## Pre-push hook setup
+## Pre-commit hooks
 
-Typos is automatically run in GitHub Actions CI on every PR. To enable local pre-push checks:
+Typos runs automatically via prek before push (configured in `.pre-commit-config.yaml`).
 
+**First-time setup:**
 ```bash
-# Install prek (Rust-based pre-commit alternative)
+# Install prek if not already installed
 cargo install prek
 
-# Initialize prek in the repo
+# Initialize hooks in the repo
 prek install
-
-# Add typos to your pre-push hook configuration
 ```
 
-Or manually add to `.git/hooks/pre-push` (but prek is preferred for consistency).
+Hooks run automatically on `git commit` and `git push`. To run manually:
+```bash
+prek run --stage pre-push
+```
 
 ## Configuration
 
 The `.typos.toml` file contains:
 - Game-specific terms (e.g., `inspectres`, `vtt`, `hbs`)
 - Project-specific acronyms and notations (e.g., `Nd6` for dice rolls)
-- Directories to ignore (generated files, node_modules, etc.)
+- File patterns to exclude from checking (generated files, node_modules, etc.)
 
 ## Common false positives
 
