@@ -1,0 +1,54 @@
+{
+  "_id": "WeirdAgent0002",
+  "name": "Vampire (Weird Agent Sample)",
+  "type": "agent",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+    "description": "A centuries-old vampire working as a paranormal investigator. Demonstrates multiple power implementations and high Cool pool. Vulnerable to sunlight, fire, and stakes through the heart.",
+    "skills": {
+      "academics": { "base": 2, "penalty": 0 },
+      "athletics": { "base": 3, "penalty": 0 },
+      "technology": { "base": 0, "penalty": 0 },
+      "contact": { "base": 2, "penalty": 0 }
+    },
+    "talent": "",
+    "cool": 3,
+    "isWeird": true,
+    "power": {
+      "name": "Shapeshifting",
+      "description": "Transform into mist, a bat, or wolf form. Regain control each turn.",
+      "baseSkill": "athletics",
+      "coolCost": 1
+    },
+    "characteristics": [
+      { "text": "Cannot enter sanctified ground", "used": false },
+      { "text": "Must feed on blood to recover from injury", "used": false },
+      { "text": "Weaknesses: sunlight, fire, running water, holy symbols", "used": false }
+    ],
+    "missionPool": 0,
+    "isDead": false,
+    "daysOutOfAction": 0,
+    "recoveryStartedAt": 0,
+    "stress": 0
+  },
+  "flags": {
+    "inspectres": {
+      "archetype": "WeirdAgent-Vampire",
+      "version": "1.0",
+      "secondaryPower": {
+        "name": "Mind Control",
+        "description": "Influence a target's thoughts and commands. Dominate weaker wills.",
+        "baseSkill": "contact",
+        "coolCost": 1
+      }
+    }
+  },
+  "_stats": {
+    "systemId": "inspectres",
+    "systemVersion": "0.1.0",
+    "coreVersion": "13.0.0",
+    "createdTime": null,
+    "modifiedTime": null,
+    "lastModifiedBy": null
+  }
+}

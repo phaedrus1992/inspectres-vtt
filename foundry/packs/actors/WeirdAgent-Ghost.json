@@ -1,0 +1,54 @@
+{
+  "_id": "WeirdAgent0004",
+  "name": "Ghost (Weird Agent Sample)",
+  "type": "agent",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+    "description": "An incorporeal spirit bound to investigate the paranormal. Can phase through walls and float, but must spend Cool to interact with the physical world. Tied to a specific location or object.",
+    "skills": {
+      "academics": { "base": 3, "penalty": 0 },
+      "athletics": { "base": 0, "penalty": 0 },
+      "technology": { "base": 0, "penalty": 0 },
+      "contact": { "base": 2, "penalty": 0 }
+    },
+    "talent": "",
+    "cool": 5,
+    "isWeird": true,
+    "power": {
+      "name": "Phase Through Walls",
+      "description": "Pass through solid matter. Cannot bring physical objects with you (except your anchor).",
+      "baseSkill": "athletics",
+      "coolCost": 1
+    },
+    "characteristics": [
+      { "text": "Incorporeal: cannot be harmed by physical attacks", "used": false },
+      { "text": "Bound to location/object: cannot stray more than 1 mile away", "used": false },
+      { "text": "Spending Cool allows brief physical interaction (1 minute per die)", "used": false }
+    ],
+    "missionPool": 0,
+    "isDead": false,
+    "daysOutOfAction": 0,
+    "recoveryStartedAt": 0,
+    "stress": 0
+  },
+  "flags": {
+    "inspectres": {
+      "archetype": "WeirdAgent-Ghost",
+      "version": "1.0",
+      "secondaryPower": {
+        "name": "Manifest",
+        "description": "Become partially visible and tangible. Spend Cool to interact with physical objects.",
+        "baseSkill": "contact",
+        "coolCost": 1
+      }
+    }
+  },
+  "_stats": {
+    "systemId": "inspectres",
+    "systemVersion": "0.1.0",
+    "coreVersion": "13.0.0",
+    "createdTime": null,
+    "modifiedTime": null,
+    "lastModifiedBy": null
+  }
+}
