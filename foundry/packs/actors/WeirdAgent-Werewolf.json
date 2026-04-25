@@ -1,0 +1,54 @@
+{
+  "_id": "WeirdAgent0003",
+  "name": "Werewolf (Weird Agent Sample)",
+  "type": "agent",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+    "description": "A dual-natured investigator with human and beast forms. Skills change based on form. Keen senses and natural ferocity make this archetype excellent for combat roles.",
+    "skills": {
+      "academics": { "base": 2, "penalty": 0 },
+      "athletics": { "base": 2, "penalty": 0 },
+      "technology": { "base": 2, "penalty": 0 },
+      "contact": { "base": 1, "penalty": 0 }
+    },
+    "talent": "",
+    "cool": 3,
+    "isWeird": true,
+    "power": {
+      "name": "Keen Senses",
+      "description": "In beast form, gain +2 dice to Contact-based perception rolls. Track targets by scent over vast distances.",
+      "baseSkill": "contact",
+      "coolCost": 1
+    },
+    "characteristics": [
+      { "text": "Beast form stats: Athletics 7, Contact 0", "used": false },
+      { "text": "Vulnerable to wolfsbane and silver", "used": false },
+      { "text": "Cannot control transformation during full moon", "used": false }
+    ],
+    "missionPool": 0,
+    "isDead": false,
+    "daysOutOfAction": 0,
+    "recoveryStartedAt": 0,
+    "stress": 0
+  },
+  "flags": {
+    "inspectres": {
+      "archetype": "WeirdAgent-Werewolf",
+      "version": "1.0",
+      "secondaryPower": {
+        "name": "Ferocity",
+        "description": "In beast form, add +2 dice to Athletics-based attacks. Ignore pain thresholds.",
+        "baseSkill": "athletics",
+        "coolCost": 1
+      }
+    }
+  },
+  "_stats": {
+    "systemId": "inspectres",
+    "systemVersion": "0.1.0",
+    "coreVersion": "13.0.0",
+    "createdTime": null,
+    "modifiedTime": null,
+    "lastModifiedBy": null
+  }
+}

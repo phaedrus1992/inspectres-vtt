@@ -1,0 +1,104 @@
+{
+  "_id": "ClientRoll",
+  "name": "Client Roll",
+  "type": "RollTable",
+  "description": "Generate a random paranormal investigation job by rolling 2d6 four times and consulting the Client Roll Chart. Results: Personality, Client Type, Occurrence, and Location.",
+  "img": "icons/svg/dice-target.svg",
+  "results": [
+    {
+      "_id": "personality1",
+      "type": "text",
+      "text": "Horny",
+      "weight": 1,
+      "range": [2, 2]
+    },
+    {
+      "_id": "personality2",
+      "type": "text",
+      "text": "Bored",
+      "weight": 1,
+      "range": [3, 3]
+    },
+    {
+      "_id": "personality3",
+      "type": "text",
+      "text": "Skeptical",
+      "weight": 1,
+      "range": [4, 4]
+    },
+    {
+      "_id": "personality4",
+      "type": "text",
+      "text": "Angry",
+      "weight": 1,
+      "range": [5, 5]
+    },
+    {
+      "_id": "personality5",
+      "type": "text",
+      "text": "Impatient",
+      "weight": 1,
+      "range": [6, 6]
+    },
+    {
+      "_id": "personality6",
+      "type": "text",
+      "text": "Weird",
+      "weight": 1,
+      "range": [7, 7]
+    },
+    {
+      "_id": "personality7",
+      "type": "text",
+      "text": "Frantic",
+      "weight": 1,
+      "range": [8, 8]
+    },
+    {
+      "_id": "personality8",
+      "type": "text",
+      "text": "Terrified",
+      "weight": 1,
+      "range": [9, 9]
+    },
+    {
+      "_id": "personality9",
+      "type": "text",
+      "text": "Calm",
+      "weight": 1,
+      "range": [10, 10]
+    },
+    {
+      "_id": "personality10",
+      "type": "text",
+      "text": "Enthusiastic",
+      "weight": 1,
+      "range": [11, 11]
+    },
+    {
+      "_id": "personality11",
+      "type": "text",
+      "text": "Blasé",
+      "weight": 1,
+      "range": [12, 12]
+    }
+  ],
+  "formula": "2d6",
+  "replacement": true,
+  "displayRoll": true,
+  "flags": {
+    "inspectres": {
+      "category": "job-generation",
+      "field": "personality",
+      "description": "Roll 2d6 for Client Personality. Use all four fields (Personality, Client Type, Occurrence, Location) together to create a complete job."
+    }
+  },
+  "_stats": {
+    "systemId": "inspectres",
+    "systemVersion": "0.1.0",
+    "coreVersion": "13.0.0",
+    "createdTime": null,
+    "modifiedTime": null,
+    "lastModifiedBy": null
+  }
+}

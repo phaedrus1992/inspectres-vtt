@@ -1,0 +1,54 @@
+{
+  "_id": "WeirdAgent0005",
+  "name": "Psychic (Weird Agent Sample)",
+  "type": "agent",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+    "description": "A mentally-gifted investigator with telepathic and precognitive abilities. High Contact skill, minimal physical abilities. Prone to migraines and caffeine addiction.",
+    "skills": {
+      "academics": { "base": 2, "penalty": 0 },
+      "athletics": { "base": 1, "penalty": 0 },
+      "technology": { "base": 2, "penalty": 0 },
+      "contact": { "base": 5, "penalty": 0 }
+    },
+    "talent": "",
+    "cool": 0,
+    "isWeird": true,
+    "power": {
+      "name": "Telepathy",
+      "description": "Communicate silently with one target within line of sight. Read surface thoughts without the target's consent (costs 1 Cool).",
+      "baseSkill": "contact",
+      "coolCost": 1
+    },
+    "characteristics": [
+      { "text": "Prone to migraines from mental strain", "used": false },
+      { "text": "Caffeine-dependent (2+ cups per day)", "used": false },
+      { "text": "Takes stress penalties from crowds and loud environments", "used": false }
+    ],
+    "missionPool": 0,
+    "isDead": false,
+    "daysOutOfAction": 0,
+    "recoveryStartedAt": 0,
+    "stress": 0
+  },
+  "flags": {
+    "inspectres": {
+      "archetype": "WeirdAgent-Psychic",
+      "version": "1.0",
+      "secondaryPower": {
+        "name": "Precognition",
+        "description": "See glimpses of a near-future event. Gain +2 dice on the next roll against that threat.",
+        "baseSkill": "contact",
+        "coolCost": 1
+      }
+    }
+  },
+  "_stats": {
+    "systemId": "inspectres",
+    "systemVersion": "0.1.0",
+    "coreVersion": "13.0.0",
+    "createdTime": null,
+    "modifiedTime": null,
+    "lastModifiedBy": null
+  }
+}
