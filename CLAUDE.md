@@ -68,7 +68,7 @@ Where `$CHILD_ID` from `gh issue view $NUMBER --json id --jq .id`.
 
 ## Versioning
 
-Semantic Versioning. Version in `foundry/system.json`.
+Semantic Versioning.
 
 | Change | Version |
 |--------|---------|
@@ -76,10 +76,42 @@ Semantic Versioning. Version in `foundry/system.json`.
 | New functionality | MINOR |
 | Bug fixes, refactors, docs, CI | PATCH |
 
-**Changelog updates:**
-- Every PR with user-facing changes → add to `[Unreleased]` in `CHANGELOG.md`
-- Pure tooling/CI/docs → no entry required (unless user-visible)
-- Release → move `[Unreleased]` to dated section, bump version
+### Version Locations
+
+**Current version: `0.2.0`**
+
+When bumping version, update **ALL** of these locations to keep them in sync:
+
+1. **`foundry/system.json`** — `version` field (authoritative source)
+2. **`package.json`** — `version` field (foundry/ directory)
+3. **`package-lock.json`** — auto-generated, commit after `npm install`
+4. **`CHANGELOG.md`** — **ONLY** during actual release (see below)
+5. **`docs/current/sidebar.json`** — if version-pinned docs exist (rare; confirm before adding)
+
+Use grep to verify sync: `grep -n "0.2.0" foundry/system.json foundry/package.json CHANGELOG.md docs/current/sidebar.json`
+
+### CHANGELOG.md Rules
+
+**CRITICAL:** Never add a specific version number to CHANGELOG.md until **the release is triggered**. Follow this workflow:
+
+**During development (PRs and regular work):**
+- Add entry to `[Unreleased]` section only
+- Describe what changed in human-readable terms
+- Example:
+  ```markdown
+  ## [Unreleased]
+  - Add recovery UI controls to agent sheet
+  - Fix recovery timer calculation
+  - Improve debt mode styling
+  ```
+
+**At release time (tag + publish):**
+1. Move `[Unreleased]` section to new dated section: `## [1.2.3] - 2026-04-25`
+2. Bump version in `foundry/system.json` to match
+3. Create release commit + tag
+4. Publish
+
+This prevents: version creep in development, mismatched version numbers between code and changelog, and confusion about which version is actually released.
 
 Use `/changelog` skill for guidance.
 

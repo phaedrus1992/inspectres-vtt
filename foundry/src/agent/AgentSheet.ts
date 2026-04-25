@@ -92,6 +92,9 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
       addCharacteristic: AgentSheet.onAddCharacteristic,
       removeCharacteristic: AgentSheet.onRemoveCharacteristic,
       editPortrait: AgentSheet.onEditPortrait,
+      reviveAgent: AgentSheet.onReviveAgent,
+      emergencyRecovery: AgentSheet.onEmergencyRecovery,
+      overrideRecoveryDay: AgentSheet.onOverrideRecoveryDay,
     },
   };
 
@@ -402,6 +405,96 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
       );
     } catch (err: unknown) {
       handleActionError(err, "Power activation failed", "INSPECTRES.ErrorPowerActivationFailed", "Failed to activate power");
+    }
+  }
+
+  static async onReviveAgent(this: AgentSheet, _event: Event, _target: HTMLElement): Promise<void> {
+    if (!this.isEditable) return;
+    try {
+      const updateData = {
+        "system.isDead": false,
+        "system.daysOutOfAction": 0,
+        "system.recoveryStartedAt": 0,
+      } as unknown as Parameters<typeof this.actor.update>[0];
+      await this.actor.update(updateData);
+      ui.notifications?.info(
+        game.i18n?.format("INSPECTRES.InfoAgentRevived", { actor: this.actor.name }) ?? `${this.actor.name} has been revived`,
+      );
+    } catch (err: unknown) {
+      handleActionError(err, "Failed to revive agent", "INSPECTRES.ErrorReviveFailed", "Could not update agent status");
+    }
+  }
+
+  static async onEmergencyRecovery(this: AgentSheet, _event: Event, _target: HTMLElement): Promise<void> {
+    if (!this.isEditable) return;
+    const i18n = game.i18n;
+    const result = await foundry.applications.api.DialogV2.wait({
+      window: { title: i18n?.localize("INSPECTRES.EmergencyRecovery") ?? "Emergency Recovery" },
+      rejectClose: false,
+      content: `
+        <form class="inspectres-recovery-dialog">
+          <label>${i18n?.localize("INSPECTRES.DaysOutOfAction") ?? "Days out of action"}: <input type="number" name="days" min="1" max="10" value="2"></label>
+        </form>
+      `,
+      buttons: [
+        {
+          action: "set",
+          label: i18n?.localize("INSPECTRES.DialogSet") ?? "Set",
+          default: true,
+          callback: (_event: Event, _button: HTMLButtonElement, dialog: HTMLDialogElement) => {
+            const form = dialog.querySelector("form") as HTMLFormElement | null;
+            if (!form) return null;
+            const days = Math.max(1, Math.min(10, Number(new FormData(form).get("days") ?? 2)));
+            return { days: isNaN(days) ? 2 : days };
+          },
+        },
+        { action: "cancel", label: i18n?.localize("INSPECTRES.DialogCancel") ?? "Cancel" },
+      ],
+    });
+
+    if (result === null || result === undefined || result === "cancel") return;
+    const config = result as { days: number };
+    const currentDay = getCurrentDay();
+
+    try {
+      const updateData = {
+        "system.isDead": false,
+        "system.daysOutOfAction": config.days,
+        "system.recoveryStartedAt": currentDay,
+      } as unknown as Parameters<typeof this.actor.update>[0];
+      await this.actor.update(updateData);
+      ui.notifications?.info(
+        game.i18n?.format("INSPECTRES.InfoRecoveryStarted", { actor: this.actor.name, days: String(config.days) }) ?? `${this.actor.name} on emergency recovery for ${config.days} days`,
+      );
+    } catch (err: unknown) {
+      handleActionError(err, "Failed to start recovery", "INSPECTRES.ErrorRecoveryFailed", "Could not update recovery status");
+    }
+  }
+
+  static async onOverrideRecoveryDay(this: AgentSheet, _event: Event, target: HTMLElement): Promise<void> {
+    if (!this.isEditable) return;
+    const input = target as HTMLInputElement;
+    const targetDay = Number(input.value);
+    if (isNaN(targetDay) || targetDay < 1) {
+      ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnInvalidDay") ?? "Invalid day number");
+      return;
+    }
+
+    try {
+      const system = this.actor.system as unknown as AgentData;
+      const currentDay = getCurrentDay();
+      const daysNeeded = Math.max(0, targetDay - system.recoveryStartedAt);
+
+      const updateData = {
+        "system.daysOutOfAction": daysNeeded,
+      } as unknown as Parameters<typeof this.actor.update>[0];
+      await this.actor.update(updateData);
+
+      ui.notifications?.info(
+        game.i18n?.format("INSPECTRES.InfoRecoveryDayOverride", { actor: this.actor.name, day: String(targetDay) }) ?? `${this.actor.name} recovery adjusted to day ${targetDay}`,
+      );
+    } catch (err: unknown) {
+      handleActionError(err, "Failed to override recovery day", "INSPECTRES.ErrorOverrideFailed", "Could not update recovery day");
     }
   }
 }

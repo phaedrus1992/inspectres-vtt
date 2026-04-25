@@ -201,6 +201,69 @@
         <p class="mission-pool-display">{{system.missionPool}} franchise {{inspectres-plural system.missionPool "die" "dice"}}</p>
       </section>
 
+      <!-- Recovery Status Section -->
+      <section class="inspectres-section inspectres-recovery">
+        <h2>{{localize "INSPECTRES.RecoveryStatus"}}</h2>
+
+        <div class="recovery-info">
+          <div class="status-display">
+            <span class="status-label">{{localize "INSPECTRES.Status"}}:</span>
+            <span class="status-value {{recoveryStatus.status}}">
+              {{#if (eq recoveryStatus.status "dead")}}
+                {{localize "INSPECTRES.RecoveryStatusDead"}}
+              {{else if (eq recoveryStatus.status "recovering")}}
+                {{localize "INSPECTRES.RecoveryStatusRecovering"}} ({{recoveryStatus.daysRemaining}} {{inspectres-plural recoveryStatus.daysRemaining "day" "days"}} left)
+              {{else if (eq recoveryStatus.status "returned")}}
+                {{localize "INSPECTRES.RecoveryStatusReturned"}}
+              {{else}}
+                {{localize "INSPECTRES.RecoveryStatusActive"}}
+              {{/if}}
+            </span>
+          </div>
+
+          {{#if (or system.isDead (gt system.daysOutOfAction 0))}}
+            <div class="recovery-details">
+              {{#if system.isDead}}
+                <p class="recovery-note">{{localize "INSPECTRES.RecoveryNoteDead"}}</p>
+              {{else}}
+                <p class="recovery-note">
+                  {{localize "INSPECTRES.RecoveryNoteRecovering"}}:
+                  <span class="recovery-day">Day {{inspectres-add system.recoveryStartedAt system.daysOutOfAction}}</span>
+                </p>
+              {{/if}}
+            </div>
+          {{/if}}
+        </div>
+
+        {{#if isEditable}}
+          <div class="recovery-controls">
+            {{#if system.isDead}}
+              <button type="button" class="inspectres-recovery-button" data-action="reviveAgent">
+                {{localize "INSPECTRES.ReviveAgent"}}
+              </button>
+            {{else if (gt system.daysOutOfAction 0)}}
+              <div class="recovery-override">
+                <label>
+                  {{localize "INSPECTRES.OverrideRecoveryDay"}}:
+                  <input
+                    type="number"
+                    class="recovery-day-input"
+                    data-action="overrideRecoveryDay"
+                    min="1"
+                    max="365"
+                    value="{{inspectres-add system.recoveryStartedAt system.daysOutOfAction}}"
+                  />
+                </label>
+              </div>
+            {{else}}
+              <button type="button" class="inspectres-recovery-button" data-action="emergencyRecovery">
+                {{localize "INSPECTRES.EmergencyRecovery"}}
+              </button>
+            {{/if}}
+          </div>
+        {{/if}}
+      </section>
+
     </div><!-- /notes tab -->
 
   </div>
