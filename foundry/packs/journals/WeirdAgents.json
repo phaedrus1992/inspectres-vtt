@@ -1,0 +1,23 @@
+{
+  "_id": "WeirdAgents",
+  "name": "Weird Agents Overview",
+  "type": "JournalEntry",
+  "pages": [
+    {
+      "_id": "page1",
+      "type": "text",
+      "title": "Weird Agents",
+      "text": {
+        "content": "# Weird Agents\n\nSome investigators are not ordinary humans. **Weird Agents** are paranormal beings with supernatural powers and unique mechanics.\n\n## What Makes a Weird Agent\n\n**Weird Agents** have:\n- **Powers** — Supernatural abilities tied to a specific skill\n- **Cool Pool** — A pool of Cool points (0-5) spent to activate powers\n- **Characteristics** — Unique quirks, vulnerabilities, or restrictions\n- **Skill variations** — Some archetypes trade athletic ability for mental or social prowess\n\n## Key Mechanics\n\n### Powers\nPowers are activated two ways:\n- **Without Cool cost:** Use the power as part of a normal skill roll\n- **With Cool cost:** Spend Cool to unlock special effects or override normal limits (costs vary by power)\n\n### Cool Pool\nEach Weird Agent starts with **Cool points** (0-5, set by archetype):\n- **Use:** Spend 1 Cool per power activation\n- **Refresh:** Gain Cool during **Vacation** when franchise recovers\n- **Depletion:** If Cool reaches 0, you cannot activate powers until vacation\n\n### Power Base Skills\nEach power is tied to a **Base Skill** (Academics, Athletics, Technology, or Contact). When you roll the base skill, you can invoke the power to enhance the outcome.\n\n## Stress & Recovery\n\nWeird Agents stress the same way as regular agents, but recovery may be narrative-specific. GMs should play up archetype flavor during downtime—a Psychic might recover from migraines, a Werewolf might struggle during the full moon, a Vampire might hide from sunlight.\n\n## Available Archetypes\n\nThe compendium includes four starter archetypes:\n- **Psychic** — Telepathy and precognition\n- **Ghost** — Phase through walls and manifest physically\n- **Werewolf** — Keen senses and ferocity in beast form\n- **Vampire** — Shapeshifting and mind control\n\nSee individual archetype entries for skill details, Cool pools, characteristic restrictions, and power descriptions.\n"
+      }
+    }
+  ],
+  "_stats": {
+    "systemId": "inspectres",
+    "systemVersion": "0.3.0",
+    "coreVersion": "13.0.0",
+    "createdTime": null,
+    "modifiedTime": null,
+    "lastModifiedBy": null
+  }
+}

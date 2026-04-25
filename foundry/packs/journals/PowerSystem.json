@@ -1,0 +1,23 @@
+{
+  "_id": "PowerSystem",
+  "name": "Power System Rules",
+  "type": "JournalEntry",
+  "pages": [
+    {
+      "_id": "page1",
+      "type": "text",
+      "title": "Power System",
+      "text": {
+        "content": "# Power System Rules\n\n## Activating Powers\n\nWeird Agents activate supernatural powers in two ways:\n\n### Power as Enhancement (No Cost)\nUse the power as part of a normal skill roll without spending Cool. The power enhances what you accomplish but doesn't override normal outcomes.\n\n**Example:** A Psychic rolls Contact to interrogate a suspect. The Psychic reads the suspect's general mood and hesitation as part of the roll—no Cool spent, just narrative enhancement.\n\n### Power with Cool Cost\nSpend Cool to activate special effects, override limits, or guarantee effects that would normally require a successful roll.\n\n**Example:** A Psychic spends 1 Cool to read a suspect's surface thoughts *without the target's consent*. The Psychic doesn't roll—the power succeeds automatically for that Cool point.\n\n## Cool Pool Mechanics\n\n### Starting Cool\nEach Weird Agent archetype has a starting **Cool pool** (0-5 points):\n- **Psychic:** 0 Cool (must restore via vacation)\n- **Ghost:** 5 Cool (highest pool)\n- **Werewolf:** 3 Cool\n- **Vampire:** 3 Cool\n\n### Spending Cool\nDuring a mission, spend Cool to activate powers with mechanical effects. Each power costs 1 Cool (some powers may vary—check the power description).\n\n**Timing:** Spend Cool when you declare the power, before or after a roll (depends on power). Once spent, Cool is gone until vacation.\n\n### Running Out of Cool\nIf your Cool pool reaches 0, you cannot activate any powers requiring Cool. You still retain your normal skills and can use powers without cost (enhancement only).\n\n**Recovery:** Your Cool refills during **Vacation**. When the franchise takes vacation, all agents reset to their archetype's starting Cool pool.\n\n## Power Base Skills\n\nEach power is tied to a **Base Skill**:\n\n| Base Skill | Powers That Use It |\n|---|---|\n| **Academics** | Telepathy (Psychic), Shapeshifting (Vampire) |\n| **Athletics** | Phase Through Walls (Ghost), Keen Senses (Werewolf), Ferocity (Werewolf) |\n| **Technology** | *(Reserved for future archetypes)* |\n| **Contact** | Telepathy (Psychic), Precognition (Psychic), Manifest (Ghost), Mind Control (Vampire) |\n\n### Rolling with Powers\nWhen you roll the base skill, you can invoke the power to enhance or modify the outcome:\n- **On a success:** Power works as intended\n- **On a failure:** Power still works if it has a Cool cost; otherwise the power fails with the roll\n- **With Cool spent:** The power succeeds regardless of the roll (if cost paid)\n\n## Inventing Custom Powers\n\nGMs and players can design custom powers for Weird Agents:\n\n### Power Design Template\n- **Name:** What is the supernatural ability called?\n- **Base Skill:** Which skill triggers or supports this power?\n- **Cool Cost:** How many Cool points to activate? (0 = always available, 1+ = limited)\n- **Effect:** What does the power do? Mechanical effect or narrative permission?\n- **Limits:** When does the power *not* work?\n\n### Example: Custom Power\n**Name:** Flight  \n**Base Skill:** Athletics  \n**Cool Cost:** 1 (per scene)  \n**Effect:** Fly at human running speed. Lasts for the duration of a scene. Can carry one other person.  \n**Limits:** Cannot fly while carrying heavy equipment (beyond normal gear). Loud wing beats give away position (hearing test to avoid detection).\n\nCheck with your GM before using custom powers in a campaign.\n"
+      }
+    }
+  ],
+  "_stats": {
+    "systemId": "inspectres",
+    "systemVersion": "0.3.0",
+    "coreVersion": "13.0.0",
+    "createdTime": null,
+    "modifiedTime": null,
+    "lastModifiedBy": null
+  }
+}
