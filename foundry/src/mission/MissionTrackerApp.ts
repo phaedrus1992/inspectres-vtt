@@ -36,14 +36,19 @@ export class MissionTrackerApp extends foundry.applications.api.ApplicationV2 {
   override async _prepareContext(_options: foundry.applications.api.ApplicationV2Options): Promise<Record<string, unknown>> {
     const franchise = findFranchiseActor();
     if (!franchise) {
-      return { missionPool: 0, missionGoal: 0, progressPercent: 0, missionComplete: false, isGm: game.user?.isGM ?? false };
+      return { missionPool: 0, missionGoal: 0, progressPercent: 0, missionComplete: false, isGm: game.user?.isGM ?? false, elapsedDays: 0 };
     }
     const system = franchiseSystemData(franchise);
     const missionPool = system.missionPool;
     const missionGoal = system.missionGoal;
     const progressPercent = missionGoal > 0 ? Math.min(100, Math.round((missionPool / missionGoal) * 100)) : 0;
     const missionComplete = missionGoal > 0 && missionPool >= missionGoal;
-    return { missionPool, missionGoal, progressPercent, missionComplete, isGm: game.user?.isGM ?? false };
+
+    const currentDay = ((game.settings as unknown as { get: (namespace: string, key: string) => unknown })?.get("inspectres", "currentDay") as number | undefined) ?? 1;
+    const missionStartDay = system.missionStartDay ?? currentDay;
+    const elapsedDays = Math.max(0, currentDay - missionStartDay);
+
+    return { missionPool, missionGoal, progressPercent, missionComplete, isGm: game.user?.isGM ?? false, elapsedDays };
   }
 
   static async onBeginCleanUp(this: MissionTrackerApp, _event: Event, _target: HTMLElement): Promise<void> {
