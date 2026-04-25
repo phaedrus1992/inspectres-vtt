@@ -78,13 +78,17 @@ Semantic Versioning.
 
 ### Version Locations
 
+**Current version: `0.3.0`**
+
 When bumping version, update **ALL** of these locations to keep them in sync:
 
 1. **`foundry/system.json`** — `version` field (authoritative source)
-2. **`CHANGELOG.md`** — **ONLY** during actual release (see below)
-3. **`docs/current/sidebar.json`** — if version-pinned docs exist (rare; confirm before adding)
+2. **`package.json`** — `version` field (foundry/ directory)
+3. **`package-lock.json`** — auto-generated, commit after `npm install`
+4. **`CHANGELOG.md`** — **ONLY** during actual release (see below)
+5. **`docs/current/sidebar.json`** — if version-pinned docs exist (rare; confirm before adding)
 
-Use grep to verify sync: `grep -n "1.2.3" foundry/system.json CHANGELOG.md docs/current/sidebar.json`
+Use grep to verify sync: `grep -n "0.3.0" foundry/system.json foundry/package.json CHANGELOG.md docs/current/sidebar.json`
 
 ### CHANGELOG.md Rules
 
