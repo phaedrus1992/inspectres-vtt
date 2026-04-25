@@ -61,6 +61,7 @@
                   class="skill-roll-button"
                   data-action="skillRoll"
                   data-skill="{{skillName}}"
+                  title="{{localize (concat "INSPECTRES.TooltipSkill" (capitalize skillName))}}"
                   aria-label="{{localize "INSPECTRES.AriaLabel.SkillRoll"}}"
                 ><i class="fas fa-dice"></i></button>
               </div>
@@ -176,6 +177,7 @@
               <input
                 type="checkbox"
                 name="system.characteristics.{{idx}}.used"
+                title="{{localize "INSPECTRES.TooltipCharacteristicUsed"}}"
                 {{#if characteristic.used}}checked{{/if}}
                 class="characteristic-used"
               />

@@ -78,6 +78,7 @@
             type="button"
             class="inspectres-roll-button"
             data-action="bankRoll"
+            title="{{localize "INSPECTRES.TooltipBankRoll"}}"
             {{#if system.debtMode}}disabled{{/if}}
           >
             {{localize "INSPECTRES.BankRollButton"}}
@@ -133,7 +134,12 @@
       <!-- Client Roll Section -->
       <section class="inspectres-section">
         <h2>{{localize "INSPECTRES.ClientRoll"}}</h2>
-        <button type="button" class="inspectres-roll-button" data-action="clientRoll">
+        <button
+          type="button"
+          class="inspectres-roll-button"
+          data-action="clientRoll"
+          title="{{localize "INSPECTRES.TooltipClientRoll"}}"
+        >
           {{localize "INSPECTRES.ClientRoll"}}
         </button>
       </section>
