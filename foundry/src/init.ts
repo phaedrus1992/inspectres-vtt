@@ -71,6 +71,12 @@ Hooks.once("init", async function () {
       void (async () => {
         try {
           await autoClearRecoveredAgents(newDay);
+          // Re-render mission tracker to show updated elapsed days
+          if (MissionTrackerApp.instance) {
+            await MissionTrackerApp.instance.render().catch((err: unknown) => {
+              handleActionError(err, "Mission tracker re-render failed (day change)", "INSPECTRES.ErrorMissionTrackerOpen", "Mission Tracker failed to update");
+            });
+          }
         } catch (err: unknown) {
           const message = err instanceof Error ? err.message : String(err);
           console.error("[INSPECTRES] Auto-clear recovered agents failed:", { newDay, error: err, errorMessage: message });
