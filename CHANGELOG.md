@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **GM Control Surface Improvements**: Added explanatory tooltips to roll buttons (Bank Roll, Client Roll, Skill Roll) and characteristic UI controls clarifying game mechanics and stress penalty effects.
 - **Weird Agent System**: New paranormal investigator archetypes with supernatural powers and special mechanics.
   - Four starter archetypes in compendium: Psychic (telepathy/precognition), Ghost (phase-through walls), Werewolf (keen senses/ferocity), Vampire (shapeshifting/mind control)
   - Power system with Cool cost mechanics, base skill associations, and dual-power support per archetype
