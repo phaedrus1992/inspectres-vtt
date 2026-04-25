@@ -102,7 +102,7 @@ These are less critical but expected features.
 | Feature | Core Impl. | UI | Notes |
 |---------|-----------|-----|-------|
 | Skill Roll + Augmentation | ✅ | ✅ | Fully working |
-| Stress Roll + Chart | ✅ | ✅ | Chart applied but penalty choice automated |
+| Stress Roll + Chart | ⚠️ | ⚠️ | Chart applied but penalty choice automated (rules require player choice) |
 | Bank Roll + Resolution | ✅ | ✅ | Fully working |
 | Client Generation | ✅ | ✅ | Fully working |
 | Death & Dismemberment | ✅ | ✅ | Conditional on `deathMode` flag |
@@ -137,18 +137,18 @@ These are less critical but expected features.
 |-------|----------|----------|--------|
 | **Weird agent `power` field not persisted** | `agent-schema.ts:15–20` vs. `AgentDataModel.ts` | P0 | TypeScript declares field but Foundry schema has no `SchemaField`. Data lost on reload. |
 | **Stress penalty hardcoded to Academics** | `roll-executor.ts:61–68` | P0 | All stress outcomes apply to Academics. Rules require player choice. Will need refactoring to support multi-skill distribution. |
-| **Schema drift risk: `AgentData` vs. `AgentDataModel`** | `agent-schema.ts` and `AgentDataModel.ts` | P0 | Maintained separately with no mechanical enforcement. Silent data loss if fields diverge. |
-| **`as unknown as AgentData` cast density** | 26 sites in `AgentSheet.ts`, scattered across project | P0 | fvtt-types v13 limitation requires double-cast at `actor.system` boundary. Acknowledged but represents type-safety debt pending TypeDataModel migration. |
 
 ### 2.3 High-Priority Code Quality Issues (P1)
 
 | Issue | Location | Details | Fix Complexity |
 |-------|----------|---------|-----------------|
-| **Duplicate distribution dialog** | `MissionTrackerApp.ts:69–148` and `FranchiseSheet.ts:169–253` | 80+ lines of identical logic (player inputs, validation, pool reset, socket emit, chat message) | Medium: Extract to shared utility module with injectable franchise resolver |
+| **Schema drift risk: `AgentData` vs. `AgentDataModel`** | `agent-schema.ts` and `AgentDataModel.ts` | Maintained separately with no mechanical enforcement. Future risk of silent data loss if fields diverge; does not block current gameplay. | High: Requires full migration to TypeDataModel |
+| **`as unknown as AgentData` cast density** | 13 sites in `AgentSheet.ts`, scattered across project | fvtt-types v13 limitation requires double-cast at `actor.system` boundary. Acknowledged but represents type-safety debt pending TypeDataModel migration. | Medium: Add helper utility to reduce cast sites; eliminate pending TypeDataModel migration |
+| **Duplicate distribution dialog** | `MissionTrackerApp.ts:69–150` and `FranchiseSheet.ts:169–254` | 80+ lines of identical logic (player inputs, validation, pool reset, socket emit, chat message) | Medium: Extract to shared utility module with injectable franchise resolver |
 | **`SocketSyncManager` dead implementation** | `socket/socket-sync.ts` | Class with 5 methods; only `queueEvent` called (2 sites) but queue never flushed; `flushQueue` never invoked; GM-priority conflict resolution branches are identical (inert) | Medium: Either complete the implementation or remove entirely in favor of simpler `mission/socket.ts` |
 | **`teamwork.ts` and `confessional.ts` not integrated** | `mission/teamwork.ts`, `mission/confessional.ts` | Exported functions never imported; exercised by tests but no production code path | Low: UI wiring needed to make functional (P1 feature work) |
 | **DataModel escape hatches** | `AgentDataModel.ts:5`, `FranchiseDataModel.ts` | Both use `as unknown as new () => object` and return `Record<string, unknown>` from `defineSchema()`. Discards typed field structure. | High: Requires TypeDataModel generics resolution (TypeScript + fvtt-types upgrade, coordinated with team) |
-| **No `franchiseSystemData` helper in agent code** | `AgentSheet.ts:1–26` | Agent code has 26 `as unknown as AgentData` casts. Franchise code uses a centralized `franchiseSystemData()` helper reducing duplication | Low: Extract to utility, apply across agent code |
+| **No `franchiseSystemData` helper in agent code** | `AgentSheet.ts` | Agent code has 13 `as unknown as AgentData` casts. Franchise code uses a centralized `franchiseSystemData()` helper reducing duplication | Low: Extract to utility, apply across agent code |
 | **Test fixture violates `RollActor` pattern** | `AgentSheet.test.ts:18` | Test setup uses `Object.create(AgentSheet.prototype)` instead of structural interface. Couples tests to class implementation | Low: Refactor fixtures to satisfy `RollActor` interface |
 
 ### 2.4 Medium-Priority Code Quality Issues (P2)
@@ -162,7 +162,7 @@ These are less critical but expected features.
 | **`addToMissionPool` helper duplication** | `InSpectresAgent.ts:11` and `InSpectresFranchise.ts:12` | Identical private helpers in separate files. Could extract to shared utility. |
 | **Death/Dismemberment paths untested** | `__mocks__/setup.ts`, `roll-executor.test.ts` | `MockRoll.setResults` defined but unused. Death outcome test path uses empty `faces: []` triggering fallbacks instead of real outcomes. |
 | **CSS button reset uses negative-class selector** | `inspectres.css:100` | `.button:not(.inspectres-roll-button):not(...)` is brittle; will silently break when new button variants added without exclusion list. |
-| **Recovery description strings unused** | `recovery-utils.ts:43–75` | `computeRecoveryStatus` returns hardcoded English descriptions never used by template. Could mislead future developers. |
+| **Recovery description strings used for banner display** | `recovery-utils.ts:43–75` / `agent-sheet.hbs:6` | `computeRecoveryStatus` returns descriptions used in agent sheet recovery banner (`{{recoveryStatus.description}}`). Correct behavior but worth documenting to avoid confusion. |
 | **`overrideRecoveryDay` action on input may not fire** | `agent-sheet.hbs:253` | `data-action` on `input[type=number]` with no corresponding `_onRender` change listener. Handler at `AgentSheet.ts:474` may be unreachable. |
 | **Day controls missing `aria-label`** | `franchise-sheet.hbs` | `−`/`+` buttons have only `title` attributes. Should have `aria-label` like other icon-only buttons. |
 | **`InSpectresAgent.awardFranchiseDice` unused API** | `InSpectresAgent.ts` | Method exists but never called; rolls interact via `RollActor` structural interface. Potential dead API surface. |
