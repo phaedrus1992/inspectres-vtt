@@ -159,7 +159,7 @@ See `.claude/rules/foundry-vite.md` for testing patterns.
 
 ### Franchise as Second Player
 
-**Why:** Gives non-combat mechanical depth. Resource management, agency stress, bankrupty are real threats. Agents aren't independent — they serve the franchise.
+**Why:** Gives non-combat mechanical depth. Resource management, agency stress, bankruptcy are real threats. Agents aren't independent — they serve the franchise.
 
 ## Extending the System
 

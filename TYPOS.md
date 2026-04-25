@@ -1,0 +1,62 @@
+# Typos Spell Check
+
+This project uses [typos-cli](https://github.com/crate-ci/typos) to catch spelling errors in code, comments, docs, and configuration.
+
+## Running typos locally
+
+```bash
+# Basic check (excludes configured in .typos.toml)
+typos --config .typos.toml
+
+# Fix errors automatically (use with caution, review changes)
+typos --config .typos.toml --write
+```
+
+## Installing typos
+
+```bash
+# macOS (via Homebrew)
+brew install typos-cli
+
+# Other platforms: https://github.com/crate-ci/typos#install
+```
+
+## Pre-commit hooks
+
+Typos runs automatically via prek before push (configured in `.pre-commit-config.yaml`).
+
+**First-time setup:**
+```bash
+# Install prek if not already installed
+cargo install prek
+
+# Initialize hooks in the repo
+prek install
+```
+
+Hooks run automatically on `git commit` and `git push`. To run manually:
+```bash
+prek run --stage pre-push
+```
+
+## Configuration
+
+The `.typos.toml` file contains:
+- Game-specific terms (e.g., `inspectres`, `vtt`, `hbs`)
+- Project-specific acronyms and notations (e.g., `Nd6` for dice rolls)
+- File patterns to exclude from checking (generated files, node_modules, etc.)
+
+## Common false positives
+
+If typos flags a legitimate term, add it to `.typos.toml` under `[default.extend-words]`:
+
+```toml
+[default.extend-words]
+"myterm" = "myterm"
+```
+
+Then re-run to verify the fix.
+
+## CI Integration
+
+Typos runs in GitHub Actions on every PR via `.github/workflows/ci.yml` (`spell-check` job). This check must pass before merging.

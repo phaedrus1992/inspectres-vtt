@@ -1,0 +1,28 @@
+# Typos configuration for InSpectres
+# Project-specific word list and configuration
+
+[default.extend-words]
+# Game-specific terms and project-specific words
+Nd = "Nd"        # Notation: Nd6 = N dice of 6 faces
+d6 = "d6"        # Six-sided die notation
+die = "die"      # Singular of dice
+hbs = "hbs"      # Handlebars file extension
+inspectres = "inspectres"  # Game title
+vtt = "vtt"      # VTT = Virtual Tabletop
+Foundry = "Foundry"  # Proper name: Foundry VTT
+GMs = "GMs"      # Plural of GM
+API = "API"      # Acronym
+UUID = "UUID"    # Acronym
+npm = "npm"      # Package manager name
+semgrep = "semgrep"  # Tool name
+prek = "prek"    # Project tool
+typos = "typos"  # Tool name
+
+[files]
+# Directories to exclude from spell checking
+extend-exclude = [
+  "*semgrep-results*",
+  "*node_modules*",
+  "*dist*",
+  "*packs-compiled*",
+]
