@@ -78,7 +78,7 @@ Semantic Versioning.
 
 ### Version Locations
 
-**Current version: `0.3.0`**
+**Current version: `0.2.0`**
 
 When bumping version, update **ALL** of these locations to keep them in sync:
 
@@ -88,7 +88,7 @@ When bumping version, update **ALL** of these locations to keep them in sync:
 4. **`CHANGELOG.md`** — **ONLY** during actual release (see below)
 5. **`docs/current/sidebar.json`** — if version-pinned docs exist (rare; confirm before adding)
 
-Use grep to verify sync: `grep -n "0.3.0" foundry/system.json foundry/package.json CHANGELOG.md docs/current/sidebar.json`
+Use grep to verify sync: `grep -n "0.2.0" foundry/system.json foundry/package.json CHANGELOG.md docs/current/sidebar.json`
 
 ### CHANGELOG.md Rules
 
