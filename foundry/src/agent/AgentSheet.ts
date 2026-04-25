@@ -483,7 +483,6 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     try {
       const system = this.actor.system as unknown as AgentData;
       const currentDay = getCurrentDay();
-      const daysElapsed = currentDay - system.recoveryStartedAt;
       const daysNeeded = Math.max(0, targetDay - system.recoveryStartedAt);
 
       const updateData = {
