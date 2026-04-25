@@ -83,6 +83,33 @@ If the franchise fails, the campaign ends or resets. This is an ending state, no
 > - Franchise stress mounting (at halfway point to crisis)
 > - Next mission will be harder if stress isn't managed
 
+## GM Controls: Time Progression
+
+### Advancing the Calendar
+
+The **Franchise Sheet** includes day advancement controls in the top right:
+- **+1 Day** button — Advance the calendar by one day
+- **-1 Day** button — Regress to the previous day (if needed)
+- **Current Day** display — Shows the current day number (starts at 1)
+
+**Why use this?** InSpectres tracking uses wall-clock days, not game time. When a mission ends and agents go on vacation or recovery, advancing the day tracks the real passage of time. The system automatically:
+1. Clears any agents who finished recovery (their recovery period expires based on the day they started)
+2. Updates the Mission Tracker to show how many days have passed since the current mission started
+
+### Mission Timeline
+
+When you start a new mission:
+1. **Open the Mission Tracker** (button on Franchise Sheet)
+2. **Advance the day** when a mission ends or agents take vacation
+3. **Watch elapsed days** in the Mission Tracker — shows how long the current mission has been running
+
+The Mission Tracker displays:
+- **Mission Pool** — Dice agents have earned so far
+- **Goal** — Dice needed to complete the mission
+- **Elapsed Days** — Days since mission started (automatically calculated)
+
+When elapsed days reach your intended mission length, that's your cue to wrap up and move toward completion.
+
 ## Tips
 
 - **Track stress carefully** — It's a real threat. Failed missions compound it

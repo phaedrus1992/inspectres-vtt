@@ -78,11 +78,19 @@ export function computeRecoveryStatus(
   };
 }
 
-export async function autoClearRecoveredAgents(currentDay: number): Promise<void> {
-  if (typeof game === "undefined" || !game.actors) return;
-  if (!game.user?.isGM) return;
+export interface AutoClearResult {
+  cleared: number;
+  failed: number;
+  errors: Array<{ agentName: string; error: string }>;
+}
 
-  const updates: Array<{ id: string; changes: Record<string, number> }> = [];
+export async function autoClearRecoveredAgents(currentDay: number): Promise<AutoClearResult> {
+  const result: AutoClearResult = { cleared: 0, failed: 0, errors: [] };
+
+  if (typeof game === "undefined" || !game.actors) return result;
+  if (!game.user?.isGM) return result;
+
+  const updates: Array<{ id: string; name: string; changes: Record<string, number> }> = [];
 
   for (const actor of game.actors) {
     if ((actor.type as string) !== "agent") continue;
@@ -95,18 +103,32 @@ export async function autoClearRecoveredAgents(currentDay: number): Promise<void
     if (daysElapsed >= system.daysOutOfAction) {
       updates.push({
         id: actor.id ?? "",
+        name: actor.name ?? "Unknown",
         changes: { "system.daysOutOfAction": 0, "system.recoveryStartedAt": 0 },
       });
     }
   }
 
-  if (updates.length === 0) return;
+  if (updates.length === 0) return result;
 
-  // Batch update all recovered agents in one call
-  for (const { id, changes } of updates) {
+  // Update all recovered agents, tracking success/failure
+  for (const { id, name, changes } of updates) {
     const actor = game.actors?.get(id);
-    if (actor) {
+    if (!actor) {
+      result.failed += 1;
+      result.errors.push({ agentName: name, error: "Actor not found" });
+      continue;
+    }
+
+    try {
       await actor.update(changes);
+      result.cleared += 1;
+    } catch (err: unknown) {
+      result.failed += 1;
+      const message = err instanceof Error ? err.message : String(err);
+      result.errors.push({ agentName: name, error: message });
     }
   }
+
+  return result;
 }

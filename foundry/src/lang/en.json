@@ -60,6 +60,7 @@
     "MissionTrackerTitle": "Mission Tracker",
     "MissionTrackerPool": "Mission Dice Earned",
     "MissionTrackerGoal": "Goal",
+    "MissionTrackerElapsed": "Elapsed Days",
     "MissionTrackerComplete": "Mission complete!",
     "MissionTrackerBeginCleanUp": "Begin Clean Up",
     "MissionTrackerEndEarly": "End Mission Early",

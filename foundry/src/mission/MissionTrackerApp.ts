@@ -1,6 +1,7 @@
 import { findFranchiseActor, franchiseSystemData } from "../franchise/franchise-utils.js";
 import { handleActionError } from "../utils/ui-errors.js";
 import { getSyncManager, type MissionState } from "../socket/socket-sync.js";
+import { getCurrentDaySetting } from "../utils/settings-utils.js";
 
 export class MissionTrackerApp extends foundry.applications.api.ApplicationV2 {
   static instance: MissionTrackerApp | null = null;
@@ -36,14 +37,19 @@ export class MissionTrackerApp extends foundry.applications.api.ApplicationV2 {
   override async _prepareContext(_options: foundry.applications.api.ApplicationV2Options): Promise<Record<string, unknown>> {
     const franchise = findFranchiseActor();
     if (!franchise) {
-      return { missionPool: 0, missionGoal: 0, progressPercent: 0, missionComplete: false, isGm: game.user?.isGM ?? false };
+      return { missionPool: 0, missionGoal: 0, progressPercent: 0, missionComplete: false, isGm: game.user?.isGM ?? false, elapsedDays: 0 };
     }
     const system = franchiseSystemData(franchise);
     const missionPool = system.missionPool;
     const missionGoal = system.missionGoal;
     const progressPercent = missionGoal > 0 ? Math.min(100, Math.round((missionPool / missionGoal) * 100)) : 0;
     const missionComplete = missionGoal > 0 && missionPool >= missionGoal;
-    return { missionPool, missionGoal, progressPercent, missionComplete, isGm: game.user?.isGM ?? false };
+
+    const currentDay = getCurrentDaySetting();
+    const missionStartDay = system.missionStartDay ?? currentDay;
+    const elapsedDays = Math.max(0, currentDay - missionStartDay);
+
+    return { missionPool, missionGoal, progressPercent, missionComplete, isGm: game.user?.isGM ?? false, elapsedDays };
   }
 
   static async onBeginCleanUp(this: MissionTrackerApp, _event: Event, _target: HTMLElement): Promise<void> {
