@@ -305,12 +305,12 @@
     "ErrorReviveFailed": "Could not revive agent",
     "ErrorRecoveryFailed": "Could not update recovery status",
     "ErrorOverrideFailed": "Could not override recovery day",
-    "TooltipBankRoll": "Roll Bank dice to earn Franchise resources. Success = gain dice; Failure = gain nothing.",
-    "TooltipClientRoll": "Roll Client dice to resolve the mission. Success = earn mission dice; Failure = earn nothing.",
-    "TooltipSkillAcademics": "Test knowledge-based investigations. Success = earn mission dice; Failure = stress penalty.",
-    "TooltipSkillAthletics": "Test physical feats. Success = earn mission dice; Failure = stress penalty.",
-    "TooltipSkillTechnology": "Test technical investigations. Success = earn mission dice; Failure = stress penalty.",
-    "TooltipSkillContact": "Test social and networking investigations. Success = earn mission dice; Failure = stress penalty.",
+    "TooltipBankRoll": "Roll Bank dice to gain Franchise resources. Success = gain dice; Failure = gain nothing.",
+    "TooltipClientRoll": "Roll Client dice to advance the mission. Success = earn mission dice; Failure = earn nothing.",
+    "TooltipSkillAcademics": "Test knowledge-based investigations. Success = earn mission dice; Failure = GM narrates complications.",
+    "TooltipSkillAthletics": "Test physical feats. Success = earn mission dice; Failure = GM narrates complications.",
+    "TooltipSkillTechnology": "Test technical investigations. Success = earn mission dice; Failure = GM narrates complications.",
+    "TooltipSkillContact": "Test social and networking investigations. Success = earn mission dice; Failure = GM narrates complications.",
     "TooltipCharacteristicUsed": "Mark as used if this characteristic was invoked during the roll. Used characteristics reduce stress penalty by 1."
   }
 }
