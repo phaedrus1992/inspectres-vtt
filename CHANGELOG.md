@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-04-25
+
+### Added
+
+- **Weird Agent System**: New paranormal investigator archetypes with supernatural powers and special mechanics.
+  - Four starter archetypes in compendium: Psychic (telepathy/precognition), Ghost (phase-through walls), Werewolf (keen senses/ferocity), Vampire (shapeshifting/mind control)
+  - Power system with Cool cost mechanics, base skill associations, and dual-power support per archetype
+  - Characteristic system for archetype-specific quirks and vulnerabilities
+  - Full integration with existing stress, recovery, and franchise mechanics
+- **Client Roll Table**: Randomized job generation for paranormal investigation scenarios. Roll 2d6 to determine client personality (Horny, Bored, Skeptical, Angry, Impatient, Weird, Frantic, Terrified, Calm, Enthusiastic, Blasé). Foundation for expanded four-field job generation system.
+
 ## [0.2.0] - 2026-04-23
 
 ### Added
