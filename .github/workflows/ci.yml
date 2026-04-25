@@ -22,10 +22,9 @@ jobs:
           persist-credentials: false
 
       - name: Run typos spell check
-        uses: reviewdog/action-typos@7e8ece26c3ed11f3e01d6e643590ea8ae05eb28f  # v1.17.4
+        uses: reviewdog/action-typos@d5eb1bbcd1b3bfde596f6eeb470322727862fe98  # v1.19.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          typos_version: latest
 
   typecheck:
     name: Type check
