@@ -5,6 +5,7 @@ import { handleActionError } from "../utils/ui-errors.js";
 import { activateTabs } from "../utils/sheet-tabs.js";
 import { enterDebtMode, attemptLoanRepayment } from "./bankruptcy-handler.js";
 import { getSyncManager } from "../socket/socket-sync.js";
+import { getCurrentDaySetting, setCurrentDaySetting } from "../utils/settings-utils.js";
 
 // HandlebarsApplicationMixin provides _renderHTML/_replaceHTML required by ApplicationV2 for PARTS-based sheets
 export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.sheets.ActorSheetV2) {
@@ -41,7 +42,7 @@ export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicati
     const system = this.actor.system as unknown as FranchiseData;
     const isGm = game.user?.isGM ?? false;
     const missionComplete = system.missionGoal > 0 && system.missionPool >= system.missionGoal;
-    const currentDay = (game.settings as unknown as { get: (namespace: string, key: string) => unknown })?.get("inspectres", "currentDay") as number ?? 1;
+    const currentDay = getCurrentDaySetting();
     return { ...base, system, isGm, missionComplete, currentDay };
   }
 
@@ -129,18 +130,18 @@ export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicati
 
   static async onAdvanceDay(this: FranchiseSheet, _event: Event, _target: HTMLElement): Promise<void> {
     if (!this.isEditable || !(game.user?.isGM ?? false)) return;
-    const currentDay = (game.settings as unknown as { get: (namespace: string, key: string) => unknown })?.get("inspectres", "currentDay") as number ?? 1;
+    const currentDay = getCurrentDaySetting();
     const nextDay = currentDay + 1;
-    void (game.settings as unknown as { set: (namespace: string, key: string, value: unknown) => Promise<unknown> })?.set("inspectres", "currentDay", nextDay).catch((err: unknown) => {
+    void setCurrentDaySetting(nextDay).catch((err: unknown) => {
       handleActionError(err, "Day advance failed", "INSPECTRES.ErrorDayAdvanceFailed", "Failed to advance day");
     });
   }
 
   static async onRegressDay(this: FranchiseSheet, _event: Event, _target: HTMLElement): Promise<void> {
     if (!this.isEditable || !(game.user?.isGM ?? false)) return;
-    const currentDay = (game.settings as unknown as { get: (namespace: string, key: string) => unknown })?.get("inspectres", "currentDay") as number ?? 1;
+    const currentDay = getCurrentDaySetting();
     const prevDay = Math.max(1, currentDay - 1);
-    void (game.settings as unknown as { set: (namespace: string, key: string, value: unknown) => Promise<unknown> })?.set("inspectres", "currentDay", prevDay).catch((err: unknown) => {
+    void setCurrentDaySetting(prevDay).catch((err: unknown) => {
       handleActionError(err, "Day regress failed", "INSPECTRES.ErrorDayRegressFailed", "Failed to revert day");
     });
   }

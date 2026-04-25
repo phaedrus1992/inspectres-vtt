@@ -14,6 +14,15 @@ import { MissionTrackerApp } from "./mission/MissionTrackerApp.js";
 import { onMissionSocketEvent } from "./mission/socket.js";
 import { handleActionError } from "./utils/ui-errors.js";
 import { autoClearRecoveredAgents } from "./agent/recovery-utils.js";
+import { getCurrentDaySetting } from "./utils/settings-utils.js";
+
+// Helper to re-render Mission Tracker with error handling
+function rerenderMissionTracker(context: string): void {
+  if (!MissionTrackerApp.instance) return;
+  void MissionTrackerApp.instance.render().catch((err: unknown) => {
+    handleActionError(err, `Mission tracker re-render failed (${context})`, "INSPECTRES.ErrorMissionTrackerOpen", "Mission Tracker failed to update");
+  });
+}
 
 Hooks.once("init", async function () {
   try {
@@ -70,13 +79,15 @@ Hooks.once("init", async function () {
       }
       void (async () => {
         try {
-          await autoClearRecoveredAgents(newDay);
-          // Re-render mission tracker to show updated elapsed days
-          if (MissionTrackerApp.instance) {
-            await MissionTrackerApp.instance.render().catch((err: unknown) => {
-              handleActionError(err, "Mission tracker re-render failed (day change)", "INSPECTRES.ErrorMissionTrackerOpen", "Mission Tracker failed to update");
-            });
+          const result = await autoClearRecoveredAgents(newDay);
+          if (result.failed > 0) {
+            console.warn("[INSPECTRES] Some agents failed to auto-clear recovery:", result);
+            if (ui.notifications) {
+              ui.notifications.warn(game.i18n?.localize("INSPECTRES.ErrorPartialRecoveryFailed") ?? "Some agents failed to clear recovery state");
+            }
           }
+          // Re-render mission tracker to show updated elapsed days
+          rerenderMissionTracker("day change");
         } catch (err: unknown) {
           const message = err instanceof Error ? err.message : String(err);
           console.error("[INSPECTRES] Auto-clear recovered agents failed:", { newDay, error: err, errorMessage: message });
@@ -113,18 +124,12 @@ Hooks.once("init", async function () {
 
 Hooks.once("ready", function () {
   onMissionSocketEvent(() => {
-    if (MissionTrackerApp.instance) {
-      void MissionTrackerApp.instance.render().catch((err: unknown) => {
-        handleActionError(err, "Mission tracker re-render failed (socket event)", "INSPECTRES.ErrorMissionTrackerOpen", "Mission Tracker failed to update");
-      });
-    }
+    rerenderMissionTracker("socket event");
   });
 });
 
 Hooks.on("updateActor", function (actor: Actor) {
-  if ((actor.type as string) === "franchise" && MissionTrackerApp.instance) {
-    void MissionTrackerApp.instance.render().catch((err: unknown) => {
-      handleActionError(err, "Mission tracker re-render failed (actor update)", "INSPECTRES.ErrorMissionTrackerOpen", "Mission Tracker failed to update");
-    });
+  if ((actor.type as string) === "franchise") {
+    rerenderMissionTracker("actor update");
   }
 });

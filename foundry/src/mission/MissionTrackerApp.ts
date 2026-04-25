@@ -1,6 +1,7 @@
 import { findFranchiseActor, franchiseSystemData } from "../franchise/franchise-utils.js";
 import { handleActionError } from "../utils/ui-errors.js";
 import { getSyncManager, type MissionState } from "../socket/socket-sync.js";
+import { getCurrentDaySetting } from "../utils/settings-utils.js";
 
 export class MissionTrackerApp extends foundry.applications.api.ApplicationV2 {
   static instance: MissionTrackerApp | null = null;
@@ -44,7 +45,7 @@ export class MissionTrackerApp extends foundry.applications.api.ApplicationV2 {
     const progressPercent = missionGoal > 0 ? Math.min(100, Math.round((missionPool / missionGoal) * 100)) : 0;
     const missionComplete = missionGoal > 0 && missionPool >= missionGoal;
 
-    const currentDay = ((game.settings as unknown as { get: (namespace: string, key: string) => unknown })?.get("inspectres", "currentDay") as number | undefined) ?? 1;
+    const currentDay = getCurrentDaySetting();
     const missionStartDay = system.missionStartDay ?? currentDay;
     const elapsedDays = Math.max(0, currentDay - missionStartDay);
 
