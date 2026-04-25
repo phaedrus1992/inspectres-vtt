@@ -1,8 +1,8 @@
-# InSpectres
+# InSpectres VTT
 
 **A paranormal investigation RPG system for [Foundry VTT](https://foundryvtt.com/)**
 
-InSpectres is a tabletop role-playing game where players run a paranormal investigation agency. This repository contains the Foundry VTT system plugin and tools for managing long-running campaigns.
+InSpectres VTT is a tabletop role-playing game where players run a paranormal investigation agency. This repository contains the Foundry VTT system plugin and tools for managing long-running campaigns.
 
 ## Quick Start
 
@@ -13,7 +13,7 @@ InSpectres is a tabletop role-playing game where players run a paranormal invest
    - **Windows:** `C:\Users\<username>\AppData\Local\FoundryVTT\Data\systems\`
    - **macOS:** `~/Library/Application Support/FoundryVTT/Data/systems/`
    - **Linux:** `~/.local/share/FoundryVTT/Data/systems/`
-3. Launch Foundry, create a world, select **InSpectres** as the system
+3. Launch Foundry, create a world, select **InSpectres VTT** as the system
 
 See [Installation from Release](https://phaedrus1992.github.io/inspectres-vtt/install/from-release) for detailed steps.
 

@@ -4,7 +4,7 @@ sidebar_position: 3
 
 # Contributing
 
-How to contribute to InSpectres.
+How to contribute to InSpectres VTT.
 
 ## Before You Start
 

@@ -1,6 +1,6 @@
 {
   "id": "inspectres",
-  "title": "InSpectres",
+  "title": "InSpectres VTT",
   "description": "Paranormal investigation RPG system for Foundry VTT.",
   "version": "0.2.0",
   "compatibility": {
@@ -28,28 +28,28 @@
   "packs": [
     {
       "name": "actors",
-      "label": "InSpectres Actors",
+      "label": "InSpectres VTT Actors",
       "path": "packs/actors",
       "type": "Actor",
       "system": "inspectres"
     },
     {
       "name": "rolltables",
-      "label": "InSpectres Roll Tables",
+      "label": "InSpectres VTT Roll Tables",
       "path": "packs/rolltables",
       "type": "RollTable",
       "system": "inspectres"
     },
     {
       "name": "journals",
-      "label": "InSpectres Rules & Guides",
+      "label": "InSpectres VTT Rules & Guides",
       "path": "packs/journals",
       "type": "JournalEntry",
       "system": "inspectres"
     },
     {
       "name": "macros",
-      "label": "InSpectres Macros",
+      "label": "InSpectres VTT Macros",
       "path": "packs/macros",
       "type": "Macro"
     }

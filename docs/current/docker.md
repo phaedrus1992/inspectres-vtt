@@ -1,6 +1,6 @@
 # Running Foundry VTT with Docker
 
-This repository includes Docker support for running Foundry VTT with the InSpectres system
+This repository includes Docker support for running Foundry VTT with the InSpectres VTT system
 pre-installed. It uses the community-standard
 [felddy/foundryvtt](https://github.com/felddy/foundryvtt-docker) image.
 
@@ -8,7 +8,7 @@ pre-installed. It uses the community-standard
 
 - [Docker](https://docs.docker.com/get-docker/) and Docker Compose v2 (`docker compose version`)
 - A [Foundry VTT](https://foundryvtt.com/) account with a license key
-- The InSpectres system built locally — run this first:
+- The InSpectres VTT system built locally — run this first:
 
   ```bash
   cd foundry
@@ -98,7 +98,7 @@ docker compose -f docker/docker-compose.yml down
 
 World data, assets, and config persist in `docker/data/` between restarts.
 
-## Updating the InSpectres System
+## Updating the InSpectres VTT System
 
 After making changes to the system:
 
@@ -155,7 +155,7 @@ Everything under `docker/data/` persists across container restarts:
 | `docker/data/Config/` | Foundry server config (`options.json`) |
 | `docker/data/Data/worlds/` | Campaign worlds and all scene/actor/item data |
 | `docker/data/Data/assets/` | Uploaded images, audio, and other media |
-| `docker/data/Data/systems/` | Installed game systems (other than InSpectres, which is bind-mounted) |
+| `docker/data/Data/systems/` | Installed game systems (other than InSpectres VTT, which is bind-mounted) |
 
 Back up `docker/data/` regularly, especially before updating Foundry.
 

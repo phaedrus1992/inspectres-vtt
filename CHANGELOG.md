@@ -16,6 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Full integration with existing stress, recovery, and franchise mechanics
 - **Client Roll Table**: Randomized job generation for paranormal investigation scenarios. Roll 2d6 to determine client personality (Horny, Bored, Skeptical, Angry, Impatient, Weird, Frantic, Terrified, Calm, Enthusiastic, Blasé). Foundation for expanded four-field job generation system.
 
+### Changed
+- Renamed project to "InSpectres VTT" for clearer branding and discoverability. The system id is unchanged ("inspectres"), so existing worlds and saves continue to work without migration.
+
 ## [0.2.0] - 2026-04-23
 
 ### Added
