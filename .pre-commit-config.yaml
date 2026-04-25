@@ -1,5 +1,6 @@
 # See https://pre-commit.com for more information
 # Configuration for prek pre-commit hooks
+# Fast CI checks that should run locally before push
 
 repos:
   # Typos spell checker
@@ -10,3 +11,15 @@ repos:
         name: Spell check (typos)
         args: [--config, .typos.toml, --exclude, "*semgrep-results*", --exclude, "*node_modules*", --exclude, "*dist*", --exclude, "*packs-compiled*"]
         stages: [commit, push]
+        additional_dependencies: []
+
+  # TypeScript type checking
+  - repo: local
+    hooks:
+      - id: typescript-check
+        name: Type check (TypeScript)
+        entry: sh -c 'cd foundry && npm run check'
+        language: system
+        files: ^foundry/src/.*\.ts$
+        pass_filenames: false
+        stages: [push]
