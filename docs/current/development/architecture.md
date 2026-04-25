@@ -4,7 +4,7 @@ sidebar_position: 2
 
 # System Architecture
 
-Overview of how InSpectres is organized and designed.
+Overview of how InSpectres VTT is organized and designed.
 
 ## Why Foundry VTT + TypeScript?
 

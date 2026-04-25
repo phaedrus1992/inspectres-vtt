@@ -4,7 +4,7 @@ sidebar_position: 3
 
 # Rolls & Mechanics
 
-How dice rolls work in InSpectres.
+How dice rolls work in InSpectres VTT.
 
 ## Skill Roll
 

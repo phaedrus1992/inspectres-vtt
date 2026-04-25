@@ -4,7 +4,7 @@ sidebar_position: 1
 
 # Installation from Release
 
-Download and install the latest stable release of InSpectres.
+Download and install the latest stable release of InSpectres VTT.
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ Download and install the latest stable release of InSpectres.
 
 ### 1. Download the Latest Release
 
-1. Go to the [InSpectres releases page](https://github.com/phaedrus1992/inspectres-vtt/releases)
+1. Go to the [InSpectres VTT releases page](https://github.com/phaedrus1992/inspectres-vtt/releases)
 2. Find the latest release (top of the page)
 3. Download the `inspectres.zip` file
 
@@ -44,13 +44,13 @@ systems/
 
 1. Start Foundry VTT
 2. Create a new world (or open an existing one)
-3. In the world creation dialog, select **InSpectres** from the System dropdown
+3. In the world creation dialog, select **InSpectres VTT** from the System dropdown
 4. Finish creating the world and launch it
 
 ### 4. Verify Installation
 
 Once in the world, you're ready to play. Check that:
-- InSpectres is listed in **World Settings → System**
+- InSpectres VTT is listed in **World Settings → System**
 - You can create a new **Agent** (player character)
 - You can create a new **Franchise** (your investigation agency)
 

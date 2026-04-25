@@ -4,7 +4,7 @@ sidebar_position: 2
 
 # Installation from Source
 
-Build and install InSpectres directly from the repository source code. Use this if you want to:
+Build and install InSpectres VTT directly from the repository source code. Use this if you want to:
 
 - Contribute changes back to the project
 - Test unreleased features
@@ -79,7 +79,7 @@ systems/
 
 ### 5. Launch Foundry and Activate the System
 
-Same as the release installation — create a world, select InSpectres as the system, and launch.
+Same as the release installation — create a world, select InSpectres VTT as the system, and launch.
 
 ## Development Workflow
 

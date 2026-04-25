@@ -4,7 +4,7 @@ sidebar_position: 1
 
 # Development Setup
 
-Set up your development environment to contribute to InSpectres.
+Set up your development environment to contribute to InSpectres VTT.
 
 ## Prerequisites
 

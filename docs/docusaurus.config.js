@@ -6,7 +6,7 @@
 // cannot support "type": "module" in package.json. Webpack internally requires
 // CommonJS for server-side rendering and does not provide require.resolveWeak in ESM mode.
 const config = {
-  title: 'InSpectres',
+  title: 'InSpectres VTT',
   tagline: 'Paranormal investigation RPG system for Foundry VTT',
   favicon: 'img/favicon.ico',
 
@@ -52,9 +52,9 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       navbar: {
-        title: 'InSpectres',
+        title: 'InSpectres VTT',
         logo: {
-          alt: 'InSpectres Logo',
+          alt: 'InSpectres VTT Logo',
           src: 'img/logo.svg',
         },
         items: [
@@ -110,7 +110,7 @@ const config = {
             ],
           },
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} InSpectres. Built with Docusaurus.`,
+        copyright: `Copyright © ${new Date().getFullYear()} InSpectres VTT. Built with Docusaurus.`,
       },
       prism: {
         theme: require('prism-react-renderer').themes.github,
