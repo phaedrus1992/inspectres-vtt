@@ -276,6 +276,13 @@
     "EarnedDiceThisMission": "Earned Dice This Mission",
     "ButtonAttemptRepayment": "Attempt Repayment",
     "Cancel": "Cancel",
-    "ErrorRepaymentFailed": "Loan repayment failed"
+    "ErrorRepaymentFailed": "Loan repayment failed",
+    "InGameDay": "In-Game Day",
+    "BeginVacation": "Begin Vacation",
+    "ConfirmVacationTitle": "Begin Vacation",
+    "ConfirmVacationBody": "End mission and begin vacation? This will open the distribution dialog.",
+    "WarnNoMissionPool": "No mission pool to distribute.",
+    "ErrorDayAdvanceFailed": "Failed to advance day",
+    "ErrorDayRegressFailed": "Failed to revert day"
   }
 }
