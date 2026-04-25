@@ -21,12 +21,11 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Install typos
-        run: |
-          curl -sSL https://github.com/crate-ci/typos/releases/download/v1.23.1/typos-v1.23.1-x86_64-unknown-linux-musl.tar.gz | tar xz -C /usr/local/bin
-
       - name: Run typos spell check
-        run: typos --config .typos.toml
+        uses: reviewdog/action-typos@7e8ece26c3ed11f3e01d6e643590ea8ae05eb28f  # v1.17.4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          typos_version: latest
 
   typecheck:
     name: Type check
