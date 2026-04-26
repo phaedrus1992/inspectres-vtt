@@ -131,6 +131,24 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
           target.checked = !target.checked;
           return;
         }
+        // Issue #219: Prevent >1 weird agent per group
+        if (target.checked) {
+          const group = (this.actor.getFlag as (namespace: string, key: string) => unknown)("inspectres", "group") as string | undefined;
+          if (group) {
+            const existingWeirdAgent = game.actors?.find((a) => {
+              const aGroup = (a.getFlag as (namespace: string, key: string) => unknown)("inspectres", "group");
+              return aGroup === group && (a.system as unknown as { isWeird: boolean }).isWeird && a.id !== this.actor.id;
+            });
+            if (existingWeirdAgent) {
+              ui.notifications?.warn(
+                game.i18n?.format("INSPECTRES.WarnOneWeirdPerGroup", { agentName: existingWeirdAgent.name }) ??
+                  `Group already has a weird agent: ${existingWeirdAgent.name}`,
+              );
+              target.checked = false;
+              return;
+            }
+          }
+        }
         // fvtt-types expects full document data shape for actor.update; partial update path is safe at runtime
         const updateData = { "system.isWeird": target.checked } as unknown as Parameters<typeof this.actor.update>[0];
         void this.actor.update(updateData).catch((err: unknown) => {

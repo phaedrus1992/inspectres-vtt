@@ -27,6 +27,12 @@ export class AgentDataModel extends (foundry.abstract.TypeDataModel as unknown a
       talent: new StringField({ required: true, initial: "" }),
       cool: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
       isWeird: new BooleanField({ required: true, initial: false }),
+      power: new SchemaField({
+        name: new StringField({ required: true, initial: "" }),
+        description: new StringField({ required: true, initial: "" }),
+        baseSkill: new StringField({ required: true, initial: "athletics" }),
+        coolCost: new NumberField({ required: true, integer: true, min: 1, initial: 1 }),
+      }, { required: false, initial: null }),
       characteristics: new ArrayField(new SchemaField({
         text: new StringField({ required: true, initial: "" }),
         used: new BooleanField({ required: true, initial: false }),
@@ -48,5 +54,22 @@ export class AgentDataModel extends (foundry.abstract.TypeDataModel as unknown a
     }
 
     return source;
+  }
+
+  prepareBaseData(): void {
+    (this as unknown as { prepareBaseData: () => void }).prepareBaseData?.call(Object.getPrototypeOf(Object.getPrototypeOf(this)));
+    // Enforce skill range based on weird agent status
+    const isWeird = (this as unknown as { isWeird: boolean }).isWeird;
+    const maxSkill = isWeird ? 10 : 4;
+    const skillKeys = ["academics", "athletics", "technology", "contact"] as const;
+    const skills = (this as unknown as { skills: Record<string, { base: number; penalty: number }> }).skills;
+
+    if (skills) {
+      for (const skillKey of skillKeys) {
+        if (skills[skillKey]) {
+          skills[skillKey].base = Math.min(skills[skillKey].base, maxSkill);
+        }
+      }
+    }
   }
 }

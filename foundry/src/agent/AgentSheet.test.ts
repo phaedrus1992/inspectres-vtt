@@ -525,6 +525,7 @@ describe("AgentSheet", () => {
         talent: "",
         cool: 0,
         isWeird: false,
+        power: null,
         characteristics: [],
         missionPool: 0,
         isDead: false,

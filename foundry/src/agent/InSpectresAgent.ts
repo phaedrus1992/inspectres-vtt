@@ -59,6 +59,21 @@ export class InSpectresAgent extends Actor {
     if (systemChanges && ("isDead" in systemChanges || "daysOutOfAction" in systemChanges || "recoveryStartedAt" in systemChanges)) {
       throw new Error("Recovery state can only be modified by the GM");
     }
+
+    // Issue #218: Enforce skill range based on weird agent status
+    if (systemChanges && "skills" in systemChanges) {
+      const isWeird = (systemChanges["isWeird"] ?? (this.system as unknown as { isWeird: boolean }).isWeird) as boolean;
+      const maxSkill = isWeird ? 10 : 4;
+      const skillChanges = systemChanges["skills"] as Record<string, { base?: number }> | undefined;
+      if (skillChanges) {
+        for (const skill of Object.values(skillChanges)) {
+          if (skill && "base" in skill && typeof skill.base === "number" && skill.base > maxSkill) {
+            throw new Error(`Skill value ${skill.base} exceeds max of ${maxSkill} for ${isWeird ? "weird" : "normal"} agent`);
+          }
+        }
+      }
+    }
+
     return result;
   }
 }
