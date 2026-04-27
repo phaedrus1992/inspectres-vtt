@@ -1,3 +1,5 @@
+import { getDevLogger } from "../utils/dev-logger.js";
+
 export const SOCKET_EVENT = "system.inspectres";
 
 export interface MissionSocketPayload {
@@ -22,14 +24,15 @@ export function onMissionSocketEvent(handler: (payload: MissionSocketPayload) =>
     ) return;
 
     if ((payload as { type: string }).type !== "missionPoolUpdated") {
-      console.warn("onMissionSocketEvent: unhandled payload type", (payload as { type: string }).type);
+      getDevLogger().warn("socket", "Unhandled payload type", { type: (payload as { type: string }).type });
       return;
     }
 
     try {
       handler(payload as MissionSocketPayload);
     } catch (err: unknown) {
-      console.error("onMissionSocketEvent: handler threw", err);
+      const message = err instanceof Error ? err.message : String(err);
+      getDevLogger().error("socket", "Handler threw", { error: message });
     }
   });
 }

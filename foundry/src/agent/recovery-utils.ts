@@ -5,6 +5,7 @@
 
 import { type AgentData } from "./agent-schema.js";
 import { agentSystemData } from "./agent-system-data.js";
+import { getDevLogger } from "../utils/dev-logger.js";
 
 // Default in-game day when the setting is unavailable (matches setting's initial value)
 const DEFAULT_IN_GAME_DAY = 1;
@@ -20,7 +21,7 @@ export function getCurrentDay(): number {
   } catch (err: unknown) {
     if (game.ready) {
       const message = err instanceof Error ? err.message : String(err);
-      console.warn("[INSPECTRES] Failed to get currentDay setting; using default:", { error: err, errorMessage: message });
+      getDevLogger().warn("recovery", "Failed to get currentDay setting; using default", { error: message });
     }
     return DEFAULT_IN_GAME_DAY;
   }
@@ -31,7 +32,6 @@ export type RecoveryStatus = "active" | "dead" | "recovering" | "returned";
 export interface RecoveryInfo {
   status: RecoveryStatus;
   daysRemaining: number;
-  description: string;
 }
 
 export function computeRecoveryStatus(
@@ -42,23 +42,16 @@ export function computeRecoveryStatus(
     return {
       status: "dead",
       daysRemaining: 0,
-      description: "Agent has been killed",
     };
   }
 
-  // Never injured — daysOutOfAction explicitly 0
   if (system.daysOutOfAction === 0) {
     return {
       status: "active",
       daysRemaining: 0,
-      description: "Agent is active",
     };
   }
 
-  // Injured but recovery start day not set — invariant violation
-  // This occurs if: (a) migration failed to initialize recoveryStartedAt on legacy data,
-  // or (b) caller set daysOutOfAction > 0 without setting recoveryStartedAt in the same update.
-  // Treat as if recovery started today to avoid leaving agent permanently blocked.
   const startDay = system.recoveryStartedAt === 0 ? currentDay : system.recoveryStartedAt;
 
   const daysElapsed = currentDay - startDay;
@@ -68,14 +61,12 @@ export function computeRecoveryStatus(
     return {
       status: "recovering",
       daysRemaining,
-      description: `Agent out of action for ${daysRemaining} more day${daysRemaining === 1 ? "" : "s"}`,
     };
   }
 
   return {
     status: "returned",
     daysRemaining: 0,
-    description: "Agent recovered and ready to return",
   };
 }
 
