@@ -39,9 +39,71 @@ export class InSpectresAgent extends Actor {
       if (skillChanges) {
         for (const skill of Object.values(skillChanges)) {
           if (skill && "base" in skill && typeof skill.base === "number" && skill.base > maxSkill) {
-            throw new Error(`Skill value ${skill.base} exceeds max of ${maxSkill} for ${isWeird ? "weird" : "normal"} agent`);
+            throw new Error(`Skill value ${skill.base} exceeds max of ${maxSkill} for ${isWeird ? "weird" : "normal"} agent (p.42, p.59)`);
           }
         }
+      }
+    }
+
+    // Issue #227, #267: Talent field gating for weird agents
+    if (systemChanges && "talent" in systemChanges && typeof systemChanges["talent"] === "string" && systemChanges["talent"]) {
+      const isWeird = (systemChanges["isWeird"] ?? agentSystemData(this as Actor).isWeird) as boolean;
+      if (isWeird) {
+        throw new Error("Weird agents cannot have Talent (p.42, p.59). Clear the Talent field.");
+      }
+    }
+
+    // Issue #256: Validate skill distribution budget
+    if (systemChanges && ("skills" in systemChanges || "isWeird" in systemChanges)) {
+      const isWeird = (systemChanges["isWeird"] ?? agentSystemData(this as Actor).isWeird) as boolean;
+      const skills = (systemChanges["skills"] ?? agentSystemData(this as Actor).skills) as Record<string, { base: number }> | undefined;
+      if (skills) {
+        const totalDice = Object.values(skills).reduce((sum, skill) => sum + (skill?.base ?? 0), 0);
+        const maxDice = isWeird ? 10 : 9;
+        if (totalDice > maxDice) {
+          throw new Error(`Skill total ${totalDice} exceeds max of ${maxDice} dice for ${isWeird ? "weird" : "normal"} agent (p.42, p.59)`);
+        }
+      }
+    }
+
+    return result;
+  }
+
+  override async _preCreate(
+    data: unknown,
+    options: unknown,
+    user: unknown,
+  ): Promise<boolean | void> {
+    // Type fvtt-types boundary: _preCreate signature uses User object, not userId string
+    const result = await super._preCreate(data as Parameters<Actor["_preCreate"]>[0], options as Parameters<Actor["_preCreate"]>[1], user as Parameters<Actor["_preCreate"]>[2]);
+    const source = (data as Record<string, unknown>)?.["system"] as Record<string, unknown> | undefined;
+    const isWeird = source?.["isWeird"] as boolean | undefined;
+
+    // Issue #219, #257: Enforce exactly one weird agent per franchise
+    if (isWeird) {
+      const existingWeirdAgents = game.actors?.filter((actor) => {
+        const actorSystem = actor.system as Record<string, unknown> | undefined;
+        const actorIsWeird = actorSystem?.["isWeird"] as boolean | undefined;
+        return String(actor.type) === "agent" && actorIsWeird === true;
+      }) ?? [];
+      if (existingWeirdAgents.length > 0) {
+        throw new Error("Only one weird agent allowed per group/franchise (p.53). A weird agent already exists.");
+      }
+    }
+
+    // Issue #227: Talent not allowed on weird agents at creation
+    const talent = source?.["talent"] as string | undefined;
+    if (isWeird && talent) {
+      throw new Error("Weird agents cannot have Talent (p.42, p.59). Clear the Talent field before creating a weird agent.");
+    }
+
+    // Issue #256: Validate skill budget at creation
+    const skills = source?.["skills"] as Record<string, { base: number }> | undefined;
+    if (skills) {
+      const totalDice = Object.values(skills).reduce((sum, skill) => sum + (skill?.base ?? 0), 0);
+      const maxDice = isWeird ? 10 : 9;
+      if (totalDice > maxDice) {
+        throw new Error(`Skill total ${totalDice} exceeds max of ${maxDice} dice for ${isWeird ? "weird" : "normal"} agent (p.42, p.59)`);
       }
     }
 
