@@ -349,7 +349,7 @@ Stress penalties **reduce specific skill ratings** by removing dice from those s
 ### Cool Caps
 
 - **Normal agents:** Maximum 3 Cool dice
-  - *VTT Implementation note:* The digital sheet enforces the cap at session end (avoiding mid-session interruptions) rather than immediately. The original rules state a 3-die maximum but do not specify enforcement timing.
+  - *VTT Implementation note:* The digital sheet enforces the cap on world load (session start) rather than immediately during play. Mid-session over-cap states persist until the next world load. The original rules state a 3-die maximum but do not specify enforcement timing.
 - **Weird agents:** No maximum; can hold unlimited Cool
 
 ---
