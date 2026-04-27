@@ -380,9 +380,10 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     }
     const result = await buildVacationDialog({
       agentStress: system.stress,
-      agentName: this.actor.name ?? "Unknown",
       franchiseBank: franchiseSystem.bank,
       franchiseInDebt: franchiseSystem.debtMode,
+      agentCool: system.cool,
+      agentIsWeird: system.isWeird,
     });
     if (!result) return;
     if (result.bankDiceSpent === 0) {
@@ -392,17 +393,19 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
       return;
     }
     const newStress = Math.max(0, system.stress - result.stressReduction);
+    const newCool = system.cool + (result.coolRestored ?? 0);
     const newBank = Math.max(0, franchiseSystem.bank - result.bankDiceSpent);
-    const agentUpdateData = { "system.stress": newStress } as unknown as Parameters<typeof this.actor.update>[0];
+    const agentUpdateData = { "system.stress": newStress, "system.cool": newCool } as unknown as Parameters<
+      typeof this.actor.update
+    >[0];
     const franchiseUpdateData = { "system.bank": newBank } as unknown as Parameters<typeof franchise.update>[0];
     try {
-      await Promise.all([
-        this.actor.update(agentUpdateData),
-        franchise.update(franchiseUpdateData),
-      ]);
+      await this.actor.update(agentUpdateData);
+      await franchise.update(franchiseUpdateData);
+      const coolMessage = (result.coolRestored ?? 0) > 0 ? `, restored ${result.coolRestored} Cool` : "";
       ui.notifications?.info(
         game.i18n?.localize("INSPECTRES.InfoVacationComplete") ??
-          `Vacation: spent ${result.bankDiceSpent} dice, reduced stress by ${result.stressReduction}.`,
+          `Vacation: spent ${result.bankDiceSpent} dice, reduced stress by ${result.stressReduction}${coolMessage}.`,
       );
     } catch (err: unknown) {
       handleActionError(err, "Vacation failed", "INSPECTRES.ErrorVacationFailed", "Failed to apply vacation");
