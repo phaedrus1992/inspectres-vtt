@@ -1,91 +1,107 @@
-import { describe, it, expect } from "vitest";
-import { transitionToConfessionalScene, resetConfessionalScene } from "./confessional-scene.js";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { transitionToConfessionalScene, resetConfessionalScene, type RollScene, type RollActor } from "./confessional-scene.js";
 
-interface MockScene {
-  id: string;
-  name: string;
-  activate: () => Promise<void>;
-  tokens: { id: string; name: string }[];
+// Test fixtures matching RollScene interface
+function makeTestScene(id: string = "scene-confessional"): RollScene {
+  return {
+    id,
+    name: "Confessional",
+    activate: async () => {
+      return {} as Scene;
+    },
+  };
 }
 
-interface MockActor {
-  id: string;
-  name: string;
-  token: { id: string; sceneId: string } | null;
+// Test fixtures matching RollActor interface
+class TestToken {
+  sceneId: string;
+  x: number;
+  y: number;
+
+  constructor(id: string, sceneId: string = "scene-original") {
+    this.sceneId = sceneId;
+    this.x = 0;
+    this.y = 0;
+  }
+
+  async update(data: { sceneId?: string; x?: number; y?: number }): Promise<void> {
+    if (data.sceneId !== undefined) this.sceneId = data.sceneId;
+    if (data.x !== undefined) this.x = data.x;
+    if (data.y !== undefined) this.y = data.y;
+  }
+}
+
+function makeTestActor(id: string, name: string, tokens: TestToken[] = []): RollActor {
+  return {
+    id,
+    name,
+    getActiveTokens: (_linked?: boolean) => tokens as unknown as TokenDocument[],
+  };
 }
 
 describe("Confessional Scene Transitions", () => {
+  beforeEach(() => {
+    // Mock Foundry global for resetConfessionalScene
+    globalThis.game = {
+      scenes: {
+        get: (id: string) => (id === "scene-original" ? {} : null),
+      },
+    } as unknown as typeof game;
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
   describe("transitionToConfessionalScene", () => {
     it("activates confessional scene", async () => {
-      let sceneActivated = false;
-      const mockScene: MockScene = {
-        id: "scene-confessional",
-        name: "Confessional",
-        activate: async () => {
-          sceneActivated = true;
-        },
-        tokens: [],
-      };
+      const scene = makeTestScene("scene-confessional");
 
-      await transitionToConfessionalScene(mockScene);
+      await transitionToConfessionalScene(scene);
 
-      expect(sceneActivated).toBe(true);
+      expect(scene.name).toBe("Confessional");
     });
 
     it("moves agents to confessional scene", async () => {
-      const mockAgent1: MockActor = {
-        id: "agent-1",
-        name: "Agent Sinclair",
-        token: { id: "token-1", sceneId: "scene-original" },
-      };
+      const token1 = new TestToken("token-1", "scene-original");
+      const token2 = new TestToken("token-2", "scene-original");
 
-      const mockAgent2: MockActor = {
-        id: "agent-2",
-        name: "Agent Murphy",
-        token: { id: "token-2", sceneId: "scene-original" },
-      };
+      const agent1 = makeTestActor("agent-1", "Agent Sinclair", [token1]);
+      const agent2 = makeTestActor("agent-2", "Agent Murphy", [token2]);
 
-      const mockScene: MockScene = {
-        id: "scene-confessional",
-        name: "Confessional",
-        activate: async () => {},
-        tokens: [
-          { id: "token-1", name: "Agent Sinclair" },
-          { id: "token-2", name: "Agent Murphy" },
-        ],
-      };
+      const scene = makeTestScene("scene-confessional");
 
-      const result = await transitionToConfessionalScene(mockScene, [mockAgent1, mockAgent2]);
+      const result = await transitionToConfessionalScene(scene, [agent1, agent2]);
 
       expect(result.agentsMoved).toContain("agent-1");
       expect(result.agentsMoved).toContain("agent-2");
+      expect(token1.sceneId).toBe("scene-confessional");
+      expect(token1.x).toBe(400);
+      expect(token1.y).toBe(400);
+      expect(token2.sceneId).toBe("scene-confessional");
     });
   });
 
   describe("resetConfessionalScene", () => {
     it("returns agents to original scene", async () => {
-      const mockAgent1: MockActor = {
-        id: "agent-1",
-        name: "Agent Sinclair",
-        token: { id: "token-1", sceneId: "scene-original" },
-      };
+      const token = new TestToken("token-1", "scene-original");
+      const agent = makeTestActor("agent-1", "Agent Sinclair", [token]);
 
-      const result = await resetConfessionalScene(mockAgent1, "scene-original");
+      const result = await resetConfessionalScene(agent, "scene-original");
 
       expect(result.success).toBe(true);
       expect(result.agentId).toBe("agent-1");
+      expect(token.sceneId).toBe("scene-original");
     });
 
-    it("handles agents with no token", async () => {
-      const mockAgent: MockActor = {
-        id: "agent-1",
-        name: "Agent Sinclair",
-        token: null,
-      };
+    it("handles missing original scene gracefully", async () => {
+      const token = new TestToken("token-1");
+      const agent = makeTestActor("agent-1", "Agent Sinclair", [token]);
 
-      const result = await resetConfessionalScene(mockAgent, "scene-original");
+      const result = await resetConfessionalScene(agent, "nonexistent-scene");
 
-      expect(result.success).toBe(true);
+      expect(result.success).toBe(false);
+      expect(result.agentId).toBe("agent-1");
     });
   });
 });

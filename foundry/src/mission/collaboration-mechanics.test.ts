@@ -53,17 +53,23 @@ describe("Collaboration Mechanics E2E", () => {
     });
 
     it("transitions agents to confessional scene", async () => {
+      // Create test token to track scene updates
+      const testToken = { sceneId: "scene-original", x: 0, y: 0, async update(data) {
+        if (data.sceneId) this.sceneId = data.sceneId;
+        if (data.x) this.x = data.x;
+        if (data.y) this.y = data.y;
+      } };
+
       const mockScene = {
         id: "scene-confessional",
         name: "Confessional",
         activate: async () => {},
-        tokens: [],
       };
 
       const mockAgent = {
         id: "agent-1",
         name: "Agent Sinclair",
-        token: { id: "token-1", sceneId: "scene-original" },
+        getActiveTokens: () => [testToken] as unknown as TokenDocument[],
       };
 
       const result = await transitionToConfessionalScene(mockScene, [mockAgent]);
@@ -73,10 +79,19 @@ describe("Collaboration Mechanics E2E", () => {
     });
 
     it("returns agent from confessional after use", async () => {
+      // Mock Foundry global
+      globalThis.game = {
+        scenes: { get: (id: string) => (id === "scene-original" ? {} : null) },
+      } as unknown as typeof game;
+
+      const testToken = { sceneId: "scene-original", async update(data) {
+        if (data.sceneId) this.sceneId = data.sceneId;
+      } };
+
       const mockAgent = {
         id: "agent-1",
         name: "Agent Sinclair",
-        token: { id: "token-1", sceneId: "scene-original" },
+        getActiveTokens: () => [testToken] as unknown as TokenDocument[],
       };
 
       const resetResult = await resetConfessionalScene(mockAgent, "scene-original");
@@ -86,6 +101,11 @@ describe("Collaboration Mechanics E2E", () => {
     });
 
     it("handles complex mission with all three mechanics", async () => {
+      // Mock Foundry global for confessional reset
+      globalThis.game = {
+        scenes: { get: (id: string) => (id === "scene-original" ? {} : null) },
+      } as unknown as typeof game;
+
       const context: MissionContext = {
         agentName: "Agent Sinclair",
         skillName: "academics",
@@ -113,16 +133,21 @@ describe("Collaboration Mechanics E2E", () => {
       expect(techCheckResult.allowed).toBe(true);
 
       // Step 3: Transition to confessional
+      const testToken = { sceneId: "scene-original", x: 0, y: 0, async update(data) {
+        if (data.sceneId) this.sceneId = data.sceneId;
+        if (data.x) this.x = data.x;
+        if (data.y) this.y = data.y;
+      } };
+
       const mockScene = {
         id: "scene-confessional",
         name: "Confessional",
         activate: async () => {},
-        tokens: [],
       };
       const mockAgent = {
         id: "agent-1",
         name: context.agentName,
-        token: { id: "token-1", sceneId: "scene-original" },
+        getActiveTokens: () => [testToken] as unknown as TokenDocument[],
       };
       const sceneResult = await transitionToConfessionalScene(mockScene, [mockAgent]);
       expect(sceneResult.agentsMoved).toContain("agent-1");
