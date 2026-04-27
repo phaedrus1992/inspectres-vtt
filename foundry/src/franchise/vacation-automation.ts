@@ -3,6 +3,7 @@
  * Hazard Pay, Characteristics Bonus, Bankruptcy Restart
  */
 
+import { getActorSystem } from "../utils/system-cast.js";
 import { calculateHazardPay } from "./end-of-session-bonuses.js";
 import { type FranchiseData } from "./franchise-schema.js";
 
@@ -22,7 +23,7 @@ export interface BankruptcyRestartResult {
  * Apply end-of-session bonuses: hazard pay + characteristics bonus
  */
 export async function applyEndOfSessionBonuses(context: EndOfSessionContext): Promise<void> {
-  const system = context.franchiseActor.system as unknown as FranchiseData;
+  const system = getActorSystem<FranchiseData>(context.franchiseActor);
 
   let banUpdate = system.bank;
 
@@ -117,7 +118,7 @@ export async function initiateBankruptcyRestart(franchiseActor: Actor): Promise<
   }
 
   // Reset franchise
-  const system = franchiseActor.system as unknown as FranchiseData;
+  const system = getActorSystem<FranchiseData>(franchiseActor);
   try {
     // Type: Actor.update() uses dotted paths; cast matches Foundry API
     const resetData = {

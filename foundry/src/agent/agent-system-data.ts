@@ -1,9 +1,9 @@
+import { getActorSystem, type RollActor } from "../utils/system-cast.js";
 import { type AgentData } from "./agent-schema.js";
 import { validateCoolCapPostLoad } from "../validation/gating-validation.js";
 
-export function agentSystemData(actor: { system: unknown } | Actor): AgentData {
-  // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
-  return actor.system as unknown as AgentData;
+export function agentSystemData(actor: RollActor | Actor): AgentData {
+  return getActorSystem<AgentData>(actor);
 }
 
 // #282: Enforce 3-die Cool cap for normal agents post-load

@@ -2,6 +2,7 @@
  * InSpectres Agent Character Sheet
  */
 
+import { getActorSystem } from "../utils/system-cast.js";
 import { type AgentCharacteristic } from "./agent-schema.js";
 import { executeSkillRoll, executeStressRoll, type SkillName } from "../rolls/roll-executor.js";
 import { agentSystemData } from "./agent-system-data.js";
@@ -124,7 +125,6 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
 
   override async _prepareContext(_options: foundry.applications.api.ApplicationV2Options): Promise<Record<string, unknown>> {
     const base = await super._prepareContext(_options);
-    // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
     const system = agentSystemData(this.actor);
     const currentDay = getCurrentDay();
     const recoveryStatus = computeRecoveryStatus(system, currentDay);
@@ -249,7 +249,6 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
       console.error("onSkillStep: missing or invalid data-skill attribute", { skillAttr });
       return;
     }
-    // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
     const system = agentSystemData(this.actor);
     const status = computeRecoveryStatus(system, getCurrentDay());
     if (status.status === "recovering" || status.status === "dead") {
@@ -284,7 +283,6 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
       console.error("onToggleCool: invalid data-value", { valueStr });
       return;
     }
-    // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
     const system = agentSystemData(this.actor);
     const status = computeRecoveryStatus(system, getCurrentDay());
     if (status.status === "recovering" || status.status === "dead") {
@@ -374,7 +372,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
       ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnFranchiseNotFound") ?? "Franchise actor not found.");
       return;
     }
-    const franchiseSystem = franchise.system as unknown as FranchiseData;
+    const franchiseSystem = getActorSystem<FranchiseData>(franchise);
     const status = computeRecoveryStatus(system, getCurrentDay());
     if (status.status === "recovering" || status.status === "dead") {
       ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnActionBlockedRecovery") ?? "Cannot act while recovering");
