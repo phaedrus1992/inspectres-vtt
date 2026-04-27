@@ -62,10 +62,25 @@ export async function createDistributionDialog(opts: DistributionDialogOptions):
           if (!form) return null;
           const data = new FormData(form);
           const distribution: Record<string, number> = {};
+
           for (const player of players) {
-            const raw = Number(data.get(`player-${player.id}`) ?? 0);
-            distribution[player.id] = isNaN(raw) ? 0 : Math.max(0, raw);
+            const inputName = `player-${player.id}`;
+            const rawValue = data.get(inputName);
+
+            // Validate that form input exists and is not null
+            if (rawValue === null) {
+              throw new Error(`Form input missing for ${player.name} (${inputName}). This may indicate a rendering issue.`);
+            }
+
+            const num = Number(rawValue);
+            // Reject unparsable or negative values with clear context
+            if (isNaN(num) || num < 0) {
+              throw new Error(`Invalid dice count for ${player.name}: "${rawValue}". Please enter a whole number ≥ 0.`);
+            }
+
+            distribution[player.id] = num;
           }
+
           return distribution;
         },
       },
