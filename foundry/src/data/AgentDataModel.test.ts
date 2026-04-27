@@ -27,7 +27,6 @@ describe("AgentDataModel", () => {
     expect(schema).toHaveProperty("cool");
     expect(schema).toHaveProperty("isWeird");
     expect(schema).toHaveProperty("characteristics");
-    expect(schema).toHaveProperty("missionPool");
     expect(schema).toHaveProperty("description");
   });
 
@@ -121,7 +120,6 @@ describe("AgentDataModel", () => {
         "daysOutOfAction",
         "isDead",
         "isWeird",
-        "missionPool",
         "power",
         "recoveryStartedAt",
         "skills",

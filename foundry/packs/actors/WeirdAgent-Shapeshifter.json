@@ -24,7 +24,6 @@
       { "text": "Can only maintain one form at a time", "used": false },
       { "text": "Maintains physical limitations of the form (height, mass)", "used": false }
     ],
-    "missionPool": 0,
     "isDead": false,
     "daysOutOfAction": 0,
     "recoveryStartedAt": 0,

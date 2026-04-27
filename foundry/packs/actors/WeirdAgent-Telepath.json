@@ -24,7 +24,6 @@
       { "text": "Requires physical contact to use power", "used": false },
       { "text": "Psychic echoes of violence cause stress (optional house rule)", "used": false }
     ],
-    "missionPool": 0,
     "isDead": false,
     "daysOutOfAction": 0,
     "recoveryStartedAt": 0,

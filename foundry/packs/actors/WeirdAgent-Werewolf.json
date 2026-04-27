@@ -25,7 +25,6 @@
       { "text": "Vulnerable to wolfsbane and silver", "used": false },
       { "text": "Cannot control transformation during full moon", "used": false }
     ],
-    "missionPool": 0,
     "isDead": false,
     "daysOutOfAction": 0,
     "recoveryStartedAt": 0,

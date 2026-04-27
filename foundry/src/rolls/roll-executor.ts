@@ -7,6 +7,7 @@ import {
   type DeathDismembermentOutcome,
 } from "./roll-charts.js";
 import { type AgentData } from "../agent/agent-schema.js";
+import { agentSystemData } from "../agent/agent-system-data.js";
 import { type FranchiseData } from "../franchise/franchise-schema.js";
 import { emitMissionPoolUpdated } from "../mission/socket.js";
 import { getCurrentDay, computeRecoveryStatus } from "../agent/recovery-utils.js";
@@ -146,7 +147,7 @@ export async function executeSkillRoll(
   // If an agent somehow rolls while recovering due to a UI race condition, the error should propagate to the caller.
 
   // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
-  const system = agent.system as unknown as AgentData;
+  const system = agentSystemData(agent);
   const skill = system.skills[skillName];
   const effectiveDice = Math.max(0, skill.base - skill.penalty);
 
@@ -367,7 +368,7 @@ export async function executeStressRoll(
   // If an agent somehow rolls while recovering due to a UI race condition, the error should propagate to the caller.
 
   // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
-  const system = agent.system as unknown as AgentData;
+  const system = agentSystemData(agent);
   const { stressDiceCount, coolDiceUsed } = params;
 
   const { roll, faces } = await rollDice(stressDiceCount);

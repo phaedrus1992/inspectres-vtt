@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Renamed project to "InSpectres VTT" for clearer branding and discoverability. The system id is unchanged ("inspectres"), so existing worlds and saves continue to work without migration.
 
+
 ## [0.2.0] - 2026-04-23
 
 ### Added

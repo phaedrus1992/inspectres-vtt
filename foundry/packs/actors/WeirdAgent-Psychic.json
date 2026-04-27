@@ -25,7 +25,6 @@
       { "text": "Caffeine-dependent (2+ cups per day)", "used": false },
       { "text": "Takes stress penalties from crowds and loud environments", "used": false }
     ],
-    "missionPool": 0,
     "isDead": false,
     "daysOutOfAction": 0,
     "recoveryStartedAt": 0,
