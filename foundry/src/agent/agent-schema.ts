@@ -35,5 +35,13 @@ export interface AgentData {
   isDead: boolean;
   daysOutOfAction: number;
   recoveryStartedAt: number;
+  /**
+   * Accumulated stress points (0–6 scale).
+   * Rules define stress as the sum of all skill penalties, but the VTT uses a single counter
+   * for simplified vacation dialog rendering. The counter is reduced when spending Bank dice
+   * on Vacation. This dual representation (counter + individual skill penalties) is intentional:
+   * skill penalties track mechanical effects during play, while the stress counter simplifies
+   * vacation UI presentation.
+   */
   stress: number;
 }
