@@ -32,8 +32,41 @@ export interface AgentData {
   isWeird: boolean;
   power?: WeirdPower | null;
   characteristics: AgentCharacteristic[];
+  /**
+   * Agent is out of action due to death or dismemberment.
+   *
+   * Invariant: when isDead=true, recoveryStartedAt and daysOutOfAction must both be set.
+   * Recovery is complete when currentDay >= recoveryStartedAt + daysOutOfAction.
+   * Use autoClearRecoveredAgents() hook to auto-revive when timer expires.
+   *
+   * @see recoveryStartedAt
+   * @see daysOutOfAction
+   */
   isDead: boolean;
+  /**
+   * Duration of recovery in wall-clock days.
+   *
+   * Recovery formula: complete when currentDay >= recoveryStartedAt + daysOutOfAction
+   * Use wall-clock time (Foundry currentDay setting), not game time.
+   * GM explicitly advances currentDay; system auto-clears when time expires.
+   *
+   * Invariant: only meaningful when isDead=true.
+   *
+   * @see isDead
+   * @see recoveryStartedAt
+   */
   daysOutOfAction: number;
+  /**
+   * Wall-clock day when recovery started (Foundry setting currentDay).
+   *
+   * Used to calculate when recovery expires: currentDay >= recoveryStartedAt + daysOutOfAction
+   * Stored at moment death occurs; enables recovery timer to survive session restarts.
+   *
+   * Invariant: only meaningful when isDead=true.
+   *
+   * @see isDead
+   * @see daysOutOfAction
+   */
   recoveryStartedAt: number;
   /**
    * Accumulated stress points (0–6 scale).
