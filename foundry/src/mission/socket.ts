@@ -1,5 +1,5 @@
 import { getDevLogger } from "../utils/dev-logger.js";
-import { isMissionSocketPayload, type MissionSocketPayload } from "../socket/socket-guards.js";
+import { getPayloadType, isMissionSocketPayload, type MissionSocketPayload } from "../socket/socket-guards.js";
 
 export const SOCKET_EVENT = "system.inspectres";
 
@@ -13,9 +13,9 @@ export function emitMissionPoolUpdated(franchiseId: string): void {
 export function onMissionSocketEvent(handler: (payload: MissionSocketPayload) => void): void {
   game.socket?.on(SOCKET_EVENT, (payload: unknown) => {
     if (!isMissionSocketPayload(payload)) {
-      if (typeof payload === "object" && payload !== null && "type" in payload) {
-        const p = payload as { type: unknown };
-        getDevLogger().warn("socket", "Unhandled payload type", { type: p.type });
+      const type = getPayloadType(payload);
+      if (type !== undefined) {
+        getDevLogger().warn("socket", "Unhandled payload type", { type });
       }
       return;
     }
