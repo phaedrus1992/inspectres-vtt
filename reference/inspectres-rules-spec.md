@@ -348,7 +348,8 @@ Stress penalties **reduce specific skill ratings** by removing dice from those s
 
 ### Cool Caps
 
-- **Normal agents:** Maximum 3 Cool dice (can exceed briefly during play; must honor cap at session end)
+- **Normal agents:** Maximum 3 Cool dice
+  - *VTT Implementation note:* The digital sheet enforces the cap on world load (session start) rather than immediately during play. Mid-session over-cap states persist until the next world load. The original rules state a 3-die maximum but do not specify enforcement timing.
 - **Weird agents:** No maximum; can hold unlimited Cool
 
 ---
@@ -516,6 +517,7 @@ Mission is complete.
 Team recovers and relaxes.
 
 - **Spend Bank dice or franchise dice** to restore stress penalties
+  - **Bank dice spending:** When spending Bank dice to restore stress or Cool, **roll all spent Bank dice first and consult the Bank Roll Chart**. Apply the chart result, then apply the recovery benefit.
 - One die spent = +1 to one skill
 - Weird agents may also spend dice to restore Cool
 - Can be brief or extended into the next mission's setup
@@ -746,7 +748,9 @@ If a character loses many stress dice and needs recovery time, use this table:
 | 2 | Service Charge: lose this die + 1 additional Bank die |
 | 1 | Account Overrun: lose ALL Bank dice |
 
-### Client Roll Chart (Roll 2d6 for each field)
+### Client Roll Chart (Roll 2d6 or choose for each field)
+
+When generating a client, roll 2d6 for each field, or choose whatever result seems most interesting for the session.
 
 | Roll | Personality | Client Type | Occurrence | Location |
 |---|---|---|---|---|
