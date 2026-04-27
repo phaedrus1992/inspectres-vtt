@@ -1,0 +1,60 @@
+# Dependencies and build artifacts
+node_modules/
+*/node_modules/
+dist/
+build/
+.next/
+coverage/
+
+# Package lock files (large, rarely edited directly)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Git and version control
+.git/
+.gitignore
+
+# IDE and editor artifacts
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Build and runtime caches
+.cache/
+.parcel-cache/
+.next/
+out/
+dist/
+build/
+
+# Foundry VTT specific
+foundry/dist/
+foundry/node_modules/
+docs/node_modules/
+docs/build/
+
+# Temporary and scratch files
+.tmp/
+.claude/
+
+# Database and data files
+*.db
+*.sqlite
+*.sqlite3
+
+# Environment files (secrets, tokens)
+.env
+.env.local
+.env.*.local
+
+# Testing artifacts
+coverage/
+.nyc_output/
+
+# OS and system files
+.DS_Store
+Thumbs.db
