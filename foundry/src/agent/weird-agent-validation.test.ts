@@ -1,145 +1,239 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import type { AgentData } from "./agent-schema.js";
 
-function createMockAgentSystem(overrides: Partial<AgentData> = {}): AgentData {
-  return {
-    description: "",
-    skills: {
-      academics: { base: 1, penalty: 0 },
-      athletics: { base: 1, penalty: 0 },
-      technology: { base: 1, penalty: 0 },
-      contact: { base: 1, penalty: 0 },
-    },
-    talent: "",
-    cool: 1,
-    isWeird: false,
-    power: null,
-    characteristics: [],
-    isDead: false,
-    daysOutOfAction: 0,
-    recoveryStartedAt: 0,
-    stress: 0,
-    ...overrides,
-  };
+/**
+ * Validation helper functions extracted for testing.
+ * These mirror the validation logic in InSpectresAgent._preCreate and _preUpdate.
+ */
+
+function validateSkillRange(
+  isWeird: boolean,
+  skills: Record<string, { base?: number }> | undefined,
+): void {
+  if (!skills) return;
+  const maxSkill = isWeird ? 10 : 4;
+  for (const skill of Object.values(skills)) {
+    if (skill && "base" in skill && typeof skill.base === "number" && skill.base > maxSkill) {
+      throw new Error(
+        `Skill value ${skill.base} exceeds max of ${maxSkill} for ${isWeird ? "weird" : "normal"} agent (p.42, p.59)`,
+      );
+    }
+  }
+}
+
+function validateSkillBudget(isWeird: boolean, skills: Record<string, { base: number }> | undefined): void {
+  if (!skills) return;
+  const totalDice = Object.values(skills).reduce((sum, skill) => sum + (skill?.base ?? 0), 0);
+  const maxDice = isWeird ? 10 : 9;
+  if (totalDice > maxDice) {
+    throw new Error(
+      `Skill total ${totalDice} exceeds max of ${maxDice} dice for ${isWeird ? "weird" : "normal"} agent (p.42, p.59)`,
+    );
+  }
+}
+
+function validateTalentGating(isWeird: boolean, talent: string | undefined): void {
+  if (isWeird && talent) {
+    throw new Error("Weird agents cannot have Talent (p.42, p.59). Clear the Talent field.");
+  }
+}
+
+function validateSkillMinimum(skills: Record<string, { base: number }> | undefined): void {
+  if (!skills) return;
+  for (const skill of Object.values(skills)) {
+    if (skill && "base" in skill && typeof skill.base === "number" && skill.base < 0) {
+      throw new Error("Skill base cannot be negative");
+    }
+  }
 }
 
 describe("Weird Agent Validation", () => {
-  describe("Skill distribution validation", () => {
-    it("allows up to 4 per skill and 9-die total for normal agents", async () => {
-      const system = createMockAgentSystem({
-        isWeird: false,
-        skills: {
-          academics: { base: 4, penalty: 0 },
-          athletics: { base: 3, penalty: 0 },
-          technology: { base: 2, penalty: 0 },
-          contact: { base: 0, penalty: 0 },
-        },
-      });
-      // Total = 9 dice, max per skill = 4
-      expect(system.skills.academics.base).toBe(4);
+  describe("Skill range validation", () => {
+    it("allows up to 4 per skill for normal agents", () => {
+      const skills = {
+        academics: { base: 4 },
+        athletics: { base: 0 },
+        technology: { base: 0 },
+        contact: { base: 0 },
+      };
+      expect(() => validateSkillRange(false, skills)).not.toThrow();
     });
 
-    it("allows up to 10 per skill and 10-die total for weird agents", async () => {
-      const system = createMockAgentSystem({
-        isWeird: true,
-        skills: {
-          academics: { base: 10, penalty: 0 },
-          athletics: { base: 0, penalty: 0 },
-          technology: { base: 0, penalty: 0 },
-          contact: { base: 0, penalty: 0 },
-        },
-      });
-      expect(system.skills.academics.base).toBe(10);
+    it("rejects skills exceeding 4 for normal agents", () => {
+      const skills = {
+        academics: { base: 5 },
+        athletics: { base: 0 },
+        technology: { base: 0 },
+        contact: { base: 0 },
+      };
+      expect(() => validateSkillRange(false, skills)).toThrow(/exceeds max of 4/);
     });
 
-    it("enforces 10-die total for weird agents (not more)", async () => {
-      const system = createMockAgentSystem({
-        isWeird: true,
-        skills: {
-          academics: { base: 6, penalty: 0 },
-          athletics: { base: 5, penalty: 0 },
-          technology: { base: 0, penalty: 0 },
-          contact: { base: 0, penalty: 0 },
-        },
-      });
-      // Total = 11 dice, should be rejected
-      // Issue #256: validation implemented in _preUpdate
-      const total = Object.values(system.skills).reduce((sum, skill) => sum + (skill?.base ?? 0), 0);
-      expect(total).toBe(11);
+    it("allows up to 10 per skill for weird agents", () => {
+      const skills = {
+        academics: { base: 10 },
+        athletics: { base: 0 },
+        technology: { base: 0 },
+        contact: { base: 0 },
+      };
+      expect(() => validateSkillRange(true, skills)).not.toThrow();
+    });
+
+    it("rejects skills exceeding 10 for weird agents", () => {
+      const skills = {
+        academics: { base: 11 },
+        athletics: { base: 0 },
+        technology: { base: 0 },
+        contact: { base: 0 },
+      };
+      expect(() => validateSkillRange(true, skills)).toThrow(/exceeds max of 10/);
+    });
+  });
+
+  describe("Skill budget validation", () => {
+    it("allows 9 total dice for normal agents", () => {
+      const skills = {
+        academics: { base: 4 },
+        athletics: { base: 3 },
+        technology: { base: 2 },
+        contact: { base: 0 },
+      };
+      expect(() => validateSkillBudget(false, skills)).not.toThrow();
+    });
+
+    it("rejects 10+ total dice for normal agents", () => {
+      const skills = {
+        academics: { base: 4 },
+        athletics: { base: 3 },
+        technology: { base: 2 },
+        contact: { base: 1 },
+      };
+      expect(() => validateSkillBudget(false, skills)).toThrow(/exceeds max of 9 dice/);
+    });
+
+    it("allows 10 total dice for weird agents", () => {
+      const skills = {
+        academics: { base: 10 },
+        athletics: { base: 0 },
+        technology: { base: 0 },
+        contact: { base: 0 },
+      };
+      expect(() => validateSkillBudget(true, skills)).not.toThrow();
+    });
+
+    it("rejects 11+ total dice for weird agents", () => {
+      const skills = {
+        academics: { base: 6 },
+        athletics: { base: 5 },
+        technology: { base: 0 },
+        contact: { base: 0 },
+      };
+      expect(() => validateSkillBudget(true, skills)).toThrow(/exceeds max of 10 dice/);
     });
   });
 
   describe("Talent field gating", () => {
-    it("allows talent on normal agents", async () => {
-      const system = createMockAgentSystem({
-        isWeird: false,
-        talent: "Some Talent",
-      });
-      expect(system.talent).toBe("Some Talent");
+    it("allows talent on normal agents", () => {
+      expect(() => validateTalentGating(false, "Some Talent")).not.toThrow();
     });
 
-    it("rejects talent on weird agents", async () => {
-      const system = createMockAgentSystem({
-        isWeird: true,
-        talent: "Some Talent",
-      });
-      // Issue #227, #267: validation implemented in _preUpdate
-      expect(system.talent).toBe("Some Talent");
+    it("rejects talent on weird agents", () => {
+      expect(() => validateTalentGating(true, "Some Talent")).toThrow(
+        /Weird agents cannot have Talent/,
+      );
+    });
+
+    it("allows empty/undefined talent on weird agents", () => {
+      expect(() => validateTalentGating(true, undefined)).not.toThrow();
+      expect(() => validateTalentGating(true, "")).not.toThrow();
     });
   });
 
-  describe("Power field persistence", () => {
-    it("persists power field on reload", async () => {
-      const power = {
-        name: "Psychometry",
-        description: "Touch objects to see past events",
-        baseSkill: "contact" as const,
-        coolCost: 1,
+  describe("Skill minimum validation", () => {
+    it("rejects negative skill base values", () => {
+      const skills = {
+        academics: { base: -1 },
+        athletics: { base: 0 },
+        technology: { base: 0 },
+        contact: { base: 0 },
       };
-      const system = createMockAgentSystem({
-        isWeird: true,
-        power,
-      });
-      expect(system.power).toEqual(power);
+      expect(() => validateSkillMinimum(skills)).toThrow(/cannot be negative/);
     });
 
-    it("preserves power when not modified", async () => {
-      const power = {
-        name: "Telepathy",
-        description: "Read minds",
-        baseSkill: "contact" as const,
-        coolCost: 2,
+    it("allows zero skill base values", () => {
+      const skills = {
+        academics: { base: 0 },
+        athletics: { base: 0 },
+        technology: { base: 0 },
+        contact: { base: 0 },
       };
-      const system = createMockAgentSystem({
-        isWeird: true,
-        power,
-      });
-      const reloaded = createMockAgentSystem({
-        isWeird: true,
-        power,
-      });
-      expect(reloaded.power).toEqual(power);
-    });
-
-    it("allows clearing power on weird agent", async () => {
-      const system = createMockAgentSystem({
-        isWeird: true,
-        power: {
-          name: "Precognition",
-          description: "See the future",
-          baseSkill: "contact" as const,
-          coolCost: 3,
-        },
-      });
-      system.power = null;
-      expect(system.power).toBeNull();
+      expect(() => validateSkillMinimum(skills)).not.toThrow();
     });
   });
 
-  describe("Error messages reference rulebook", () => {
-    it("error messages include rulebook page references", async () => {
-      // Messages should mention p.42, p.53, p.59 where applicable
-      expect(true).toBe(true);
+  describe("Combined validation (multi-rule checks)", () => {
+    it("validates skill range before budget (catches overspend per-skill first)", () => {
+      const skills = {
+        academics: { base: 5 }, // exceeds per-skill max of 4 for normal
+        athletics: { base: 0 },
+        technology: { base: 0 },
+        contact: { base: 0 },
+      };
+      expect(() => {
+        validateSkillRange(false, skills);
+        validateSkillBudget(false, skills);
+      }).toThrow(/exceeds max of 4/); // per-skill check catches it first
+    });
+
+    it("validates talent gating independently", () => {
+      const skills = {
+        academics: { base: 4 },
+        athletics: { base: 3 },
+        technology: { base: 2 },
+        contact: { base: 0 },
+      };
+      // Weird agent with valid skills but invalid talent
+      expect(() => {
+        validateSkillRange(true, skills);
+        validateSkillBudget(true, skills);
+        validateTalentGating(true, "Some Talent");
+      }).toThrow(/Weird agents cannot have Talent/);
+    });
+
+    it("validates skill minimum as lower bound", () => {
+      const skills = {
+        academics: { base: -2 },
+        athletics: { base: 0 },
+        technology: { base: 0 },
+        contact: { base: 0 },
+      };
+      expect(() => validateSkillMinimum(skills)).toThrow(/cannot be negative/);
+    });
+  });
+
+  describe("Error messages include rulebook references", () => {
+    it("skill range error includes page references", () => {
+      const skills = {
+        academics: { base: 5 },
+        athletics: { base: 0 },
+        technology: { base: 0 },
+        contact: { base: 0 },
+      };
+      expect(() => validateSkillRange(false, skills)).toThrow(/p\.42, p\.59/);
+    });
+
+    it("skill budget error includes page references", () => {
+      const skills = {
+        academics: { base: 4 },
+        athletics: { base: 3 },
+        technology: { base: 2 },
+        contact: { base: 1 },
+      };
+      expect(() => validateSkillBudget(false, skills)).toThrow(/p\.42, p\.59/);
+    });
+
+    it("talent error includes page references", () => {
+      expect(() => validateTalentGating(true, "Some Talent")).toThrow(/p\.42, p\.59/);
     });
   });
 });
