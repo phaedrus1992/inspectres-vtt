@@ -44,6 +44,7 @@ Patterns split by domain. Each file scoped to specific paths:
 | `foundry-api.md` | `foundry/**/*` | Document API, hooks, updates |
 | `playwright-foundry.md` | `foundry/**/*.test.ts` | Foundry testing |
 | `enums-and-magic-strings.md` | `**/*.ts` `**/*.hbs` | Avoid magic strings; prefer enums, especially templates |
+| `temporary-work.md` | `.tmp/**` | Scratch files, logs, reports, build artifacts |
 | `changelog.md` | `CHANGELOG.md` | Semver & changelog format |
 
 Auto-loaded by Claude Code. Supplement main CLAUDE.md.
