@@ -7,10 +7,19 @@ From `foundry/` directory:
 npm install
 npm run dev        # Watch build
 npm run build      # Production build
-npm run check      # Type check
+npm run check      # Type check only
+npm run lint       # Lint only
 npm run test       # Run tests
 npm run test:watch # Watch mode
+npm run quality    # ALL checks: lint + type + tests (use before commit)
 ```
+
+**Before committing:** Always run `npm run quality` to validate all changes. This runs:
+1. **oxlint** with `--fix` (auto-fixes style issues)
+2. **TypeScript** type checker (`tsc --noEmit`)
+3. **vitest** test suite (all tests must pass)
+
+Pre-commit hooks run `npm run quality` on push. Run locally first to catch issues early.
 
 ## Game Mechanics Questions
 
@@ -317,6 +326,49 @@ Game-critical operations **must have discoverable UI buttons**, not require navi
 **If play-testing shows high access frequency:** Consider hybrid approach with toolbar widget for day/mission/vacation quick-access, keeping detailed controls on sheets.
 
 **See also:** GitHub issues #159–#168 (GM control audit results)
+
+## Pre-Commit Hooks
+
+**Configuration:** `.pre-commit-config.yaml` (authoritative source; `.prek.toml` removed)
+
+### Setup
+```bash
+prek install                    # Install hooks
+prek auto-update --cooldown 7   # Auto-update prek framework
+```
+
+### Running hooks locally
+```bash
+cd foundry
+
+# Run all quality checks (RECOMMENDED before every commit)
+npm run quality
+
+# Or individually:
+npm run lint                    # oxlint with --fix
+npm run check                   # TypeScript type check
+npm run test                    # vitest suite
+
+# Run prek manually (same as what push would trigger)
+prek run --all-files
+```
+
+### Workflows
+
+**Before committing:**
+1. Make changes in `foundry/src/`
+2. Run `npm run quality` (lint + type + test)
+3. Fix any failures
+4. Commit with message including `Fixes #<issue-id>` in body
+
+**On push:**
+- Pre-commit hook fires: runs spell check (typos)
+- Pre-push hook fires: runs `npm run quality` (all three checks)
+- If any hook fails, fix and retry push
+
+**Why separate hooks:**
+- `pre-commit`: Fast, spell-check only (catches typos early)
+- `pre-push`: Full quality check (catches code issues before remote)
 
 <!-- icm:start -->
 ## Persistent memory (ICM) — MANDATORY
