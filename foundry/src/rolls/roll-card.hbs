@@ -5,6 +5,16 @@
     {{#if takesFour}}
       <p class="roll-card-note">{{localize "INSPECTRES.RollCardTookFour"}}</p>
     {{/if}}
+    {{#if requirementTier}}
+      <div class="roll-card-requirement">
+        <p><strong>{{localize "INSPECTRES.DialogRequirementTier"}}:</strong> {{localize (concat "INSPECTRES.Requirement." (inspectres-capitalize requirementTier))}}</p>
+        {{#if requirementDefect}}
+          <p class="requirement-defect">⚠ {{localize "INSPECTRES.RequirementDefect"}}</p>
+        {{else if requirementCheckFailed}}
+          <p class="requirement-failed">✗ {{localize "INSPECTRES.RequirementCheckFail"}}</p>
+        {{/if}}
+      </div>
+    {{/if}}
     <div class="roll-card-outcome">
       <span class="roll-card-result">{{localize result}}</span>
       <p class="roll-card-narration">{{localize narration}}</p>

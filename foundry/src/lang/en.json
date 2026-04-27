@@ -53,6 +53,7 @@
     "DialogCoolDice": "Cool Dice (0–{max})",
     "DialogTalentDie": "Talent Die",
     "DialogTakesFour": "Take a 4 (skip roll)",
+    "DialogRequirementTier": "Requirement Tier",
     "DialogStressDice": "Stress Dice (1–5)",
     "DialogCoolIgnore": "Cool dice to ignore lowest (0–{max})",
     "DialogRoll": "Roll",
@@ -87,7 +88,6 @@
     "ErrorUpdateFailed": "Failed to update actor data",
     "ErrorRollFailed": "Roll failed",
     "ErrorSkillRollFailed": "Skill roll failed",
-    "ErrorStressRollFailed": "Stress roll failed",
     "ErrorBankRollFailed": "Bank roll failed",
     "ErrorClientRollFailed": "Client roll failed",
     "ErrorNoFranchise": "No franchise actor found in this world.",
@@ -322,6 +322,13 @@
     "TooltipSkillAthletics": "Test physical feats. Success = earn mission dice; Failure = GM narrates complications.",
     "TooltipSkillTechnology": "Test technical investigations. Success = earn mission dice; Failure = GM narrates complications.",
     "TooltipSkillContact": "Test social and networking investigations. Success = earn mission dice; Failure = GM narrates complications.",
-    "TooltipCharacteristicUsed": "Mark as used if this characteristic was invoked during the roll. Used characteristics reduce stress penalty by 1."
+    "TooltipCharacteristicUsed": "Mark as used if this characteristic was invoked during the roll. Used characteristics reduce stress penalty by 1.",
+    "Requirement": {
+      "Common": "Common (4+)",
+      "Rare": "Rare (5+)",
+      "Exotic": "Exotic (6)"
+    },
+    "RequirementCheckFail": "Requirement check failed — automatic failure",
+    "RequirementDefect": "Equipment defect! Critical failure on barely-missed requirement"
   }
 }

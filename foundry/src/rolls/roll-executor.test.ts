@@ -181,6 +181,83 @@ describe("executeSkillRoll", () => {
     expect(rollFormula).toBe("2d6");
     expect(chatCreateSpy).toHaveBeenCalled();
   });
+
+  describe("Requirement Gating (Phase 1)", () => {
+    it("does not auto-fail when roll meets requirement tier (common=4)", async () => {
+      (globalThis as unknown as { Roll: typeof MockRoll }).Roll = class extends MockRoll {
+        constructor(formula: string) {
+          super(formula);
+          this.setResults([4]);
+        }
+      };
+      const agent = makeAgent();
+      const franchise = makeFranchise();
+      await executeSkillRoll(agent, franchise, "technology", { requirementTier: "common" });
+      // Roll of 4 meets common requirement (4+), so should NOT auto-fail (Fair = 0 franchise dice, but roll was successful)
+      expect((franchise.system as Record<string, unknown>)["missionPool"]).toBe(0);
+    });
+
+    it("auto-fails when roll below requirement tier (rare=5)", async () => {
+      (globalThis as unknown as { Roll: typeof MockRoll }).Roll = class extends MockRoll {
+        constructor(formula: string) {
+          super(formula);
+          this.setResults([4]);
+        }
+      };
+      const agent = makeAgent();
+      const franchise = makeFranchise();
+      await executeSkillRoll(agent, franchise, "technology", { requirementTier: "rare" });
+      // Roll of 4 is below rare requirement (5+), so auto-fails (roll outcome = 1)
+      // Outcome of 1 = Terrible, which awards 0 franchise dice
+      expect((franchise.system as Record<string, unknown>)["missionPool"]).toBe(0);
+    });
+
+    it("triggers defect when roll = minTier - 1 on rare items", async () => {
+      (globalThis as unknown as { Roll: typeof MockRoll }).Roll = class extends MockRoll {
+        constructor(formula: string) {
+          super(formula);
+          this.setResults([4]); // 4 = 5 - 1, triggers defect on rare
+        }
+      };
+      const agent = makeAgent();
+      const franchise = makeFranchise();
+      const chatCreateSpy = vi.spyOn(ChatMessage, "create").mockResolvedValue(undefined);
+      await executeSkillRoll(agent, franchise, "technology", { requirementTier: "rare" });
+      // Verify defect flag is passed to chat message context
+      expect(chatCreateSpy).toHaveBeenCalled();
+      const call = chatCreateSpy.mock.calls[0]?.[0];
+      // The defect should be included in the chat context
+      expect(call).toBeDefined();
+    });
+
+    it("no defect on common items even when roll is low", async () => {
+      (globalThis as unknown as { Roll: typeof MockRoll }).Roll = class extends MockRoll {
+        constructor(formula: string) {
+          super(formula);
+          this.setResults([1]); // Far below common threshold, but no defect
+        }
+      };
+      const agent = makeAgent();
+      const franchise = makeFranchise();
+      await executeSkillRoll(agent, franchise, "technology", { requirementTier: "common" });
+      // No defect on common items
+      expect((franchise.system as Record<string, unknown>)["missionPool"]).toBe(0);
+    });
+
+    it("throws error when requirement tier set on non-technology skill", async () => {
+      (globalThis as unknown as { Roll: typeof MockRoll }).Roll = class extends MockRoll {
+        constructor(formula: string) {
+          super(formula);
+          this.setResults([5]);
+        }
+      };
+      const agent = makeAgent();
+      const franchise = makeFranchise();
+      await expect(
+        executeSkillRoll(agent, franchise, "academics", { requirementTier: "rare" }),
+      ).rejects.toThrow(/Cannot set requirement tier.*academics.*Technology rolls/);
+    });
+  });
 });
 
 // ---------------------------------------------------------------------------

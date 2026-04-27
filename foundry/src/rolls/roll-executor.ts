@@ -11,6 +11,7 @@ import { agentSystemData } from "../agent/agent-system-data.js";
 import { type FranchiseData } from "../franchise/franchise-schema.js";
 import { emitMissionPoolUpdated } from "../mission/socket.js";
 import { getCurrentDay, computeRecoveryStatus } from "../agent/recovery-utils.js";
+import { type ItemRarity, isRollSufficient, checkDefect } from "../mission/requirements-checker.js";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -209,6 +210,7 @@ export async function executeSkillRoll(
   agent: RollActor,
   franchise: RollActor | null,
   skillName: SkillName,
+  options?: { requirementTier?: ItemRarity }, // Phase 1: Requirements Checker
 ): Promise<void> {
   // Recovery check is the responsibility of the UI layer (AgentSheet).
   // The UI displays warnings and prevents roll initiation for agents who are recovering/dead.
@@ -237,9 +239,16 @@ export async function executeSkillRoll(
     availableCool,
     hasTalent: talentText.length > 0,
     canTakeFour: skill.base >= 4,
+    isTechnology: skillName === "technology",
   });
 
   if (augmentation === null) return; // dialog cancelled
+
+  // Phase 1: Requirements Checker — apply pre-roll requirement if specified
+  const requirementTier = options?.requirementTier ?? augmentation.requirementTier;
+  if (requirementTier && skillName !== "technology") {
+    throw new Error(`Cannot set requirement tier on ${skillName} skill — requirements only apply to Technology rolls. Check dialog filtering.`);
+  }
 
   let highestFace: DieFace;
   let mainRoll: Roll;
@@ -271,7 +280,20 @@ export async function executeSkillRoll(
     }
   }
 
-  const outcome = SKILL_ROLL_CHART[highestFace];
+  // Phase 1: Requirements Checker — gate on requirement tier if set
+  let outcome = SKILL_ROLL_CHART[highestFace];
+  let requirementDefect = false;
+  let requirementCheckFailed = false;
+  if (requirementTier && skillName === "technology") {
+    const rollSufficient = isRollSufficient(highestFace, requirementTier);
+    const isDefect = !rollSufficient && checkDefect(highestFace, requirementTier);
+    if (!rollSufficient) {
+      // Auto-fail: set outcome to worst result
+      outcome = SKILL_ROLL_CHART[1];
+      requirementDefect = isDefect;
+      requirementCheckFailed = true;
+    }
+  }
 
   // Resolve bank dice augmentation (only when not taking a 4)
   let bankSummary: BankResolutionSummary | null = null;
@@ -283,16 +305,25 @@ export async function executeSkillRoll(
 
   // Apply actor updates — skipped entirely when taking a 4 (no resources spent)
   if (!augmentation.takesFour) {
-    if (franchise && franchiseSystem) {
-      if (augmentation.cardDice > 0 && cardType) {
-        await actorUpdate(franchise, { [`system.cards.${cardType}`]: availableCardDice - augmentation.cardDice });
+    try {
+      if (franchise && franchiseSystem) {
+        if (augmentation.cardDice > 0 && cardType) {
+          await actorUpdate(franchise, { [`system.cards.${cardType}`]: availableCardDice - augmentation.cardDice });
+        }
+        if (bankSummary !== null) {
+          await actorUpdate(franchise, { "system.bank": bankSummary.finalBankTotal });
+        }
       }
-      if (bankSummary !== null) {
-        await actorUpdate(franchise, { "system.bank": bankSummary.finalBankTotal });
+      if (augmentation.coolDice > 0) {
+        await actorUpdate(agent, { "system.cool": availableCool - augmentation.coolDice });
       }
-    }
-    if (augmentation.coolDice > 0) {
-      await actorUpdate(agent, { "system.cool": availableCool - augmentation.coolDice });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      const userError = new Error(
+        `Failed to deduct resources from ${agent.name}: ${message}. Roll cancelled.`,
+      );
+      ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorUpdateFailed") ?? "Failed to update actor data");
+      throw userError;
     }
   }
 
@@ -313,6 +344,9 @@ export async function executeSkillRoll(
     isWeird: system.isWeird,
     takesFour: augmentation.takesFour,
     bankResolutions: bankSummary?.resolutions ?? [],
+    requirementTier, // Phase 1
+    requirementDefect, // Phase 1
+    requirementCheckFailed, // Phase 1
   });
   await postChatCard(content, speaker, [mainRoll]);
 }
@@ -325,6 +359,7 @@ interface SkillRollDialogOptions {
   availableCool: number;
   hasTalent: boolean;
   canTakeFour: boolean;
+  isTechnology?: boolean; // Phase 1: Requirements Checker
 }
 
 interface SkillRollAugmentation {
@@ -333,6 +368,7 @@ interface SkillRollAugmentation {
   coolDice: number;
   talentDie: boolean;
   takesFour: boolean;
+  requirementTier?: ItemRarity; // Phase 1: Requirements Checker
 }
 
 async function buildSkillRollDialog(opts: SkillRollDialogOptions): Promise<SkillRollAugmentation | null> {
@@ -346,9 +382,31 @@ async function buildSkillRollDialog(opts: SkillRollDialogOptions): Promise<Skill
   const takesFourLabel = i18n?.localize("INSPECTRES.DialogTakesFour") ?? "Take a 4 (skip roll)";
   const baseDiceLabel = i18n?.localize("INSPECTRES.DialogBaseDice") ?? "Base dice";
 
+  const requirementLabel = i18n?.localize("INSPECTRES.DialogRequirementTier") ?? "Requirement";
+  const requirementOptions = [
+    { value: "", locKey: undefined },
+    { value: "common", locKey: "INSPECTRES.Requirement.Common" },
+    { value: "rare", locKey: "INSPECTRES.Requirement.Rare" },
+    { value: "exotic", locKey: "INSPECTRES.Requirement.Exotic" },
+  ];
+  const requirementOptionsHtml = requirementOptions
+    .map((opt) => {
+      if (!opt.value) return `<option value="">None</option>`;
+      // Foundry i18n.localize returns string | void; provide fallback for both undefined cases
+      const localized = opt.locKey ? (i18n?.localize(opt.locKey) ?? opt.value) : opt.value;
+      return `<option value="${opt.value}">${localized}</option>`;
+    })
+    .join("");
+  const requirementSection = opts.isTechnology ? `
+    <label>${requirementLabel}: <select name="requirementTier">
+      ${requirementOptionsHtml}
+    </select></label>
+  ` : "";
+
   const content = `
     <form class="inspectres-roll-dialog">
       <p><strong>${baseDiceLabel}:</strong> ${opts.effectiveDice}</p>
+      ${requirementSection}
       ${cardLabel ? `<label><input type="checkbox" name="cardDice"> ${cardLabel}</label>` : ""}
       ${opts.availableBank > 0 ? `<label>${bankLabel}: <input type="number" name="bankDice" min="0" max="${opts.availableBank}" value="0"></label>` : ""}
       ${opts.availableCool > 0 ? `<label>${coolLabel}: <input type="number" name="coolDice" min="0" max="${opts.availableCool}" value="0"></label>` : ""}
@@ -378,7 +436,23 @@ async function buildSkillRollDialog(opts: SkillRollDialogOptions): Promise<Skill
           const coolDice = Math.min(Number(data.get("coolDice") ?? 0), opts.availableCool);
           const talentDie = data.has("talentDie");
           const takesFour = data.has("takesFour");
-          return { cardDice, bankDice: isNaN(bankDice) ? 0 : bankDice, coolDice: isNaN(coolDice) ? 0 : coolDice, talentDie, takesFour };
+          const requirementTierRaw = String(data.get("requirementTier") ?? "");
+          const requirementTier = (requirementTierRaw === "common" || requirementTierRaw === "rare" || requirementTierRaw === "exotic")
+            ? requirementTierRaw
+            : undefined;
+          if (requirementTierRaw && !requirementTier) {
+            console.error(
+              `buildSkillRollDialog: invalid requirementTier value "${requirementTierRaw}". Expected one of: common, rare, exotic. Treating as undefined.`,
+            );
+          }
+          return {
+            cardDice,
+            bankDice: isNaN(bankDice) ? 0 : bankDice,
+            coolDice: isNaN(coolDice) ? 0 : coolDice,
+            talentDie,
+            takesFour,
+            requirementTier,
+          };
         },
       },
       {
