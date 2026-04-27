@@ -31,7 +31,7 @@ export async function createDistributionDialog(opts: DistributionDialogOptions):
     .map(
       (player) => `
           <div class="distribution-input">
-            <label for="player-${player.id}">${player.name}:</label>
+            <label for="player-${player.id}">${foundry.utils.escapeHTML(player.name)}:</label>
             <input type="number" id="player-${player.id}" name="player-${player.id}" min="0" value="0" />
           </div>
         `,

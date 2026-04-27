@@ -10,6 +10,19 @@ describe("createDistributionDialog", () => {
         format: vi.fn((key: string, data: Record<string, unknown>) => `MOCKED[${key}:${JSON.stringify(data)}]`),
       },
     };
+    (globalThis as Record<string, unknown>)["foundry"] = {
+      utils: {
+        escapeHTML: (str: string) => str.replace(/[<>&"]/g, (ch) => {
+          const map: Record<string, string> = { "<": "&lt;", ">": "&gt;", "&": "&amp;", '"': "&quot;" };
+          return map[ch] ?? ch;
+        }),
+      },
+    };
+  });
+
+  afterEach(() => {
+    delete (globalThis as Record<string, unknown>)["game"];
+    delete (globalThis as Record<string, unknown>)["foundry"];
   });
 
   it("renders dialog with form using for/id labels", async () => {
@@ -52,5 +65,16 @@ describe("createDistributionDialog", () => {
     const result = await createDistributionDialog({ missionPool: 5, players: [] });
     const content = result.content as string;
     expect(content).toContain("No active players");
+  });
+
+  it("escapes player names to prevent HTML injection", async () => {
+    const players: PlayerInfo[] = [
+      { id: "user1", name: "<img src=x onerror='alert(1)'>" },
+    ];
+    const result = await createDistributionDialog({ missionPool: 5, players });
+    const content = result.content as string;
+    // Should contain escaped entities, not raw HTML
+    expect(content).toContain("&lt;img");
+    expect(content).not.toContain("<img src=x");
   });
 });
