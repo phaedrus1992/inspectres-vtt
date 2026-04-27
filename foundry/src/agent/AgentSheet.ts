@@ -152,6 +152,24 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
         });
       }, { signal: controller.signal });
     }
+
+    // recovery-day-input: change event for overrideRecoveryDay (not automatic like form inputs with name="...")
+    for (const el of this.element.querySelectorAll<HTMLInputElement>(".recovery-day-input")) {
+      el.addEventListener("change", (event: Event) => {
+        const target = event.target as HTMLInputElement;
+        void AgentSheet.onOverrideRecoveryDay.call(this, event, target).catch((err: unknown) => {
+          const message = err instanceof Error ? err.message : String(err);
+          console.error("Failed to override recovery day for agent", {
+            actorId: this.actor.id,
+            actorName: this.actor.name,
+            targetValue: target.value,
+            error: err,
+            errorMessage: message,
+          });
+          handleActionError(err, "Failed to override recovery day", "INSPECTRES.ErrorUpdateFailed", "Could not update recovery");
+        });
+      }, { signal: controller.signal });
+    }
   }
 
   static async onSkillRoll(this: AgentSheet, _event: Event, target: HTMLElement): Promise<void> {
