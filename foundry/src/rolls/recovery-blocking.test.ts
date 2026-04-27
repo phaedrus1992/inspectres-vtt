@@ -59,10 +59,11 @@ describe("Recovery Blocking for Rolls", () => {
   });
 
   describe("Recovery blocking in rolls", () => {
-    it("includes recovery status description when agent is recovering", () => {
+    it("shows days remaining when agent is recovering", () => {
       const system = makeAgent({ daysOutOfAction: 3, recoveryStartedAt: 5 });
       const status = computeRecoveryStatus(system, 6);
-      expect(status.description).toContain("2 more days");
+      expect(status.daysRemaining).toBe(2);
+      expect(status.status).toBe("recovering");
     });
 
     it("blocks both recovering and dead agents from rolling", () => {

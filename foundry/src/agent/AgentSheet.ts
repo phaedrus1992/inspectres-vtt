@@ -19,6 +19,24 @@ function isSkillName(value: string | null): value is SkillName {
   return SKILL_NAMES.includes(value as SkillName);
 }
 
+function getRecoveryBannerText(recoveryStatus: ReturnType<typeof computeRecoveryStatus>): string | null {
+  switch (recoveryStatus.status) {
+    case "dead":
+      return game.i18n?.localize("INSPECTRES.RecoveryStatusDead") ?? "Dead";
+    case "recovering": {
+      const i18n = game.i18n?.localize("INSPECTRES.RecoveryStatusRecovering") ?? "Recovering";
+      const days = recoveryStatus.daysRemaining;
+      const dayLabel = days === 1 ? "day" : "days";
+      return `${i18n} (${days} ${dayLabel} left)`;
+    }
+    case "returned":
+    case "active":
+      return null;
+    default:
+      return null;
+  }
+}
+
 // Store AbortController for each sheet instance to manage checkbox listeners
 const checkboxControllers = new WeakMap<AgentSheet, AbortController>();
 
@@ -108,7 +126,8 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     const system = agentSystemData(this.actor);
     const currentDay = getCurrentDay();
     const recoveryStatus = computeRecoveryStatus(system, currentDay);
-    return { ...base, system, recoveryStatus };
+    const bannerText = getRecoveryBannerText(recoveryStatus);
+    return { ...base, system, recoveryStatus, bannerText };
   }
 
   override async _onRender(context: Record<string, unknown>, options: foundry.applications.api.ApplicationV2Options): Promise<void> {

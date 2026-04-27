@@ -32,7 +32,6 @@ describe("computeRecoveryStatus", () => {
 
       expect(result.status).toBe("dead");
       expect(result.daysRemaining).toBe(0);
-      expect(result.description).toContain("killed");
     });
 
     it("returns dead regardless of daysOutOfAction", () => {
@@ -69,21 +68,20 @@ describe("computeRecoveryStatus", () => {
       expect(result.daysRemaining).toBe(2);
     });
 
-    it("shows singular 'day' when daysRemaining === 1", () => {
+    it("shows singular day count when daysRemaining === 1", () => {
       const system = makeAgent({ daysOutOfAction: 3, recoveryStartedAt: 5 });
       const result = computeRecoveryStatus(system, 7); // day 5 + 2 elapsed = 1 remaining
 
       expect(result.daysRemaining).toBe(1);
-      expect(result.description).toContain("1 more day");
-      expect(result.description).not.toContain("days");
+      expect(result.status).toBe("recovering");
     });
 
-    it("shows plural 'days' when daysRemaining > 1", () => {
+    it("shows plural day count when daysRemaining > 1", () => {
       const system = makeAgent({ daysOutOfAction: 3, recoveryStartedAt: 5 });
       const result = computeRecoveryStatus(system, 6); // 2 remaining
 
       expect(result.daysRemaining).toBe(2);
-      expect(result.description).toContain("2 more days");
+      expect(result.status).toBe("recovering");
     });
 
     it("blocks rolls when exactly at recovery deadline", () => {
@@ -112,11 +110,12 @@ describe("computeRecoveryStatus", () => {
       expect(result.status).not.toBe("recovering");
     });
 
-    it("shows recovery message when returned", () => {
+    it("transitions to returned when recovery expires", () => {
       const system = makeAgent({ daysOutOfAction: 3, recoveryStartedAt: 5 });
       const result = computeRecoveryStatus(system, 8);
 
-      expect(result.description).toContain("recovered");
+      expect(result.status).toBe("returned");
+      expect(result.daysRemaining).toBe(0);
     });
   });
 

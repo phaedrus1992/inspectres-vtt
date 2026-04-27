@@ -18,6 +18,8 @@ import { getCurrentDay, computeRecoveryStatus } from "../agent/recovery-utils.js
 
 export type SkillName = "academics" | "athletics" | "technology" | "contact";
 
+export type RollType = "skill" | "bank" | "stress" | "client";
+
 type DieFace = 1 | 2 | 3 | 4 | 5 | 6;
 
 export interface BankDieResolution {
@@ -53,6 +55,20 @@ export interface RollActor {
 
 function isDieFace(n: number): n is DieFace {
   return n >= 1 && n <= 6;
+}
+
+function getRollTypeLabel(rollType: RollType): string {
+  switch (rollType) {
+    case "skill": return game.i18n?.localize("INSPECTRES.SkillRoll") ?? "Skill Roll";
+    case "bank": return game.i18n?.localize("INSPECTRES.BankRoll") ?? "Bank Roll";
+    case "stress": return game.i18n?.localize("INSPECTRES.StressRoll") ?? "Stress Roll";
+    case "client": return game.i18n?.localize("INSPECTRES.ClientRoll") ?? "Client Roll";
+    default: return assertNever(rollType);
+  }
+}
+
+function assertNever(x: never): never {
+  throw new Error(`Unexpected roll type: ${JSON.stringify(x)}`);
 }
 
 function extractFaces(roll: Roll): number[] {
