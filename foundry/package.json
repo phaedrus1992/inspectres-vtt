@@ -11,9 +11,11 @@
     "pack:actors": "fvtt package pack --id inspectres --type System -n actors --in packs/actors --out packs-compiled",
     "pack:macros": "fvtt package pack --id inspectres --type System -n macros --in packs/macros --out packs-compiled",
     "check": "tsc --noEmit",
+    "lint": "./node_modules/.bin/oxlint . --fix",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "quality": "npm run lint && npm run check && npm run test"
   },
   "engines": {
     "node": ">=22"
@@ -25,6 +27,7 @@
     "fast-check": "^4.7.0",
     "fvtt-types": "github:League-of-Foundry-Developers/foundry-vtt-types#main",
     "jsdom": "^29.0.2",
+    "oxlint": "^0.7.0",
     "typescript": "^5.7.2",
     "vite": "^8.0.8",
     "vitest": "^4.1.4"
