@@ -20,13 +20,18 @@ export interface RollActor {
  * @template T - The target system type (e.g., AgentData, FranchiseData)
  * @param actor - Actor to cast
  * @returns Properly cast actor.system
+ * @throws Error if actor.system is null, undefined, or not an object
  *
  * @example
  * const system = getActorSystem<AgentData>(this.actor);
  * // Instead of: this.actor.system as unknown as AgentData (repeated 11+ times in sheets)
  */
 export function getActorSystem<T extends object>(actor: RollActor): T {
-  // Type narrowing: test fixture implements minimal RollActor interface needed for roll execution.
-  // Full Actor type includes 128+ Foundry properties unused in this context.
+  if (!actor.system || typeof actor.system !== "object") {
+    throw new Error(
+      `Invalid actor.system for "${actor.name ?? actor.id}": expected object, got ${typeof actor.system}. ` +
+      `Check that actor is fully loaded before accessing system data.`,
+    );
+  }
   return actor.system as unknown as T;
 }

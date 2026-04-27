@@ -22,16 +22,22 @@ describe("system-cast consolidation (#363)", () => {
     );
 
     const searchResult = result.stdout.trim();
-    const lines = searchResult.split("\n").filter((line) => line.includes("AgentData") || line.includes("FranchiseData"));
+    const lines = searchResult
+      .split("\n")
+      .filter((line) => {
+        // Skip comments and documentation
+        if (line.includes("//") || line.includes("*")) return false;
+        return line.includes("AgentData") || line.includes("FranchiseData");
+      })
+      .filter((line) => line.length > 0);
 
     if (lines.length > 0) {
-      console.log("Found manual system casts (expected before consolidation):");
+      console.log("Found manual system casts that should use getActorSystem():");
       lines.forEach((line) => console.log(line));
     }
 
-    // Currently expects ~20+ casts. After #363, should be 0
-    expect(lines.length).toBeGreaterThan(0);
-    console.log(`Found ${lines.length} manual system casts to consolidate`);
+    // After #363 consolidation completes, should have 0 manual casts
+    expect(lines.length).toBe(0);
   });
 
   it("getActorSystem should be imported and used in agent/franchise files", () => {

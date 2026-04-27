@@ -54,4 +54,43 @@ describe("getActorSystem", () => {
 
     expect(system.stress).toBe(2);
   });
+
+  it("throws when actor.system is undefined", () => {
+    const actor: RollActor = {
+      id: "test-id",
+      name: "Bad Actor",
+      system: undefined as unknown as object,
+      async update() {},
+    };
+
+    expect(() => getActorSystem<{ cool: number }>(actor)).toThrow(
+      /Invalid actor.system.*expected object, got undefined/,
+    );
+  });
+
+  it("throws when actor.system is null", () => {
+    const actor: RollActor = {
+      id: "test-id",
+      name: "Null Actor",
+      system: null as unknown as object,
+      async update() {},
+    };
+
+    expect(() => getActorSystem<{ cool: number }>(actor)).toThrow(
+      /Invalid actor.system.*expected object, got object/,
+    );
+  });
+
+  it("throws when actor.system is primitive", () => {
+    const actor: RollActor = {
+      id: "test-id",
+      name: "String System",
+      system: "not an object" as unknown as object,
+      async update() {},
+    };
+
+    expect(() => getActorSystem<{ cool: number }>(actor)).toThrow(
+      /Invalid actor.system.*expected object, got string/,
+    );
+  });
 });

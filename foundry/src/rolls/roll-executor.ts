@@ -220,12 +220,10 @@ export async function executeSkillRoll(
   // Removing this defensive check prevents error translation loss and focuses validation at the boundary.
   // If an agent somehow rolls while recovering due to a UI race condition, the error should propagate to the caller.
 
-  // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
   const system = agentSystemData(agent);
   const skill = system.skills[skillName];
   const effectiveDice = Math.max(0, skill.base - skill.penalty);
 
-  // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
   const franchiseSystem = franchise ? getActorSystem<FranchiseData>(franchise) : null;
   const cardType = CARD_FOR_SKILL[skillName];
   const availableCardDice = franchiseSystem && cardType ? franchiseSystem.cards[cardType] : 0;
@@ -563,7 +561,6 @@ export async function executeStressRoll(
   // Removing this defensive check prevents error translation loss and focuses validation at the boundary.
   // If an agent somehow rolls while recovering due to a UI race condition, the error should propagate to the caller.
 
-  // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
   const system = agentSystemData(agent);
   const { stressDiceCount, coolDiceUsed } = params;
 
