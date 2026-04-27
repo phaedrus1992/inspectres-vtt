@@ -19,6 +19,7 @@ export function isMissionSocketPayload(payload: unknown): payload is MissionSock
   return (
     typeof p["type"] === "string" &&
     typeof p["franchiseId"] === "string" &&
+    (p["franchiseId"] as string).trim().length > 0 &&
     p["type"] === "missionPoolUpdated"
   );
 }

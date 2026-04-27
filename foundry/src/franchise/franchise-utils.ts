@@ -2,7 +2,6 @@ import { type FranchiseData } from "./franchise-schema.js";
 
 export function findFranchiseActor(): Actor | null {
   if (!game.actors) return null;
-  // Filter by type instead of manual iteration. Cleaner API; VM can optimize.
   return game.actors.find((actor) => (actor.type as string) === "franchise") ?? null;
 }
 

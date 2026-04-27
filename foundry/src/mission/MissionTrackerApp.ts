@@ -3,12 +3,6 @@ import { handleActionError } from "../utils/ui-errors.js";
 import { emitMissionPoolUpdated } from "./socket.js";
 import { getCurrentDaySetting } from "../utils/settings-utils.js";
 
-export interface MissionState {
-  missionPool: number;
-  missionGoal: number;
-  missionStartDay: number;
-}
-
 export class MissionTrackerApp extends foundry.applications.api.ApplicationV2 {
   static instance: MissionTrackerApp | null = null;
 
@@ -16,9 +10,12 @@ export class MissionTrackerApp extends foundry.applications.api.ApplicationV2 {
     if (!MissionTrackerApp.instance) {
       MissionTrackerApp.instance = new MissionTrackerApp();
     }
-    void MissionTrackerApp.instance.render({ force: true }).catch((err: unknown) => {
+    const instance = MissionTrackerApp.instance;
+    void instance.render({ force: true }).catch((err: unknown) => {
       handleActionError(err, "Failed to open Mission Tracker", "INSPECTRES.ErrorMissionTrackerOpen", "Failed to open Mission Tracker");
-      MissionTrackerApp.instance = null;
+      if (MissionTrackerApp.instance === instance) {
+        MissionTrackerApp.instance = null;
+      }
     });
   }
 
@@ -161,7 +158,11 @@ export class MissionTrackerApp extends foundry.applications.api.ApplicationV2 {
     const updateData = { "system.missionPool": 0 } as unknown as Parameters<typeof franchise.update>[0];
     await franchise.update(updateData);
 
-    emitMissionPoolUpdated(franchise.id ?? "");
+    try {
+      emitMissionPoolUpdated(franchise.id ?? "");
+    } catch (err: unknown) {
+      handleActionError(err, "Socket emission failed", "INSPECTRES.ErrorSocketEmissionFailed", "Failed to notify other players");
+    }
 
     const lines = Object.entries(distribution)
       .filter(([, v]) => v > 0)
@@ -194,7 +195,11 @@ export class MissionTrackerApp extends foundry.applications.api.ApplicationV2 {
     const updateData = { "system.missionPool": remaining } as unknown as Parameters<typeof franchise.update>[0];
     await franchise.update(updateData);
 
-    emitMissionPoolUpdated(franchise.id ?? "");
+    try {
+      emitMissionPoolUpdated(franchise.id ?? "");
+    } catch (err: unknown) {
+      handleActionError(err, "Socket emission failed", "INSPECTRES.ErrorSocketEmissionFailed", "Failed to notify other players");
+    }
 
     const msg = game.i18n?.format("INSPECTRES.MissionEndedEarlyWithHalfDice", { remaining: String(remaining) })
       ?? `The mission ended early. Keeping ${remaining} franchise dice.`;
