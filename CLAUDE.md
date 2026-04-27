@@ -61,10 +61,25 @@ Where `$CHILD_ID` from `gh issue view $NUMBER --json id --jq .id`.
 
 ### Milestones
 
-- **Economy: Vacation & Bankruptcy** — stress recovery, debt, financial mechanics
-- **Character: Recovery & Death** — character continuity, death flows, incapacity
-- **Content & Variants: Weird Agents** — special powers, archetypes, content expansions
-- **Infrastructure: Multiplayer & DevTools** — socket sync, real-time features, developer tooling
+Milestones are **categorization labels, not project phases**. They organize issues by domain, not by completion timeline.
+
+**Core game design:**
+- **Core Mechanics** — Skill rolls, stress, cool dice caps, augmentations, edge cases
+- **Content & Variants: Weird Agents** — Weird agent mechanics, special powers, talent restrictions
+- **Economy: Vacation & Bankruptcy** — Vacation mechanics, bankruptcy, financial resource management
+- **Collaboration & Rolls** — Teamwork assists, confessionals, interview workflows, private life rolls
+- **Character: Recovery & Death** — Recovery controls, death/dismemberment, character continuity
+
+**Technical & integration:**
+- **Code Quality & Testing** — Type safety, dead code, test coverage, refactoring
+- **Infrastructure** — Socket sync, logging, performance optimization
+- **UI & UX** — Sheets, dialogs, forms, accessibility, CSS
+- **Foundry Integration** — Foundry API integration, actor dependencies
+
+**Specialized:**
+- **Starting Interview** — Campaign setup flow and GM checklist
+
+**Policy:** Milestones are **never deleted** when all issues are completed. They remain as domain markers for future related work. Issues move into/out of milestones as work is organized; the milestones themselves are permanent organizational structure.
 
 ## Versioning
 

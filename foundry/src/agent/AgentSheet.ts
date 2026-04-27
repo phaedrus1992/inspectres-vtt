@@ -152,6 +152,24 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
         });
       }, { signal: controller.signal });
     }
+
+    // recovery-day-input: change event for overrideRecoveryDay (not automatic like form inputs with name="...")
+    for (const el of this.element.querySelectorAll<HTMLInputElement>(".recovery-day-input")) {
+      el.addEventListener("change", (event: Event) => {
+        const target = event.target as HTMLInputElement;
+        void AgentSheet.onOverrideRecoveryDay.call(this, event, target).catch((err: unknown) => {
+          const message = err instanceof Error ? err.message : String(err);
+          console.error("Failed to override recovery day for agent", {
+            actorId: this.actor.id,
+            actorName: this.actor.name,
+            targetValue: target.value,
+            error: err,
+            errorMessage: message,
+          });
+          handleActionError(err, "Failed to override recovery day", "INSPECTRES.ErrorUpdateFailed", "Could not update recovery");
+        });
+      }, { signal: controller.signal });
+    }
   }
 
   static async onSkillRoll(this: AgentSheet, _event: Event, target: HTMLElement): Promise<void> {
@@ -489,7 +507,8 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     if (!this.isEditable) return;
     const input = target as HTMLInputElement;
     const targetDay = Number(input.value);
-    if (isNaN(targetDay) || targetDay < 1) {
+    const MAX_RECOVERY_DAY = 365;
+    if (!Number.isInteger(targetDay) || isNaN(targetDay) || targetDay < 1 || targetDay > MAX_RECOVERY_DAY) {
       ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnInvalidDay") ?? "Invalid day number");
       return;
     }
@@ -497,7 +516,11 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     try {
       const system = this.actor.system as unknown as AgentData;
       const currentDay = getCurrentDay();
-      const daysNeeded = Math.max(0, targetDay - system.recoveryStartedAt);
+      if (targetDay < system.recoveryStartedAt) {
+        ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnRecoveryDayBeforeStart") ?? "Target day must be on or after the recovery start day");
+        return;
+      }
+      const daysNeeded = targetDay - system.recoveryStartedAt;
 
       const updateData = {
         "system.daysOutOfAction": daysNeeded,

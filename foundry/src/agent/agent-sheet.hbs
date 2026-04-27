@@ -163,46 +163,6 @@
         </button>
       </section>
 
-    </div><!-- /stats tab -->
-
-    <!-- Notes Tab -->
-    <div class="tab" data-tab="notes" id="tab-notes" role="tabpanel">
-
-      <!-- Characteristics Section -->
-      <section class="inspectres-section">
-        <h2>{{localize "INSPECTRES.Characteristics"}}</h2>
-        <div class="characteristics-list">
-          {{#each system.characteristics as |characteristic idx|}}
-            <div class="characteristic-row">
-              <input
-                type="checkbox"
-                name="system.characteristics.{{idx}}.used"
-                title="{{localize "INSPECTRES.TooltipCharacteristicUsed"}}"
-                {{#if characteristic.used}}checked{{/if}}
-                class="characteristic-used"
-              />
-              <input
-                type="text"
-                name="system.characteristics.{{idx}}.text"
-                value="{{characteristic.text}}"
-                placeholder="Characteristic text"
-                class="characteristic-text"
-              />
-              <button type="button" class="btn-remove" data-action="removeCharacteristic" data-idx="{{idx}}" aria-label="{{localize "INSPECTRES.AriaLabel.RemoveCharacteristic"}}">
-                ✕
-              </button>
-            </div>
-          {{/each}}
-        </div>
-        <button type="button" class="btn-add" data-action="addCharacteristic">{{localize "INSPECTRES.AddCharacteristic"}}</button>
-      </section>
-
-      <!-- Mission Pool Section -->
-      <section class="inspectres-section">
-        <h2>{{localize "INSPECTRES.MissionPool"}}</h2>
-        <p class="mission-pool-display">{{system.missionPool}} franchise {{inspectres-plural system.missionPool "die" "dice"}}</p>
-      </section>
-
       <!-- Recovery Status Section -->
       <section class="inspectres-section inspectres-recovery">
         <h2>{{localize "INSPECTRES.RecoveryStatus"}}</h2>
@@ -264,6 +224,46 @@
             {{/if}}
           </div>
         {{/if}}
+      </section>
+
+    </div><!-- /stats tab -->
+
+    <!-- Notes Tab -->
+    <div class="tab" data-tab="notes" id="tab-notes" role="tabpanel">
+
+      <!-- Characteristics Section -->
+      <section class="inspectres-section">
+        <h2>{{localize "INSPECTRES.Characteristics"}}</h2>
+        <div class="characteristics-list">
+          {{#each system.characteristics as |characteristic idx|}}
+            <div class="characteristic-row">
+              <input
+                type="checkbox"
+                name="system.characteristics.{{idx}}.used"
+                title="{{localize "INSPECTRES.TooltipCharacteristicUsed"}}"
+                {{#if characteristic.used}}checked{{/if}}
+                class="characteristic-used"
+              />
+              <input
+                type="text"
+                name="system.characteristics.{{idx}}.text"
+                value="{{characteristic.text}}"
+                placeholder="Characteristic text"
+                class="characteristic-text"
+              />
+              <button type="button" class="btn-remove" data-action="removeCharacteristic" data-idx="{{idx}}" aria-label="{{localize "INSPECTRES.AriaLabel.RemoveCharacteristic"}}">
+                ✕
+              </button>
+            </div>
+          {{/each}}
+        </div>
+        <button type="button" class="btn-add" data-action="addCharacteristic">{{localize "INSPECTRES.AddCharacteristic"}}</button>
+      </section>
+
+      <!-- Mission Pool Section -->
+      <section class="inspectres-section">
+        <h2>{{localize "INSPECTRES.MissionPool"}}</h2>
+        <p class="mission-pool-display">{{system.missionPool}} franchise {{inspectres-plural system.missionPool "die" "dice"}}</p>
       </section>
 
     </div><!-- /notes tab -->
