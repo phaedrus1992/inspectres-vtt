@@ -237,6 +237,7 @@
     "WarnStressRollRecovering": "Agents out of action cannot roll.",
     "WarnFranchiseNotFound": "Franchise actor not found.",
     "WarnActionBlockedRecovery": "Cannot act while recovering.",
+    "WarnOneWeirdPerGroup": "Group already has a weird agent: {agentName}",
     "DialogVacationTitle": "Vacation",
     "VacationBankSpending": "Bank Dice Spending",
     "VacationBankHint": "Spend Bank dice to reduce stress (1 die = 1 stress point). Agent has",
