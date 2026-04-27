@@ -566,7 +566,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     }
     const system = agentSystemData(this.actor);
     if (system.cool < 1) {
-      ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnNoCooltRestore") ?? "No Cool available to restore skills");
+      ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnNoCoolToRestore") ?? "No Cool available to restore skills");
       return;
     }
     const i18n = game.i18n;

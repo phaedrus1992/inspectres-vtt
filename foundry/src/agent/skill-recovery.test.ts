@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { executeSkillRecovery } from "./skill-recovery.js";
-import { makeAgent, makeFranchise } from "../__mocks__/test-fixtures.js";
+import { executeSkillRecovery, type RollActor } from "./skill-recovery.js";
+import { makeAgent } from "../__mocks__/test-fixtures.js";
 import type { AgentData } from "./agent-schema.js";
 
 describe("executeSkillRecovery - mid-mission Cool → skill recovery", () => {
@@ -15,8 +15,7 @@ describe("executeSkillRecovery - mid-mission Cool → skill recovery", () => {
       },
     });
 
-    // Type: executeSkillRecovery requires full Actor; test fixture satisfies functional interface
-    await executeSkillRecovery(agent as unknown as Actor, "academics", 1);
+    await executeSkillRecovery(agent as unknown as RollActor, "academics", 1);
 
     const updated = agent as unknown as { system: AgentData };
     expect(updated.system.skills.academics.penalty).toBe(1); // restored 1 point
@@ -34,7 +33,7 @@ describe("executeSkillRecovery - mid-mission Cool → skill recovery", () => {
       },
     });
 
-    await executeSkillRecovery(agent as unknown as Actor, "academics", 3);
+    await executeSkillRecovery(agent as unknown as RollActor, "academics", 3);
 
     const updated = agent as unknown as { system: AgentData };
     expect(updated.system.skills.academics.penalty).toBe(0); // fully restored

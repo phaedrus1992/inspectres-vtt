@@ -15,6 +15,13 @@ export interface SkillRecoveryResult {
   readonly notificationKey?: string;
 }
 
+export interface RollActor {
+  readonly id: string | null;
+  readonly name: string;
+  readonly system: object;
+  update(data: Record<string, unknown>): Promise<unknown>;
+}
+
 /**
  * Execute mid-mission Cool → skill recovery
  * @param agent - The agent spending Cool
@@ -23,7 +30,7 @@ export interface SkillRecoveryResult {
  * @returns Result with success status and localization key for notification
  */
 export async function executeSkillRecovery(
-  agent: Actor,
+  agent: RollActor,
   skillName: SkillName,
   coolSpent: number,
 ): Promise<SkillRecoveryResult> {
@@ -33,6 +40,7 @@ export async function executeSkillRecovery(
 
   // Prevent spending Cool while recovering or dead
   if (recoveryStatus.status === "recovering" || recoveryStatus.status === "dead") {
+    ui.notifications?.warn("Cannot spend Cool while recovering or dead");
     return {
       success: false,
       reason: "Cannot spend Cool while recovering or dead",
@@ -41,6 +49,7 @@ export async function executeSkillRecovery(
 
   // Validate Cool availability
   if (coolSpent > system.cool) {
+    ui.notifications?.warn(`Not enough Cool dice (have ${system.cool}, need ${coolSpent})`);
     return {
       success: false,
       reason: `Not enough Cool dice (have ${system.cool}, need ${coolSpent})`,
@@ -48,6 +57,7 @@ export async function executeSkillRecovery(
   }
 
   if (coolSpent < 1) {
+    ui.notifications?.warn("Must spend at least 1 Cool die");
     return {
       success: false,
       reason: "Must spend at least 1 Cool die",
@@ -57,6 +67,7 @@ export async function executeSkillRecovery(
   // Get skill data
   const skillData = system.skills[skillName];
   if (!skillData) {
+    ui.notifications?.warn(`Skill ${skillName} not found`);
     return {
       success: false,
       reason: `Skill ${skillName} not found`,

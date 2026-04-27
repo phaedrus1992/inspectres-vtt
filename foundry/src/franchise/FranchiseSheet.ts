@@ -272,7 +272,7 @@ export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicati
     }
     const context = {
       franchiseActor: this.actor,
-      deathMode: (this.actor.system as unknown as FranchiseData).debtMode,
+      deathMode: (this.actor.system as unknown as FranchiseData).deathMode,
       agentCount: agentActors.length,
       nonWeirdAgentCount: nonWeirdAgents.length,
     };

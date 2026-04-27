@@ -3,7 +3,7 @@
  * Hazard Pay, Characteristics Bonus, Bankruptcy Restart
  */
 
-import { calculateHazardPay, selectRandomCharacteristic } from "./end-of-session-bonuses.js";
+import { calculateHazardPay } from "./end-of-session-bonuses.js";
 import { type FranchiseData } from "./franchise-schema.js";
 
 export interface EndOfSessionContext {
