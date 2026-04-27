@@ -2,7 +2,7 @@
  * InSpectres Agent Character Sheet
  */
 
-import { type AgentData, type AgentCharacteristic } from "./agent-schema.js";
+import { type AgentCharacteristic } from "./agent-schema.js";
 import { executeSkillRoll, executeStressRoll, type SkillName } from "../rolls/roll-executor.js";
 import { agentSystemData } from "./agent-system-data.js";
 import { findFranchiseActor, franchiseSystemData } from "../franchise/franchise-utils.js";

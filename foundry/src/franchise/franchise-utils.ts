@@ -8,6 +8,7 @@ export function findFranchiseActor(): Actor | null {
   return null;
 }
 
-export function franchiseSystemData(actor: Actor): FranchiseData {
+export function franchiseSystemData(actor: { system: unknown } | Actor): FranchiseData {
+  // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
   return actor.system as unknown as FranchiseData;
 }
