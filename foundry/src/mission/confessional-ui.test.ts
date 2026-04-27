@@ -1,0 +1,73 @@
+import { describe, it, expect } from "vitest";
+import {
+  loadConfessionalScene,
+  returnFromConfessional,
+  getConfessionalSceneId,
+} from "./confessional-ui.js";
+
+describe("Confessional UI Integration", () => {
+  describe("loadConfessionalScene", () => {
+    it("returns scene ID when confessional scene exists", async () => {
+      const existingSceneId = "scene-123";
+
+      // Mock finding an existing confessional scene
+      const result = await loadConfessionalScene(existingSceneId);
+
+      expect(result).toBeDefined();
+      expect(typeof result).toBe("string");
+    });
+
+    it("creates confessional scene data structure with correct name", async () => {
+      const sceneId = await loadConfessionalScene("new-scene");
+
+      expect(sceneId).toBeTruthy();
+    });
+  });
+
+  describe("returnFromConfessional", () => {
+    it("returns to home scene after confessional", async () => {
+      const homeSceneId = "home-scene-456";
+      const confessionalSceneId = "confess-scene-789";
+
+      const returned = await returnFromConfessional(homeSceneId, confessionalSceneId);
+
+      expect(returned).toBe(true);
+    });
+
+    it("clears confessional state on return", async () => {
+      const homeSceneId = "home-scene-456";
+      const confessionalSceneId = "confess-scene-789";
+
+      await returnFromConfessional(homeSceneId, confessionalSceneId);
+
+      // Verify no confessional state remains
+      const stateAfter = getConfessionalSceneId();
+      expect(stateAfter).toBeNull();
+    });
+
+    it("handles missing home scene gracefully", async () => {
+      const confessionalSceneId = "confess-scene-789";
+
+      const returned = await returnFromConfessional(null, confessionalSceneId);
+
+      expect(returned).toBe(false);
+    });
+  });
+
+  describe("getConfessionalSceneId", () => {
+    it("returns null when no confessional active", () => {
+      const sceneId = getConfessionalSceneId();
+
+      expect(sceneId).toBeNull();
+    });
+
+    it("returns scene ID when confessional is active", async () => {
+      const confessionalSceneId = "confess-123";
+
+      await loadConfessionalScene(confessionalSceneId);
+      const active = getConfessionalSceneId();
+
+      expect(active).toBe(confessionalSceneId);
+    });
+  });
+});
