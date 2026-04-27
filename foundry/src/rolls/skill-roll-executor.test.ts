@@ -43,11 +43,12 @@ describe("Skill Roll Executor - Requirements Validation", () => {
       expect(result.blockReason).toContain("INSPECTRES");
     });
 
-    it("allows Technology roll when mission is null (optional feature)", () => {
+    it("blocks Technology roll when mission is null (#330 fail-closed)", () => {
+      // #330: P0 blocker — null mission now defaults to false (fail-closed)
       const result = checkTechnologyRollRequirements(null);
 
-      expect(result.allowed).toBe(true);
-      expect(result.blockReason).toBe("");
+      expect(result.allowed).toBe(false);
+      expect(result.blockReason).toBe("INSPECTRES.Error.NoMissionState");
     });
   });
 });

@@ -1,9 +1,11 @@
 # See https://pre-commit.com for more information
-# Configuration for prek pre-commit hooks
-# Fast CI checks that should run locally before push
+# Root-level pre-commit configuration for InSpectres VTT
+# Workspace discovery: prek looks for .pre-commit-config.yaml in all subdirectories
+# Install: prek install
+# Run manually: prek run --all-files
 
 repos:
-  # Typos spell checker
+  # Spell checker (runs at project root)
   - repo: https://github.com/crate-ci/typos
     rev: v1.23.1
     hooks:
@@ -11,14 +13,8 @@ repos:
         name: Spell check (typos)
         args: [--config, .typos.toml]
         stages: [pre-commit, pre-push]
-
-  # TypeScript type checking
-  - repo: local
-    hooks:
-      - id: typescript-check
-        name: Type check (TypeScript)
-        entry: sh -c 'cd foundry && npm run check'
-        language: system
-        files: ^foundry/src/.*\.ts$
-        pass_filenames: false
-        stages: [pre-push]
+        exclude: |
+          (?x)^(
+            \.semgrep-results/|
+            \.tmp/
+          )$

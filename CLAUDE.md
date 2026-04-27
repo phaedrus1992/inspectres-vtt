@@ -7,10 +7,19 @@ From `foundry/` directory:
 npm install
 npm run dev        # Watch build
 npm run build      # Production build
-npm run check      # Type check
+npm run check      # Type check only
+npm run lint       # Lint only
 npm run test       # Run tests
 npm run test:watch # Watch mode
+npm run quality    # ALL checks: lint + type + tests (use before commit)
 ```
+
+**Before committing:** Always run `npm run quality` to validate all changes. This runs:
+1. **oxlint** with `--fix` (auto-fixes style issues)
+2. **TypeScript** type checker (`tsc --noEmit`)
+3. **vitest** test suite (all tests must pass)
+
+Pre-commit hooks run `npm run quality` on push. Run locally first to catch issues early.
 
 ## Game Mechanics Questions
 
@@ -317,6 +326,60 @@ Game-critical operations **must have discoverable UI buttons**, not require navi
 **If play-testing shows high access frequency:** Consider hybrid approach with toolbar widget for day/mission/vacation quick-access, keeping detailed controls on sheets.
 
 **See also:** GitHub issues #159–#168 (GM control audit results)
+
+## Pre-Commit Hooks
+
+**Configuration:** Workspace discovery via prek
+- Root: `.pre-commit-config.yaml` (spell check)
+- `foundry/.pre-commit-config.yaml` (lint, type check, tests)
+
+### Setup
+```bash
+prek install                    # Install hooks (reads all .pre-commit-config.yaml files)
+prek auto-update --cooldown 7   # Auto-update prek framework
+```
+
+### Running hooks locally
+```bash
+cd foundry
+
+# Run all quality checks (RECOMMENDED before every commit)
+npm run quality
+
+# Or individually for faster feedback:
+npm run lint                    # oxlint with --fix
+npm run check                   # TypeScript type check
+npm run test                    # vitest suite
+
+# Run prek manually (walks workspace, respects .gitignore)
+prek run                        # Check changed files only (fast, respects .gitignore)
+
+# Note: Do NOT use --all-files locally (it bypasses .gitignore)
+# Only use --all-files in CI when you specifically need to check everything
+```
+
+### Workflows
+
+**Before committing:**
+1. Make changes in `foundry/src/`
+2. Run individual checks for faster iteration:
+   - `npm run lint` → fix style issues
+   - `npm run check` → fix type errors
+   - `npm run test` → fix failing tests
+3. Or use `npm run quality` to run all at once
+4. Commit with message including `Fixes #<issue-id>` in body
+
+**On push:**
+- Workspace discovery: prek finds both `.pre-commit-config.yaml` files
+- Pre-commit stage: spell check (typos) from root
+- Pre-push stage: individual tools from `foundry/` (oxlint, tsc, vitest)
+- Progress shown per-tool, not bundled together
+- If any hook fails, fix and retry push
+
+**Why separate hooks per-tool:**
+- Individual progress lines (see each tool's output)
+- Run only changed tools locally (`npm run lint` doesn't re-run tests)
+- Pre-push runs all three only when needed
 
 <!-- icm:start -->
 ## Persistent memory (ICM) — MANDATORY

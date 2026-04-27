@@ -30,10 +30,11 @@ describe("Requirements Checker Integration", () => {
       expect(allowed).toBe(false);
     });
 
-    it("allows Technology roll when no mission state (optional feature)", () => {
+    it("blocks Technology roll when no mission state (fail-closed #330)", () => {
+      // #330: P0 blocker — null mission now defaults to false (fail-closed, not fail-open)
       const allowed = canTechnologyRoll(null);
 
-      expect(allowed).toBe(true);
+      expect(allowed).toBe(false);
     });
   });
 
@@ -83,10 +84,11 @@ describe("Requirements Checker Integration", () => {
       expect(reason).toContain("INSPECTRES");
     });
 
-    it("returns empty string when no mission state", () => {
+    it("returns error message when no mission state (#330)", () => {
+      // #330: P0 blocker — null mission now returns error reason, not empty string
       const reason = getRequirementBlockReason(null);
 
-      expect(reason).toBe("");
+      expect(reason).toBe("INSPECTRES.Error.NoMissionState");
     });
   });
 });

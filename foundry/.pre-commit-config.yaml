@@ -1,0 +1,43 @@
+# Foundry workspace pre-commit configuration
+# Run by prek workspace discovery from root
+# Individual hooks for better progress visibility
+
+exclude: |
+  (?x)^(
+    \.semgrep-results/|
+    \.tmp/
+  )$
+
+repos:
+  # Linting
+  - repo: local
+    hooks:
+      - id: oxlint
+        name: Lint (oxlint)
+        entry: npm run lint
+        language: system
+        files: ^src/.*\.ts$
+        pass_filenames: false
+        stages: [pre-push]
+
+  # Type checking
+  - repo: local
+    hooks:
+      - id: typescript
+        name: Type check (TypeScript)
+        entry: npm run check
+        language: system
+        files: ^src/.*\.ts$
+        pass_filenames: false
+        stages: [pre-push]
+
+  # Tests
+  - repo: local
+    hooks:
+      - id: vitest
+        name: Tests (vitest)
+        entry: npm test
+        language: system
+        files: ^src/.*\.ts$
+        pass_filenames: false
+        stages: [pre-push]
