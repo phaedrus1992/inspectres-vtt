@@ -171,11 +171,7 @@ if (!result) return;
 
 **Principle:** Game-critical operations must have visible UI buttons on sheets, not be hidden in settings or require console access.
 
-**When adding a new feature that GMs control:**
-1. If it affects gameplay rules, add a visible control/indicator to the relevant sheet
-2. Label it clearly in game terms, not technical jargon
-3. Group related controls (recovery controls on Agent sheet, financial on Franchise sheet)
-4. Never hide critical state behind code paths or auto-set it without override buttons
+If it affects gameplay: add visible control/indicator on relevant sheet, labeled in game terms, grouped by domain (recovery on Agent, financial on Franchise), never auto-set without override button.
 
 **Examples:**
 - Agent recovery state (`isDead`, `daysOutOfAction`) → needs "Revive" button and recovery status display
