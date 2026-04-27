@@ -3,13 +3,14 @@ import { transitionToConfessionalScene, resetConfessionalScene, type RollScene, 
 
 // Test fixtures matching RollScene interface
 function makeTestScene(id: string = "scene-confessional"): RollScene {
-  return {
+  const scene: RollScene = {
     id,
     name: "Confessional",
     activate: async () => {
       return {} as Scene;
     },
   };
+  return scene;
 }
 
 // Test fixtures matching RollActor interface
@@ -42,11 +43,11 @@ function makeTestActor(id: string, name: string, tokens: TestToken[] = []): Roll
 describe("Confessional Scene Transitions", () => {
   beforeEach(() => {
     // Mock Foundry global for resetConfessionalScene
-    globalThis.game = {
+    (globalThis as Record<string, unknown>)["game"] = {
       scenes: {
         get: (id: string) => (id === "scene-original" ? {} : null),
       },
-    } as unknown as typeof game;
+    };
   });
 
   afterEach(() => {

@@ -12,6 +12,8 @@ import { type FranchiseData } from "../franchise/franchise-schema.js";
 import { emitMissionPoolUpdated } from "../mission/socket.js";
 import { getCurrentDay, computeRecoveryStatus } from "../agent/recovery-utils.js";
 import { type ItemRarity, isRollSufficient, checkDefect } from "../mission/requirements-checker.js";
+import { prepareSkillRollContext } from "../agent/skill-roll-dialog.js";
+import { checkTechnologyRollRequirements } from "./skill-roll-executor.js";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -210,7 +212,7 @@ export async function executeSkillRoll(
   agent: RollActor,
   franchise: RollActor | null,
   skillName: SkillName,
-  options?: { requirementTier?: ItemRarity }, // Phase 1: Requirements Checker
+  options?: { requirementTier?: ItemRarity; isPrivateLife?: boolean }, // Phase 1: Requirements Checker + Phase 4: Private Life
 ): Promise<void> {
   // Recovery check is the responsibility of the UI layer (AgentSheet).
   // The UI displays warnings and prevents roll initiation for agents who are recovering/dead.
@@ -230,6 +232,21 @@ export async function executeSkillRoll(
   const availableCool = system.cool;
   const talentText = system.talent.trim();
 
+  // Phase 4: Apply private-life gating if applicable
+  const isPrivateLife = options?.isPrivateLife ?? false;
+  const rollContext = prepareSkillRollContext({
+    agentName: agent.name,
+    skillName,
+    skillRank: skill.base,
+    isPrivateLife,
+    availableAugmentations: {
+      cool: availableCool > 0,
+      card: availableCardDice > 0,
+      bank: availableBank > 0,
+      talent: talentText.length > 0,
+    },
+  });
+
   // Gather augmentation via dialog
   const augmentation = await buildSkillRollDialog({
     skillName,
@@ -240,6 +257,7 @@ export async function executeSkillRoll(
     hasTalent: talentText.length > 0,
     canTakeFour: skill.base >= 4,
     isTechnology: skillName === "technology",
+    isPrivateLife,
   });
 
   if (augmentation === null) return; // dialog cancelled
@@ -248,6 +266,17 @@ export async function executeSkillRoll(
   const requirementTier = options?.requirementTier ?? augmentation.requirementTier;
   if (requirementTier && skillName !== "technology") {
     throw new Error(`Cannot set requirement tier on ${skillName} skill — requirements only apply to Technology rolls. Check dialog filtering.`);
+  }
+
+  // Phase 1: Validate Technology roll requirements (if applicable)
+  if (skillName === "technology" && requirementTier) {
+    const requirementCheck = checkTechnologyRollRequirements({
+      itemRarity: requirementTier,
+      requirementsMet: true, // TODO: determine from mission context in future phases
+    });
+    if (!requirementCheck.allowed) {
+      throw new Error(`Technology roll blocked: ${requirementCheck.blockReason}`);
+    }
   }
 
   let highestFace: DieFace;
@@ -360,6 +389,7 @@ interface SkillRollDialogOptions {
   hasTalent: boolean;
   canTakeFour: boolean;
   isTechnology?: boolean; // Phase 1: Requirements Checker
+  isPrivateLife?: boolean; // Phase 4: Private Life Gating
 }
 
 interface SkillRollAugmentation {
@@ -373,12 +403,18 @@ interface SkillRollAugmentation {
 
 async function buildSkillRollDialog(opts: SkillRollDialogOptions): Promise<SkillRollAugmentation | null> {
   const i18n = game.i18n;
-  const cardLabel = opts.availableCardDice > 0
+
+  // Phase 4: Apply private-life gating to augmentation availability
+  const canUseCard = opts.availableCardDice > 0 && !(opts.isPrivateLife ?? false);
+  const canUseBank = opts.availableBank > 0 && !(opts.isPrivateLife ?? false);
+  const canUseTalent = opts.hasTalent && !(opts.isPrivateLife ?? false);
+
+  const cardLabel = canUseCard
     ? i18n?.format("INSPECTRES.DialogCardDiceAvailable", { n: String(opts.availableCardDice) }) ?? `Card Dice (${opts.availableCardDice} available)`
     : null;
-  const bankLabel = i18n?.format("INSPECTRES.DialogBankDice", { max: String(opts.availableBank) }) ?? `Bank Dice (0–${opts.availableBank})`;
+  const bankLabel = canUseBank ? (i18n?.format("INSPECTRES.DialogBankDice", { max: String(opts.availableBank) }) ?? `Bank Dice (0–${opts.availableBank})`) : null;
   const coolLabel = i18n?.format("INSPECTRES.DialogCoolDice", { max: String(opts.availableCool) }) ?? `Cool Dice (0–${opts.availableCool})`;
-  const talentLabel = i18n?.localize("INSPECTRES.DialogTalentDie") ?? "Talent Die";
+  const talentLabel = canUseTalent ? (i18n?.localize("INSPECTRES.DialogTalentDie") ?? "Talent Die") : null;
   const takesFourLabel = i18n?.localize("INSPECTRES.DialogTakesFour") ?? "Take a 4 (skip roll)";
   const baseDiceLabel = i18n?.localize("INSPECTRES.DialogBaseDice") ?? "Base dice";
 
@@ -408,9 +444,9 @@ async function buildSkillRollDialog(opts: SkillRollDialogOptions): Promise<Skill
       <p><strong>${baseDiceLabel}:</strong> ${opts.effectiveDice}</p>
       ${requirementSection}
       ${cardLabel ? `<label><input type="checkbox" name="cardDice"> ${cardLabel}</label>` : ""}
-      ${opts.availableBank > 0 ? `<label>${bankLabel}: <input type="number" name="bankDice" min="0" max="${opts.availableBank}" value="0"></label>` : ""}
+      ${bankLabel ? `<label>${bankLabel}: <input type="number" name="bankDice" min="0" max="${opts.availableBank}" value="0"></label>` : ""}
       ${opts.availableCool > 0 ? `<label>${coolLabel}: <input type="number" name="coolDice" min="0" max="${opts.availableCool}" value="0"></label>` : ""}
-      ${opts.hasTalent ? `<label><input type="checkbox" name="talentDie"> ${talentLabel}</label>` : ""}
+      ${talentLabel ? `<label><input type="checkbox" name="talentDie"> ${talentLabel}</label>` : ""}
       ${opts.canTakeFour ? `<label><input type="checkbox" name="takesFour"> ${takesFourLabel}</label>` : ""}
     </form>
   `;

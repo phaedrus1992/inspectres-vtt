@@ -36,7 +36,8 @@ export async function transitionToConfessionalScene(
     for (const agent of agents) {
       const tokens = agent.getActiveTokens(true);
       for (const token of tokens) {
-        await token.update({ sceneId: scene.id, x: 400, y: 400 });
+        // fvtt-types UpdateInput doesn't include sceneId; using type assertion as Foundry API supports it
+        await token.update({ sceneId: scene.id, x: 400, y: 400 } as unknown as Parameters<typeof token.update>[0]);
         agentsMoved.push(agent.id);
       }
     }
@@ -64,7 +65,8 @@ export async function resetConfessionalScene(
   // Move agent tokens back to original scene
   const tokens = agent.getActiveTokens(true);
   for (const token of tokens) {
-    await token.update({ sceneId: originalSceneId });
+    // fvtt-types UpdateInput doesn't include sceneId; using type assertion as Foundry API supports it
+    await token.update({ sceneId: originalSceneId } as unknown as Parameters<typeof token.update>[0]);
   }
 
   return {
