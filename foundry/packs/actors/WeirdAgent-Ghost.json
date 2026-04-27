@@ -25,7 +25,6 @@
       { "text": "Bound to location/object: cannot stray more than 1 mile away", "used": false },
       { "text": "Spending Cool allows brief physical interaction (1 minute per die)", "used": false }
     ],
-    "missionPool": 0,
     "isDead": false,
     "daysOutOfAction": 0,
     "recoveryStartedAt": 0,
