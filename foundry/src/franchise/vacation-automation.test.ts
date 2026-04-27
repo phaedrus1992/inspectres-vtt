@@ -31,14 +31,15 @@ describe("vacation-automation", () => {
           deathMode: true,
         },
         update: vi.fn(),
-        items: {
-          contents: [
-            { isWeird: false },
-            { isWeird: true },
-            { isWeird: false },
-          ],
-        },
       } as any;
+
+      const mockAgents = [
+        { type: "agent", system: { isWeird: false } },
+        { type: "agent", system: { isWeird: true } },
+        { type: "agent", system: { isWeird: false } },
+      ] as any;
+
+      (globalThis as any).game.actors = mockAgents;
 
       const context: EndOfSessionContext = {
         franchiseActor: mockFranchiseActor,
@@ -84,15 +85,10 @@ describe("vacation-automation", () => {
       expect(mockFranchiseActor.update).not.toHaveBeenCalled();
     });
 
-    it("applies characteristics bonus to random unused characteristic", async () => {
+    it("notifies characteristics bonus availability", async () => {
       const mockFranchiseActor = {
         system: {
           bank: 5,
-        },
-        items: {
-          contents: [
-            { isWeird: false },
-          ],
         },
         update: vi.fn(),
       } as any;
@@ -104,13 +100,15 @@ describe("vacation-automation", () => {
         nonWeirdAgentCount: 1,
       };
 
-      // Mock selecting characteristics bonus
-      vi.spyOn(Math, "random").mockReturnValue(0.5);
-
       await applyEndOfSessionBonuses(context);
 
-      // Characteristics bonus should be applied if unused characteristic available
-      // Update call expected if bonus applies
+      // Characteristics bonus notification should fire
+      expect((globalThis as any).ui.notifications.info).toHaveBeenCalled();
+      const calls = ((globalThis as any).ui.notifications.info as any).mock.calls;
+      const notified = calls.some((call: unknown[]) =>
+        String(call[0]).includes("Characteristics") || String(call[0]).includes("INSPECTRES.NotifyCharacteristicsBonus"),
+      );
+      expect(notified).toBe(true);
     });
   });
 
@@ -123,13 +121,15 @@ describe("vacation-automation", () => {
           cardsLocked: true,
         },
         update: vi.fn(),
-        items: {
-          contents: [
-            { system: { cool: 2 }, update: vi.fn() },
-            { system: { cool: 1 }, update: vi.fn() },
-          ],
-        },
       } as any;
+
+      const mockAgents = [
+        { type: "agent", system: { cool: 2 }, update: vi.fn() },
+        { type: "agent", system: { cool: 1 }, update: vi.fn() },
+      ] as any;
+
+      (globalThis as any).game.actors = mockAgents;
+      (globalThis as any).game.user = { isGM: true };
 
       // Mock DialogV2 confirmation
       vi.stubGlobal("foundry", {
@@ -176,8 +176,8 @@ describe("vacation-automation", () => {
     });
 
     it("wipes Cool from all agents on restart", async () => {
-      const mockAgent1 = { system: { cool: 3 }, update: vi.fn() };
-      const mockAgent2 = { system: { cool: 1 }, update: vi.fn() };
+      const mockAgent1 = { type: "agent", system: { cool: 3 }, update: vi.fn(), name: "Agent 1" };
+      const mockAgent2 = { type: "agent", system: { cool: 1 }, update: vi.fn(), name: "Agent 2" };
 
       const mockFranchiseActor = {
         system: {
@@ -186,10 +186,10 @@ describe("vacation-automation", () => {
           cardsLocked: true,
         },
         update: vi.fn(),
-        items: {
-          contents: [mockAgent1, mockAgent2],
-        },
       } as any;
+
+      (globalThis as any).game.actors = [mockAgent1, mockAgent2];
+      (globalThis as any).game.user = { isGM: true };
 
       vi.stubGlobal("foundry", {
         applications: {
@@ -217,10 +217,10 @@ describe("vacation-automation", () => {
           loanAmount: 7,
         },
         update: vi.fn(),
-        items: {
-          contents: [],
-        },
       } as any;
+
+      (globalThis as any).game.actors = [];
+      (globalThis as any).game.user = { isGM: true };
 
       vi.stubGlobal("foundry", {
         applications: {
