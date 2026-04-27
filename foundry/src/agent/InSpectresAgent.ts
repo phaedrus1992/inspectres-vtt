@@ -103,9 +103,14 @@ export class InSpectresAgent extends Actor {
     }
 
     // Issue #227, #267: Talent field gating for weird agents
-    if (systemChanges && "talent" in systemChanges && typeof systemChanges["talent"] === "string" && systemChanges["talent"]) {
-      const isWeird = (systemChanges["isWeird"] ?? agentSystemData(this as Actor).isWeird) as boolean;
-      this.validateTalentGating(isWeird, systemChanges["talent"]);
+    // Validate talent when: (1) talent field is being changed, or (2) isWeird is flipping to true
+    if (systemChanges && ("talent" in systemChanges || "isWeird" in systemChanges)) {
+      const isWeirdAfter = (systemChanges["isWeird"] ?? agentSystemData(this as Actor).isWeird) as boolean;
+      const talentAfter =
+        "talent" in systemChanges
+          ? (systemChanges["talent"] as string | undefined)
+          : (agentSystemData(this as Actor).talent as string | undefined);
+      this.validateTalentGating(isWeirdAfter, talentAfter);
     }
 
     // Issue #256: Validate skill distribution budget
