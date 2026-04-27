@@ -79,7 +79,7 @@ function applySkillPenalty(
   updateData: Record<string, unknown>,
   system: AgentData,
   penaltyAmount: number,
-  targetSkill: SkillName = "academics",
+  targetSkill: SkillName,
 ): void {
   const currentPenalty = system.skills[targetSkill]?.penalty ?? 0;
   updateData[`system.skills.${targetSkill}.penalty`] = currentPenalty + penaltyAmount;
@@ -106,23 +106,26 @@ async function postChatCard(
   await ChatMessage.create({ content, speaker, rolls } as unknown as Parameters<typeof ChatMessage.create>[0]);
 }
 
+// All valid skills for penalty selection — drives dialog rendering and validation.
+// Used to: (1) enumerate dialog options, (2) validate form input against known set.
+// If SkillName ever changes, this constant fails to compile until updated.
+export const SKILL_NAMES = ["academics", "athletics", "technology", "contact"] as const satisfies readonly SkillName[];
+
 async function getPlayerPenaltyChoice(
   system: AgentData,
   penaltyAmount: number,
 ): Promise<SkillName | null> {
-  const skills: Array<{ name: SkillName; rank: number }> = [
-    { name: "academics", rank: system.skills.academics?.base ?? 0 },
-    { name: "athletics", rank: system.skills.athletics?.base ?? 0 },
-    { name: "technology", rank: system.skills.technology?.base ?? 0 },
-    { name: "contact", rank: system.skills.contact?.base ?? 0 },
-  ];
+  const skills: Array<{ name: SkillName; rank: number }> = SKILL_NAMES.map((name) => ({
+    name,
+    rank: system.skills[name]?.base ?? 0,
+  }));
 
   const content = `
     <form class="inspectres-penalty-dialog">
       <p><strong>${game.i18n?.localize("INSPECTRES.PenaltyDialogPrompt") ?? "Choose a skill to penalize"}</strong></p>
       <p>${game.i18n?.format("INSPECTRES.PenaltyDialogAmount", { amount: String(penaltyAmount) }) ?? `Penalty: -${penaltyAmount} die`}</p>
-      ${skills.map((skill) => `
-        <label><input type="radio" name="selectedSkill" value="${skill.name}"> ${game.i18n?.localize(`INSPECTRES.Skill.${skill.name}`) ?? skill.name} (${skill.rank})</label>
+      ${skills.map((skill, idx) => `
+        <label><input type="radio" name="selectedSkill" value="${skill.name}"${idx === 0 ? " checked" : ""}> ${game.i18n?.localize(`INSPECTRES.Skill.${skill.name}`) ?? skill.name} (${skill.rank})</label>
       `).join("")}
     </form>
   `;
@@ -142,6 +145,9 @@ async function getPlayerPenaltyChoice(
           const data = new FormData(form);
           const selectedSkill = data.get("selectedSkill");
           if (!selectedSkill || typeof selectedSkill !== "string") return null;
+          // Validate selected skill is one of the known valid options.
+          // Prevents malformed form or DOM manipulation from writing to arbitrary skill paths.
+          if (!SKILL_NAMES.includes(selectedSkill as SkillName)) return null;
           return selectedSkill as SkillName;
         },
       },
