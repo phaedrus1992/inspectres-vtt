@@ -4,19 +4,10 @@
  */
 
 import { getDevLogger } from "../utils/dev-logger.js";
+import { isSyncEvent, type MissionState, type SyncEvent } from "./socket-guards.js";
 
-export interface MissionState {
-  missionPool: number;
-  missionGoal: number;
-  missionStartDay: number;
-}
-
-export interface SyncEvent {
-  type: "mission-update";
-  data: MissionState;
-  senderId: string;
-  timestamp: number;
-}
+// Re-export types for backward compatibility
+export type { MissionState, SyncEvent } from "./socket-guards.js";
 
 interface SyncStatus {
   lastSync: number;

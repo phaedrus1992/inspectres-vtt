@@ -1,11 +1,9 @@
 import { getDevLogger } from "../utils/dev-logger.js";
+import { getPayloadType, isMissionSocketPayload, type MissionSocketPayload } from "../socket/socket-guards.js";
 
 export const SOCKET_EVENT = "system.inspectres";
 
-export interface MissionSocketPayload {
-  type: "missionPoolUpdated";
-  franchiseId: string;
-}
+export { type MissionSocketPayload } from "../socket/socket-guards.js";
 
 export function emitMissionPoolUpdated(franchiseId: string): void {
   const payload: MissionSocketPayload = { type: "missionPoolUpdated", franchiseId };
@@ -14,22 +12,16 @@ export function emitMissionPoolUpdated(franchiseId: string): void {
 
 export function onMissionSocketEvent(handler: (payload: MissionSocketPayload) => void): void {
   game.socket?.on(SOCKET_EVENT, (payload: unknown) => {
-    if (
-      typeof payload !== "object" ||
-      payload === null ||
-      !("type" in payload) ||
-      !("franchiseId" in payload) ||
-      typeof (payload as { type: unknown }).type !== "string" ||
-      typeof (payload as { franchiseId: unknown }).franchiseId !== "string"
-    ) return;
-
-    if ((payload as { type: string }).type !== "missionPoolUpdated") {
-      getDevLogger().warn("socket", "Unhandled payload type", { type: (payload as { type: string }).type });
+    if (!isMissionSocketPayload(payload)) {
+      const type = getPayloadType(payload);
+      if (type !== undefined) {
+        getDevLogger().warn("socket", "Unhandled payload type", { type });
+      }
       return;
     }
 
     try {
-      handler(payload as MissionSocketPayload);
+      handler(payload);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
       getDevLogger().error("socket", "Handler threw", { error: message });
