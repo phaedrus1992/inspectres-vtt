@@ -3,7 +3,13 @@
   {{#if (or (eq recoveryStatus.status "dead") (eq recoveryStatus.status "recovering"))}}
     <div class="recovery-banner {{recoveryStatus.status}}">
       <i class="fas {{#if (eq recoveryStatus.status "dead")}}fa-skull{{else}}fa-bed{{/if}}"></i>
-      <span>{{recoveryStatus.description}}</span>
+      <span>
+        {{#if (eq recoveryStatus.status "dead")}}
+          {{localize "INSPECTRES.RecoveryStatusDead"}}
+        {{else}}
+          {{localize "INSPECTRES.RecoveryStatusRecovering"}} ({{recoveryStatus.daysRemaining}} {{inspectres-plural recoveryStatus.daysRemaining "day" "days"}} left)
+        {{/if}}
+      </span>
     </div>
   {{/if}}
 
