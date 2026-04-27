@@ -127,21 +127,23 @@ Hooks.once("ready", function () {
   onMissionSocketEvent(() => {
     rerenderMissionTracker("socket event");
   });
-  // #282: Validate Cool cap for all loaded agents (post-load enforcement)
-  void (async () => {
-    for (const actor of game.actors ?? []) {
-      if ((actor.type as string) !== "agent") continue;
-      const updates = validateAndFixCoolCap(actor);
-      if (updates) {
-        try {
-          await actor.update(updates);
-        } catch (err: unknown) {
-          const message = err instanceof Error ? err.message : String(err);
-          console.warn(`[INSPECTRES] Failed to fix Cool cap for ${actor.name}:`, message);
+  // #282: Validate Cool cap for all loaded agents (post-load enforcement) — GM only
+  if (game.user?.isGM ?? false) {
+    void (async () => {
+      for (const actor of game.actors ?? []) {
+        if ((actor.type as string) !== "agent") continue;
+        const updates = validateAndFixCoolCap(actor);
+        if (updates) {
+          try {
+            await actor.update(updates);
+          } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : String(err);
+            console.warn(`[INSPECTRES] Failed to fix Cool cap for ${actor.name}:`, message);
+          }
         }
       }
-    }
-  })();
+    })();
+  }
 });
 
 Hooks.on("updateActor", function (actor: Actor) {

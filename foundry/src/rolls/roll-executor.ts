@@ -12,7 +12,7 @@ import { type FranchiseData } from "../franchise/franchise-schema.js";
 import { emitMissionPoolUpdated } from "../mission/socket.js";
 import { getCurrentDay, computeRecoveryStatus } from "../agent/recovery-utils.js";
 import { type ItemRarity, isRollSufficient, checkDefect } from "../mission/requirements-checker.js";
-import { prepareSkillRollContext } from "../agent/skill-roll-dialog.js";
+import { prepareSkillRollContext, type SkillRollContextInput } from "../agent/skill-roll-dialog.js";
 import { checkTechnologyRollRequirements } from "./skill-roll-executor.js";
 
 // ---------------------------------------------------------------------------
@@ -234,18 +234,23 @@ export async function executeSkillRoll(
 
   // Phase 4: Apply private-life gating if applicable
   const isPrivateLife = options?.isPrivateLife ?? false;
-  const rollContext = prepareSkillRollContext({
+  const contextInput: SkillRollContextInput = {
     agentName: agent.name,
     skillName,
     skillRank: skill.base,
     isPrivateLife,
+    originalSkillRating: skill.base,
     availableAugmentations: {
       cool: availableCool > 0,
       card: availableCardDice > 0,
       bank: availableBank > 0,
       talent: talentText.length > 0,
     },
-  });
+  };
+  if (cardType) {
+    contextInput.cardSkill = cardType;
+  }
+  const rollContext = prepareSkillRollContext(contextInput);
 
   // Gather augmentation via dialog
   const augmentation = await buildSkillRollDialog({
@@ -255,7 +260,8 @@ export async function executeSkillRoll(
     availableBank,
     availableCool,
     hasTalent: talentText.length > 0,
-    canTakeFour: skill.base >= 4,
+    canTakeFour: rollContext.take4Allowed,
+    cardSkillAllowed: rollContext.cardSkillAllowed,
     isTechnology: skillName === "technology",
     isPrivateLife,
   });
@@ -388,6 +394,7 @@ interface SkillRollDialogOptions {
   availableCool: number;
   hasTalent: boolean;
   canTakeFour: boolean;
+  cardSkillAllowed: boolean; // #283: Gate Card dice by skill match
   isTechnology?: boolean; // Phase 1: Requirements Checker
   isPrivateLife?: boolean; // Phase 4: Private Life Gating
 }
@@ -405,7 +412,8 @@ async function buildSkillRollDialog(opts: SkillRollDialogOptions): Promise<Skill
   const i18n = game.i18n;
 
   // Phase 4: Apply private-life gating to augmentation availability
-  const canUseCard = opts.availableCardDice > 0 && !(opts.isPrivateLife ?? false);
+  // #283: Also gate Card dice by skill match
+  const canUseCard = opts.availableCardDice > 0 && !(opts.isPrivateLife ?? false) && opts.cardSkillAllowed;
   const canUseBank = opts.availableBank > 0 && !(opts.isPrivateLife ?? false);
   const canUseTalent = opts.hasTalent && !(opts.isPrivateLife ?? false);
 

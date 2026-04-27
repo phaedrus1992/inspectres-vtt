@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { prepareSkillRollContext } from "../agent/skill-roll-dialog.js";
 import { checkTechnologyRollRequirements } from "../rolls/skill-roll-executor.js";
 import { transitionToConfessionalScene, resetConfessionalScene, type RollScene } from "./confessional-scene.js";
+import type { SkillName } from "../rolls/roll-executor.js";
 
 // Test fixtures matching RollScene interface
 class TestToken {
@@ -43,7 +44,7 @@ describe("Collaboration Mechanics E2E", () => {
 
       const rollContext = prepareSkillRollContext({
         agentName: context.agentName,
-        skillName: context.skillName as any,
+        skillName: context.skillName as SkillName,
         skillRank: 2,
         isPrivateLife: context.isPrivateLife,
         availableAugmentations: { cool: true, card: true, bank: true, talent: true },
@@ -130,7 +131,7 @@ describe("Collaboration Mechanics E2E", () => {
       // Step 1: Prepare skill roll with private-life gating
       const rollContext = prepareSkillRollContext({
         agentName: context.agentName,
-        skillName: context.skillName as any,
+        skillName: context.skillName as SkillName,
         skillRank: 2,
         isPrivateLife: context.isPrivateLife,
         availableAugmentations: { cool: true, card: true, bank: true, talent: true },
