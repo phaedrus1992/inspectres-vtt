@@ -394,7 +394,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
       return;
     }
     const newStress = Math.max(0, system.stress - result.stressReduction);
-    const newCool = (result.coolRestored ?? 0) > 0 ? Math.min(3, system.cool + (result.coolRestored ?? 0)) : system.cool;
+    const newCool = system.cool + (result.coolRestored ?? 0);
     const newBank = Math.max(0, franchiseSystem.bank - result.bankDiceSpent);
     const agentUpdateData = { "system.stress": newStress, "system.cool": newCool } as unknown as Parameters<
       typeof this.actor.update

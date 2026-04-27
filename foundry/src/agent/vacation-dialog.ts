@@ -39,7 +39,7 @@ export async function buildVacationDialog(options: VacationOptions): Promise<Vac
   }
 
   const maxStressSpendable = Math.min(agentStress, franchiseBank);
-  const maxCoolRestorable = agentIsWeird ? Math.min(agentCool, franchiseBank - maxStressSpendable) : 0;
+  const maxCoolRestorable = agentIsWeird ? franchiseBank - maxStressSpendable : 0;
 
   let formHtml = `
     <form>

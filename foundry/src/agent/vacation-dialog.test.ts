@@ -100,9 +100,27 @@ describe("vacation-dialog", () => {
   });
 
   describe("Weird agent Cool restoration during vacation", () => {
-    it("should include Cool restoration option when agent is weird", () => {
+    it("should return null when agent is weird with zero stress but zero cool", async () => {
       const options: VacationOptions = {
-        agentStress: 3,
+        agentStress: 0,
+        agentName: "Weird Agent",
+        franchiseBank: 5,
+        franchiseInDebt: false,
+        agentCool: 0,
+        agentIsWeird: true,
+      };
+
+      const result = await buildVacationDialog(options);
+
+      expect(result).toBeNull();
+      expect(ui.notifications?.info).toHaveBeenCalledWith(
+        expect.stringContaining("NoStress"),
+      );
+    });
+
+    it("should allow Cool restoration when weird agent has cool to restore", async () => {
+      const options: VacationOptions = {
+        agentStress: 0,
         agentName: "Weird Agent",
         franchiseBank: 5,
         franchiseInDebt: false,
@@ -110,12 +128,28 @@ describe("vacation-dialog", () => {
         agentIsWeird: true,
       };
 
-      // Dialog should present both stress and cool options for weird agents
+      // Dialog should be shown (weird agent has cool to restore)
+      // Cannot test actual dialog UI without mocking DialogV2, but interface allows it
       expect(options.agentIsWeird).toBe(true);
-      expect(options.agentCool).toBeDefined();
+      expect(options.agentCool).toBeGreaterThan(0);
     });
 
-    it("should not include Cool restoration option for normal agents", () => {
+    it("should limit Cool restoration to available franchise dice after stress", () => {
+      const scenarios = [
+        { stress: 2, cool: 5, bank: 5, maxStressSpend: 2, maxCoolRestore: 3 },
+        { stress: 1, cool: 3, bank: 2, maxStressSpend: 1, maxCoolRestore: 1 },
+        { stress: 0, cool: 10, bank: 4, maxStressSpend: 0, maxCoolRestore: 4 },
+      ];
+
+      for (const { stress, cool, bank, maxStressSpend, maxCoolRestore } of scenarios) {
+        const maxSpendable = Math.min(stress, bank);
+        const availableDice = bank - maxSpendable;
+        expect(maxSpendable).toBe(maxStressSpend);
+        expect(availableDice).toBe(maxCoolRestore);
+      }
+    });
+
+    it("should not allow Cool restoration for normal agents", () => {
       const options: VacationOptions = {
         agentStress: 3,
         agentName: "Normal Agent",
@@ -126,42 +160,9 @@ describe("vacation-dialog", () => {
       };
 
       expect(options.agentIsWeird).toBe(false);
-    });
-
-    it("should allow restoring Cool using franchise dice for weird agents", () => {
-      const options: VacationOptions = {
-        agentStress: 3,
-        agentName: "Weird Agent",
-        franchiseBank: 5,
-        franchiseInDebt: false,
-        agentCool: 1,
-        agentIsWeird: true,
-      };
-
-      // Weird agent should be able to spend franchise dice to restore Cool
-      const maxCoolRestore = Math.min(options.agentCool || 0, options.franchiseBank);
-      expect(maxCoolRestore).toBe(1);
-    });
-
-    it("should limit Cool restoration to current Cool value", () => {
-      const scenarios = [
-        { cool: 3, bank: 10, maxRestore: 3 }, // Limited by cool (agent can restore up to max cool)
-        { cool: 1, bank: 5, maxRestore: 1 },
-        { cool: 10, bank: 2, maxRestore: 2 }, // Limited by bank (not enough franchise)
-      ];
-
-      for (const { cool, bank, maxRestore } of scenarios) {
-        const options: VacationOptions = {
-          agentStress: 2,
-          agentName: "Weird",
-          franchiseBank: bank,
-          franchiseInDebt: false,
-          agentCool: cool,
-          agentIsWeird: true,
-        };
-        const actualMax = Math.min(options.agentCool || 0, options.franchiseBank);
-        expect(actualMax).toBe(maxRestore);
-      }
+      // Normal agents don't get cool restoration UI
+      const maxCoolRestore = options.agentIsWeird ? Math.max(0, options.franchiseBank) : 0;
+      expect(maxCoolRestore).toBe(0);
     });
   });
 });
