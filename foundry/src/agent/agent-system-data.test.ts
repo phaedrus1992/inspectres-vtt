@@ -16,7 +16,7 @@ describe("agentSystemData helper", () => {
       "talent": "Hypnosis",
       "characteristics": [{ text: "Paranoid", used: false }],
       "stress": 1,
-    }) as unknown as Actor;
+    });
 
     const result = agentSystemData(mockActor);
 
@@ -42,7 +42,7 @@ describe("agentSystemData helper", () => {
       },
       "characteristics": [],
       "stress": 0,
-    }) as unknown as Actor;
+    });
 
     const result = agentSystemData(mockActor);
 
@@ -55,7 +55,7 @@ describe("agentSystemData helper", () => {
     const mockActor = makeAgent({
       "description": "",
       "stress": 0,
-    }) as unknown as Actor;
+    });
 
     const result: AgentData = agentSystemData(mockActor);
 

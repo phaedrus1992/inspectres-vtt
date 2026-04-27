@@ -3,6 +3,15 @@ import { MockActorSheetV2, Hooks } from "../__mocks__/setup.js";
 import { AgentSheet } from "./AgentSheet.js";
 import type { AgentData } from "./agent-schema.js";
 
+function makeAgentSheetTestInstance(actor: unknown, isEditable = true) {
+  const sheet = Object.create(AgentSheet.prototype) as unknown as AgentSheet;
+  // Test fixtures bypass readonly properties via Object.create pattern
+  // Production uses proper ApplicationV2 initialization; tests use minimal mock
+  Object.defineProperty(sheet, "actor", { value: actor, writable: true });
+  Object.defineProperty(sheet, "isEditable", { value: isEditable, writable: true });
+  return sheet;
+}
+
 describe("AgentSheet", () => {
   beforeEach(() => {
     Hooks.clearAll();
@@ -59,9 +68,7 @@ describe("AgentSheet", () => {
   describe("tab navigation", () => {
     function makeSheetWithTabs(activeTab = "stats") {
       const mockActor = new MockActorSheetV2().actor;
-      const sheet = Object.create(AgentSheet.prototype);
-      sheet.actor = mockActor;
-      sheet.isEditable = true;
+      const sheet = makeAgentSheetTestInstance(mockActor, true);
 
       const statsTab = document.createElement("div");
       statsTab.setAttribute("data-tab", "stats");
@@ -136,9 +143,7 @@ describe("AgentSheet", () => {
   describe("portrait editing", () => {
     it("updates actor img when portrait is edited", async () => {
       const mockActor = new MockActorSheetV2().actor;
-      const sheet = Object.create(AgentSheet.prototype);
-      sheet.actor = mockActor;
-      sheet.isEditable = true;
+      const sheet = makeAgentSheetTestInstance(mockActor, true);
 
       const updateSpy = vi.spyOn(sheet.actor, "update").mockResolvedValue(sheet.actor);
       const target = document.createElement("img");
@@ -176,9 +181,7 @@ describe("AgentSheet", () => {
 
     it("does not update actor when file picker is dismissed without selection", async () => {
       const mockActor = new MockActorSheetV2().actor;
-      const sheet = Object.create(AgentSheet.prototype);
-      sheet.actor = mockActor;
-      sheet.isEditable = true;
+      const sheet = makeAgentSheetTestInstance(mockActor, true);
 
       const updateSpy = vi.spyOn(sheet.actor, "update").mockResolvedValue(sheet.actor);
       const target = document.createElement("img");
@@ -206,9 +209,7 @@ describe("AgentSheet", () => {
 
     it("does not open file picker when sheet is not editable", async () => {
       const mockActor = new MockActorSheetV2().actor;
-      const sheet = Object.create(AgentSheet.prototype);
-      sheet.actor = mockActor;
-      sheet.isEditable = false;
+      const sheet = makeAgentSheetTestInstance(mockActor, false);
 
       const filePickerConstructor = vi.fn();
       class TrackingFilePicker {
@@ -234,9 +235,7 @@ describe("AgentSheet", () => {
   describe("_onRender", () => {
     it("does not attach change listeners when sheet is not editable", async () => {
       const mockSheet = new MockActorSheetV2();
-      const sheet = Object.create(AgentSheet.prototype);
-      sheet.actor = mockSheet.actor;
-      sheet.isEditable = false;
+      const sheet = makeAgentSheetTestInstance(mockSheet.actor, false);
 
       const checkbox = document.createElement("input");
       checkbox.className = "weird-checkbox";
@@ -257,9 +256,7 @@ describe("AgentSheet", () => {
 
     it("attaches change listener to weird-checkbox elements", async () => {
       const mockActor = new MockActorSheetV2().actor;
-      const sheet = Object.create(AgentSheet.prototype);
-      sheet.actor = mockActor;
-      sheet.isEditable = true;
+      const sheet = makeAgentSheetTestInstance(mockActor, true);
 
       const checkbox = document.createElement("input");
       checkbox.className = "weird-checkbox";
@@ -281,9 +278,7 @@ describe("AgentSheet", () => {
 
     it("handles listener errors gracefully without rethrowing", async () => {
       const mockActor = new MockActorSheetV2().actor;
-      const sheet = Object.create(AgentSheet.prototype);
-      sheet.actor = mockActor;
-      sheet.isEditable = true;
+      const sheet = makeAgentSheetTestInstance(mockActor, true);
 
       const checkbox = document.createElement("input");
       checkbox.className = "weird-checkbox";
@@ -306,9 +301,7 @@ describe("AgentSheet", () => {
 
     it("multiple checkboxes each get listeners attached", async () => {
       const mockActor = new MockActorSheetV2().actor;
-      const sheet = Object.create(AgentSheet.prototype);
-      sheet.actor = mockActor;
-      sheet.isEditable = true;
+      const sheet = makeAgentSheetTestInstance(mockActor, true);
 
       const checkbox1 = document.createElement("input");
       const checkbox2 = document.createElement("input");
@@ -333,9 +326,7 @@ describe("AgentSheet", () => {
 
     it("does not accumulate listeners across multiple re-renders", async () => {
       const mockActor = new MockActorSheetV2().actor;
-      const sheet = Object.create(AgentSheet.prototype);
-      sheet.actor = mockActor;
-      sheet.isEditable = true;
+      const sheet = makeAgentSheetTestInstance(mockActor, true);
 
       const checkbox = document.createElement("input");
       checkbox.className = "weird-checkbox";
@@ -361,9 +352,7 @@ describe("AgentSheet", () => {
   describe("onActivatePower guards", () => {
     it("does not activate power when sheet is not editable", async () => {
       const mockActor = new MockActorSheetV2().actor;
-      const sheet = Object.create(AgentSheet.prototype);
-      sheet.actor = mockActor;
-      sheet.isEditable = false;
+      const sheet = makeAgentSheetTestInstance(mockActor, false);
 
       const updateSpy = vi.spyOn(sheet.actor, "update").mockResolvedValue(sheet.actor);
 
@@ -374,9 +363,7 @@ describe("AgentSheet", () => {
 
     it("does not activate power while agent is recovering", async () => {
       const mockActor = new MockActorSheetV2().actor;
-      const sheet = Object.create(AgentSheet.prototype);
-      sheet.actor = mockActor;
-      sheet.isEditable = true;
+      const sheet = makeAgentSheetTestInstance(mockActor, true);
 
       const agentData: AgentData = {
         description: "",
@@ -403,9 +390,7 @@ describe("AgentSheet", () => {
 
     it("activates power and deducts cool when conditions are met", async () => {
       const mockActor = new MockActorSheetV2().actor;
-      const sheet = Object.create(AgentSheet.prototype);
-      sheet.actor = mockActor;
-      sheet.isEditable = true;
+      const sheet = makeAgentSheetTestInstance(mockActor, true);
 
       const agentData: AgentData = {
         description: "",
@@ -434,9 +419,7 @@ describe("AgentSheet", () => {
 
     it("prevents power activation if cool is insufficient", async () => {
       const mockActor = new MockActorSheetV2().actor;
-      const sheet = Object.create(AgentSheet.prototype);
-      sheet.actor = mockActor;
-      sheet.isEditable = true;
+      const sheet = makeAgentSheetTestInstance(mockActor, true);
 
       const agentData: AgentData = {
         description: "",
@@ -465,9 +448,7 @@ describe("AgentSheet", () => {
   describe("recovery management handlers", () => {
     it("onReviveAgent clears death state", async () => {
       const mockActor = new MockActorSheetV2().actor;
-      const sheet = Object.create(AgentSheet.prototype);
-      sheet.actor = mockActor;
-      sheet.isEditable = true;
+      const sheet = makeAgentSheetTestInstance(mockActor, true);
 
       const updateSpy = vi.spyOn(sheet.actor, "update").mockResolvedValue(sheet.actor);
       const target = document.createElement("button");
@@ -486,9 +467,7 @@ describe("AgentSheet", () => {
 
     it("onEmergencyRecovery opens dialog and sets recovery fields", async () => {
       const mockActor = new MockActorSheetV2().actor;
-      const sheet = Object.create(AgentSheet.prototype);
-      sheet.actor = mockActor;
-      sheet.isEditable = true;
+      const sheet = makeAgentSheetTestInstance(mockActor, true);
 
       const updateSpy = vi.spyOn(sheet.actor, "update").mockResolvedValue(sheet.actor);
 
@@ -512,9 +491,7 @@ describe("AgentSheet", () => {
 
     it("onOverrideRecoveryDay updates recovery end day", async () => {
       const mockActor = new MockActorSheetV2().actor;
-      const sheet = Object.create(AgentSheet.prototype);
-      sheet.actor = mockActor;
-      sheet.isEditable = true;
+      const sheet = makeAgentSheetTestInstance(mockActor, true);
 
       const agentData: AgentData = {
         description: "",
@@ -549,9 +526,7 @@ describe("AgentSheet", () => {
 
     it("does not perform recovery actions when sheet is not editable", async () => {
       const mockActor = new MockActorSheetV2().actor;
-      const sheet = Object.create(AgentSheet.prototype);
-      sheet.actor = mockActor;
-      sheet.isEditable = false;
+      const sheet = makeAgentSheetTestInstance(mockActor, false);
 
       const updateSpy = vi.spyOn(sheet.actor, "update").mockResolvedValue(sheet.actor);
 

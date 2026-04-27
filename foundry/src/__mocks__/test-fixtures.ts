@@ -6,7 +6,31 @@
  */
 
 import type { RollActor } from "../rolls/roll-executor.js";
-import type { AgentData } from "../agent/agent-schema.js";
+
+function applyNestedUpdate(target: Record<string, unknown>, path: string, value: unknown): void {
+  const parts = path.split(".");
+  if (parts.length === 1) {
+    target[path] = value;
+  } else {
+    let obj = target;
+    for (let i = 0; i < parts.length - 1; i++) {
+      const part = parts[i];
+      if (part !== undefined) {
+        if (!(part in obj)) {
+          obj[part] = {};
+        }
+        const next = obj[part];
+        if (typeof next === "object" && next !== null) {
+          obj = next as Record<string, unknown>;
+        }
+      }
+    }
+    const lastPart = parts[parts.length - 1];
+    if (lastPart !== undefined) {
+      obj[lastPart] = value;
+    }
+  }
+}
 
 export function makeAgent(overrides: Record<string, unknown> = {}): RollActor {
   return {
@@ -28,34 +52,12 @@ export function makeAgent(overrides: Record<string, unknown> = {}): RollActor {
       daysOutOfAction: 0,
       recoveryStartedAt: 0,
       stress: 0,
-      missionPool: 0,
       ...overrides,
     },
     async update(data: Record<string, unknown>) {
       for (const [k, v] of Object.entries(data)) {
         const systemPath = k.replace("system.", "");
-        const parts = systemPath.split(".");
-        if (parts.length === 1) {
-          (this.system as Record<string, unknown>)[systemPath] = v;
-        } else {
-          let obj = this.system as Record<string, unknown>;
-          for (let i = 0; i < parts.length - 1; i++) {
-            const part = parts[i];
-            if (part !== undefined) {
-              if (!(part in obj)) {
-                obj[part] = {};
-              }
-              const next = obj[part];
-              if (typeof next === "object" && next !== null) {
-                obj = next as Record<string, unknown>;
-              }
-            }
-          }
-          const lastPart = parts[parts.length - 1];
-          if (lastPart !== undefined) {
-            obj[lastPart] = v;
-          }
-        }
+        applyNestedUpdate(this.system as Record<string, unknown>, systemPath, v);
       }
       return this;
     },
@@ -72,34 +74,14 @@ export function makeFranchise(overrides: Record<string, unknown> = {}): RollActo
       missionPool: 0,
       missionGoal: 10,
       debtMode: false,
+      deathMode: false,
       loanAmount: 0,
       ...overrides,
     },
     async update(data: Record<string, unknown>) {
       for (const [k, v] of Object.entries(data)) {
         const systemPath = k.replace("system.", "");
-        const parts = systemPath.split(".");
-        if (parts.length === 1) {
-          (this.system as Record<string, unknown>)[systemPath] = v;
-        } else {
-          let obj = this.system as Record<string, unknown>;
-          for (let i = 0; i < parts.length - 1; i++) {
-            const part = parts[i];
-            if (part !== undefined) {
-              if (!(part in obj)) {
-                obj[part] = {};
-              }
-              const next = obj[part];
-              if (typeof next === "object" && next !== null) {
-                obj = next as Record<string, unknown>;
-              }
-            }
-          }
-          const lastPart = parts[parts.length - 1];
-          if (lastPart !== undefined) {
-            obj[lastPart] = v;
-          }
-        }
+        applyNestedUpdate(this.system as Record<string, unknown>, systemPath, v);
       }
       return this;
     },

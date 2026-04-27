@@ -346,10 +346,7 @@ describe("executeClientRoll", () => {
 
 describe("executeStressRoll — death outcomes in death mode", () => {
   it("triggers death outcome when death mode enabled and roll face ≤ 2", async () => {
-    vi.restoreAllMocks(); // Clear beforeEach spy setup
-    // Mock Math.random to return deterministic death roll: 1 = Maimed
-    const originalRandom = Math.random;
-    Math.random = () => 0; // 0 * 3 + 1 = 1 (Maimed)
+    vi.spyOn(Math, "random").mockReturnValue(0); // 0 * 3 + 1 = 1 (Maimed)
 
     (globalThis as unknown as { Roll: typeof MockRoll }).Roll = class extends MockRoll {
       constructor(formula: string) {
@@ -369,12 +366,9 @@ describe("executeStressRoll — death outcomes in death mode", () => {
     expect(updateCall).toBeDefined();
     // Verify that a death outcome was triggered (agent update was called with death-related data)
     expect(agent.system).toBeDefined();
-
-    Math.random = originalRandom;
   });
 
   it("does not trigger death outcome when death mode disabled despite low roll", async () => {
-    vi.restoreAllMocks();
     (globalThis as unknown as { Roll: typeof MockRoll }).Roll = class extends MockRoll {
       constructor(formula: string) {
         super(formula);
@@ -395,9 +389,7 @@ describe("executeStressRoll — death outcomes in death mode", () => {
   });
 
   it("death outcome roll with face 2 triggers when death mode enabled", async () => {
-    vi.restoreAllMocks();
-    const originalRandom = Math.random;
-    Math.random = () => 0.33; // 0.33 * 3 + 1 ≈ 1.99 → 1 (Maimed)
+    vi.spyOn(Math, "random").mockReturnValue(0.33); // 0.33 * 3 + 1 ≈ 1.99 → 1 (Maimed)
 
     (globalThis as unknown as { Roll: typeof MockRoll }).Roll = class extends MockRoll {
       constructor(formula: string) {
@@ -416,8 +408,6 @@ describe("executeStressRoll — death outcomes in death mode", () => {
     // Face 2 should trigger some death outcome (not meltdown)
     const updateCall = agentUpdateSpy.mock.calls[0];
     expect(updateCall).toBeDefined();
-
-    Math.random = originalRandom;
   });
 });
 
