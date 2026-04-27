@@ -329,11 +329,13 @@ Game-critical operations **must have discoverable UI buttons**, not require navi
 
 ## Pre-Commit Hooks
 
-**Configuration:** `.pre-commit-config.yaml` (authoritative source; `.prek.toml` removed)
+**Configuration:** Workspace discovery via prek
+- Root: `.pre-commit-config.yaml` (spell check)
+- `foundry/.pre-commit-config.yaml` (lint, type check, tests)
 
 ### Setup
 ```bash
-prek install                    # Install hooks
+prek install                    # Install hooks (reads all .pre-commit-config.yaml files)
 prek auto-update --cooldown 7   # Auto-update prek framework
 ```
 
@@ -344,12 +346,12 @@ cd foundry
 # Run all quality checks (RECOMMENDED before every commit)
 npm run quality
 
-# Or individually:
+# Or individually for faster feedback:
 npm run lint                    # oxlint with --fix
 npm run check                   # TypeScript type check
 npm run test                    # vitest suite
 
-# Run prek manually (same as what push would trigger)
+# Run prek manually (walks workspace, runs all configs)
 prek run --all-files
 ```
 
@@ -357,18 +359,24 @@ prek run --all-files
 
 **Before committing:**
 1. Make changes in `foundry/src/`
-2. Run `npm run quality` (lint + type + test)
-3. Fix any failures
+2. Run individual checks for faster iteration:
+   - `npm run lint` → fix style issues
+   - `npm run check` → fix type errors
+   - `npm run test` → fix failing tests
+3. Or use `npm run quality` to run all at once
 4. Commit with message including `Fixes #<issue-id>` in body
 
 **On push:**
-- Pre-commit hook fires: runs spell check (typos)
-- Pre-push hook fires: runs `npm run quality` (all three checks)
+- Workspace discovery: prek finds both `.pre-commit-config.yaml` files
+- Pre-commit stage: spell check (typos) from root
+- Pre-push stage: individual tools from `foundry/` (oxlint, tsc, vitest)
+- Progress shown per-tool, not bundled together
 - If any hook fails, fix and retry push
 
-**Why separate hooks:**
-- `pre-commit`: Fast, spell-check only (catches typos early)
-- `pre-push`: Full quality check (catches code issues before remote)
+**Why separate hooks per-tool:**
+- Individual progress lines (see each tool's output)
+- Run only changed tools locally (`npm run lint` doesn't re-run tests)
+- Pre-push runs all three only when needed
 
 <!-- icm:start -->
 ## Persistent memory (ICM) — MANDATORY
