@@ -15,6 +15,7 @@ const ERROR_TALENT_ON_WEIRD_AGENT = "Weird agents cannot have Talent (p.42, p.59
 const ERROR_WEIRD_AGENT_EXISTS = "Only one weird agent allowed per system (p.53). A weird agent already exists.";
 const ERROR_GAME_ACTORS_NOT_INITIALIZED = "Unable to check for existing weird agents—game.actors not initialized";
 const ERROR_INVALID_USER_ID = (userId: string) => `Invalid user ID: ${userId}`;
+const ERROR_SKILL_NEGATIVE = "Skill base cannot be negative";
 
 export class InSpectresAgent extends Actor {
   /**
@@ -35,8 +36,13 @@ export class InSpectresAgent extends Actor {
     const maxSkill = isWeird ? 10 : 4;
     const agentType = isWeird ? "weird" : "normal";
     for (const skill of Object.values(skills)) {
-      if (skill && "base" in skill && typeof skill.base === "number" && skill.base > maxSkill) {
-        throw new Error(ERROR_SKILL_VALUE_EXCEEDS_MAX(skill.base, maxSkill, agentType));
+      if (skill && "base" in skill && typeof skill.base === "number") {
+        if (skill.base < 0) {
+          throw new Error(ERROR_SKILL_NEGATIVE);
+        }
+        if (skill.base > maxSkill) {
+          throw new Error(ERROR_SKILL_VALUE_EXCEEDS_MAX(skill.base, maxSkill, agentType));
+        }
       }
     }
   }
