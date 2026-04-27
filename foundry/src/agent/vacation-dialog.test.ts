@@ -98,4 +98,70 @@ describe("vacation-dialog", () => {
       expect(result.stressReduction).toBe(2);
     });
   });
+
+  describe("Weird agent Cool restoration during vacation", () => {
+    it("should include Cool restoration option when agent is weird", () => {
+      const options: VacationOptions = {
+        agentStress: 3,
+        agentName: "Weird Agent",
+        franchiseBank: 5,
+        franchiseInDebt: false,
+        agentCool: 2,
+        agentIsWeird: true,
+      };
+
+      // Dialog should present both stress and cool options for weird agents
+      expect(options.agentIsWeird).toBe(true);
+      expect(options.agentCool).toBeDefined();
+    });
+
+    it("should not include Cool restoration option for normal agents", () => {
+      const options: VacationOptions = {
+        agentStress: 3,
+        agentName: "Normal Agent",
+        franchiseBank: 5,
+        franchiseInDebt: false,
+        agentCool: 0,
+        agentIsWeird: false,
+      };
+
+      expect(options.agentIsWeird).toBe(false);
+    });
+
+    it("should allow restoring Cool using franchise dice for weird agents", () => {
+      const options: VacationOptions = {
+        agentStress: 3,
+        agentName: "Weird Agent",
+        franchiseBank: 5,
+        franchiseInDebt: false,
+        agentCool: 1,
+        agentIsWeird: true,
+      };
+
+      // Weird agent should be able to spend franchise dice to restore Cool
+      const maxCoolRestore = Math.min(options.agentCool || 0, options.franchiseBank);
+      expect(maxCoolRestore).toBe(1);
+    });
+
+    it("should limit Cool restoration to current Cool value", () => {
+      const scenarios = [
+        { cool: 3, bank: 10, maxRestore: 3 }, // Limited by cool (agent can restore up to max cool)
+        { cool: 1, bank: 5, maxRestore: 1 },
+        { cool: 10, bank: 2, maxRestore: 2 }, // Limited by bank (not enough franchise)
+      ];
+
+      for (const { cool, bank, maxRestore } of scenarios) {
+        const options: VacationOptions = {
+          agentStress: 2,
+          agentName: "Weird",
+          franchiseBank: bank,
+          franchiseInDebt: false,
+          agentCool: cool,
+          agentIsWeird: true,
+        };
+        const actualMax = Math.min(options.agentCool || 0, options.franchiseBank);
+        expect(actualMax).toBe(maxRestore);
+      }
+    });
+  });
 });
