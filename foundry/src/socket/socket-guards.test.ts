@@ -83,6 +83,6 @@ describe("Socket payload validation", () => {
         type: "missionPoolUpdated",
         franchiseId: "",
       }),
-    ).toBe(true); // empty franchiseId is technically valid string
+    ).toBe(false); // empty franchiseId is invalid
   });
 });

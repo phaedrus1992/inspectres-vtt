@@ -524,6 +524,17 @@
     font-weight: 600;
   }
 
+  /* Zero-dice warning in skill roll dialog */
+  .inspectres-warning-zero-dice {
+    padding: 0.75rem 1rem;
+    background: var(--inspectres-warn-bg);
+    border-left: 3px solid var(--inspectres-warn-border);
+    color: var(--inspectres-warn-text);
+    font-size: 0.8rem;
+    margin-bottom: 1rem;
+    line-height: 1.4;
+  }
+
   /* Recovery status banner */
   .recovery-banner {
     display: flex;

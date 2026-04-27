@@ -4,7 +4,7 @@ import { MissionTrackerApp } from "../mission/MissionTrackerApp.js";
 import { handleActionError } from "../utils/ui-errors.js";
 import { activateTabs } from "../utils/sheet-tabs.js";
 import { enterDebtMode, attemptLoanRepayment } from "./bankruptcy-handler.js";
-import { getSyncManager } from "../socket/socket-sync.js";
+import { emitMissionPoolUpdated } from "../mission/socket.js";
 import { getCurrentDaySetting, setCurrentDaySetting } from "../utils/settings-utils.js";
 import { applyEndOfSessionBonuses, initiateBankruptcyRestart, type EndOfSessionContext } from "./vacation-automation.js";
 
@@ -234,14 +234,7 @@ export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicati
     const updateData = { "system.missionPool": 0, "system.missionGoal": 0, "system.missionStartDay": 0 } as unknown as Parameters<typeof this.actor.update>[0];
     await this.actor.update(updateData);
 
-    const syncManager = getSyncManager();
-    const event: Parameters<typeof syncManager.queueEvent>[0] = {
-      type: "mission-update",
-      data: { missionPool: 0, missionGoal: 0, missionStartDay: 0 },
-      senderId: game.user?.id ?? "unknown",
-      timestamp: Date.now(),
-    };
-    syncManager.queueEvent(event);
+    emitMissionPoolUpdated(this.actor.id ?? "");
 
     const lines = Object.entries(distribution)
       .filter(([, v]) => v > 0)
