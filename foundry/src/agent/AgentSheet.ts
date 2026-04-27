@@ -380,7 +380,6 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     }
     const result = await buildVacationDialog({
       agentStress: system.stress,
-      agentName: this.actor.name ?? "Unknown",
       franchiseBank: franchiseSystem.bank,
       franchiseInDebt: franchiseSystem.debtMode,
       agentCool: system.cool,
@@ -401,10 +400,8 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     >[0];
     const franchiseUpdateData = { "system.bank": newBank } as unknown as Parameters<typeof franchise.update>[0];
     try {
-      await Promise.all([
-        this.actor.update(agentUpdateData),
-        franchise.update(franchiseUpdateData),
-      ]);
+      await this.actor.update(agentUpdateData);
+      await franchise.update(franchiseUpdateData);
       const coolMessage = (result.coolRestored ?? 0) > 0 ? `, restored ${result.coolRestored} Cool` : "";
       ui.notifications?.info(
         game.i18n?.localize("INSPECTRES.InfoVacationComplete") ??

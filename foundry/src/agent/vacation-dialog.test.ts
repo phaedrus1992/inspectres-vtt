@@ -21,7 +21,6 @@ describe("vacation-dialog", () => {
     it("returns null when franchise is in debt", async () => {
       const options: VacationOptions = {
         agentStress: 3,
-        agentName: "Test Agent",
         franchiseBank: 5,
         franchiseInDebt: true,
       };
@@ -37,7 +36,6 @@ describe("vacation-dialog", () => {
     it("returns null when agent has no stress", async () => {
       const options: VacationOptions = {
         agentStress: 0,
-        agentName: "Test Agent",
         franchiseBank: 5,
         franchiseInDebt: false,
       };
@@ -53,7 +51,6 @@ describe("vacation-dialog", () => {
     it("limits spending to agent stress and franchise bank", async () => {
       const options: VacationOptions = {
         agentStress: 3,
-        agentName: "Test Agent",
         franchiseBank: 2,
         franchiseInDebt: false,
       };
@@ -65,7 +62,6 @@ describe("vacation-dialog", () => {
     it("allows zero spending (no-op case)", async () => {
       const options: VacationOptions = {
         agentStress: 3,
-        agentName: "Test Agent",
         franchiseBank: 5,
         franchiseInDebt: false,
       };
@@ -103,7 +99,6 @@ describe("vacation-dialog", () => {
     it("should return null when agent is weird with zero stress but zero cool", async () => {
       const options: VacationOptions = {
         agentStress: 0,
-        agentName: "Weird Agent",
         franchiseBank: 5,
         franchiseInDebt: false,
         agentCool: 0,
@@ -121,7 +116,6 @@ describe("vacation-dialog", () => {
     it("should allow Cool restoration when weird agent has cool to restore", async () => {
       const options: VacationOptions = {
         agentStress: 0,
-        agentName: "Weird Agent",
         franchiseBank: 5,
         franchiseInDebt: false,
         agentCool: 2,
@@ -152,7 +146,6 @@ describe("vacation-dialog", () => {
     it("should not allow Cool restoration for normal agents", () => {
       const options: VacationOptions = {
         agentStress: 3,
-        agentName: "Normal Agent",
         franchiseBank: 5,
         franchiseInDebt: false,
         agentCool: 0,

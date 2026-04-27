@@ -8,7 +8,6 @@ import { type AgentData } from "./agent-schema.js";
 
 export interface VacationOptions {
   agentStress: number;
-  agentName: string;
   franchiseBank: number;
   franchiseInDebt: boolean;
   agentCool?: number;
@@ -22,7 +21,7 @@ export interface VacationResult {
 }
 
 export async function buildVacationDialog(options: VacationOptions): Promise<VacationResult | null> {
-  const { agentStress, agentName, franchiseBank, franchiseInDebt, agentCool = 0, agentIsWeird = false } = options;
+  const { agentStress, franchiseBank, franchiseInDebt, agentCool = 0, agentIsWeird = false } = options;
 
   if (franchiseInDebt) {
     ui.notifications?.warn(
@@ -91,9 +90,20 @@ export async function buildVacationDialog(options: VacationOptions): Promise<Vac
         callback: (_event, _button, dialog) => {
           const form = dialog.querySelector("form") as HTMLFormElement;
           const data = new FormData(form);
-          const bankSpentOnStress = Math.max(0, Math.min(maxStressSpendable, Number(data.get("bankSpend") ?? 0)));
-          const coolRestored = agentIsWeird ? Math.max(0, Math.min(maxCoolRestorable, Number(data.get("coolRestore") ?? 0))) : 0;
+          const bankSpendRaw = Number(data.get("bankSpend") ?? 0);
+          const coolRestoreRaw = Number(data.get("coolRestore") ?? 0);
+
+          if (!Number.isFinite(bankSpendRaw) || !Number.isFinite(coolRestoreRaw)) {
+            throw new Error("Invalid input: bank spending must be valid numbers");
+          }
+
+          const bankSpentOnStress = Math.max(0, Math.min(maxStressSpendable, bankSpendRaw));
+          const coolRestored = agentIsWeird ? Math.max(0, Math.min(maxCoolRestorable, coolRestoreRaw)) : 0;
           const totalBankSpent = bankSpentOnStress + coolRestored;
+
+          if (totalBankSpent < 0 || totalBankSpent > franchiseBank) {
+            throw new Error(`Invalid bank spending: spent ${totalBankSpent}, available ${franchiseBank}`);
+          }
 
           return {
             bankDiceSpent: totalBankSpent,
