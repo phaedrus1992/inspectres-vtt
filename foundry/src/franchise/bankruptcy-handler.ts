@@ -60,7 +60,8 @@ export async function enterDebtMode(franchiseActor: Actor, attemptedSpend: numbe
         label: game.i18n?.localize("INSPECTRES.ButtonBorrow") ?? "Borrow & Continue",
         default: true,
         callback: (_event, _button, dialog) => {
-          const form = dialog.querySelector("form") as HTMLFormElement;
+          const form = dialog.querySelector("form") as HTMLFormElement | null;
+          if (!form) return null;
           const data = new FormData(form);
           const amount = Math.max(0, Math.min(MAX_LOAN_AMOUNT, Number(data.get("borrowAmount") ?? 0)));
           return amount;
