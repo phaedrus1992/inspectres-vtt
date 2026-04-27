@@ -86,10 +86,11 @@ export class MissionTrackerApp extends foundry.applications.api.ApplicationV2 {
     if (result === null || result === undefined) return;
     const distribution = result as Record<string, number>;
 
+    // Verify franchise still exists after dialog interaction. If it was deleted,
+    // throw error with context instead of returning silently (prevents data loss).
     const refreshedFranchise = findFranchiseActor();
     if (!refreshedFranchise) {
-      ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorNoFranchise") ?? "No franchise actor found.");
-      return;
+      throw new Error("Franchise actor was deleted while the distribution dialog was open. Distribution cancelled to prevent data loss.");
     }
     const refreshedSystem = franchiseSystemData(refreshedFranchise);
     const refreshedTotal = refreshedSystem.missionPool;
