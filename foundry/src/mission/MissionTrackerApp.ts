@@ -191,19 +191,22 @@ export class MissionTrackerApp extends foundry.applications.api.ApplicationV2 {
       return;
     }
     const system = franchiseSystemData(franchise);
-    const updateData = { "system.missionPool": 0 } as unknown as Parameters<typeof franchise.update>[0];
+    // #268: Keep half of earned dice on premature job end, not zero
+    const remaining = Math.floor(system.missionPool / 2);
+    const updateData = { "system.missionPool": remaining } as unknown as Parameters<typeof franchise.update>[0];
     await franchise.update(updateData);
 
     const syncManager = getSyncManager();
     const event: Parameters<typeof syncManager.queueEvent>[0] = {
       type: "mission-update",
-      data: { missionPool: 0, missionGoal: system.missionGoal, missionStartDay: system.missionStartDay },
+      data: { missionPool: remaining, missionGoal: system.missionGoal, missionStartDay: system.missionStartDay },
       senderId: game.user?.id ?? "unknown",
       timestamp: Date.now(),
     };
     syncManager.queueEvent(event);
 
-    const msg = game.i18n?.localize("INSPECTRES.MissionEndedEarly") ?? "The mission ended early. Franchise pool cleared.";
+    const msg = game.i18n?.format("INSPECTRES.MissionEndedEarlyWithHalfDice", { remaining: String(remaining) })
+      ?? `The mission ended early. Keeping ${remaining} franchise dice.`;
     await ChatMessage.create({ content: `<p>${msg}</p>` } as unknown as Parameters<typeof ChatMessage.create>[0]);
 
     if (MissionTrackerApp.instance === this) {

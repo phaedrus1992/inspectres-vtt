@@ -43,7 +43,7 @@ describe("Collaboration Mechanics E2E", () => {
 
       const rollContext = prepareSkillRollContext({
         agentName: context.agentName,
-        skillName: context.skillName,
+        skillName: context.skillName as any,
         skillRank: 2,
         isPrivateLife: context.isPrivateLife,
         availableAugmentations: { cool: true, card: true, bank: true, talent: true },
@@ -130,7 +130,7 @@ describe("Collaboration Mechanics E2E", () => {
       // Step 1: Prepare skill roll with private-life gating
       const rollContext = prepareSkillRollContext({
         agentName: context.agentName,
-        skillName: context.skillName,
+        skillName: context.skillName as any,
         skillRank: 2,
         isPrivateLife: context.isPrivateLife,
         availableAugmentations: { cool: true, card: true, bank: true, talent: true },

@@ -83,6 +83,7 @@
     "DistributeDialogTotalMismatch": "Total must equal {total} dice.",
     "MissionCompleteAnnounce": "The mission is complete! Franchise dice have been distributed.",
     "MissionEndedEarly": "The mission ended early. Franchise pool cleared.",
+    "MissionEndedEarlyWithHalfDice": "The mission ended early. Keeping {remaining} franchise dice.",
     "ErrorAddCharacteristic": "Failed to add characteristic",
     "ErrorRemoveCharacteristic": "Failed to remove characteristic",
     "ErrorUpdateFailed": "Failed to update actor data",
@@ -99,6 +100,15 @@
     "ErrorToggleDebtModeFailed": "Failed to toggle debt mode",
     "ErrorToggleCardsLockedFailed": "Failed to toggle cards locked",
     "ErrorRepaymentDialogFailed": "Repayment dialog failed",
+    "Error": {
+      "Take4RequiresSkillRating4": "Take a 4 requires original skill rating of 4 or higher.",
+      "CardDiceSkillMismatch": "Card dice can only be used for the card's skill.",
+      "NoCardDiceAvailable": "No card dice available for this roll.",
+      "NoMissionState": "Cannot roll without an active mission state."
+    },
+    "Warn": {
+      "ZeroDiceRollAutoFails": "⚠️ Zero-dice rolls auto-fail: you must roll 2d6 and take the lowest result instead."
+    },
     "DistributeDialogPoolChanged": "Mission pool changed while the dialog was open. Please review the distribution and try again.",
     "WarnNoBankDice": "No bank dice to roll.",
     "WarnSkillRollDebtMode": "Skill rolls are blocked while in Debt Mode.",

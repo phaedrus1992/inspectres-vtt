@@ -1,5 +1,7 @@
 import { gateAugmentationsForPrivateLife } from "../rolls/private-life-roll.js";
 import type { Augmentations } from "../rolls/private-life-roll.js";
+import { validateTake4Gating, validateCardDiceGating } from "../validation/gating-validation.js";
+import type { SkillName } from "../rolls/roll-executor.js";
 
 export interface SkillRollContext {
   agentName: string;
@@ -7,13 +9,17 @@ export interface SkillRollContext {
   skillRank: number;
   isPrivateLife: boolean;
   augmentations: Augmentations;
+  take4Allowed: boolean;
+  cardSkillAllowed: boolean;
 }
 
 export interface SkillRollContextInput {
   agentName: string;
-  skillName: string;
+  skillName: SkillName;
   skillRank: number;
   isPrivateLife: boolean;
+  originalSkillRating?: number;
+  cardSkill?: string;
   availableAugmentations: {
     cool: boolean;
     card: boolean;
@@ -32,11 +38,21 @@ export function prepareSkillRollContext(input: SkillRollContextInput): SkillRoll
 
   const gatedAugmentations = gateAugmentationsForPrivateLife(augmentations, input.isPrivateLife);
 
+  // #281: Gate Take 4 by original skill rating
+  const take4Check = validateTake4Gating(input.originalSkillRating ?? 0);
+  const take4Allowed = take4Check.allowed;
+
+  // #283: Gate Card dice by matching skill
+  const cardCheck = validateCardDiceGating(input.skillName, input.cardSkill ?? null);
+  const cardSkillAllowed = cardCheck.allowed;
+
   return {
     agentName: input.agentName,
     skillName: input.skillName,
     skillRank: input.skillRank,
     isPrivateLife: input.isPrivateLife,
     augmentations: gatedAugmentations,
+    take4Allowed,
+    cardSkillAllowed,
   };
 }

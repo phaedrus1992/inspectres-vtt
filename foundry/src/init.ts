@@ -15,6 +15,7 @@ import { onMissionSocketEvent } from "./mission/socket.js";
 import { handleActionError } from "./utils/ui-errors.js";
 import { autoClearRecoveredAgents } from "./agent/recovery-utils.js";
 import { getCurrentDaySetting } from "./utils/settings-utils.js";
+import { validateAndFixCoolCap } from "./agent/agent-system-data.js";
 
 // Helper to re-render Mission Tracker with error handling
 function rerenderMissionTracker(context: string): void {
@@ -126,6 +127,21 @@ Hooks.once("ready", function () {
   onMissionSocketEvent(() => {
     rerenderMissionTracker("socket event");
   });
+  // #282: Validate Cool cap for all loaded agents (post-load enforcement)
+  void (async () => {
+    for (const actor of game.actors ?? []) {
+      if ((actor.type as string) !== "agent") continue;
+      const updates = validateAndFixCoolCap(actor);
+      if (updates) {
+        try {
+          await actor.update(updates);
+        } catch (err: unknown) {
+          const message = err instanceof Error ? err.message : String(err);
+          console.warn(`[INSPECTRES] Failed to fix Cool cap for ${actor.name}:`, message);
+        }
+      }
+    }
+  })();
 });
 
 Hooks.on("updateActor", function (actor: Actor) {
