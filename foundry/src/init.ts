@@ -130,6 +130,7 @@ Hooks.once("ready", function () {
   // #282: Validate Cool cap for all loaded agents (post-load enforcement) — GM only
   if (game.user?.isGM ?? false) {
     void (async () => {
+      const failedAgents: string[] = [];
       for (const actor of game.actors ?? []) {
         if ((actor.type as string) !== "agent") continue;
         const updates = validateAndFixCoolCap(actor);
@@ -139,8 +140,14 @@ Hooks.once("ready", function () {
           } catch (err: unknown) {
             const message = err instanceof Error ? err.message : String(err);
             console.warn(`[INSPECTRES] Failed to fix Cool cap for ${actor.name}:`, message);
+            failedAgents.push(actor.name ?? "Unknown Agent");
           }
         }
+      }
+      if (failedAgents.length > 0) {
+        const names = failedAgents.join(", ");
+        console.warn(`[INSPECTRES] Cool cap enforcement incomplete for: ${names}`);
+        ui.notifications?.warn(`Failed to verify Cool cap for: ${names}`);
       }
     })();
   }
