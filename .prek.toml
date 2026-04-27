@@ -1,0 +1,27 @@
+[settings]
+# prek hook configuration for InSpectres VTT
+# Pre-commit checks to ensure code quality
+
+[[hooks]]
+name = "lint"
+stages = ["pre-commit"]
+description = "Run oxlint with --fix"
+command = "npm run lint --prefix foundry"
+pass_filenames = false
+always_run = true
+
+[[hooks]]
+name = "type-check"
+stages = ["pre-commit"]
+description = "Run TypeScript type checker"
+command = "npm run check --prefix foundry"
+pass_filenames = false
+always_run = true
+
+[[hooks]]
+name = "tests"
+stages = ["pre-commit"]
+description = "Run vitest test suite"
+command = "npm test --prefix foundry"
+pass_filenames = false
+always_run = true
