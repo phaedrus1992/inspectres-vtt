@@ -1,15 +1,9 @@
 <form class="inspectres inspectres-sheet inspectres-agent-sheet" autocomplete="off">
   {{!-- Recovery Status Banner --}}
-  {{#if (or (eq recoveryStatus.status "dead") (eq recoveryStatus.status "recovering"))}}
+  {{#if bannerText}}
     <div class="recovery-banner {{recoveryStatus.status}}">
       <i class="fas {{#if (eq recoveryStatus.status "dead")}}fa-skull{{else}}fa-bed{{/if}}"></i>
-      <span>
-        {{#if (eq recoveryStatus.status "dead")}}
-          {{localize "INSPECTRES.RecoveryStatusDead"}}
-        {{else}}
-          {{localize "INSPECTRES.RecoveryStatusRecovering"}} ({{recoveryStatus.daysRemaining}} {{inspectres-plural recoveryStatus.daysRemaining "day" "days"}} left)
-        {{/if}}
-      </span>
+      <span>{{bannerText}}</span>
     </div>
   {{/if}}
 
