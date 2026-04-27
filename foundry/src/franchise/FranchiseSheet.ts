@@ -6,6 +6,7 @@ import { activateTabs } from "../utils/sheet-tabs.js";
 import { enterDebtMode, attemptLoanRepayment } from "./bankruptcy-handler.js";
 import { getSyncManager } from "../socket/socket-sync.js";
 import { getCurrentDaySetting, setCurrentDaySetting } from "../utils/settings-utils.js";
+import { applyEndOfSessionBonuses, initiateBankruptcyRestart, type EndOfSessionContext } from "./vacation-automation.js";
 
 // HandlebarsApplicationMixin provides _renderHTML/_replaceHTML required by ApplicationV2 for PARTS-based sheets
 export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.sheets.ActorSheetV2) {
@@ -24,6 +25,8 @@ export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicati
       advanceDay: FranchiseSheet.onAdvanceDay,
       regressDay: FranchiseSheet.onRegressDay,
       beginVacation: FranchiseSheet.onBeginVacation,
+      applyHazardPay: FranchiseSheet.onApplyHazardPay,
+      restartBankruptcy: FranchiseSheet.onRestartBankruptcy,
     },
   };
 
@@ -251,6 +254,38 @@ export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicati
     const baseMsg = game.i18n?.localize("INSPECTRES.MissionCompleteAnnounce") ?? "The mission is complete! Franchise dice have been distributed.";
     const content2 = `<p>${baseMsg}</p><ul>${lines.map((l) => `<li>${l}</li>`).join("")}</ul>`;
     await ChatMessage.create({ content: content2 } as unknown as Parameters<typeof ChatMessage.create>[0]);
+  }
+
+  static async onApplyHazardPay(this: FranchiseSheet, _event: Event, _target: HTMLElement): Promise<void> {
+    if (!this.isEditable || !(game.user?.isGM ?? false)) return;
+    const allActors = Array.from(game.actors ?? []);
+    const agentActors: Actor[] = [];
+    const nonWeirdAgents: Actor[] = [];
+    for (const actor of allActors) {
+      if ((actor as unknown as Record<string, unknown>)["type"] === "agent") {
+        agentActors.push(actor);
+        const sys = actor.system as unknown as Record<string, unknown>;
+        if (!(sys["isWeird"] ?? false)) {
+          nonWeirdAgents.push(actor);
+        }
+      }
+    }
+    const context = {
+      franchiseActor: this.actor,
+      deathMode: (this.actor.system as unknown as FranchiseData).debtMode,
+      agentCount: agentActors.length,
+      nonWeirdAgentCount: nonWeirdAgents.length,
+    };
+    void applyEndOfSessionBonuses(context).catch((err: unknown) => {
+      handleActionError(err, "Hazard pay failed", "INSPECTRES.ErrorApplyHazardPayFailed", "Failed to apply hazard pay");
+    });
+  }
+
+  static async onRestartBankruptcy(this: FranchiseSheet, _event: Event, _target: HTMLElement): Promise<void> {
+    if (!this.isEditable || !(game.user?.isGM ?? false)) return;
+    void initiateBankruptcyRestart(this.actor).catch((err: unknown) => {
+      handleActionError(err, "Bankruptcy restart failed", "INSPECTRES.ErrorRestartBankruptcyFailed", "Failed to restart bankruptcy");
+    });
   }
 
   private static localize(key: string, fallback: string): string {

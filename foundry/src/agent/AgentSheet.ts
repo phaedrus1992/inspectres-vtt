@@ -11,6 +11,7 @@ import { activateTabs } from "../utils/sheet-tabs.js";
 import { getOrCreateListenerController } from "../utils/listener-cleanup.js";
 import { computeRecoveryStatus, getCurrentDay } from "./recovery-utils.js";
 import { buildVacationDialog } from "./vacation-dialog.js";
+import { executeSkillRecovery } from "./skill-recovery.js";
 import { type FranchiseData } from "../franchise/franchise-schema.js";
 
 const SKILL_NAMES = ["academics", "athletics", "technology", "contact"] as const;
@@ -113,6 +114,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
       reviveAgent: AgentSheet.onReviveAgent,
       emergencyRecovery: AgentSheet.onEmergencyRecovery,
       overrideRecoveryDay: AgentSheet.onOverrideRecoveryDay,
+      restoreSkill: AgentSheet.onRestoreSkill,
     },
   };
 
@@ -553,5 +555,50 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     } catch (err: unknown) {
       handleActionError(err, "Failed to override recovery day", "INSPECTRES.ErrorOverrideFailed", "Could not update recovery day");
     }
+  }
+
+  static async onRestoreSkill(this: AgentSheet, _event: Event, target: HTMLElement): Promise<void> {
+    if (!this.isEditable) return;
+    const skillAttr = target.getAttribute("data-skill");
+    if (!isSkillName(skillAttr)) {
+      console.error("onRestoreSkill: missing or invalid data-skill attribute", { skillAttr });
+      return;
+    }
+    const system = agentSystemData(this.actor);
+    if (system.cool < 1) {
+      ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnNoCooltRestore") ?? "No Cool available to restore skills");
+      return;
+    }
+    const i18n = game.i18n;
+    const maxCool = system.cool;
+    const result = await foundry.applications.api.DialogV2.wait({
+      window: { title: i18n?.localize("INSPECTRES.RestoreSkill") ?? "Restore Skill" },
+      rejectClose: false,
+      content: `
+        <form class="inspectres-restore-skill-dialog">
+          <label>${i18n?.localize("INSPECTRES.DialogRestoreSkillLabel") ?? "Cool to spend (1 Cool = +1 skill)"}: <input type="number" name="cool" min="1" max="${maxCool}" value="1"></label>
+        </form>
+      `,
+      buttons: [
+        {
+          action: "restore",
+          label: i18n?.localize("INSPECTRES.DialogRestore") ?? "Restore",
+          default: true,
+          callback: (_event: Event, _button: HTMLButtonElement, dialog: HTMLDialogElement) => {
+            const form = dialog.querySelector("form") as HTMLFormElement | null;
+            if (!form) return null;
+            const cool = Math.max(1, Math.min(maxCool, Number(new FormData(form).get("cool") ?? 1)));
+            return { cool: isNaN(cool) ? 1 : cool };
+          },
+        },
+        { action: "cancel", label: i18n?.localize("INSPECTRES.DialogCancel") ?? "Cancel" },
+      ],
+    });
+
+    if (result === null || result === undefined || result === "cancel") return;
+    const config = result as { cool: number };
+    void executeSkillRecovery(this.actor, skillAttr, config.cool).catch((err: unknown) => {
+      handleActionError(err, "Skill recovery failed", "INSPECTRES.ErrorSkillRecoveryFailed", "Failed to restore skill");
+    });
   }
 }
