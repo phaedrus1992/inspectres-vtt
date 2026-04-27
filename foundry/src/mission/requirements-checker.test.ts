@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getRequirementTier, isRollSufficient } from "./requirements-checker.js";
+import { getRequirementTier, isRollSufficient, checkDefect } from "./requirements-checker.js";
 
 describe("Requirements Checker", () => {
   describe("getRequirementTier", () => {
@@ -39,6 +39,33 @@ describe("Requirements Checker", () => {
     it("returns true when roll exceeds requirement", () => {
       const sufficient = isRollSufficient(6, "common");
       expect(sufficient).toBe(true);
+    });
+  });
+
+  describe("checkDefect", () => {
+    it("returns false for common items (no defect on common)", () => {
+      const defect = checkDefect(3, "common");
+      expect(defect).toBe(false);
+    });
+
+    it("returns true for rare when roll = 4 (min 5 - 1)", () => {
+      const defect = checkDefect(4, "rare");
+      expect(defect).toBe(true);
+    });
+
+    it("returns true for exotic when roll = 5 (min 6 - 1)", () => {
+      const defect = checkDefect(5, "exotic");
+      expect(defect).toBe(true);
+    });
+
+    it("returns false when roll is 2+ below requirement", () => {
+      const defect = checkDefect(3, "exotic");
+      expect(defect).toBe(false);
+    });
+
+    it("returns false when roll meets requirement", () => {
+      const defect = checkDefect(5, "rare");
+      expect(defect).toBe(false);
     });
   });
 });

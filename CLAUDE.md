@@ -19,6 +19,18 @@ For roll procedures, augmentations, stress, franchises, etc.:
 2. Query project memory for prior design decisions
 3. Escalate to user if both silent
 
+## Plans and Superpowers
+
+**Plans location:** `docs/superpowers/plans/`
+- Implementation plans go in `docs/superpowers/plans/` (e.g., `docs/superpowers/plans/312-collaboration-rolls.md`)
+- Named by issue ID and theme (e.g., `{issue-id}-{theme}.md`)
+- Plans are documentation of the approach before implementation begins
+- Include architecture, phases, file changes, test strategy
+
+**Specs location:** `docs/superpowers/specs/`
+- Specifications for game mechanics, rules interpretations, design decisions
+- Shared reference for understanding system behavior
+
 ## Domain Rules (`.claude/rules/`)
 
 Patterns split by domain. Each file scoped to specific paths:
