@@ -13,6 +13,7 @@ import {
   executeBankRoll,
   executeClientRoll,
   type RollActor,
+  type SkillName,
 } from "./roll-executor.js";
 
 // ---------------------------------------------------------------------------
@@ -237,16 +238,33 @@ describe("executeStressRoll", () => {
     expect((agent.system as Record<string, unknown>)["cool"]).toBe(2);
   });
 
-  it("zeroes cool on Meltdown (result 1)", async () => {
+  it("zeroes cool and applies penalty on Meltdown (result 1)", async () => {
     (globalThis as unknown as { Roll: typeof MockRoll }).Roll = class extends MockRoll {
       constructor(formula: string) {
         super(formula);
         this.setResults([1]);
       }
     };
-    const agent = makeAgent({ cool: 3 });
+    const agent = makeAgent({
+      cool: 3,
+      skills: {
+        academics: { base: 2, penalty: 0 },
+        athletics: { base: 1, penalty: 0 },
+        technology: { base: 1, penalty: 0 },
+        contact: { base: 0, penalty: 0 }
+      }
+    });
+
+    // Mock dialog.wait to return "academics" when Meltdown asks for penalty choice
+    vi.spyOn(foundry.applications.api.DialogV2, "wait").mockResolvedValue("academics" satisfies SkillName);
+
     await executeStressRoll(agent, { stressDiceCount: 1, coolDiceUsed: 0 });
-    expect((agent.system as Record<string, unknown>)["cool"]).toBe(0);
+
+    const system = agent.system as Record<string, unknown>;
+    expect(system["cool"]).toBe(0);
+    // Meltdown with 1 stress die = -1 penalty to selected skill
+    const skills = system["skills"] as Record<string, Record<string, number>>;
+    expect(skills["academics"]?.["penalty"]).toBe(1);
   });
 
   it("no actor update on result 5 (Blasé)", async () => {
@@ -276,6 +294,93 @@ describe("executeStressRoll", () => {
     await executeStressRoll(agent, { stressDiceCount: 3, coolDiceUsed: 1 });
     // Cool is NOT spent on stress ignore; result should be 3 (Stressed), cool unchanged
     expect(sys["cool"]).toBe(coolBefore);
+  });
+
+  it("applies penalty on Fair result (result 3) when penalty amount > 0", async () => {
+    (globalThis as unknown as { Roll: typeof MockRoll }).Roll = class extends MockRoll {
+      constructor(formula: string) {
+        super(formula);
+        this.setResults([3]); // Fair = Minor penalty
+      }
+    };
+    const agent = makeAgent({
+      cool: 2,
+      skills: {
+        academics: { base: 2, penalty: 0 },
+        athletics: { base: 1, penalty: 0 },
+        technology: { base: 1, penalty: 0 },
+        contact: { base: 0, penalty: 0 }
+      }
+    });
+
+    // Mock dialog.wait to return "academics" (default)
+    vi.spyOn(foundry.applications.api.DialogV2, "wait").mockResolvedValue("academics" satisfies SkillName);
+
+    await executeStressRoll(agent, { stressDiceCount: 1, coolDiceUsed: 0 });
+    const system = agent.system as Record<string, unknown>;
+    const skills = system["skills"] as Record<string, Record<string, number>>;
+    // Fair result = -1 penalty to selected skill
+    expect(skills["academics"]?.["penalty"]).toBeGreaterThan(0);
+  });
+
+  it("applies penalty to selected skill, not hardcoded to academics", async () => {
+    (globalThis as unknown as { Roll: typeof MockRoll }).Roll = class extends MockRoll {
+      constructor(formula: string) {
+        super(formula);
+        this.setResults([2]); // Stressed = -1 penalty
+      }
+    };
+    const agent = makeAgent({
+      cool: 2,
+      skills: {
+        academics: { base: 2, penalty: 0 },
+        athletics: { base: 1, penalty: 0 },
+        technology: { base: 1, penalty: 0 },
+        contact: { base: 0, penalty: 0 }
+      }
+    });
+
+    // Mock dialog.wait to return "athletics" instead of academics
+    vi.spyOn(foundry.applications.api.DialogV2, "wait").mockResolvedValue("athletics" satisfies SkillName);
+
+    await executeStressRoll(agent, { stressDiceCount: 1, coolDiceUsed: 0 });
+
+    const system = agent.system as Record<string, unknown>;
+    const skills = system["skills"] as Record<string, Record<string, number>>;
+    // Penalty applied to athletics (player choice), not academics
+    expect(skills["athletics"]?.["penalty"]).toBeGreaterThan(0);
+    expect(skills["academics"]?.["penalty"]).toBe(0);
+  });
+
+  it("skips penalty when player closes dialog without selecting", async () => {
+    (globalThis as unknown as { Roll: typeof MockRoll }).Roll = class extends MockRoll {
+      constructor(formula: string) {
+        super(formula);
+        this.setResults([2]); // Stressed = -1 penalty
+      }
+    };
+    const agent = makeAgent({
+      cool: 2,
+      skills: {
+        academics: { base: 2, penalty: 0 },
+        athletics: { base: 1, penalty: 0 },
+        technology: { base: 1, penalty: 0 },
+        contact: { base: 0, penalty: 0 }
+      }
+    });
+
+    // Mock dialog.wait to return null (player closed without selecting)
+    vi.spyOn(foundry.applications.api.DialogV2, "wait").mockResolvedValue(null);
+
+    await executeStressRoll(agent, { stressDiceCount: 1, coolDiceUsed: 0 });
+
+    const system = agent.system as Record<string, unknown>;
+    const skills = system["skills"] as Record<string, Record<string, number>>;
+    // No penalty applied when dialog cancelled
+    expect(skills["academics"]?.["penalty"]).toBe(0);
+    expect(skills["athletics"]?.["penalty"]).toBe(0);
+    expect(skills["technology"]?.["penalty"]).toBe(0);
+    expect(skills["contact"]?.["penalty"]).toBe(0);
   });
 });
 

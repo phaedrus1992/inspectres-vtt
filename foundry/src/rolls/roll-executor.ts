@@ -79,9 +79,10 @@ function applySkillPenalty(
   updateData: Record<string, unknown>,
   system: AgentData,
   penaltyAmount: number,
+  targetSkill: SkillName,
 ): void {
-  const academicsPenalty = system.skills.academics?.penalty ?? 0;
-  updateData["system.skills.academics.penalty"] = academicsPenalty + penaltyAmount;
+  const currentPenalty = system.skills[targetSkill]?.penalty ?? 0;
+  updateData[`system.skills.${targetSkill}.penalty`] = currentPenalty + penaltyAmount;
 }
 
 async function actorUpdate(actor: RollActor, data: Record<string, unknown>): Promise<void> {
@@ -103,6 +104,58 @@ async function postChatCard(
 ): Promise<void> {
   // fvtt-types ChatMessage.create expects strict DocumentData; whisper/rolls fields are valid at runtime
   await ChatMessage.create({ content, speaker, rolls } as unknown as Parameters<typeof ChatMessage.create>[0]);
+}
+
+// All valid skills for penalty selection — drives dialog rendering and validation.
+// Used to: (1) enumerate dialog options, (2) validate form input against known set.
+// If SkillName ever changes, this constant fails to compile until updated.
+export const SKILL_NAMES = ["academics", "athletics", "technology", "contact"] as const satisfies readonly SkillName[];
+
+async function getPlayerPenaltyChoice(
+  system: AgentData,
+  penaltyAmount: number,
+): Promise<SkillName | null> {
+  const skills: Array<{ name: SkillName; rank: number }> = SKILL_NAMES.map((name) => ({
+    name,
+    rank: system.skills[name]?.base ?? 0,
+  }));
+
+  const content = `
+    <form class="inspectres-penalty-dialog">
+      <p><strong>${game.i18n?.localize("INSPECTRES.PenaltyDialogPrompt") ?? "Choose a skill to penalize"}</strong></p>
+      <p>${game.i18n?.format("INSPECTRES.PenaltyDialogAmount", { amount: String(penaltyAmount) }) ?? `Penalty: -${penaltyAmount} die`}</p>
+      ${skills.map((skill, idx) => `
+        <label><input type="radio" name="selectedSkill" value="${skill.name}"${idx === 0 ? " checked" : ""}> ${game.i18n?.localize(`INSPECTRES.Skill.${skill.name}`) ?? skill.name} (${skill.rank})</label>
+      `).join("")}
+    </form>
+  `;
+
+  const result = await foundry.applications.api.DialogV2.wait({
+    window: { title: game.i18n?.localize("INSPECTRES.PenaltyDialogTitle") ?? "Stress Penalty" },
+    rejectClose: false,
+    content,
+    buttons: [
+      {
+        action: "select",
+        label: game.i18n?.localize("INSPECTRES.DialogOK") ?? "OK",
+        default: true,
+        callback: (_event: Event, _button: HTMLButtonElement, dialog: HTMLDialogElement) => {
+          const form = dialog.querySelector("form") as HTMLFormElement | null;
+          if (!form) return null;
+          const data = new FormData(form);
+          const selectedSkill = data.get("selectedSkill");
+          if (!selectedSkill || typeof selectedSkill !== "string") return null;
+          // Validate selected skill is one of the known valid options.
+          // Prevents malformed form or DOM manipulation from writing to arbitrary skill paths.
+          if (!SKILL_NAMES.includes(selectedSkill as SkillName)) return null;
+          return selectedSkill as SkillName;
+        },
+      },
+    ],
+  });
+
+  if (result === null || result === undefined) return null;
+  return result as SkillName;
 }
 
 
@@ -423,16 +476,22 @@ export async function executeStressRoll(
   // Apply updates — meltdown takes precedence over coolGain
   const updateData: Record<string, unknown> = {};
   if (effectiveFace === 1) {
-    // Meltdown: zero cool, skill penalty pool = stress dice count (applied to academics; player reallocates)
+    // Meltdown: zero cool, skill penalty pool = stress dice count (ask player which skill)
     updateData["system.cool"] = 0;
-    applySkillPenalty(updateData, system, stressDiceCount);
+    const meltdownSkill = await getPlayerPenaltyChoice(system, stressDiceCount);
+    if (meltdownSkill) {
+      applySkillPenalty(updateData, system, stressDiceCount, meltdownSkill);
+    }
   } else {
     if (outcome.coolGain > 0) {
       updateData["system.cool"] = system.cool + outcome.coolGain;
     }
-    // Apply outcome-based skill penalty (applied to academics; player reallocates)
+    // Apply outcome-based skill penalty (ask player which skill to penalize)
     if (outcome.skillPenalty > 0) {
-      applySkillPenalty(updateData, system, outcome.skillPenalty);
+      const penaltySkill = await getPlayerPenaltyChoice(system, outcome.skillPenalty);
+      if (penaltySkill) {
+        applySkillPenalty(updateData, system, outcome.skillPenalty, penaltySkill);
+      }
     }
   }
 

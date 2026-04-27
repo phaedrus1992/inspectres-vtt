@@ -57,6 +57,16 @@
     "DialogCoolIgnore": "Cool dice to ignore lowest (0–{max})",
     "DialogRoll": "Roll",
     "DialogCancel": "Cancel",
+    "DialogOK": "OK",
+    "PenaltyDialogTitle": "Stress Penalty",
+    "PenaltyDialogPrompt": "Choose a skill to penalize",
+    "PenaltyDialogAmount": "Penalty: –{amount} die",
+    "Skill": {
+      "academics": "Academics",
+      "athletics": "Athletics",
+      "technology": "Technology",
+      "contact": "Contact"
+    },
     "MissionTrackerTitle": "Mission Tracker",
     "MissionTrackerPool": "Mission Dice Earned",
     "MissionTrackerGoal": "Goal",
