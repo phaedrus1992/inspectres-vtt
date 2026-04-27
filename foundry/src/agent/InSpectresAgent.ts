@@ -6,6 +6,16 @@
 import type { AgentData } from "./agent-schema.js";
 import { agentSystemData } from "./agent-system-data.js";
 
+const ERROR_RECOVERY_STATE_GM_ONLY = "Recovery state can only be modified by the GM";
+const ERROR_SKILL_VALUE_EXCEEDS_MAX = (skillValue: number, max: number, agentType: string) =>
+  `Skill value ${skillValue} exceeds max of ${max} for ${agentType} agent (p.42, p.59)`;
+const ERROR_SKILL_TOTAL_EXCEEDS_MAX = (total: number, max: number, agentType: string) =>
+  `Skill total ${total} exceeds max of ${max} dice for ${agentType} agent (p.42, p.59)`;
+const ERROR_TALENT_ON_WEIRD_AGENT = "Weird agents cannot have Talent (p.42, p.59). Clear the Talent field.";
+const ERROR_WEIRD_AGENT_EXISTS = "Only one weird agent allowed per system (p.53). A weird agent already exists.";
+const ERROR_GAME_ACTORS_NOT_INITIALIZED = "Unable to check for existing weird agents—game.actors not initialized";
+const ERROR_INVALID_USER_ID = (userId: string) => `Invalid user ID: ${userId}`;
+
 export class InSpectresAgent extends Actor {
   /**
    * Get effective skill value (base - penalty, min 0)
@@ -26,23 +36,24 @@ export class InSpectresAgent extends Actor {
     const userIdStr = String(userId);
     const user = game.users?.get(userIdStr);
     if (!user) {
-      throw new Error(`Invalid user ID: ${userIdStr}`);
+      throw new Error(ERROR_INVALID_USER_ID(userIdStr));
     }
     if (user.isGM) return result;
     const systemChanges = (changed as Record<string, unknown>)["system"] as Record<string, unknown> | undefined;
     if (systemChanges && ("isDead" in systemChanges || "daysOutOfAction" in systemChanges || "recoveryStartedAt" in systemChanges)) {
-      throw new Error("Recovery state can only be modified by the GM");
+      throw new Error(ERROR_RECOVERY_STATE_GM_ONLY);
     }
 
     // Issue #218: Enforce skill range based on weird agent status
     if (systemChanges && "skills" in systemChanges) {
       const isWeird = (systemChanges["isWeird"] ?? agentSystemData(this as Actor).isWeird) as boolean;
       const maxSkill = isWeird ? 10 : 4;
+      const agentType = isWeird ? "weird" : "normal";
       const skillChanges = systemChanges["skills"] as Record<string, { base?: number }> | undefined;
       if (skillChanges) {
         for (const skill of Object.values(skillChanges)) {
           if (skill && "base" in skill && typeof skill.base === "number" && skill.base > maxSkill) {
-            throw new Error(`Skill value ${skill.base} exceeds max of ${maxSkill} for ${isWeird ? "weird" : "normal"} agent (p.42, p.59)`);
+            throw new Error(ERROR_SKILL_VALUE_EXCEEDS_MAX(skill.base, maxSkill, agentType));
           }
         }
       }
@@ -52,7 +63,7 @@ export class InSpectresAgent extends Actor {
     if (systemChanges && "talent" in systemChanges && typeof systemChanges["talent"] === "string" && systemChanges["talent"]) {
       const isWeird = (systemChanges["isWeird"] ?? agentSystemData(this as Actor).isWeird) as boolean;
       if (isWeird) {
-        throw new Error("Weird agents cannot have Talent (p.42, p.59). Clear the Talent field.");
+        throw new Error(ERROR_TALENT_ON_WEIRD_AGENT);
       }
     }
 
@@ -63,8 +74,9 @@ export class InSpectresAgent extends Actor {
       if (skills) {
         const totalDice = Object.values(skills).reduce((sum, skill) => sum + (skill?.base ?? 0), 0);
         const maxDice = isWeird ? 10 : 9;
+        const agentType = isWeird ? "weird" : "normal";
         if (totalDice > maxDice) {
-          throw new Error(`Skill total ${totalDice} exceeds max of ${maxDice} dice for ${isWeird ? "weird" : "normal"} agent (p.42, p.59)`);
+          throw new Error(ERROR_SKILL_TOTAL_EXCEEDS_MAX(totalDice, maxDice, agentType));
         }
       }
     }
@@ -86,7 +98,7 @@ export class InSpectresAgent extends Actor {
     // Issue #219, #257: Enforce exactly one weird agent per franchise
     if (isWeird) {
       if (!game.actors) {
-        throw new Error("Unable to check for existing weird agents—game.actors not initialized");
+        throw new Error(ERROR_GAME_ACTORS_NOT_INITIALIZED);
       }
       const existingWeirdAgents = game.actors.filter((actor) => {
         const actorSystem = actor.system as Record<string, unknown> | undefined;
@@ -94,14 +106,14 @@ export class InSpectresAgent extends Actor {
         return String(actor.type) === "agent" && actorIsWeird === true;
       });
       if (existingWeirdAgents.length > 0) {
-        throw new Error("Only one weird agent allowed per system (p.53). A weird agent already exists.");
+        throw new Error(ERROR_WEIRD_AGENT_EXISTS);
       }
     }
 
     // Issue #227: Talent not allowed on weird agents at creation
     const talent = source?.["talent"] as string | undefined;
     if (isWeird && talent) {
-      throw new Error("Weird agents cannot have Talent (p.42, p.59). Clear the Talent field before creating a weird agent.");
+      throw new Error(ERROR_TALENT_ON_WEIRD_AGENT);
     }
 
     // Issue #256: Validate skill budget at creation
@@ -109,8 +121,9 @@ export class InSpectresAgent extends Actor {
     if (skills) {
       const totalDice = Object.values(skills).reduce((sum, skill) => sum + (skill?.base ?? 0), 0);
       const maxDice = isWeird ? 10 : 9;
+      const agentType = isWeird ? "weird" : "normal";
       if (totalDice > maxDice) {
-        throw new Error(`Skill total ${totalDice} exceeds max of ${maxDice} dice for ${isWeird ? "weird" : "normal"} agent (p.42, p.59)`);
+        throw new Error(ERROR_SKILL_TOTAL_EXCEEDS_MAX(totalDice, maxDice, agentType));
       }
     }
 
