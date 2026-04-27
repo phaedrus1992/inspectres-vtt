@@ -1,28 +1,22 @@
 import { describe, it, expect } from "vitest";
 import { agentSystemData } from "./agent-system-data.js";
+import { makeAgent } from "../__mocks__/test-fixtures.js";
 import type { AgentData } from "./agent-schema.js";
 
 describe("agentSystemData helper", () => {
   it("extracts system data from an agent actor", () => {
-    const mockActor = {
-      system: {
-        description: "Test agent",
-        skills: {
-          academics: { base: 2, penalty: 0 },
-          athletics: { base: 1, penalty: 0 },
-          technology: { base: 3, penalty: 0 },
-          contact: { base: 2, penalty: 0 },
-        },
-        talent: "Hypnosis",
-        cool: 2,
-        isWeird: false,
-        characteristics: [{ text: "Paranoid", used: false }],
-        isDead: false,
-        daysOutOfAction: 0,
-        recoveryStartedAt: 0,
-        stress: 1,
+    const mockActor = makeAgent({
+      "description": "Test agent",
+      "skills": {
+        academics: { base: 2, penalty: 0 },
+        athletics: { base: 1, penalty: 0 },
+        technology: { base: 3, penalty: 0 },
+        contact: { base: 2, penalty: 0 },
       },
-    } as unknown as Actor;
+      "talent": "Hypnosis",
+      "characteristics": [{ text: "Paranoid", used: false }],
+      "stress": 1,
+    });
 
     const result = agentSystemData(mockActor);
 
@@ -36,31 +30,19 @@ describe("agentSystemData helper", () => {
   });
 
   it("preserves optional WeirdPower field", () => {
-    const mockActor = {
-      system: {
-        description: "Weird agent",
-        skills: {
-          academics: { base: 0, penalty: 0 },
-          athletics: { base: 0, penalty: 0 },
-          technology: { base: 0, penalty: 0 },
-          contact: { base: 0, penalty: 0 },
-        },
-        talent: undefined,
-        cool: 1,
-        isWeird: true,
-        power: {
-          name: "Levitate",
-          description: "Can levitate objects",
-          baseSkill: "athletics" as const,
-          coolCost: 1,
-        },
-        characteristics: [],
-        isDead: false,
-        daysOutOfAction: 0,
-        recoveryStartedAt: 0,
-        stress: 0,
+    const mockActor = makeAgent({
+      "description": "Weird agent",
+      "talent": undefined,
+      "isWeird": true,
+      "power": {
+        name: "Levitate",
+        description: "Can levitate objects",
+        baseSkill: "athletics" as const,
+        coolCost: 1,
       },
-    } as unknown as Actor;
+      "characteristics": [],
+      "stress": 0,
+    });
 
     const result = agentSystemData(mockActor);
 
@@ -70,25 +52,10 @@ describe("agentSystemData helper", () => {
   });
 
   it("returns a properly typed AgentData object", () => {
-    const mockActor = {
-      system: {
-        description: "",
-        skills: {
-          academics: { base: 0, penalty: 0 },
-          athletics: { base: 0, penalty: 0 },
-          technology: { base: 0, penalty: 0 },
-          contact: { base: 0, penalty: 0 },
-        },
-        talent: "",
-        cool: 0,
-        isWeird: false,
-        characteristics: [],
-        isDead: false,
-        daysOutOfAction: 0,
-        recoveryStartedAt: 0,
-        stress: 0,
-      },
-    } as unknown as Actor;
+    const mockActor = makeAgent({
+      "description": "",
+      "stress": 0,
+    });
 
     const result: AgentData = agentSystemData(mockActor);
 
