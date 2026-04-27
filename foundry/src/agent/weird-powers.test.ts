@@ -15,9 +15,7 @@ interface PowerDescriptor {
   coolCost: number;
 }
 
-interface WeirdAgentData extends AgentData {
-  power?: PowerDescriptor;
-}
+type WeirdAgentData = AgentData;
 
 describe("Weird Agent Powers", () => {
   describe("Power descriptor", () => {
@@ -270,6 +268,7 @@ describe("Weird Agent Powers", () => {
         talent: "Star Trek Geek",
         cool: 0,
         isWeird: false,
+        power: null,
         characteristics: [],
         missionPool: 0,
         isDead: false,

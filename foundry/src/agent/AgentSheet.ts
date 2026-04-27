@@ -131,9 +131,23 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
           target.checked = !target.checked;
           return;
         }
+        // Issue #219: Group-level gating deferred pending group assignment feature implementation.
+        // When groups are modeled in Issue #292, re-enable validation below:
+        // if (target.checked) {
+        //   const group = ...getFlag("inspectres", "group")...
+        //   Prevent >1 weird per group
+        // }
         // fvtt-types expects full document data shape for actor.update; partial update path is safe at runtime
         const updateData = { "system.isWeird": target.checked } as unknown as Parameters<typeof this.actor.update>[0];
         void this.actor.update(updateData).catch((err: unknown) => {
+          const message = err instanceof Error ? err.message : String(err);
+          console.error("Failed to toggle weird status for agent", {
+            actorId: this.actor.id,
+            actorName: this.actor.name,
+            targetValue: target.checked,
+            error: err,
+            errorMessage: message,
+          });
           handleActionError(err, "Failed to toggle weird status", "INSPECTRES.ErrorUpdateFailed", "Failed to update actor data");
         });
       }, { signal: controller.signal });

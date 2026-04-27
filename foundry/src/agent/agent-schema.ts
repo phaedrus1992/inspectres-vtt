@@ -30,7 +30,7 @@ export interface AgentData {
   talent: string;
   cool: number;
   isWeird: boolean;
-  power?: WeirdPower;
+  power?: WeirdPower | null;
   characteristics: AgentCharacteristic[];
   missionPool: number;
   isDead: boolean;
