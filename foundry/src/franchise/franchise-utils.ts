@@ -1,3 +1,4 @@
+import { getActorSystem, type RollActor } from "../utils/system-cast.js";
 import { type FranchiseData } from "./franchise-schema.js";
 
 export function findFranchiseActor(): Actor | null {
@@ -5,7 +6,6 @@ export function findFranchiseActor(): Actor | null {
   return game.actors.find((actor) => (actor.type as string) === "franchise") ?? null;
 }
 
-export function franchiseSystemData(actor: { system: unknown } | Actor): FranchiseData {
-  // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
-  return actor.system as unknown as FranchiseData;
+export function franchiseSystemData(actor: RollActor | Actor): FranchiseData {
+  return getActorSystem<FranchiseData>(actor);
 }

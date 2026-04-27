@@ -3,6 +3,7 @@
  * Represents the paranormal investigation franchise (shared resources)
  */
 
+import { getActorSystem } from "../utils/system-cast.js";
 import type { FranchiseData } from "./franchise-schema.js";
 import { getCurrentDaySetting } from "../utils/settings-utils.js";
 import { getDevLogger } from "../utils/dev-logger.js";
@@ -12,7 +13,7 @@ import { getDevLogger } from "../utils/dev-logger.js";
  */
 async function addToMissionPool(actor: Actor, amount: number): Promise<void> {
   try {
-    const system = actor.system as unknown as { missionPool: number };
+    const system = getActorSystem<{ missionPool: number }>(actor);
     const current = system.missionPool;
     await actor.update({
       "system.missionPool": current + amount,
@@ -44,7 +45,7 @@ export class InSpectresFranchise extends Actor {
     const newGoal = systemChanged["missionGoal"] as number | undefined;
     if (typeof newGoal !== "number" || newGoal <= 0) return;
 
-    const system = this.system as unknown as FranchiseData;
+    const system = getActorSystem<FranchiseData>(this);
     if (system.missionGoal > 0) return; // Mission already started
 
     const currentDay = getCurrentDaySetting();

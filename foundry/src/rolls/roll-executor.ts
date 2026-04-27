@@ -1,3 +1,4 @@
+import { getActorSystem } from "../utils/system-cast.js";
 import {
   SKILL_ROLL_CHART,
   STRESS_ROLL_CHART,
@@ -225,7 +226,7 @@ export async function executeSkillRoll(
   const effectiveDice = Math.max(0, skill.base - skill.penalty);
 
   // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
-  const franchiseSystem = franchise ? (franchise.system as unknown as FranchiseData) : null;
+  const franchiseSystem = franchise ? getActorSystem<FranchiseData>(franchise) : null;
   const cardType = CARD_FOR_SKILL[skillName];
   const availableCardDice = franchiseSystem && cardType ? franchiseSystem.cards[cardType] : 0;
   const availableBank = franchiseSystem ? franchiseSystem.bank : 0;
@@ -524,7 +525,7 @@ async function buildSkillRollDialog(opts: SkillRollDialogOptions): Promise<Skill
 
 export async function executeBankRoll(franchise: RollActor): Promise<void> {
   // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
-  const system = franchise.system as unknown as FranchiseData;
+  const system = getActorSystem<FranchiseData>(franchise);
   const currentBank = system.bank;
 
   if (currentBank === 0) {
@@ -578,7 +579,7 @@ export async function executeStressRoll(
   const outcome = STRESS_ROLL_CHART[effectiveFace];
 
   // Check if death mode is active and this is a death-level outcome
-  const franchiseSystem = franchise ? (franchise.system as unknown as FranchiseData) : null;
+  const franchiseSystem = franchise ? getActorSystem<FranchiseData>(franchise) : null;
   const deathModeActive = franchiseSystem?.deathMode ?? false;
   let deathOutcome: DeathDismembermentOutcome | null = null;
   if (deathModeActive && effectiveFace <= 2) {

@@ -2,6 +2,7 @@
  * InSpectres Agent Character Sheet
  */
 
+import { getActorSystem } from "../utils/system-cast.js";
 import { type AgentCharacteristic } from "./agent-schema.js";
 import { executeSkillRoll, executeStressRoll, type SkillName } from "../rolls/roll-executor.js";
 import { agentSystemData } from "./agent-system-data.js";
@@ -374,7 +375,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
       ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnFranchiseNotFound") ?? "Franchise actor not found.");
       return;
     }
-    const franchiseSystem = franchise.system as unknown as FranchiseData;
+    const franchiseSystem = getActorSystem<FranchiseData>(franchise);
     const status = computeRecoveryStatus(system, getCurrentDay());
     if (status.status === "recovering" || status.status === "dead") {
       ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnActionBlockedRecovery") ?? "Cannot act while recovering");

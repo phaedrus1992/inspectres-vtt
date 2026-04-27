@@ -4,6 +4,7 @@
  * End of mission: repay loan + 1 die interest, then evaluate franchise total
  */
 
+import { getActorSystem } from "../utils/system-cast.js";
 import { type FranchiseData } from "./franchise-schema.js";
 
 export const MAX_LOAN_AMOUNT = 10;
@@ -28,7 +29,7 @@ export function computeBankruptcyState(system: FranchiseData): BankruptcyState {
  * Lock Cards and offer borrow up to MAX_LOAN_AMOUNT
  */
 export async function enterDebtMode(franchiseActor: Actor, attemptedSpend: number): Promise<boolean> {
-  const system = franchiseActor.system as unknown as FranchiseData;
+  const system = getActorSystem<FranchiseData>(franchiseActor);
   if (system.debtMode) {
     ui.notifications?.warn(
       game.i18n?.localize("INSPECTRES.ErrorAlreadyInDebt") ?? "Franchise is already in debt.",
@@ -101,7 +102,7 @@ export async function attemptLoanRepayment(
   franchiseActor: Actor,
   earnedDiceThisMission: number,
 ): Promise<{ success: boolean; debtCleared: boolean }> {
-  const system = franchiseActor.system as unknown as FranchiseData;
+  const system = getActorSystem<FranchiseData>(franchiseActor);
 
   if (!system.debtMode) {
     ui.notifications?.info(

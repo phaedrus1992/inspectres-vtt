@@ -1,3 +1,4 @@
+import { getActorSystem } from "../utils/system-cast.js";
 import { type FranchiseData } from "./franchise-schema.js";
 import { executeBankRoll, executeClientRoll } from "../rolls/roll-executor.js";
 import { MissionTrackerApp } from "../mission/MissionTrackerApp.js";
@@ -43,7 +44,7 @@ export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicati
   override async _prepareContext(_options: foundry.applications.api.ApplicationV2Options): Promise<Record<string, unknown>> {
     const base = await super._prepareContext(_options);
     // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
-    const system = this.actor.system as unknown as FranchiseData;
+    const system = getActorSystem<FranchiseData>(this.actor);
     const isGm = game.user?.isGM ?? false;
     const missionComplete = system.missionGoal > 0 && system.missionPool >= system.missionGoal;
     const currentDay = getCurrentDaySetting();
@@ -53,7 +54,7 @@ export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicati
   static async onBankRoll(this: FranchiseSheet, _event: Event, _target: HTMLElement): Promise<void> {
     if (!this.isEditable) return;
     // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
-    const system = this.actor.system as unknown as FranchiseData;
+    const system = getActorSystem<FranchiseData>(this.actor);
     if (system.debtMode) {
       ui.notifications?.warn(FranchiseSheet.localize("INSPECTRES.WarnBankRollDebtMode", "Bank rolls are disabled in Debt Mode."));
       return;
@@ -66,7 +67,7 @@ export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicati
   static async onClientRoll(this: FranchiseSheet, _event: Event, _target: HTMLElement): Promise<void> {
     if (!this.isEditable) return;
     // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
-    const system = this.actor.system as unknown as FranchiseData;
+    const system = getActorSystem<FranchiseData>(this.actor);
     if (system.debtMode) {
       ui.notifications?.warn(FranchiseSheet.localize("INSPECTRES.WarnClientRollDebtMode", "Client rolls are disabled in Debt Mode."));
       return;
@@ -82,7 +83,7 @@ export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicati
 
   static async onEnterDebt(this: FranchiseSheet, _event: Event, _target: HTMLElement): Promise<void> {
     if (!this.isEditable) return;
-    const system = this.actor.system as unknown as FranchiseData;
+    const system = getActorSystem<FranchiseData>(this.actor);
     if (system.bank > 0) {
       ui.notifications?.warn(
         FranchiseSheet.localize("INSPECTRES.WarnCantEnterDebtWithPositiveBank", "Franchise must have zero or negative Bank to enter Debt Mode."),
@@ -96,14 +97,14 @@ export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicati
   }
 
   static async onToggleDebtMode(this: FranchiseSheet, _event: Event, _target: HTMLElement): Promise<void> {
-    const system = this.actor.system as unknown as FranchiseData;
+    const system = getActorSystem<FranchiseData>(this.actor);
     void FranchiseSheet.toggleFlag.call(this, "system.debtMode", system.debtMode).catch((err: unknown) => {
       handleActionError(err, "Toggle debt mode failed", "INSPECTRES.ErrorToggleDebtModeFailed", "Failed to toggle debt mode");
     });
   }
 
   static async onToggleCardsLocked(this: FranchiseSheet, _event: Event, _target: HTMLElement): Promise<void> {
-    const system = this.actor.system as unknown as FranchiseData;
+    const system = getActorSystem<FranchiseData>(this.actor);
     void FranchiseSheet.toggleFlag.call(this, "system.cardsLocked", system.cardsLocked).catch((err: unknown) => {
       handleActionError(err, "Toggle cards locked failed", "INSPECTRES.ErrorToggleCardsLockedFailed", "Failed to toggle cards locked");
     });
@@ -111,7 +112,7 @@ export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicati
 
   static async onAttemptRepayment(this: FranchiseSheet, _event: Event, _target: HTMLElement): Promise<void> {
     if (!this.isEditable) return;
-    const system = this.actor.system as unknown as FranchiseData;
+    const system = getActorSystem<FranchiseData>(this.actor);
     if (!system.debtMode) {
       ui.notifications?.warn(FranchiseSheet.localize("INSPECTRES.InfoNotInDebt", "Franchise is not in debt."));
       return;
@@ -152,7 +153,7 @@ export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicati
 
   static async onBeginVacation(this: FranchiseSheet, _event: Event, _target: HTMLElement): Promise<void> {
     if (!this.isEditable || !(game.user?.isGM ?? false)) return;
-    const system = this.actor.system as unknown as FranchiseData;
+    const system = getActorSystem<FranchiseData>(this.actor);
     if (system.missionPool === 0) {
       ui.notifications?.warn(FranchiseSheet.localize("INSPECTRES.WarnNoMissionPool", "No mission pool to distribute."));
       return;
@@ -171,7 +172,7 @@ export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicati
   }
 
   private static async openDistributionDialog(this: FranchiseSheet): Promise<void> {
-    const system = this.actor.system as unknown as FranchiseData;
+    const system = getActorSystem<FranchiseData>(this.actor);
     const total = system.missionPool;
     const players = (game.users?.filter((u) => u.active && !u.isGM) ?? []).map((u) => ({ id: u.id, name: u.name ?? u.id }));
 
@@ -179,7 +180,7 @@ export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicati
 
     if (distribution === null) return;
 
-    const refreshedSystem = this.actor.system as unknown as FranchiseData;
+    const refreshedSystem = getActorSystem<FranchiseData>(this.actor);
     const refreshedTotal = refreshedSystem.missionPool;
     const distributedTotal = Object.values(distribution).reduce((sum, v) => sum + v, 0);
 
@@ -224,7 +225,7 @@ export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicati
     }
     const context = {
       franchiseActor: this.actor,
-      deathMode: (this.actor.system as unknown as FranchiseData).deathMode,
+      deathMode: (getActorSystem<FranchiseData>(this.actor)).deathMode,
       agentCount: agentActors.length,
       nonWeirdAgentCount: nonWeirdAgents.length,
     };
