@@ -447,8 +447,16 @@ async function buildSkillRollDialog(opts: SkillRollDialogOptions): Promise<Skill
     </select></label>
   ` : "";
 
+  const zeroDiceWarning = opts.effectiveDice === 0
+    ? `<div class="inspectres-warning-zero-dice">
+        <strong>${i18n?.localize("INSPECTRES.WarningZeroDice") ?? "⚠ No Dice to Roll"}</strong><br>
+        ${i18n?.localize("INSPECTRES.WarningZeroDiceDetail") ?? "You have 0 base dice. Adding augmentations will let you roll normally, otherwise you'll roll 2d6 and take the lowest."}
+      </div>`
+    : "";
+
   const content = `
     <form class="inspectres-roll-dialog">
+      ${zeroDiceWarning}
       <p><strong>${baseDiceLabel}:</strong> ${opts.effectiveDice}</p>
       ${requirementSection}
       ${cardLabel ? `<label><input type="checkbox" name="cardDice"> ${cardLabel}</label>` : ""}

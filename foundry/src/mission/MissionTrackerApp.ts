@@ -1,7 +1,13 @@
 import { findFranchiseActor, franchiseSystemData } from "../franchise/franchise-utils.js";
 import { handleActionError } from "../utils/ui-errors.js";
-import { getSyncManager, type MissionState } from "../socket/socket-sync.js";
+import { emitMissionPoolUpdated } from "./socket.js";
 import { getCurrentDaySetting } from "../utils/settings-utils.js";
+
+export interface MissionState {
+  missionPool: number;
+  missionGoal: number;
+  missionStartDay: number;
+}
 
 export class MissionTrackerApp extends foundry.applications.api.ApplicationV2 {
   static instance: MissionTrackerApp | null = null;
@@ -152,18 +158,10 @@ export class MissionTrackerApp extends foundry.applications.api.ApplicationV2 {
     franchise: Actor,
     distribution: Record<string, number>,
   ): Promise<void> {
-    const system = franchiseSystemData(franchise);
     const updateData = { "system.missionPool": 0 } as unknown as Parameters<typeof franchise.update>[0];
     await franchise.update(updateData);
 
-    const syncManager = getSyncManager();
-    const event: Parameters<typeof syncManager.queueEvent>[0] = {
-      type: "mission-update",
-      data: { missionPool: 0, missionGoal: system.missionGoal, missionStartDay: system.missionStartDay },
-      senderId: game.user?.id ?? "unknown",
-      timestamp: Date.now(),
-    };
-    syncManager.queueEvent(event);
+    emitMissionPoolUpdated(franchise.id ?? "");
 
     const lines = Object.entries(distribution)
       .filter(([, v]) => v > 0)
@@ -196,14 +194,7 @@ export class MissionTrackerApp extends foundry.applications.api.ApplicationV2 {
     const updateData = { "system.missionPool": remaining } as unknown as Parameters<typeof franchise.update>[0];
     await franchise.update(updateData);
 
-    const syncManager = getSyncManager();
-    const event: Parameters<typeof syncManager.queueEvent>[0] = {
-      type: "mission-update",
-      data: { missionPool: remaining, missionGoal: system.missionGoal, missionStartDay: system.missionStartDay },
-      senderId: game.user?.id ?? "unknown",
-      timestamp: Date.now(),
-    };
-    syncManager.queueEvent(event);
+    emitMissionPoolUpdated(franchise.id ?? "");
 
     const msg = game.i18n?.format("INSPECTRES.MissionEndedEarlyWithHalfDice", { remaining: String(remaining) })
       ?? `The mission ended early. Keeping ${remaining} franchise dice.`;

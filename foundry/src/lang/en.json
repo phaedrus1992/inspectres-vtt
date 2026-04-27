@@ -56,6 +56,8 @@
     "DialogRequirementTier": "Requirement Tier",
     "DialogStressDice": "Stress Dice (1–5)",
     "DialogCoolIgnore": "Cool dice to ignore lowest (0–{max})",
+    "WarningZeroDice": "⚠ No Dice to Roll",
+    "WarningZeroDiceDetail": "You have 0 base dice. Adding augmentations will let you roll normally, otherwise you'll roll 2d6 and take the lowest.",
     "DialogRoll": "Roll",
     "DialogCancel": "Cancel",
     "DialogOK": "OK",
