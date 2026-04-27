@@ -1,7 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { createDistributionDialog, type PlayerInfo } from "./distribution-dialog.js";
+import { buildDistributionConfig, type PlayerInfo } from "./distribution-dialog.js";
 
-describe("createDistributionDialog", () => {
+describe("buildDistributionConfig", () => {
+  const mockDialog = {
+    querySelector: vi.fn(),
+  } as unknown as HTMLDialogElement;
+
   beforeEach(() => {
     // Mock foundry globals
     (globalThis as Record<string, unknown>)["game"] = {
@@ -21,6 +25,7 @@ describe("createDistributionDialog", () => {
   });
 
   afterEach(() => {
+    vi.clearAllMocks();
     delete (globalThis as Record<string, unknown>)["game"];
     delete (globalThis as Record<string, unknown>)["foundry"];
   });
@@ -30,7 +35,7 @@ describe("createDistributionDialog", () => {
       { id: "user1", name: "Alice" },
       { id: "user2", name: "Bob" },
     ];
-    const result = await createDistributionDialog({ missionPool: 10, players });
+    const result = await buildDistributionConfig({ missionPool: 10, players });
     expect(result).toHaveProperty("content");
     const content = result.content as string;
     // Should use for/id pairing, not wrapping labels
@@ -45,7 +50,7 @@ describe("createDistributionDialog", () => {
       { id: "user1", name: "Alice" },
       { id: "user2", name: "Bob" },
     ];
-    const result = await createDistributionDialog({ missionPool: 10, players });
+    const result = await buildDistributionConfig({ missionPool: 10, players });
     const content = result.content as string;
     expect(content).toContain("Alice");
     expect(content).toContain("Bob");
@@ -53,7 +58,7 @@ describe("createDistributionDialog", () => {
 
   it("includes dialog buttons", async () => {
     const players: PlayerInfo[] = [{ id: "user1", name: "Alice" }];
-    const result = await createDistributionDialog({ missionPool: 5, players });
+    const result = await buildDistributionConfig({ missionPool: 5, players });
     expect(result.buttons).toBeDefined();
     expect(Array.isArray(result.buttons)).toBe(true);
     const actions = result.buttons?.map((b) => b.action);
@@ -62,7 +67,7 @@ describe("createDistributionDialog", () => {
   });
 
   it("handles no players gracefully", async () => {
-    const result = await createDistributionDialog({ missionPool: 5, players: [] });
+    const result = await buildDistributionConfig({ missionPool: 5, players: [] });
     const content = result.content as string;
     expect(content).toContain("No active players");
   });
@@ -71,7 +76,7 @@ describe("createDistributionDialog", () => {
     const players: PlayerInfo[] = [
       { id: "user1", name: "<img src=x onerror='alert(1)'>" },
     ];
-    const result = await createDistributionDialog({ missionPool: 5, players });
+    const result = await buildDistributionConfig({ missionPool: 5, players });
     const content = result.content as string;
     // Should contain escaped entities, not raw HTML
     expect(content).toContain("&lt;img");

@@ -8,7 +8,7 @@ export interface DistributionDialogOptions {
   players: PlayerInfo[];
 }
 
-export interface DistributionDialogResult {
+interface DialogConfig {
   content: string;
   window?: { title: string };
   buttons?: Array<{
@@ -24,7 +24,7 @@ export interface DistributionDialogResult {
   rejectClose?: boolean;
 }
 
-export async function createDistributionDialog(opts: DistributionDialogOptions): Promise<DistributionDialogResult> {
+export async function buildDistributionConfig(opts: DistributionDialogOptions): Promise<DialogConfig> {
   const { missionPool, players } = opts;
 
   const playerInputs = players
@@ -91,4 +91,11 @@ export async function createDistributionDialog(opts: DistributionDialogOptions):
       },
     ],
   };
+}
+
+export async function promptDistribution(opts: DistributionDialogOptions): Promise<Record<string, number> | null> {
+  const config = await buildDistributionConfig(opts);
+  const result = await foundry.applications.api.DialogV2.wait(config);
+  if (result === null || result === undefined) return null;
+  return result as Record<string, number>;
 }
