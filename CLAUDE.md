@@ -51,7 +51,7 @@ Auto-loaded by Claude Code. Supplement main CLAUDE.md.
 
 ## Issues
 
-All tracking via GitHub (`gh issue`).
+All tracking via GitHub (`gh issue`). **NEVER use Linear CLI tools** — this project uses GitHub-native issues only.
 
 **Create GitHub issue immediately for:**
 - Deferred pre-pr-review findings (Step 7)
