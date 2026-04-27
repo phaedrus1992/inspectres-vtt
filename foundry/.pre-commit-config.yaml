@@ -2,6 +2,12 @@
 # Run by prek workspace discovery from root
 # Individual hooks for better progress visibility
 
+exclude: |
+  (?x)^(
+    \.semgrep-results/|
+    \.tmp/
+  )$
+
 repos:
   # Linting
   - repo: local

@@ -351,8 +351,11 @@ npm run lint                    # oxlint with --fix
 npm run check                   # TypeScript type check
 npm run test                    # vitest suite
 
-# Run prek manually (walks workspace, runs all configs)
-prek run --all-files
+# Run prek manually (walks workspace, respects .gitignore)
+prek run                        # Check changed files only (fast, respects .gitignore)
+
+# Note: Do NOT use --all-files locally (it bypasses .gitignore)
+# Only use --all-files in CI when you specifically need to check everything
 ```
 
 ### Workflows

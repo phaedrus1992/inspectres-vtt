@@ -13,3 +13,8 @@ repos:
         name: Spell check (typos)
         args: [--config, .typos.toml]
         stages: [pre-commit, pre-push]
+        exclude: |
+          (?x)^(
+            \.semgrep-results/|
+            \.tmp/
+          )$
