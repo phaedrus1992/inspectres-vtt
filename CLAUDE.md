@@ -31,6 +31,7 @@ Patterns split by domain. Each file scoped to specific paths:
 | `foundry-patterns.md` | `foundry/**/*` | Elements, rolls, enrichers, CSS, migrations |
 | `foundry-api.md` | `foundry/**/*` | Document API, hooks, updates |
 | `playwright-foundry.md` | `foundry/**/*.test.ts` | Foundry testing |
+| `enums-and-magic-strings.md` | `**/*.ts` `**/*.hbs` | Avoid magic strings; prefer enums, especially templates |
 | `changelog.md` | `CHANGELOG.md` | Semver & changelog format |
 
 Auto-loaded by Claude Code. Supplement main CLAUDE.md.
@@ -161,14 +162,16 @@ Use `/changelog` skill for guidance.
 
 ## Issue Labels
 
+**MANDATORY on all issues:** Priority + Area + Type (except sprint meta-issues).
+
 Three-tier system:
 
-**Priority** (pick one):
+**Priority** (REQUIRED — pick one):
 - P0: Critical blocker
 - P1: High priority (default)
 - P2: Nice-to-have / tech debt
 
-**Area** (one or more):
+**Area** (REQUIRED — one or more):
 - area-core: Mechanics, rolls, stress
 - area-sheets: Actor/item sheets, UI
 - area-chat: Chat rolls, messaging
@@ -176,16 +179,45 @@ Three-tier system:
 - area-character: Death, recovery, bankruptcy
 - area-compendium: Packs, content
 - area-multiplayer: Socket sync, real-time
-- area-devtools: Dev tooling
+- area-devtools: Dev tooling, logging, debug infrastructure
 - area-testing: Test infrastructure
 - area-docs: Docs, comments, i18n, rules
 
-**Type** (for code changes):
-- bug, enhancement, refactor, chore
+**Type** (REQUIRED for code changes):
+- bug: Fix for unexpected behavior
+- enhancement: New feature or capability
+- refactor: Code improvement, no behavior change
+- chore: Dependency updates, CI, tooling
 
 **Phase** (sprint/composite only):
 - phase-1: Core foundation (done)
 - phase-2: UI polish, missions (in progress)
+
+### Label Requirements
+
+**All new issues MUST have:**
+1. **Exactly one Priority** (P0, P1, or P2)
+2. **At least one Area** (area-*)
+3. **One Type** (bug, enhancement, refactor, or chore)
+4. **Milestone** (required by /ship-issue and /dev-sprint)
+
+**Validation:**
+- Create issues via `gh issue create` with explicit `--add-label` flags (see examples below)
+- Never create unlabeled issues—add labels immediately after creation if using UI
+- Pre-pr-review and ship-issue will flag missing labels on deferred work
+
+**Examples:**
+
+```bash
+# Bug fix
+gh issue create --title "Fix recovery timer" --label "P1" --label "area-character" --label "bug" --milestone "Code Quality & Testing"
+
+# Refactoring
+gh issue create --title "Extract socket type guard" --label "P2" --label "area-devtools" --label "refactor" --milestone "Code Quality & Testing"
+
+# New feature
+gh issue create --title "Add vacation mode UI" --label "P1" --label "area-sheets" --label "enhancement" --milestone "Economy: Vacation & Bankruptcy"
+```
 
 ### Label Commands
 
@@ -193,6 +225,7 @@ Three-tier system:
 gh issue list --state open --label "area-character"  # All character issues
 gh issue list --state open --label "P0" --label "bug" # All P0 bugs
 gh issue list --state all --label "P2"                # All tech debt
+gh issue list --state open --label "area-devtools"   # All dev tooling issues
 ```
 
 ## Workflow & Branching
