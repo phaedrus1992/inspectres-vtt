@@ -46,11 +46,12 @@ describe("Confessional UI Integration", () => {
     });
 
     it("handles missing home scene gracefully", async () => {
+      // #330: P0 blocker — now throws on null home scene (fail-closed)
       const confessionalSceneId = "confess-scene-789";
 
-      const returned = await returnFromConfessional(null, confessionalSceneId);
-
-      expect(returned).toBe(false);
+      await expect(returnFromConfessional(null, confessionalSceneId)).rejects.toThrow(
+        /home scene ID required/i,
+      );
     });
   });
 
