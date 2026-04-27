@@ -4,6 +4,7 @@
  */
 
 import { type AgentData } from "./agent-schema.js";
+import { agentSystemData } from "./agent-system-data.js";
 
 // Default in-game day when the setting is unavailable (matches setting's initial value)
 const DEFAULT_IN_GAME_DAY = 1;
@@ -94,7 +95,7 @@ export async function autoClearRecoveredAgents(currentDay: number): Promise<Auto
 
   for (const actor of game.actors) {
     if ((actor.type as string) !== "agent") continue;
-    const system = actor.system as unknown as AgentData;
+    const system = agentSystemData(actor);
 
     // Skip dead agents (stay dead) and uninjured agents (nothing to clear)
     if (system.isDead || system.daysOutOfAction === 0) continue;

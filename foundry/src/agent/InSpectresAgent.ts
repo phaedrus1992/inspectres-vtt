@@ -4,6 +4,7 @@
  */
 
 import type { AgentData } from "./agent-schema.js";
+import { agentSystemData } from "./agent-system-data.js";
 
 /**
  * Add franchise dice to an actor's mission pool
@@ -28,7 +29,7 @@ export class InSpectresAgent extends Actor {
    */
   getEffectiveSkill(skill: "academics" | "athletics" | "technology" | "contact"): number {
     try {
-      const system = this.system as unknown as AgentData;
+      const system = agentSystemData(this as unknown as Actor);
       const skillData = system.skills?.[skill];
       if (!skillData) return 0;
       return Math.max(0, skillData.base - skillData.penalty);

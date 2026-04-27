@@ -4,6 +4,7 @@
 
 import { type AgentData, type AgentCharacteristic } from "./agent-schema.js";
 import { executeSkillRoll, executeStressRoll, type SkillName } from "../rolls/roll-executor.js";
+import { agentSystemData } from "./agent-system-data.js";
 import { findFranchiseActor, franchiseSystemData } from "../franchise/franchise-utils.js";
 import { handleActionError } from "../utils/ui-errors.js";
 import { activateTabs } from "../utils/sheet-tabs.js";
@@ -23,8 +24,7 @@ const checkboxControllers = new WeakMap<AgentSheet, AbortController>();
 
 
 async function buildStressRollDialog(agent: Actor): Promise<void> {
-  // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
-  const system = agent.system as unknown as AgentData;
+  const system = agentSystemData(agent);
   const maxCool = system.cool;
 
   const i18n = game.i18n;
@@ -105,7 +105,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
   override async _prepareContext(_options: foundry.applications.api.ApplicationV2Options): Promise<Record<string, unknown>> {
     const base = await super._prepareContext(_options);
     // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
-    const system = this.actor.system as unknown as AgentData;
+    const system = agentSystemData(this.actor);
     const currentDay = getCurrentDay();
     const recoveryStatus = computeRecoveryStatus(system, currentDay);
     return { ...base, system, recoveryStatus };
@@ -124,7 +124,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     for (const el of this.element.querySelectorAll<HTMLInputElement>(".weird-checkbox")) {
       el.addEventListener("change", (event: Event) => {
         const target = event.target as HTMLInputElement;
-        const system = this.actor.system as unknown as AgentData;
+        const system = agentSystemData(this.actor);
         const status = computeRecoveryStatus(system, getCurrentDay());
         if (status.status === "recovering" || status.status === "dead") {
           ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnActionBlockedRecovery") ?? "Cannot act while recovering");
@@ -178,7 +178,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
       console.error("onSkillRoll: missing or invalid data-skill attribute", { skillAttr });
       return;
     }
-    const system = this.actor.system as unknown as AgentData;
+    const system = agentSystemData(this.actor);
     const currentDay = getCurrentDay();
     const recovery = computeRecoveryStatus(system, currentDay);
     if (recovery.status === "dead") {
@@ -200,7 +200,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
   }
 
   static async onStressRoll(this: AgentSheet, _event: Event, _target: HTMLElement): Promise<void> {
-    const system = this.actor.system as unknown as AgentData;
+    const system = agentSystemData(this.actor);
     const currentDay = getCurrentDay();
     const recovery = computeRecoveryStatus(system, currentDay);
     if (recovery.status === "dead") {
@@ -229,7 +229,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
       return;
     }
     // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
-    const system = this.actor.system as unknown as AgentData;
+    const system = agentSystemData(this.actor);
     const status = computeRecoveryStatus(system, getCurrentDay());
     if (status.status === "recovering" || status.status === "dead") {
       ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnSkillBlockedRecovery") ?? "Cannot act while recovering");
@@ -264,7 +264,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
       return;
     }
     // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
-    const system = this.actor.system as unknown as AgentData;
+    const system = agentSystemData(this.actor);
     const status = computeRecoveryStatus(system, getCurrentDay());
     if (status.status === "recovering" || status.status === "dead") {
       ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnSkillBlockedRecovery") ?? "Cannot act while recovering");
@@ -281,8 +281,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
 
   static async onAddCharacteristic(this: AgentSheet, _event: Event, _target: HTMLElement): Promise<void> {
     if (!this.isEditable) return;
-    // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
-    const currentSystem = this.actor.system as unknown as AgentData;
+    const currentSystem = agentSystemData(this.actor);
     const status = computeRecoveryStatus(currentSystem, getCurrentDay());
     if (status.status === "recovering" || status.status === "dead") {
       ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnActionBlockedRecovery") ?? "Cannot act while recovering");
@@ -308,8 +307,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
       console.error("onRemoveCharacteristic: invalid data-idx value", { idxStr });
       return;
     }
-    // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
-    const currentSystem = this.actor.system as unknown as AgentData;
+    const currentSystem = agentSystemData(this.actor);
     const status = computeRecoveryStatus(currentSystem, getCurrentDay());
     if (status.status === "recovering" || status.status === "dead") {
       ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnActionBlockedRecovery") ?? "Cannot act while recovering");
@@ -325,7 +323,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
 
   static async onEditPortrait(this: AgentSheet, _event: Event, target: HTMLElement): Promise<void> {
     if (!this.isEditable) return;
-    const system = this.actor.system as unknown as AgentData;
+    const system = agentSystemData(this.actor);
     const status = computeRecoveryStatus(system, getCurrentDay());
     if (status.status === "recovering" || status.status === "dead") {
       ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnActionBlockedRecovery") ?? "Cannot act while recovering");
@@ -349,7 +347,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
 
   static async onVacation(this: AgentSheet, _event: Event, _target: HTMLElement): Promise<void> {
     if (!this.isEditable) return;
-    const system = this.actor.system as unknown as AgentData;
+    const system = agentSystemData(this.actor);
     const franchise = findFranchiseActor();
     if (!franchise) {
       ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnFranchiseNotFound") ?? "Franchise actor not found.");
@@ -400,7 +398,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     if (!this.isEditable) return;
 
     try {
-      const system = this.actor.system as unknown as AgentData;
+      const system = agentSystemData(this.actor);
       const currentDay = getCurrentDay();
       const recoveryStatus = computeRecoveryStatus(system, currentDay);
       if (recoveryStatus.status === "recovering" || recoveryStatus.status === "dead") {
@@ -514,7 +512,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     }
 
     try {
-      const system = this.actor.system as unknown as AgentData;
+      const system = agentSystemData(this.actor);
       const currentDay = getCurrentDay();
       if (targetDay < system.recoveryStartedAt) {
         ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnRecoveryDayBeforeStart") ?? "Target day must be on or after the recovery start day");

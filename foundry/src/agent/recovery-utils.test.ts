@@ -16,7 +16,6 @@ function makeAgent(overrides: Partial<AgentData> = {}): AgentData {
     isWeird: false,
     power: null,
     characteristics: [],
-    missionPool: 0,
     stress: 0,
     isDead: false,
     daysOutOfAction: 0,

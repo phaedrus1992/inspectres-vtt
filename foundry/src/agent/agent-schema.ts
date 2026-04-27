@@ -32,7 +32,6 @@ export interface AgentData {
   isWeird: boolean;
   power?: WeirdPower | null;
   characteristics: AgentCharacteristic[];
-  missionPool: number;
   isDead: boolean;
   daysOutOfAction: number;
   recoveryStartedAt: number;
