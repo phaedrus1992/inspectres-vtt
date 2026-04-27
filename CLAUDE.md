@@ -48,6 +48,26 @@ All tracking via GitHub (`gh issue`).
 
 Use `/github-issues` skill to guide creation + labeling.
 
+### Issue Status Tracking
+
+GitHub doesn't have "in progress" or "in review" states. Use these equivalents:
+
+**In Progress:** Assign the issue to yourself
+- Signals you're actively working on it
+- Visible in your assignee list
+- Command: `gh issue edit <number> --assignee @me`
+
+**In Review:** Create the PR and link it to the issue
+- PR appears in the issue's "Pull Requests" section
+- Reviewers see the PR and can comment on it
+- Command: `gh pr create --title "..." --body "Fixes #<number>" ...`
+
+**Done:** Merge the PR
+- GitHub auto-closes the issue when PR merges (if commit message says "Fixes #<number>")
+- If manual close needed: `gh issue close <number>`
+
+This makes workflow status transparent without requiring custom project boards.
+
 ### Composite Issues
 
 Add constituent issues as sub-issues via GitHub API:
