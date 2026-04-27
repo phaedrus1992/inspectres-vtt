@@ -96,8 +96,8 @@
     flex-shrink: 0;
   }
 
-  /* Generic button reset — named variants are styled below */
-  button:not(.inspectres-roll-button):not(.skill-step):not(.skill-roll-button):not(.cool-pip):not(.btn-add):not(.btn-remove) {
+  /* Generic button styling — apply to buttons with .inspectres-button class */
+  button.inspectres-button {
     color: var(--inspectres-btn-color);
     background: var(--inspectres-btn-bg);
     border: 1px solid var(--inspectres-btn-border);

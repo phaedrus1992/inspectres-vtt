@@ -2,6 +2,7 @@ import { type FranchiseData } from "./franchise-schema.js";
 import { executeBankRoll, executeClientRoll } from "../rolls/roll-executor.js";
 import { MissionTrackerApp } from "../mission/MissionTrackerApp.js";
 import { handleActionError } from "../utils/ui-errors.js";
+import { createDistributionDialog } from "../utils/distribution-dialog.js";
 import { activateTabs } from "../utils/sheet-tabs.js";
 import { enterDebtMode, attemptLoanRepayment } from "./bankruptcy-handler.js";
 import { emitMissionPoolUpdated } from "../mission/socket.js";
@@ -172,50 +173,10 @@ export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicati
   private static async openDistributionDialog(this: FranchiseSheet): Promise<void> {
     const system = this.actor.system as unknown as FranchiseData;
     const total = system.missionPool;
-    const players = game.users?.filter((u) => u.active && !u.isGM) ?? [];
+    const players = (game.users?.filter((u) => u.active && !u.isGM) ?? []).map((u) => ({ id: u.id, name: u.name ?? u.id }));
 
-    const playerInputs = players
-      .map((u) => `<label>${u.name ?? u.id}: <input type="number" name="player-${u.id}" min="0" value="0" /></label>`)
-      .join("\n");
-
-    const instruction = game.i18n?.format("INSPECTRES.DistributeDialogInstruction", { total: String(total) })
-      ?? `Assign ${total} franchise dice among players.`;
-
-    const content = `
-      <form class="inspectres-distribute-dialog">
-        <p>${instruction}</p>
-        ${playerInputs || "<p>No active players.</p>"}
-      </form>
-    `;
-
-    const result = await foundry.applications.api.DialogV2.wait({
-      window: { title: game.i18n?.localize("INSPECTRES.DistributeDialogTitle") ?? "Distribute Mission Dice" },
-      rejectClose: false,
-      content,
-      buttons: [
-        {
-          action: "confirm",
-          label: game.i18n?.localize("INSPECTRES.DistributeDialogConfirm") ?? "Confirm",
-          default: true,
-          callback: (_event: Event, _button: HTMLButtonElement, dialog: HTMLDialogElement) => {
-            const form = dialog.querySelector("form") as HTMLFormElement | null;
-            if (!form) return null;
-            const data = new FormData(form);
-            const distribution: Record<string, number> = {};
-            for (const user of players) {
-              const raw = Number(data.get(`player-${user.id}`) ?? 0);
-              distribution[user.id] = isNaN(raw) ? 0 : Math.max(0, raw);
-            }
-            return distribution;
-          },
-        },
-        {
-          action: "cancel",
-          label: game.i18n?.localize("INSPECTRES.DistributeDialogCancel") ?? "Cancel",
-          callback: () => null,
-        },
-      ],
-    });
+    const dialogConfig = await createDistributionDialog({ missionPool: total, players });
+    const result = await foundry.applications.api.DialogV2.wait(dialogConfig);
 
     if (result === null || result === undefined) return;
     const distribution = result as Record<string, number>;
