@@ -20,7 +20,6 @@ A derived value is any value computed from one or more source values:
 | Source Values | Derived Value | Example |
 |---|---|---|
 | `skill.base`, `skill.penalty` | Effective skill | `Math.max(0, base - penalty)` |
-| `cool`, `stress` | Effective cool | `Math.max(0, cool - stress)` |
 | `isDead`, `daysOutOfAction`, `recoveryStartedAt`, `currentDay` | Recovery status | "recovering", "active", "dead", etc. |
 | `roll faces`, `currentBank` | Bank resolution | Final bank total after bank die resolution |
 
@@ -161,7 +160,7 @@ Both patterns are correct; choose based on usage:
 ```typescript
 // Getter — agent convenience method
 class InSpectresAgent extends Actor {
-  getEffectiveSkill(skill: SkillName): number {
+  getEffectiveSkill(skill: "academics" | "athletics" | "technology" | "contact"): number {
     const system = agentSystemData(this as Actor);
     return Math.max(0, system.skills[skill].base - system.skills[skill].penalty);
   }
