@@ -74,20 +74,24 @@ export class InSpectresAgent extends Actor {
     options: unknown,
     user: unknown,
   ): Promise<boolean | void> {
-    // Type fvtt-types boundary: _preCreate signature uses User object, not userId string
-    const result = await super._preCreate(data as Parameters<Actor["_preCreate"]>[0], options as Parameters<Actor["_preCreate"]>[1], user as Parameters<Actor["_preCreate"]>[2]);
     const source = (data as Record<string, unknown>)?.["system"] as Record<string, unknown> | undefined;
     const isWeird = source?.["isWeird"] as boolean | undefined;
 
+    // Validate BEFORE calling super._preCreate() to ensure atomicity:
+    // either all checks pass and actor is created, or validation fails and actor doesn't exist.
+
     // Issue #219, #257: Enforce exactly one weird agent per franchise
     if (isWeird) {
-      const existingWeirdAgents = game.actors?.filter((actor) => {
+      if (!game.actors) {
+        throw new Error("Unable to check for existing weird agents—game.actors not initialized");
+      }
+      const existingWeirdAgents = game.actors.filter((actor) => {
         const actorSystem = actor.system as Record<string, unknown> | undefined;
         const actorIsWeird = actorSystem?.["isWeird"] as boolean | undefined;
         return String(actor.type) === "agent" && actorIsWeird === true;
-      }) ?? [];
+      });
       if (existingWeirdAgents.length > 0) {
-        throw new Error("Only one weird agent allowed per group/franchise (p.53). A weird agent already exists.");
+        throw new Error("Only one weird agent allowed per system (p.53). A weird agent already exists.");
       }
     }
 
@@ -107,6 +111,7 @@ export class InSpectresAgent extends Actor {
       }
     }
 
-    return result;
+    // All validations passed; proceed with actor creation.
+    return await super._preCreate(data as Parameters<Actor["_preCreate"]>[0], options as Parameters<Actor["_preCreate"]>[1], user as Parameters<Actor["_preCreate"]>[2]);
   }
 }
