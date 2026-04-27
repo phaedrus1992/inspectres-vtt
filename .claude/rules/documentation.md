@@ -6,7 +6,7 @@ Guidelines for InSpectres documentation, synthesized from industry best practice
 
 **User objectives first.** Organize content around what users want to accomplish, not what the system contains. A section titled "How to Make a Skill Roll" serves users better than "Skill Roll System."
 
-**Workflow-based structure.** Group related steps into logical tasks. Instead of separate sections on "Prerequisites," "Installation," "Verification," present them as a single Getting Started flow.
+**Workflow-based structure.** Group steps into logical tasks. Instead of separate sections (Prerequisites, Installation, Verification), present as one Getting Started flow.
 
 **Modular, standalone content.** Each page should be understandable without reading others. Cross-link for context but don't require sequential reading. Use consistent terminology across all pages.
 
