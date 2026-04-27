@@ -15,13 +15,13 @@ describe("AgentSheet", () => {
 
   describe("action handlers — isEditable guard", () => {
     function makeSheet(isEditable: boolean) {
-      const actor = new MockActorSheetV2().actor;
+      const mockSheet = new MockActorSheetV2();
+      const actor = mockSheet.actor;
       actor.system = { skills: { academics: { base: 2, penalty: 0 } }, cool: 1, characteristics: [] };
-      const sheet = Object.create(AgentSheet.prototype);
-      sheet.actor = actor;
-      sheet.isEditable = isEditable;
+      // Sheet instance from mockSheet
+      mockSheet.isEditable = isEditable;
       const updateSpy = vi.spyOn(actor, "update").mockResolvedValue(actor);
-      return { sheet, updateSpy };
+      return { sheet: mockSheet as unknown as AgentSheet, updateSpy };
     }
 
     it("onSkillStep does not update actor when not editable", async () => {
