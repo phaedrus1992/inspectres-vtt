@@ -2,7 +2,7 @@ import { type FranchiseData } from "./franchise-schema.js";
 import { executeBankRoll, executeClientRoll } from "../rolls/roll-executor.js";
 import { MissionTrackerApp } from "../mission/MissionTrackerApp.js";
 import { handleActionError } from "../utils/ui-errors.js";
-import { createDistributionDialog } from "../utils/distribution-dialog.js";
+import { promptDistribution } from "../utils/distribution-dialog.js";
 import { activateTabs } from "../utils/sheet-tabs.js";
 import { enterDebtMode, attemptLoanRepayment } from "./bankruptcy-handler.js";
 import { emitMissionPoolUpdated } from "../mission/socket.js";
@@ -175,11 +175,9 @@ export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicati
     const total = system.missionPool;
     const players = (game.users?.filter((u) => u.active && !u.isGM) ?? []).map((u) => ({ id: u.id, name: u.name ?? u.id }));
 
-    const dialogConfig = await createDistributionDialog({ missionPool: total, players });
-    const result = await foundry.applications.api.DialogV2.wait(dialogConfig);
+    const distribution = await promptDistribution({ missionPool: total, players });
 
-    if (result === null || result === undefined) return;
-    const distribution = result as Record<string, number>;
+    if (distribution === null) return;
 
     const refreshedSystem = this.actor.system as unknown as FranchiseData;
     const refreshedTotal = refreshedSystem.missionPool;

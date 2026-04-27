@@ -1,6 +1,6 @@
 import { findFranchiseActor, franchiseSystemData } from "../franchise/franchise-utils.js";
 import { handleActionError } from "../utils/ui-errors.js";
-import { createDistributionDialog } from "../utils/distribution-dialog.js";
+import { promptDistribution } from "../utils/distribution-dialog.js";
 import { emitMissionPoolUpdated } from "./socket.js";
 import { getCurrentDaySetting } from "../utils/settings-utils.js";
 
@@ -80,11 +80,9 @@ export class MissionTrackerApp extends foundry.applications.api.ApplicationV2 {
     const total = system.missionPool;
     const players = (game.users?.filter((u) => u.active && !u.isGM) ?? []).map((u) => ({ id: u.id, name: u.name ?? u.id }));
 
-    const dialogConfig = await createDistributionDialog({ missionPool: total, players });
-    const result = await foundry.applications.api.DialogV2.wait(dialogConfig);
+    const distribution = await promptDistribution({ missionPool: total, players });
 
-    if (result === null || result === undefined) return;
-    const distribution = result as Record<string, number>;
+    if (distribution === null) return;
 
     // Verify franchise still exists after dialog interaction. If it was deleted,
     // throw error with context instead of returning silently (prevents data loss).
