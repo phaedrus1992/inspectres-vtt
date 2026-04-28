@@ -73,13 +73,15 @@ test.describe("Form field rendering and input validation (E2E - Playwright)", ()
     await page.waitForSelector("textarea, select", { timeout: 5000 });
     const textareas = page.locator("textarea");
     const selects = page.locator("select");
-    const hasTextarea = await textareas.count() > 0;
-    const hasSelect = await selects.count() > 0;
-    if (hasTextarea) {
+    const textareaCount = await textareas.count();
+    const selectCount = await selects.count();
+    // At least one field type must exist (verified by waitForSelector above)
+    expect(textareaCount > 0 || selectCount > 0).toBe(true);
+    if (textareaCount > 0) {
       await page.screenshot({ path: "test-results/e2e-screenshots/17-textarea.png" });
       await expect(textareas.first()).toBeVisible();
     }
-    if (hasSelect) {
+    if (selectCount > 0) {
       await page.screenshot({ path: "test-results/e2e-screenshots/18-select.png" });
       await expect(selects.first()).toBeVisible();
     }
