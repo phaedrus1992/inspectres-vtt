@@ -7,6 +7,10 @@ import { getActorSystem } from "../utils/system-cast.js";
 import { calculateHazardPay } from "./end-of-session-bonuses.js";
 import { type FranchiseData } from "./franchise-schema.js";
 
+function extractErrorMessage(err: unknown): string {
+  return err instanceof Error ? err.message : String(err);
+}
+
 export interface EndOfSessionContext {
   readonly franchiseActor: Actor;
   readonly deathMode: boolean;
@@ -60,7 +64,7 @@ export async function applyEndOfSessionBonuses(context: EndOfSessionContext): Pr
       const updateData = { "system.bank": banUpdate } as unknown as Parameters<typeof context.franchiseActor.update>[0];
       await context.franchiseActor.update(updateData);
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : String(err);
+      const message = extractErrorMessage(err);
       ui.notifications?.error(`Failed to apply hazard pay: ${message}`);
       throw err;
     }
@@ -109,7 +113,7 @@ export async function initiateBankruptcyRestart(franchiseActor: Actor): Promise<
           const updateData = { "system.cool": 0 } as unknown as Parameters<typeof actor.update>[0];
           await actor.update(updateData);
         } catch (err: unknown) {
-          const message = err instanceof Error ? err.message : String(err);
+          const message = extractErrorMessage(err);
           ui.notifications?.error(`Failed to wipe Cool from ${actor.name}: ${message}`);
           throw err;
         }
@@ -118,7 +122,6 @@ export async function initiateBankruptcyRestart(franchiseActor: Actor): Promise<
   }
 
   // Reset franchise
-  const system = getActorSystem<FranchiseData>(franchiseActor);
   try {
     // Type: Actor.update() uses dotted paths; cast matches Foundry API
     const resetData = {
@@ -131,7 +134,7 @@ export async function initiateBankruptcyRestart(franchiseActor: Actor): Promise<
     } as unknown as Parameters<typeof franchiseActor.update>[0];
     await franchiseActor.update(resetData);
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : String(err);
+    const message = extractErrorMessage(err);
     ui.notifications?.error(`Failed to reset franchise: ${message}`);
     throw err;
   }

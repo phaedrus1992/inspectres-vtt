@@ -4,6 +4,64 @@ import path from "path";
 
 const isProduction = process.env.NODE_ENV === "production";
 
+// Extract error message handling helper — eliminates 5+ duplicated error extractions
+function extractErrorMessage(err: unknown): string {
+  if (!(err instanceof Error)) return String(err);
+  let message = err.message;
+  if ((err as { cause?: unknown }).cause) {
+    const cause = extractErrorMessage((err as { cause?: unknown }).cause);
+    message += ` (caused by: ${cause})`;
+  }
+  return message;
+}
+
+// Generic tree-walk helper — eliminates 3 duplicate walk implementations
+interface WalkOptions {
+  maxDepth?: number;
+  filter?: (fileName: string) => boolean;
+}
+
+function walkDirectory(
+  dir: string,
+  callback: (filePath: string) => void,
+  options: WalkOptions = {},
+  depth: number = 0,
+): void {
+  const { maxDepth = 10, filter } = options;
+  if (depth >= maxDepth) {
+    throw new Error(`Directory nesting too deep at ${dir}`);
+  }
+  let files: string[];
+  try {
+    files = fs.readdirSync(dir);
+  } catch (err: unknown) {
+    const message = extractErrorMessage(err);
+    throw new Error(`Failed to read directory ${dir}: ${message}`);
+  }
+  for (const file of files) {
+    const filePath = path.join(dir, file);
+    let stat: fs.Stats;
+    try {
+      stat = fs.statSync(filePath);
+    } catch (err: unknown) {
+      const message = extractErrorMessage(err);
+      throw new Error(`Failed to stat file ${filePath}: ${message}`);
+    }
+    if (stat.isDirectory()) {
+      walkDirectory(filePath, callback, options, depth + 1);
+    } else if (!filter || filter(file)) {
+      // Filter function tests the file name only (e.g., name.endsWith(".css")).
+      // If no filter provided, all files are processed. Otherwise, only matching files proceed.
+      try {
+        callback(filePath);
+      } catch (err: unknown) {
+        const message = extractErrorMessage(err);
+        throw new Error(`Failed to process file ${filePath}: ${message}`);
+      }
+    }
+  }
+}
+
 export default defineConfig({
   root: "src",
   base: "",
@@ -42,7 +100,7 @@ export default defineConfig({
             source: systemJson,
           });
         } catch (err: unknown) {
-          const message = err instanceof Error ? err.message : String(err);
+          const message = extractErrorMessage(err);
           throw new Error(`Failed to read system.json: ${message}`);
         }
 
@@ -59,42 +117,33 @@ export default defineConfig({
             source: templateJson,
           });
         } catch (err: unknown) {
-          const message = err instanceof Error ? err.message : String(err);
+          const message = extractErrorMessage(err);
           throw new Error(`Failed to read template.json: ${message}`);
         }
 
         // Copy styles (including theme subdirectory)
         const stylesDir = path.resolve(__dirname, "src/styles");
         if (fs.existsSync(stylesDir)) {
-          const walkStylesDir = (dir: string, outPrefix: string = "styles", depth: number = 0): void => {
-            if (depth > 10) {
-              throw new Error(`Styles directory nesting too deep at ${dir}`);
-            }
-            try {
-              for (const file of fs.readdirSync(dir)) {
-                const filePath = path.join(dir, file);
+          const emitStyleFiles = (dir: string, outPrefix: string = "styles"): void => {
+            walkDirectory(
+              dir,
+              (filePath) => {
+                const relative = path.relative(stylesDir, filePath);
+                const outPath = path.join(outPrefix, relative).replace(/\\/g, "/");
                 try {
-                  const stat = fs.statSync(filePath);
-                  if (stat.isDirectory()) {
-                    walkStylesDir(filePath, `${outPrefix}/${file}`, depth + 1);
-                  } else if (file.endsWith(".css")) {
-                    const content = fs.readFileSync(filePath, "utf-8");
-                    this.emitFile({ type: "asset", fileName: `${outPrefix}/${file}`, source: content });
-                  }
+                  const content = fs.readFileSync(filePath, "utf-8");
+                  this.emitFile({ type: "asset", fileName: outPath, source: content });
                 } catch (err: unknown) {
-                  const message = err instanceof Error ? err.message : String(err);
-                  throw new Error(`Failed to process style file ${filePath}: ${message}`);
+                  throw new Error(`Failed to read CSS file ${filePath}: ${extractErrorMessage(err)}`);
                 }
-              }
-            } catch (err: unknown) {
-              const message = err instanceof Error ? err.message : String(err);
-              throw new Error(`Failed to walk styles directory ${dir}: ${message}`);
-            }
+              },
+              { filter: (name) => name.endsWith(".css") },
+            );
           };
           try {
-            walkStylesDir(stylesDir);
+            emitStyleFiles(stylesDir);
           } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : String(err);
+            const message = extractErrorMessage(err);
             throw new Error(`Failed to copy styles: ${message}`);
           }
         }
@@ -103,58 +152,40 @@ export default defineConfig({
         const langDir = path.resolve(__dirname, "src/lang");
         if (fs.existsSync(langDir)) {
           try {
-            for (const file of fs.readdirSync(langDir)) {
-              const filePath = path.join(langDir, file);
+            walkDirectory(langDir, (filePath) => {
+              const file = path.basename(filePath);
               try {
-                const stat = fs.statSync(filePath);
-                if (stat.isFile()) {
-                  const content = fs.readFileSync(filePath, "utf-8");
-                  this.emitFile({ type: "asset", fileName: `lang/${file}`, source: content });
-                }
+                const content = fs.readFileSync(filePath, "utf-8");
+                this.emitFile({ type: "asset", fileName: `lang/${file}`, source: content });
               } catch (err: unknown) {
-                const message = err instanceof Error ? err.message : String(err);
-                throw new Error(`Failed to process lang file ${filePath}: ${message}`);
+                throw new Error(`Failed to read lang file ${filePath}: ${extractErrorMessage(err)}`);
               }
-            }
+            });
           } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : String(err);
-            throw new Error(`Failed to read lang directory at ${langDir}: ${message}`);
+            const message = extractErrorMessage(err);
+            throw new Error(`Failed to copy lang: ${message}`);
           }
         }
 
         // Copy Handlebars templates
         const templatesDir = path.resolve(__dirname, "src");
         if (fs.existsSync(templatesDir)) {
-          const walkDir = (dir: string, depth: number = 0): void => {
-            if (depth > 10) {
-              throw new Error(`Template directory nesting too deep at ${dir}`);
-            }
-            try {
-              for (const file of fs.readdirSync(dir)) {
-                const filePath = path.join(dir, file);
-                try {
-                  const stat = fs.statSync(filePath);
-                  if (stat.isDirectory() && file !== "styles" && file !== "lang") {
-                    walkDir(filePath, depth + 1);
-                  } else if (file.endsWith(".hbs")) {
-                    const content = fs.readFileSync(filePath, "utf-8");
-                    const fileName = path.basename(filePath);
-                    this.emitFile({ type: "asset", fileName: `templates/${fileName}`, source: content });
-                  }
-                } catch (err: unknown) {
-                  const message = err instanceof Error ? err.message : String(err);
-                  throw new Error(`Failed to process template ${filePath}: ${message}`);
-                }
-              }
-            } catch (err: unknown) {
-              const message = err instanceof Error ? err.message : String(err);
-              throw new Error(`Failed to walk directory ${dir}: ${message}`);
-            }
-          };
           try {
-            walkDir(templatesDir);
+            walkDirectory(
+              templatesDir,
+              (filePath) => {
+                const fileName = path.basename(filePath);
+                try {
+                  const content = fs.readFileSync(filePath, "utf-8");
+                  this.emitFile({ type: "asset", fileName: `templates/${fileName}`, source: content });
+                } catch (err: unknown) {
+                  throw new Error(`Failed to read template file ${filePath}: ${extractErrorMessage(err)}`);
+                }
+              },
+              { filter: (name) => name.endsWith(".hbs") && name !== "styles" && name !== "lang" },
+            );
           } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : String(err);
+            const message = extractErrorMessage(err);
             throw new Error(`Template build failed: ${message}`);
           }
         }
@@ -163,43 +194,44 @@ export default defineConfig({
         // Source JSON in packs/ must be compiled via fvtt-cli before building.
         const compiledPacksDir = path.resolve(__dirname, "packs-compiled");
         if (fs.existsSync(compiledPacksDir)) {
-          function copyDir(
-            ctx: { emitFile(options: { type: "asset"; fileName: string; source: Uint8Array }): void },
-            dir: string,
-            outPrefix: string,
-            depth: number = 0,
-          ): void {
-            if (depth > 10) {
+          const copyBinaryFiles = (dir: string, outPrefix: string = "packs", depth: number = 0): void => {
+            if (depth >= 10) {
               throw new Error(`Pack directory nesting too deep at ${dir}`);
             }
-            let entries: string[];
             try {
-              entries = fs.readdirSync(dir);
-            } catch (err: unknown) {
-              const message = err instanceof Error ? err.message : String(err);
-              throw new Error(`Failed to read packs directory ${dir}: ${message}`);
-            }
-            for (const entry of entries) {
-              if (entry.startsWith(".")) continue;
-              const entryPath = path.join(dir, entry);
-              try {
-                const stat = fs.statSync(entryPath);
-                if (stat.isDirectory()) {
-                  copyDir(ctx, entryPath, `${outPrefix}/${entry}`, depth + 1);
-                } else {
-                  const content = fs.readFileSync(entryPath);
-                  ctx.emitFile({ type: "asset", fileName: `${outPrefix}/${entry}`, source: new Uint8Array(content) });
+              for (const entry of fs.readdirSync(dir)) {
+                if (entry.startsWith(".")) continue;
+                const entryPath = path.join(dir, entry);
+                try {
+                  const stat = fs.statSync(entryPath);
+                  if (stat.isDirectory()) {
+                    copyBinaryFiles(entryPath, `${outPrefix}/${entry}`, depth + 1);
+                  } else {
+                    try {
+                      const content = fs.readFileSync(entryPath);
+                      this.emitFile({
+                        type: "asset",
+                        fileName: `${outPrefix}/${entry}`,
+                        source: new Uint8Array(content),
+                      });
+                    } catch (err: unknown) {
+                      throw new Error(`Failed to read pack file ${entryPath}: ${extractErrorMessage(err)}`);
+                    }
+                  }
+                } catch (err: unknown) {
+                  const message = extractErrorMessage(err);
+                  throw new Error(`Failed to process pack entry ${entryPath}: ${message}`);
                 }
-              } catch (err: unknown) {
-                const message = err instanceof Error ? err.message : String(err);
-                throw new Error(`Failed to process pack entry ${entryPath}: ${message}`);
               }
+            } catch (err: unknown) {
+              const message = extractErrorMessage(err);
+              throw new Error(`Failed to copy compiled packs: ${message}`);
             }
-          }
+          };
           try {
-            copyDir(this, compiledPacksDir, "packs");
+            copyBinaryFiles(compiledPacksDir);
           } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : String(err);
+            const message = extractErrorMessage(err);
             throw new Error(`Failed to copy compiled packs: ${message}`);
           }
         } else {
