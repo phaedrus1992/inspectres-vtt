@@ -24,11 +24,13 @@ function makeAgentSheetWithRecovery(
     isWeird: false,
     characteristics: [],
     isDead: recoveryStatus === "dead",
-    daysOutOfAction: recoveryStatus === "recovering" ? 5 : 0,
+    daysOutOfAction: recoveryStatus === "recovering" ? 20 : 0,
     recoveryStartedAt: recoveryStatus === "recovering" ? 10 : 0,
     stress: 0,
   };
 
+  // Type narrowing: test fixture implements minimal RollActor interface needed for recovery guards.
+  // Full Foundry Actor has 130+ properties unused in this test context.
   actor.system = system as unknown as Record<string, unknown>;
   mockSheet.isEditable = isEditable;
   vi.spyOn(actor, "update").mockResolvedValue(actor);
@@ -40,6 +42,21 @@ describe("AgentSheet — Recovery state guards", () => {
   beforeEach(() => {
     Hooks.clearAll();
     vi.clearAllMocks();
+    // Mock game.settings.get() and game.i18n globally for all tests
+    const mockSettings = {
+      get: vi.fn((namespace: string, key: string) => {
+        if (namespace === "inspectres" && key === "currentDay") return 15;
+        return undefined;
+      }),
+    };
+    const mockI18n = {
+      localize: vi.fn((key: string) => key),
+    };
+    const gameGlobal = globalThis as unknown as { game: { settings: unknown; i18n: unknown } };
+    gameGlobal.game = {
+      settings: mockSettings as unknown,
+      i18n: mockI18n as unknown,
+    } as unknown as { settings: unknown; i18n: unknown };
   });
 
   afterEach(() => {
