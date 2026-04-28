@@ -51,6 +51,7 @@ Patterns split by domain. Each file scoped to specific paths:
 | `foundry-sheets.md` | `foundry/**/*` | Sheets (ApplicationV2, templates, dialogs) |
 | `foundry-patterns.md` | `foundry/**/*` | Elements, rolls, enrichers, CSS, migrations |
 | `foundry-api.md` | `foundry/**/*` | Document API, hooks, updates |
+| `foundry-theming.md` | `foundry/**/*.scss` `**/*.css` | Theme CSS, variables, hooks, settings; defer to `docs/superpowers/specs/foundry-vtt-theming-spec.md` for comprehensive guidance |
 | `playwright-foundry.md` | `foundry/**/*.test.ts` | Foundry testing |
 | `enums-and-magic-strings.md` | `**/*.ts` `**/*.hbs` | Avoid magic strings; prefer enums, especially templates |
 | `temporary-work.md` | `.tmp/**` | Scratch files, logs, reports, build artifacts |
