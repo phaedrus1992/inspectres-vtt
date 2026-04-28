@@ -86,6 +86,12 @@
     var(--inspectres-white) 10px,
     var(--inspectres-white) 20px
   );
+
+  /* Focus ring (semi-transparent green for input focus states) */
+  --inspectres-focus-ring: rgba(56, 180, 74, 0.2);
+
+  /* Orange overlay (semi-transparent orange for death mode background) */
+  --inspectres-orange-overlay: rgba(255, 140, 0, 0.05);
 }
 
 /* --- COMPONENT OVERRIDES (Component-specific customizations) --- */
