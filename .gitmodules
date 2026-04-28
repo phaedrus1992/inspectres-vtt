@@ -4,3 +4,18 @@
 [submodule "reference/pf2e"]
 	path = reference/pf2e
 	url = https://github.com/foundryvtt/pf2e
+[submodule "reference/themes/pf2e-dorako-ui"]
+	path = reference/themes/pf2e-dorako-ui
+	url = https://github.com/Dorako/pf2e-dorako-ui
+[submodule "reference/themes/samsira-dnd-ui"]
+	path = reference/themes/samsira-dnd-ui
+	url = https://gitlab.com/sasmira/dnd-ui
+[submodule "reference/themes/horrorui"]
+	path = reference/themes/horrorui
+	url = https://github.com/Sparkasaurusmex/CoSui
+[submodule "reference/themes/twilight-ui"]
+	path = reference/themes/twilight-ui
+	url = https://github.com/Rayuaz/twilight-ui
+[submodule "reference/themes/rpg-styled-ui"]
+	path = reference/themes/rpg-styled-ui
+	url = https://github.com/Xbozon/rpg-styled-ui
