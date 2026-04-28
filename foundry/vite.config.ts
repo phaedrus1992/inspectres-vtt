@@ -6,7 +6,13 @@ const isProduction = process.env.NODE_ENV === "production";
 
 // Extract error message handling helper — eliminates 5+ duplicated error extractions
 function extractErrorMessage(err: unknown): string {
-  return err instanceof Error ? err.message : String(err);
+  if (!(err instanceof Error)) return String(err);
+  let message = err.message;
+  if ((err as { cause?: unknown }).cause) {
+    const cause = extractErrorMessage((err as { cause?: unknown }).cause);
+    message += ` (caused by: ${cause})`;
+  }
+  return message;
 }
 
 // Generic tree-walk helper — eliminates 3 duplicate walk implementations
@@ -25,24 +31,34 @@ function walkDirectory(
   if (depth >= maxDepth) {
     throw new Error(`Directory nesting too deep at ${dir}`);
   }
+  let files: string[];
   try {
-    for (const file of fs.readdirSync(dir)) {
-      const filePath = path.join(dir, file);
+    files = fs.readdirSync(dir);
+  } catch (err: unknown) {
+    const message = extractErrorMessage(err);
+    throw new Error(`Failed to read directory ${dir}: ${message}`);
+  }
+  for (const file of files) {
+    const filePath = path.join(dir, file);
+    let stat: fs.Stats;
+    try {
+      stat = fs.statSync(filePath);
+    } catch (err: unknown) {
+      const message = extractErrorMessage(err);
+      throw new Error(`Failed to stat file ${filePath}: ${message}`);
+    }
+    if (stat.isDirectory()) {
+      walkDirectory(filePath, callback, options, depth + 1);
+    } else if (!filter || filter(file)) {
+      // Filter function tests the file name only (e.g., name.endsWith(".css")).
+      // If no filter provided, all files are processed. Otherwise, only matching files proceed.
       try {
-        const stat = fs.statSync(filePath);
-        if (stat.isDirectory()) {
-          walkDirectory(filePath, callback, options, depth + 1);
-        } else if (!filter || filter(file)) {
-          callback(filePath);
-        }
+        callback(filePath);
       } catch (err: unknown) {
         const message = extractErrorMessage(err);
         throw new Error(`Failed to process file ${filePath}: ${message}`);
       }
     }
-  } catch (err: unknown) {
-    const message = extractErrorMessage(err);
-    throw new Error(`Failed to walk directory ${dir}: ${message}`);
   }
 }
 

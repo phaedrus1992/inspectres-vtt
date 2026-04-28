@@ -3,6 +3,11 @@
 /* ============================================================
    INSPECTRES UTILITY CLASSES
    Reusable state styling utilities (button, border, background)
+
+   Specificity: All selectors use .inspectres namespace prefix to ensure
+   utilities override default Foundry styles (namespace raises specificity)
+   and coexist cleanly with system styles. State pseudo-classes (:hover,
+   :active, :disabled) are applied within the .inspectres prefix context.
    ============================================================ */
 
 /* --- Button utilities --- */
