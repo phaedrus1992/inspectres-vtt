@@ -6,7 +6,7 @@
     "Technology": "Technology",
     "Contact": "Contact",
     "Cool": "Cool Dice",
-    "CoolUnlimited": "Cool (Unlimited)",
+    "CoolUnlimited": "Unlimited Cool",
     "CoolCost": "Cost",
     "Talent": "Talent",
     "WeirdPower": "Supernatural Power",
@@ -119,7 +119,6 @@
     "WarnClientRollDebtMode": "Client rolls are disabled in Debt Mode.",
     "Roll": "Roll",
     "PenaltyFromStress": "penalty from stress",
-    "CoolUnlimited": "Unlimited Cool",
     "RollCardTookFour": "Took a 4 — automatic Fair result.",
     "RollCardBankDiceResults": "Bank Dice Results",
     "RollCardBankTotal": "Bank total",
@@ -343,6 +342,16 @@
       "Exotic": "Exotic (6)"
     },
     "RequirementCheckFail": "Requirement check failed — automatic failure",
-    "RequirementDefect": "Equipment defect! Critical failure on barely-missed requirement"
+    "RequirementDefect": "Equipment defect! Critical failure on barely-missed requirement",
+    "StartingInterview": "Starting Interview",
+    "StartingInterviewGuide": "Optional Starting Interview Checklist",
+    "StartingInterviewDescription": "The Starting Interview sets the franchise's tone and relationship with their client. Choose a style that fits your campaign (rules pp. 446–468).",
+    "StartingInterviewStyles": "Interview Styles",
+    "StartingInterviewScreening": "Screening Interview",
+    "StartingInterviewScreeningDesc": "Professional, by-the-book. Establish credentials and build rapport with the client. What's their emergency?",
+    "StartingInterviewInvestor": "Investor Interview",
+    "StartingInterviewInvestorDesc": "Business-focused. Negotiate scope, payment, and deliverables. What's at stake financially?",
+    "StartingInterviewMedia": "Media Interview",
+    "StartingInterviewReference": "Reference: InSpectres Rulebook pp. 446–468"
   }
 }

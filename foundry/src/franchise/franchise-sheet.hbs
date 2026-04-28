@@ -79,7 +79,7 @@
             class="inspectres-roll-button"
             data-action="bankRoll"
             title="{{localize "INSPECTRES.TooltipBankRoll"}}"
-            {{#if system.debtMode}}disabled{{/if}}
+            {{#if system.debtMode}}disabled="disabled"{{/if}}
           >
             {{localize "INSPECTRES.BankRollButton"}}
           </button>
@@ -124,7 +124,7 @@
             {{localize "INSPECTRES.OpenMissionTracker"}}
           </button>
           {{#if isGm}}
-            <button type="button" class="inspectres-roll-button" data-action="beginVacation" {{#if (eq system.missionPool 0)}}disabled{{/if}}>
+            <button type="button" class="inspectres-roll-button" data-action="beginVacation" {{#if (eq system.missionPool 0)}}disabled="disabled"{{/if}}>
               {{localize "INSPECTRES.BeginVacation"}}
             </button>
           {{/if}}
@@ -158,6 +158,24 @@
         >{{system.description}}</textarea>
       </section>
 
+      <!-- Starting Interview Guide -->
+      <section class="inspectres-section">
+        <h2>{{localize "INSPECTRES.StartingInterview"}}</h2>
+        <details role="region" aria-labelledby="starting-interview-summary">
+          <summary id="starting-interview-summary">{{localize "INSPECTRES.StartingInterviewGuide"}}</summary>
+          <div class="starting-interview-guide">
+            <p>{{localize "INSPECTRES.StartingInterviewDescription"}}</p>
+            <h3>{{localize "INSPECTRES.StartingInterviewStyles"}}</h3>
+            <ul>
+              <li><strong>{{localize "INSPECTRES.StartingInterviewScreening"}}:</strong> {{localize "INSPECTRES.StartingInterviewScreeningDesc"}}</li>
+              <li><strong>{{localize "INSPECTRES.StartingInterviewInvestor"}}:</strong> {{localize "INSPECTRES.StartingInterviewInvestorDesc"}}</li>
+              <li><strong>{{localize "INSPECTRES.StartingInterviewMedia"}}:</strong> {{localize "INSPECTRES.StartingInterviewMediaDesc"}}</li>
+            </ul>
+            <p class="starting-interview-note">{{localize "INSPECTRES.StartingInterviewReference"}}</p>
+          </div>
+        </details>
+      </section>
+
       <!-- Debt Mode Section -->
       <section class="inspectres-section">
         <h2>{{localize "INSPECTRES.DebtMode"}}</h2>
@@ -166,7 +184,7 @@
             <input
               type="checkbox"
               name="system.debtMode"
-              {{#if system.debtMode}}checked{{/if}}
+              {{#if system.debtMode}}checked="checked"{{/if}}
             />
             {{localize "INSPECTRES.DebtMode"}}
           </label>
