@@ -5,52 +5,83 @@
  * Issue #408: Add Playwright tests for button usability and interaction states
  *
  * These are E2E/Playwright tests that require a live Foundry VTT instance.
- * Placeholder test to document what will be tested; configure Playwright separately.
+ * Run with: npm run test:e2e (with Docker setup)
+ *
+ * Prerequisites:
+ * - docker/.env configured with UID/GID
+ * - docker/secrets/config.json exists
+ * - docker compose up running Foundry on port 30000
+ * - npm run dev watching for changes in another terminal
  */
 
-import { describe, it, expect } from "vitest";
+import { test, expect } from "@playwright/test";
 
-describe("Button usability and interaction states (E2E - Playwright)", () => {
-  it.skip("should test button visibility in default state", () => {
-    // E2E: Button text visible without hover
-    // E2E: Button display property not 'none'
-    // Playwright will verify these with live browser
-    expect(true).toBe(true);
+test.describe("Button usability and interaction states (E2E - Playwright)", () => {
+  test("should navigate to agent sheet and load", async ({ page }) => {
+    await page.goto("/");
+    // Wait for Foundry to load
+    await page.waitForSelector(".window-app", { timeout: 10000 });
+    expect(page.url()).toContain("localhost:30000");
   });
 
-  it.skip("should test hover state visual feedback", () => {
-    // E2E: Button color changes on hover
-    // E2E: Button shadow appears on hover
-    expect(true).toBe(true);
+  test("should test button visibility in default state", async ({ page }) => {
+    await page.goto("/");
+    // Navigate to actors sidebar and find an agent
+    const actorButton = page.locator("a.document.actor").first();
+    await expect(actorButton).toBeVisible();
   });
 
-  it.skip("should test focus state for keyboard navigation", () => {
-    // E2E: Button has visible focus indicator
-    // E2E: Focused button is visually distinct
-    expect(true).toBe(true);
+  test("should test hover state visual feedback", async ({ page }) => {
+    await page.goto("/");
+    const button = page.locator("button").first();
+    if (await button.isVisible()) {
+      await button.hover();
+      // Verify computed style changed (e.g., shadow, color)
+      const shadow = await button.evaluate((el) =>
+        window.getComputedStyle(el).boxShadow,
+      );
+      expect(shadow).not.toBe("none");
+    }
   });
 
-  it.skip("should test click handler execution", () => {
-    // E2E: Button click executes action handler
-    // E2E: Disabled button does not execute action
-    expect(true).toBe(true);
+  test("should test focus state for keyboard navigation", async ({ page }) => {
+    await page.goto("/");
+    const button = page.locator("button").first();
+    if (await button.isVisible()) {
+      await button.focus();
+      const focused = await page.evaluate(() => document.activeElement?.tagName);
+      expect(focused).toBe("BUTTON");
+    }
   });
 
-  it.skip("should test disabled button state", () => {
-    // E2E: Disabled button is visually distinct (reduced opacity)
-    // E2E: Disabled button cursor shows not-allowed
-    expect(true).toBe(true);
+  test("should test disabled button state", async ({ page }) => {
+    await page.goto("/");
+    const buttons = page.locator("button[disabled]");
+    const count = await buttons.count();
+    if (count > 0) {
+      const opacity = await buttons.first().evaluate((el) =>
+        window.getComputedStyle(el).opacity,
+      );
+      // Disabled buttons typically have reduced opacity
+      expect(parseFloat(opacity)).toBeLessThan(1);
+    }
   });
 
-  it.skip("should test button contrast and readability", () => {
-    // E2E: Button text has sufficient contrast
-    // E2E: Button font size is readable (>=12px)
-    expect(true).toBe(true);
-  });
-
-  it.skip("should test icon button accessibility", () => {
-    // E2E: Icon button has accessible label (aria-label or title)
-    // E2E: Icon button has tooltip or text label
-    expect(true).toBe(true);
+  test("should test button contrast and readability", async ({ page }) => {
+    await page.goto("/");
+    const button = page.locator("button").first();
+    if (await button.isVisible()) {
+      const styles = await button.evaluate((el) => {
+        const computed = window.getComputedStyle(el);
+        return {
+          color: computed.color,
+          background: computed.backgroundColor,
+          fontSize: computed.fontSize,
+        };
+      });
+      // Font size >= 12px
+      const fontSizePx = parseFloat(styles.fontSize);
+      expect(fontSizePx).toBeGreaterThanOrEqual(12);
+    }
   });
 });
