@@ -1,0 +1,435 @@
+/* foundry/src/styles/theme/chat.css */
+
+/* ============================================================
+   CHAT & NOTIFICATION STYLING (Phase 4: Roll Cards, Messages, Toasts)
+   Outcome coloring, message styling, notification variants
+   ============================================================ */
+
+/* ─── ROLL RESULT CARDS ──────────────────────────────────────── */
+
+.inspectres .roll-card {
+  border-radius: var(--inspectres-radius-lg);
+  overflow: hidden;
+  border-left: 4px solid var(--inspectres-border-primary);
+  padding: var(--inspectres-space-md);
+  background: var(--inspectres-white);
+  margin-bottom: var(--inspectres-space-md);
+  box-shadow: var(--inspectres-shadow-sm);
+}
+
+/* Roll outcome colors */
+.inspectres .roll-card.good {
+  border-left-color: var(--inspectres-green-dark);
+  background: linear-gradient(
+    90deg,
+    rgba(56, 180, 74, 0.05) 0%,
+    var(--inspectres-white) 20%
+  );
+}
+
+.inspectres .roll-card.partial {
+  border-left-color: var(--inspectres-warn-bg);
+  background: linear-gradient(
+    90deg,
+    var(--inspectres-warn-overlay-light) 0%,
+    var(--inspectres-white) 20%
+  );
+}
+
+.inspectres .roll-card.bad {
+  border-left-color: var(--inspectres-orange);
+  background: linear-gradient(
+    90deg,
+    var(--inspectres-orange-overlay) 0%,
+    var(--inspectres-white) 20%
+  );
+}
+
+/* Outcome badge */
+.inspectres .outcome-badge {
+  display: inline-block;
+  padding: var(--inspectres-space-xs) var(--inspectres-space-sm);
+  border-radius: var(--inspectres-radius);
+  font-weight: 600;
+  font-size: 0.85em;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-right: var(--inspectres-space-sm);
+}
+
+.inspectres .outcome-badge.good {
+  background: var(--inspectres-green-light);
+  color: var(--inspectres-white);
+}
+
+.inspectres .outcome-badge.partial {
+  background: var(--inspectres-warn-bg);
+  color: var(--inspectres-black);
+}
+
+.inspectres .outcome-badge.bad {
+  background: var(--inspectres-orange);
+  color: var(--inspectres-white);
+}
+
+/* ─── CHAT MESSAGE STYLING ───────────────────────────────────── */
+
+.inspectres .chat-message {
+  background: var(--inspectres-white);
+  border: 1px solid var(--inspectres-border-primary);
+  border-radius: var(--inspectres-radius-lg);
+  margin-bottom: var(--inspectres-space-md);
+  overflow: hidden;
+  box-shadow: var(--inspectres-shadow-sm);
+}
+
+.inspectres .chat-message .message-header {
+  background: var(--inspectres-bg-hover);
+  border-bottom: 1px solid var(--inspectres-border-primary);
+  padding: var(--inspectres-space-md) var(--inspectres-space-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--inspectres-space-md);
+}
+
+.inspectres .chat-message .message-sender {
+  font-weight: 600;
+  color: var(--inspectres-text-primary);
+  flex: 1;
+}
+
+.inspectres .chat-message .message-timestamp {
+  font-size: 0.85em;
+  color: var(--inspectres-text-secondary);
+}
+
+.inspectres .chat-message .message-content {
+  padding: var(--inspectres-space-lg);
+  color: var(--inspectres-text-primary);
+  line-height: 1.5;
+}
+
+/* Speaker avatar in chat */
+.inspectres .chat-message .actor-portrait {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--inspectres-radius);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+/* ─── SYSTEM MESSAGES ────────────────────────────────────────── */
+
+.inspectres .chat-message.system {
+  background: var(--inspectres-bg-section);
+  border-left: 3px solid var(--inspectres-text-secondary);
+}
+
+.inspectres .chat-message.system .message-header {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.inspectres .chat-message.system .message-sender {
+  font-weight: 600;
+  color: var(--inspectres-text-secondary);
+  font-style: italic;
+}
+
+/* ─── DICE DISPLAY ───────────────────────────────────────────── */
+
+.inspectres .dice-display {
+  display: flex;
+  gap: var(--inspectres-space-sm);
+  flex-wrap: wrap;
+  margin: var(--inspectres-space-md) 0;
+}
+
+.inspectres .die {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: var(--inspectres-white);
+  border: 2px solid var(--inspectres-border-primary);
+  border-radius: var(--inspectres-radius);
+  font-weight: 700;
+  font-size: 0.95em;
+  color: var(--inspectres-text-primary);
+}
+
+.inspectres .die.success {
+  background: var(--inspectres-green-light);
+  border-color: var(--inspectres-green-dark);
+  color: var(--inspectres-white);
+}
+
+.inspectres .die.failure {
+  background: var(--inspectres-orange);
+  border-color: #cc7000;
+  color: var(--inspectres-white);
+}
+
+/* ─── TOAST NOTIFICATIONS ────────────────────────────────────── */
+
+.inspectres-toast {
+  position: fixed;
+  bottom: var(--inspectres-space-lg);
+  right: var(--inspectres-space-lg);
+  max-width: 400px;
+  padding: var(--inspectres-space-md) var(--inspectres-space-lg);
+  border-radius: var(--inspectres-radius-lg);
+  background: var(--inspectres-white);
+  color: var(--inspectres-text-primary);
+  box-shadow: var(--inspectres-shadow-lg);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--inspectres-space-md);
+  z-index: 9999;
+  animation: slide-in 0.3s ease-out;
+  border-left: 4px solid var(--inspectres-border-primary);
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(400px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-out {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(400px);
+  }
+}
+
+.inspectres-toast.exiting {
+  animation: slide-out 0.3s ease-in forwards;
+}
+
+/* Toast variants */
+.inspectres-toast.info {
+  border-left-color: var(--inspectres-green-dark);
+  background: linear-gradient(
+    90deg,
+    rgba(56, 180, 74, 0.05) 0%,
+    var(--inspectres-white) 20%
+  );
+}
+
+.inspectres-toast.warn {
+  border-left-color: var(--inspectres-warn-bg);
+  background: linear-gradient(
+    90deg,
+    var(--inspectres-warn-overlay-light) 0%,
+    var(--inspectres-white) 20%
+  );
+}
+
+.inspectres-toast.error {
+  border-left-color: var(--inspectres-orange);
+  background: linear-gradient(
+    90deg,
+    var(--inspectres-orange-overlay) 0%,
+    var(--inspectres-white) 20%
+  );
+}
+
+.inspectres-toast.success {
+  border-left-color: var(--inspectres-green-dark);
+  background: linear-gradient(
+    90deg,
+    rgba(56, 180, 74, 0.08) 0%,
+    var(--inspectres-white) 20%
+  );
+}
+
+/* Toast icon */
+.inspectres-toast-icon {
+  flex-shrink: 0;
+  font-size: 1.2em;
+}
+
+.inspectres-toast.info .inspectres-toast-icon {
+  color: var(--inspectres-green-dark);
+}
+
+.inspectres-toast.warn .inspectres-toast-icon {
+  color: var(--inspectres-warn-bg);
+}
+
+.inspectres-toast.error .inspectres-toast-icon {
+  color: var(--inspectres-orange);
+}
+
+.inspectres-toast.success .inspectres-toast-icon {
+  color: var(--inspectres-green-dark);
+}
+
+/* Toast content */
+.inspectres-toast-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--inspectres-space-xs);
+}
+
+.inspectres-toast-title {
+  font-weight: 600;
+  color: var(--inspectres-text-primary);
+}
+
+.inspectres-toast-message {
+  font-size: 0.9em;
+  color: var(--inspectres-text-secondary);
+  line-height: 1.4;
+}
+
+/* Toast close button */
+.inspectres-toast-close {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: var(--inspectres-text-secondary);
+  cursor: pointer;
+  font-size: 1.2em;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+}
+
+.inspectres-toast-close:hover {
+  color: var(--inspectres-text-primary);
+}
+
+/* ─── INLINE ROLL CARD (in message content) ──────────────────── */
+
+.inspectres .inline-roll-card {
+  display: inline-block;
+  padding: var(--inspectres-space-xs) var(--inspectres-space-sm);
+  background: var(--inspectres-bg-hover);
+  border: 1px solid var(--inspectres-border-primary);
+  border-radius: var(--inspectres-radius);
+  font-weight: 600;
+  color: var(--inspectres-text-primary);
+  cursor: default;
+}
+
+.inspectres .inline-roll-card.good {
+  background: rgba(56, 180, 74, 0.15);
+  border-color: var(--inspectres-green-dark);
+  color: var(--inspectres-green-dark);
+}
+
+.inspectres .inline-roll-card.partial {
+  background: var(--inspectres-warn-overlay-dark);
+  border-color: var(--inspectres-warn-bg);
+  color: var(--inspectres-orange);
+}
+
+.inspectres .inline-roll-card.bad {
+  background: var(--inspectres-orange-overlay-dark);
+  border-color: var(--inspectres-orange);
+  color: var(--inspectres-orange);
+}
+
+/* ─── ROLL SUMMARY TABLE ─────────────────────────────────────── */
+
+.inspectres .roll-summary {
+  margin: var(--inspectres-space-md) 0;
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.9em;
+}
+
+.inspectres .roll-summary th {
+  background: var(--inspectres-bg-hover);
+  border: 1px solid var(--inspectres-border-primary);
+  padding: var(--inspectres-space-sm);
+  font-weight: 600;
+  color: var(--inspectres-text-primary);
+  text-align: left;
+}
+
+.inspectres .roll-summary td {
+  border: 1px solid var(--inspectres-border-primary);
+  padding: var(--inspectres-space-sm);
+  color: var(--inspectres-text-primary);
+}
+
+.inspectres .roll-summary tr:nth-child(even) {
+  background: var(--inspectres-bg-section);
+}
+
+.inspectres .roll-summary tr:hover {
+  background: var(--inspectres-bg-highlight);
+}
+
+/* ─── CONFESSIONAL BUTTON ────────────────────────────────────── */
+
+.inspectres .inspectres-confessional-trigger {
+  background: var(--inspectres-white);
+  border: 1px solid var(--inspectres-border-primary);
+  color: var(--inspectres-green-dark);
+  padding: var(--inspectres-space-xs) var(--inspectres-space-sm);
+  border-radius: var(--inspectres-radius);
+  cursor: pointer;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--inspectres-space-xs);
+  transition: all 0.2s ease;
+}
+
+.inspectres .inspectres-confessional-trigger:hover {
+  background: var(--inspectres-bg-hover);
+  border-color: var(--inspectres-green-dark);
+  color: var(--inspectres-button-bg-hover);
+}
+
+/* ─── NARRATIVE TEXT STYLING ─────────────────────────────────── */
+
+.inspectres .narrative-text {
+  font-style: italic;
+  color: var(--inspectres-text-secondary);
+  margin: var(--inspectres-space-sm) 0;
+  padding-left: var(--inspectres-space-md);
+  border-left: 2px solid var(--inspectres-border-primary);
+}
+
+/* ─── ROLL MODIFIER DISPLAY ──────────────────────────────────── */
+
+.inspectres .roll-modifier {
+  font-weight: 600;
+  padding: var(--inspectres-space-xs) var(--inspectres-space-sm);
+  border-radius: var(--inspectres-radius);
+  font-size: 0.85em;
+}
+
+.inspectres .roll-modifier.positive {
+  background: rgba(56, 180, 74, 0.2);
+  color: var(--inspectres-green-dark);
+}
+
+.inspectres .roll-modifier.negative {
+  background: var(--inspectres-orange-overlay-dark);
+  color: var(--inspectres-orange);
+}
+
+.inspectres .roll-modifier.neutral {
+  background: rgba(0, 0, 0, 0.1);
+  color: var(--inspectres-text-primary);
+}

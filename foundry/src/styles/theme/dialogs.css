@@ -1,0 +1,309 @@
+/* foundry/src/styles/theme/dialogs.css */
+
+/* ============================================================
+   FOUNDRY V2 DIALOG OVERRIDES (Phase 2: Dialog & Modal Styling)
+   Applies to DialogV2, ApplicationV2 modal windows, and file pickers
+   ============================================================ */
+
+/* Base dialog styling */
+.inspectres dialog.app {
+  background: var(--inspectres-white);
+  border: 1px solid var(--inspectres-border-primary);
+  box-shadow: var(--inspectres-shadow-lg);
+  border-radius: var(--inspectres-radius-lg);
+  color: var(--inspectres-text-primary);
+  max-width: 90vw;
+  max-height: 90vh;
+}
+
+/* Dialog header */
+.inspectres dialog.app .dialog-header {
+  background: var(--inspectres-white);
+  border-bottom: 1px solid var(--inspectres-border-primary);
+  padding: var(--inspectres-space-md) var(--inspectres-space-lg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--inspectres-space-md);
+}
+
+.inspectres dialog.app .dialog-title {
+  font-size: 1.1em;
+  font-weight: 600;
+  color: var(--inspectres-text-primary);
+  margin: 0;
+}
+
+.inspectres dialog.app .close-button {
+  background: none;
+  border: none;
+  color: var(--inspectres-text-secondary);
+  cursor: pointer;
+  font-size: 1.5em;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+}
+
+.inspectres dialog.app .close-button:hover {
+  color: var(--inspectres-green-dark);
+}
+
+/* Dialog content area */
+.inspectres dialog.app .dialog-content {
+  background: var(--inspectres-white);
+  color: var(--inspectres-text-primary);
+  padding: var(--inspectres-space-lg);
+  overflow-y: auto;
+  max-height: calc(90vh - 120px);
+}
+
+/* Dialog footer / button bar */
+.inspectres dialog.app .dialog-buttons {
+  background: var(--inspectres-white);
+  border-top: 1px solid var(--inspectres-border-primary);
+  padding: var(--inspectres-space-md) var(--inspectres-space-lg);
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--inspectres-space-md);
+}
+
+/* Dialog buttons */
+.inspectres dialog.app button {
+  background: var(--inspectres-button-bg);
+  color: var(--inspectres-button-text);
+  border: none;
+  padding: var(--inspectres-space-sm) var(--inspectres-space-md);
+  border-radius: var(--inspectres-radius);
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.inspectres dialog.app button:hover:not(:disabled) {
+  background: var(--inspectres-button-bg-hover);
+  box-shadow: var(--inspectres-shadow-md);
+}
+
+.inspectres dialog.app button:active:not(:disabled) {
+  background: var(--inspectres-button-bg-active);
+}
+
+.inspectres dialog.app button:disabled {
+  background: var(--inspectres-button-bg-disabled);
+  color: var(--inspectres-button-text-disabled);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Secondary/cancel buttons */
+.inspectres dialog.app button[data-action="cancel"],
+.inspectres dialog.app button.cancel {
+  background: var(--inspectres-bg-disabled);
+  color: var(--inspectres-text-primary);
+}
+
+.inspectres dialog.app button[data-action="cancel"]:hover,
+.inspectres dialog.app button.cancel:hover {
+  background: var(--inspectres-border-primary);
+}
+
+/* Primary/confirm buttons */
+.inspectres dialog.app button[data-action="confirm"],
+.inspectres dialog.app button.confirm,
+.inspectres dialog.app button[data-action="accept"],
+.inspectres dialog.app button.accept {
+  background: var(--inspectres-button-bg);
+  color: var(--inspectres-button-text);
+}
+
+/* Form elements in dialogs */
+.inspectres dialog.app input[type="text"],
+.inspectres dialog.app input[type="number"],
+.inspectres dialog.app input[type="email"],
+.inspectres dialog.app input[type="color"],
+.inspectres dialog.app textarea,
+.inspectres dialog.app select {
+  background: var(--inspectres-bg-input);
+  color: var(--inspectres-text-primary);
+  border: 1px solid var(--inspectres-border-primary);
+  padding: var(--inspectres-space-sm);
+  border-radius: var(--inspectres-radius);
+  font-family: inherit;
+}
+
+.inspectres dialog.app input:focus,
+.inspectres dialog.app textarea:focus,
+.inspectres dialog.app select:focus {
+  outline: none;
+  border-color: var(--inspectres-border-focus);
+  box-shadow: 0 0 0 2px var(--inspectres-focus-ring);
+}
+
+/* Color picker styling */
+.inspectres dialog.app input[type="color"] {
+  padding: var(--inspectres-space-xs);
+  height: 40px;
+  cursor: pointer;
+}
+
+/* File picker table styling */
+.inspectres dialog.app table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--inspectres-white);
+}
+
+.inspectres dialog.app table th {
+  background: var(--inspectres-bg-hover);
+  border: 1px solid var(--inspectres-border-primary);
+  padding: var(--inspectres-space-md);
+  text-align: left;
+  font-weight: 600;
+  color: var(--inspectres-text-primary);
+}
+
+.inspectres dialog.app table td {
+  border: 1px solid var(--inspectres-border-primary);
+  padding: var(--inspectres-space-md);
+  color: var(--inspectres-text-primary);
+}
+
+.inspectres dialog.app table tr:hover {
+  background: var(--inspectres-bg-highlight);
+}
+
+.inspectres dialog.app table tr.selected {
+  background: var(--inspectres-bg-highlight);
+}
+
+/* Form group styling (label + input pairs) */
+.inspectres dialog.app .form-group {
+  margin-bottom: var(--inspectres-space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--inspectres-space-sm);
+}
+
+.inspectres dialog.app .form-group label {
+  font-weight: 500;
+  color: var(--inspectres-text-primary);
+}
+
+/* Scrollbars in dialogs */
+.inspectres dialog.app ::-webkit-scrollbar {
+  width: 8px;
+}
+
+.inspectres dialog.app ::-webkit-scrollbar-track {
+  background: var(--inspectres-bg-hover);
+}
+
+.inspectres dialog.app ::-webkit-scrollbar-thumb {
+  background: var(--inspectres-border-primary);
+  border-radius: 4px;
+}
+
+.inspectres dialog.app ::-webkit-scrollbar-thumb:hover {
+  background: var(--inspectres-green-dark);
+}
+
+/* Confirmation dialog specific */
+.inspectres dialog.app.dialog-confirm {
+  min-width: 300px;
+  max-width: 500px;
+}
+
+.inspectres dialog.app.dialog-confirm .dialog-content {
+  text-align: center;
+  padding: var(--inspectres-space-xl);
+}
+
+/* Wait dialog (input dialog) specific */
+.inspectres dialog.app.dialog-wait {
+  min-width: 350px;
+  max-width: 600px;
+}
+
+.inspectres dialog.app.dialog-wait .dialog-content {
+  padding: var(--inspectres-space-xl);
+}
+
+/* File picker specific */
+.inspectres dialog.app.app-picker {
+  min-width: 600px;
+  width: 60vw;
+  max-width: 900px;
+  min-height: 400px;
+  height: 60vh;
+}
+
+.inspectres dialog.app.app-picker .dialog-content {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.inspectres dialog.app.app-picker table {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* FilePicker breadcrumb navigation */
+.inspectres dialog.app .file-picker-breadcrumb {
+  display: flex;
+  gap: var(--inspectres-space-sm);
+  margin-bottom: var(--inspectres-space-md);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.inspectres dialog.app .file-picker-breadcrumb button {
+  padding: var(--inspectres-space-xs) var(--inspectres-space-sm);
+  font-size: 0.9em;
+  background: var(--inspectres-bg-hover);
+  color: var(--inspectres-text-primary);
+}
+
+.inspectres dialog.app .file-picker-breadcrumb button:hover {
+  background: var(--inspectres-bg-disabled);
+}
+
+/* Directory listing icons */
+.inspectres dialog.app .file-picker-item-folder::before {
+  content: "📁 ";
+}
+
+.inspectres dialog.app .file-picker-item-file::before {
+  content: "📄 ";
+}
+
+/* Color picker palette (if custom palette is shown) */
+.inspectres dialog.app .color-palette {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(30px, 1fr));
+  gap: var(--inspectres-space-sm);
+  margin-top: var(--inspectres-space-md);
+}
+
+.inspectres dialog.app .color-swatch {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--inspectres-radius);
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.inspectres dialog.app .color-swatch:hover {
+  border-color: var(--inspectres-border-primary);
+}
+
+.inspectres dialog.app .color-swatch.selected {
+  border-color: var(--inspectres-green-dark);
+  box-shadow: 0 0 0 2px var(--inspectres-focus-ring);
+}
