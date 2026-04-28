@@ -5,3 +5,5 @@
 /docker/docker-compose.override.yml
 /docker/.env
 mewt.sqlite
+foundry/playwright-report/
+foundry/test-results/
