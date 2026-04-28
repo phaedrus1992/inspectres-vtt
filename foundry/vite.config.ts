@@ -22,7 +22,7 @@ function walkDirectory(
   depth: number = 0,
 ): void {
   const { maxDepth = 10, filter } = options;
-  if (depth > maxDepth) {
+  if (depth >= maxDepth) {
     throw new Error(`Directory nesting too deep at ${dir}`);
   }
   try {
@@ -84,7 +84,7 @@ export default defineConfig({
             source: systemJson,
           });
         } catch (err: unknown) {
-          const message = err instanceof Error ? err.message : String(err);
+          const message = extractErrorMessage(err);
           throw new Error(`Failed to read system.json: ${message}`);
         }
 
@@ -101,7 +101,7 @@ export default defineConfig({
             source: templateJson,
           });
         } catch (err: unknown) {
-          const message = err instanceof Error ? err.message : String(err);
+          const message = extractErrorMessage(err);
           throw new Error(`Failed to read template.json: ${message}`);
         }
 
@@ -114,8 +114,12 @@ export default defineConfig({
               (filePath) => {
                 const relative = path.relative(stylesDir, filePath);
                 const outPath = path.join(outPrefix, relative).replace(/\\/g, "/");
-                const content = fs.readFileSync(filePath, "utf-8");
-                this.emitFile({ type: "asset", fileName: outPath, source: content });
+                try {
+                  const content = fs.readFileSync(filePath, "utf-8");
+                  this.emitFile({ type: "asset", fileName: outPath, source: content });
+                } catch (err: unknown) {
+                  throw new Error(`Failed to read CSS file ${filePath}: ${extractErrorMessage(err)}`);
+                }
               },
               { filter: (name) => name.endsWith(".css") },
             );
@@ -134,8 +138,12 @@ export default defineConfig({
           try {
             walkDirectory(langDir, (filePath) => {
               const file = path.basename(filePath);
-              const content = fs.readFileSync(filePath, "utf-8");
-              this.emitFile({ type: "asset", fileName: `lang/${file}`, source: content });
+              try {
+                const content = fs.readFileSync(filePath, "utf-8");
+                this.emitFile({ type: "asset", fileName: `lang/${file}`, source: content });
+              } catch (err: unknown) {
+                throw new Error(`Failed to read lang file ${filePath}: ${extractErrorMessage(err)}`);
+              }
             });
           } catch (err: unknown) {
             const message = extractErrorMessage(err);
@@ -151,8 +159,12 @@ export default defineConfig({
               templatesDir,
               (filePath) => {
                 const fileName = path.basename(filePath);
-                const content = fs.readFileSync(filePath, "utf-8");
-                this.emitFile({ type: "asset", fileName: `templates/${fileName}`, source: content });
+                try {
+                  const content = fs.readFileSync(filePath, "utf-8");
+                  this.emitFile({ type: "asset", fileName: `templates/${fileName}`, source: content });
+                } catch (err: unknown) {
+                  throw new Error(`Failed to read template file ${filePath}: ${extractErrorMessage(err)}`);
+                }
               },
               { filter: (name) => name.endsWith(".hbs") && name !== "styles" && name !== "lang" },
             );
@@ -167,7 +179,7 @@ export default defineConfig({
         const compiledPacksDir = path.resolve(__dirname, "packs-compiled");
         if (fs.existsSync(compiledPacksDir)) {
           const copyBinaryFiles = (dir: string, outPrefix: string = "packs", depth: number = 0): void => {
-            if (depth > 10) {
+            if (depth >= 10) {
               throw new Error(`Pack directory nesting too deep at ${dir}`);
             }
             try {
@@ -179,12 +191,16 @@ export default defineConfig({
                   if (stat.isDirectory()) {
                     copyBinaryFiles(entryPath, `${outPrefix}/${entry}`, depth + 1);
                   } else {
-                    const content = fs.readFileSync(entryPath);
-                    this.emitFile({
-                      type: "asset",
-                      fileName: `${outPrefix}/${entry}`,
-                      source: new Uint8Array(content),
-                    });
+                    try {
+                      const content = fs.readFileSync(entryPath);
+                      this.emitFile({
+                        type: "asset",
+                        fileName: `${outPrefix}/${entry}`,
+                        source: new Uint8Array(content),
+                      });
+                    } catch (err: unknown) {
+                      throw new Error(`Failed to read pack file ${entryPath}: ${extractErrorMessage(err)}`);
+                    }
                   }
                 } catch (err: unknown) {
                   const message = extractErrorMessage(err);

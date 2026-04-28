@@ -1,10 +1,47 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import fs from "fs";
 import path from "path";
 
-// Mock implementation of extract functions to test
+// These implementations parallel the production code in vite.config.ts
+// Tests verify behavior against these trusted reference implementations
 function extractErrorMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
+}
+
+interface WalkOptions {
+  maxDepth?: number;
+  filter?: (fileName: string) => boolean;
+}
+
+function walkDirectory(
+  dir: string,
+  callback: (filePath: string) => void,
+  options: WalkOptions = {},
+  depth: number = 0,
+): void {
+  const { maxDepth = 10, filter } = options;
+  if (depth >= maxDepth) {
+    throw new Error(`Directory nesting too deep at ${dir}`);
+  }
+  try {
+    for (const file of fs.readdirSync(dir)) {
+      const filePath = path.join(dir, file);
+      try {
+        const stat = fs.statSync(filePath);
+        if (stat.isDirectory()) {
+          walkDirectory(filePath, callback, options, depth + 1);
+        } else if (!filter || filter(file)) {
+          callback(filePath);
+        }
+      } catch (err: unknown) {
+        const message = extractErrorMessage(err);
+        throw new Error(`Failed to process file ${filePath}: ${message}`);
+      }
+    }
+  } catch (err: unknown) {
+    const message = extractErrorMessage(err);
+    throw new Error(`Failed to walk directory ${dir}: ${message}`);
+  }
 }
 
 describe("Vite Plugin Refactoring", () => {
@@ -46,21 +83,7 @@ describe("Vite Plugin Refactoring", () => {
       fs.mkdirSync(path.join(tempDir, "subdir"));
       fs.writeFileSync(path.join(tempDir, "subdir", "file2.txt"), "content");
 
-      // Mock walk implementation
-      const walk = (dir: string, callback: (filePath: string) => void, depth = 0): void => {
-        if (depth > 10) throw new Error(`Nesting too deep at ${dir}`);
-        for (const file of fs.readdirSync(dir)) {
-          const filePath = path.join(dir, file);
-          const stat = fs.statSync(filePath);
-          if (stat.isDirectory()) {
-            walk(filePath, callback, depth + 1);
-          } else {
-            callback(filePath);
-          }
-        }
-      };
-
-      walk(tempDir, (filePath) => {
+      walkDirectory(tempDir, (filePath) => {
         files.push(path.relative(tempDir, filePath));
       });
 
@@ -75,19 +98,9 @@ describe("Vite Plugin Refactoring", () => {
         fs.mkdirSync(deepPath, { recursive: true });
       }
 
-      const walk = (dir: string, depth = 0): void => {
-        if (depth > 10) throw new Error(`Nesting too deep at ${dir}`);
-        const entries = fs.readdirSync(dir);
-        for (const entry of entries) {
-          const entryPath = path.join(dir, entry);
-          const stat = fs.statSync(entryPath);
-          if (stat.isDirectory()) {
-            walk(entryPath, depth + 1);
-          }
-        }
-      };
-
-      expect(() => walk(tempDir)).toThrow("Nesting too deep");
+      expect(() => {
+        walkDirectory(tempDir, () => {}, { maxDepth: 10 });
+      }).toThrow("Directory nesting too deep");
     });
 
     it("walks with file filter", () => {
@@ -97,30 +110,12 @@ describe("Vite Plugin Refactoring", () => {
       fs.mkdirSync(path.join(tempDir, "subdir"));
       fs.writeFileSync(path.join(tempDir, "subdir", "theme.css"), "");
 
-      const walk = (
-        dir: string,
-        callback: (filePath: string) => void,
-        filter: (name: string) => boolean = () => true,
-        depth = 0,
-      ): void => {
-        if (depth > 10) throw new Error(`Nesting too deep at ${dir}`);
-        for (const file of fs.readdirSync(dir)) {
-          const filePath = path.join(dir, file);
-          const stat = fs.statSync(filePath);
-          if (stat.isDirectory()) {
-            walk(filePath, callback, filter, depth + 1);
-          } else if (filter(file)) {
-            callback(filePath);
-          }
-        }
-      };
-
-      walk(
+      walkDirectory(
         tempDir,
         (filePath) => {
           cssFiles.push(path.relative(tempDir, filePath));
         },
-        (name) => name.endsWith(".css"),
+        { filter: (name) => name.endsWith(".css") },
       );
 
       expect(cssFiles).toContain("style.css");
