@@ -29,26 +29,38 @@ export default defineConfig({
       apply: "build",
       enforce: "post",
       generateBundle() {
-        // Copy system.json
+        // Copy system.json (required)
         const systemJsonPath = path.resolve(__dirname, "system.json");
-        if (fs.existsSync(systemJsonPath)) {
+        if (!fs.existsSync(systemJsonPath)) {
+          throw new Error(`system.json not found at ${systemJsonPath} — required for Foundry system`);
+        }
+        try {
           const systemJson = fs.readFileSync(systemJsonPath, "utf-8");
           this.emitFile({
             type: "asset",
             fileName: "system.json",
             source: systemJson,
           });
+        } catch (err: unknown) {
+          const message = err instanceof Error ? err.message : String(err);
+          throw new Error(`Failed to read system.json: ${message}`);
         }
 
-        // Copy template.json
+        // Copy template.json (required)
         const templateJsonPath = path.resolve(__dirname, "template.json");
-        if (fs.existsSync(templateJsonPath)) {
+        if (!fs.existsSync(templateJsonPath)) {
+          throw new Error(`template.json not found at ${templateJsonPath} — required for Foundry system`);
+        }
+        try {
           const templateJson = fs.readFileSync(templateJsonPath, "utf-8");
           this.emitFile({
             type: "asset",
             fileName: "template.json",
             source: templateJson,
           });
+        } catch (err: unknown) {
+          const message = err instanceof Error ? err.message : String(err);
+          throw new Error(`Failed to read template.json: ${message}`);
         }
 
         // Copy styles (including theme subdirectory)

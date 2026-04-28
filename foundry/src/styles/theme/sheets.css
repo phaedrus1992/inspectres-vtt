@@ -76,7 +76,7 @@
   color: var(--inspectres-text-primary);
   border: 1px solid var(--inspectres-border-primary);
   padding: var(--inspectres-space-sm);
-  border-radius: 3px;
+  border-radius: var(--inspectres-radius);
 }
 
 .inspectres .sheet input:focus,
@@ -156,7 +156,7 @@
   border: 1px solid var(--inspectres-border-primary);
   padding: var(--inspectres-space-md);
   text-align: center;
-  border-radius: 4px;
+  border-radius: var(--inspectres-radius-lg);
 }
 
 .inspectres .franchise-sheet .resource-value {

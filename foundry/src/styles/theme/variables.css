@@ -98,6 +98,18 @@
 
   /* Green overlay light (for recovering status background) */
   --inspectres-focus-ring-light: rgba(56, 180, 74, 0.1);
+
+  /* Semantic colors for warnings (yellow palette) */
+  --inspectres-warn-bg: #ffc107;
+  --inspectres-warn-border: #ff9800;
+  --inspectres-warn-text: #ffb300;
+
+  /* Accent color (interactive elements) */
+  --inspectres-accent: var(--inspectres-green-dark);
+
+  /* Radius scale */
+  --inspectres-radius: 3px;
+  --inspectres-radius-lg: 6px;
 }
 
 /* --- COMPONENT OVERRIDES (Component-specific customizations) --- */
