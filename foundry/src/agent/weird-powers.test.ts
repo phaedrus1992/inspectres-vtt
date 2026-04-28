@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect } from "vitest";
 import type { AgentData } from "./agent-schema";
 
 /**
@@ -68,6 +68,7 @@ describe("Weird Agent Powers", () => {
         talent: "",
         cool: 15,
         isWeird: true,
+        power: null,
         characteristics: [],
         isDead: false,
         daysOutOfAction: 0,
@@ -153,6 +154,7 @@ describe("Weird Agent Powers", () => {
         talent: "",
         cool: 4,
         isWeird: true,
+        power: null,
         characteristics: [],
         isDead: false,
         daysOutOfAction: 0,
@@ -178,6 +180,7 @@ describe("Weird Agent Powers", () => {
         talent: "",
         cool: 2,
         isWeird: true,
+        power: null,
         characteristics: [],
         isDead: false,
         daysOutOfAction: 0,
@@ -238,6 +241,7 @@ describe("Weird Agent Powers", () => {
         talent: "",
         cool: 2,
         isWeird: true,
+        power: null,
         characteristics: [],
         isDead: false,
         daysOutOfAction: 0,

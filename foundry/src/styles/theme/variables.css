@@ -24,7 +24,7 @@
   --inspectres-green-light: #7cc576;   /* secondary accent, highlights */
 
   /* Signal colors */
-  --inspectres-orange: #ff8c00;        /* death mode, critical warnings */
+  --inspectres-orange: #d84315;        /* death mode, critical warnings — darker, more saturated */
 
   /* --- SEMANTIC TOKENS (Purpose-driven, map palette to use cases) --- */
 
@@ -98,6 +98,53 @@
 
   /* Warn (yellow) overlays for roll outcomes */
   --inspectres-warn-overlay-light: rgba(255, 193, 7, 0.05);
+
+  /* --- V2 SHEET COMPATIBILITY (used in inspectres.css) --- */
+
+  /* Primary palette */
+  --inspectres-primary: #38b44a;
+  --inspectres-secondary: #c41e3a;
+  --inspectres-accent: #c41e3a;
+  --inspectres-success: #38b44a;
+
+  /* Sheet backgrounds */
+  --inspectres-sheet-bg: #ffffff;
+  --inspectres-section-bg: #ffffff;
+  --inspectres-input-bg: #ffffff;
+
+  /* Text colors */
+  --inspectres-text: #000000;
+  --inspectres-text-muted: #666666;
+  --inspectres-text-faint: #999999;
+
+  /* Button styling */
+  --inspectres-btn-bg: #e8e8e8;
+  --inspectres-btn-border: #d0d0d0;
+  --inspectres-btn-color: #000000;
+
+  /* Input styling */
+  --inspectres-input-border: #d0d0d0;
+  --inspectres-input-focus: #38b44a;
+
+  /* Warn/Alert colors */
+  --inspectres-warn-bg: #fffacd;
+  --inspectres-warn-border: #f0e68c;
+  --inspectres-warn-text: #333333;
+  --inspectres-warn-overlay-medium: rgba(255, 193, 7, 0.15);
+
+  /* Death/Status colors */
+  --inspectres-dead-bg: #ffe8e8;
+  --inspectres-dead-border: #c41e3a;
+  --inspectres-dead-text: #8b0000;
+  --inspectres-success-text: #38b44a;
+
+  /* Disabled/Inactive */
+  --inspectres-disabled: #d0d0d0;
+  --inspectres-inactive: #e8e8e8;
+
+  /* Sizing & Radius */
+  --inspectres-radius: 3px;
+  --inspectres-radius-lg: 6px;
   --inspectres-warn-overlay-medium: rgba(255, 193, 7, 0.1);
   --inspectres-warn-overlay-dark: rgba(255, 193, 7, 0.15);
 

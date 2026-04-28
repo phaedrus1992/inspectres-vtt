@@ -30,7 +30,7 @@ export interface AgentData {
   talent: string;
   cool: number;
   isWeird: boolean;
-  power?: WeirdPower | null;
+  power: WeirdPower | null;
   characteristics: AgentCharacteristic[];
   /**
    * Agent is out of action due to death or dismemberment.
