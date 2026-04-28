@@ -151,7 +151,12 @@ export default defineConfig({
         // Source JSON in packs/ must be compiled via fvtt-cli before building.
         const compiledPacksDir = path.resolve(__dirname, "packs-compiled");
         if (fs.existsSync(compiledPacksDir)) {
-          function copyDir(ctx: typeof this, dir: string, outPrefix: string, depth: number = 0): void {
+          function copyDir(
+            ctx: { emitFile(options: { type: "asset"; fileName: string; source: Uint8Array }): void },
+            dir: string,
+            outPrefix: string,
+            depth: number = 0,
+          ): void {
             if (depth > 10) {
               throw new Error(`Pack directory nesting too deep at ${dir}`);
             }
