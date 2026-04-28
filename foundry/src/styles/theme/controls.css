@@ -1,0 +1,390 @@
+/* foundry/src/styles/theme/controls.css */
+
+/* ============================================================
+   FOUNDRY UI CONTROL COMPONENTS (Phase 3: Tabs, Buttons, Inputs)
+   Systematic component styling with CSS variables
+   ============================================================ */
+
+/* ─── TAB NAVIGATION ─────────────────────────────────────────── */
+
+.inspectres .sheet-tabs {
+  display: flex;
+  border-bottom: 2px solid var(--inspectres-border-primary);
+  background: var(--inspectres-bg-section);
+  gap: 0;
+}
+
+.inspectres .sheet-tabs button {
+  padding: var(--inspectres-space-sm) var(--inspectres-space-md);
+  font-size: 0.9em;
+  font-weight: 500;
+  color: var(--inspectres-text-secondary);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s ease;
+}
+
+.inspectres .sheet-tabs button:hover {
+  color: var(--inspectres-text-primary);
+  background: var(--inspectres-bg-hover);
+}
+
+.inspectres .sheet-tabs button.active {
+  color: var(--inspectres-green-dark);
+  background: transparent;
+  border-bottom-color: var(--inspectres-green-dark);
+  font-weight: 600;
+}
+
+/* ─── BUTTON VARIANTS ────────────────────────────────────────── */
+
+/* Primary button (default green) */
+.inspectres button.primary,
+.inspectres button.default {
+  background: var(--inspectres-button-bg);
+  color: var(--inspectres-button-text);
+  border: none;
+  padding: var(--inspectres-space-sm) var(--inspectres-space-md);
+  border-radius: var(--inspectres-radius);
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.inspectres button.primary:hover,
+.inspectres button.default:hover {
+  background: var(--inspectres-button-bg-hover);
+  box-shadow: var(--inspectres-shadow-md);
+}
+
+.inspectres button.primary:active,
+.inspectres button.default:active {
+  background: var(--inspectres-button-bg-active);
+  transform: translateY(1px);
+}
+
+.inspectres button.primary:disabled,
+.inspectres button.default:disabled {
+  background: var(--inspectres-button-bg-disabled);
+  color: var(--inspectres-button-text-disabled);
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+/* Secondary button (light background) */
+.inspectres button.secondary {
+  background: var(--inspectres-bg-disabled);
+  color: var(--inspectres-text-primary);
+  border: 1px solid var(--inspectres-border-primary);
+  padding: var(--inspectres-space-sm) var(--inspectres-space-md);
+  border-radius: var(--inspectres-radius);
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.inspectres button.secondary:hover {
+  background: var(--inspectres-border-primary);
+  border-color: var(--inspectres-border-primary);
+}
+
+.inspectres button.secondary:active {
+  background: var(--inspectres-bg-section);
+  transform: translateY(1px);
+}
+
+.inspectres button.secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Danger button (for destructive actions) */
+.inspectres button.danger {
+  background: var(--inspectres-orange);
+  color: var(--inspectres-white);
+  border: none;
+  padding: var(--inspectres-space-sm) var(--inspectres-space-md);
+  border-radius: var(--inspectres-radius);
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.inspectres button.danger:hover {
+  background: #cc7000;
+  box-shadow: var(--inspectres-shadow-md);
+}
+
+.inspectres button.danger:active {
+  background: #994c00;
+  transform: translateY(1px);
+}
+
+.inspectres button.danger:disabled {
+  background: var(--inspectres-button-bg-disabled);
+  color: var(--inspectres-button-text-disabled);
+  cursor: not-allowed;
+}
+
+/* ─── FORM INPUTS ────────────────────────────────────────────── */
+
+.inspectres input[type="text"],
+.inspectres input[type="number"],
+.inspectres input[type="email"],
+.inspectres input[type="password"],
+.inspectres input[type="search"],
+.inspectres input[type="url"],
+.inspectres textarea,
+.inspectres select {
+  background: var(--inspectres-bg-input);
+  color: var(--inspectres-text-primary);
+  border: 1px solid var(--inspectres-border-primary);
+  padding: var(--inspectres-space-sm);
+  border-radius: var(--inspectres-radius);
+  font-family: inherit;
+  font-size: 0.95em;
+  transition: all 0.2s ease;
+}
+
+.inspectres input[type="text"]:focus,
+.inspectres input[type="number"]:focus,
+.inspectres input[type="email"]:focus,
+.inspectres input[type="password"]:focus,
+.inspectres input[type="search"]:focus,
+.inspectres input[type="url"]:focus,
+.inspectres textarea:focus,
+.inspectres select:focus {
+  outline: none;
+  border-color: var(--inspectres-border-focus);
+  box-shadow: 0 0 0 2px var(--inspectres-focus-ring);
+}
+
+.inspectres input[type="text"]:disabled,
+.inspectres input[type="number"]:disabled,
+.inspectres input[type="email"]:disabled,
+.inspectres input[type="password"]:disabled,
+.inspectres input[type="search"]:disabled,
+.inspectres input[type="url"]:disabled,
+.inspectres textarea:disabled,
+.inspectres select:disabled {
+  background: var(--inspectres-bg-disabled);
+  color: var(--inspectres-text-secondary);
+  border-color: var(--inspectres-border-disabled);
+  cursor: not-allowed;
+}
+
+/* Textarea auto-expand support */
+.inspectres textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* Select (dropdown) */
+.inspectres select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3e%3cpath fill='%23000' d='M1 1l5 5 5-5'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right var(--inspectres-space-sm) center;
+  padding-right: calc(var(--inspectres-space-md) + 12px);
+}
+
+/* ─── CHECKBOX & RADIO ───────────────────────────────────────── */
+
+.inspectres input[type="checkbox"],
+.inspectres input[type="radio"] {
+  width: 1em;
+  height: 1em;
+  accent-color: var(--inspectres-green-dark);
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+.inspectres input[type="checkbox"]:disabled,
+.inspectres input[type="radio"]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ─── MARCHING ANTS BORDER (Hazard/Critical Warning) ──────────── */
+
+.inspectres .marching-ants,
+.inspectres [data-hazard="true"],
+.inspectres .inspectres-hazard-border {
+  border: 3px solid;
+  border-image: var(--inspectres-border-hazard) 1;
+  animation: march-ants 20s linear infinite;
+}
+
+@keyframes march-ants {
+  0% {
+    border-image-slice: 1;
+    border-image-source: linear-gradient(
+      45deg,
+      var(--inspectres-black),
+      var(--inspectres-black) 10px,
+      var(--inspectres-white) 10px,
+      var(--inspectres-white) 20px
+    );
+  }
+  100% {
+    border-image-slice: 1;
+    border-image-source: linear-gradient(
+      45deg,
+      var(--inspectres-black) -20px,
+      var(--inspectres-black) -10px,
+      var(--inspectres-white) -10px,
+      var(--inspectres-white) 0px
+    );
+  }
+}
+
+/* Simpler dotted hazard border alternative (if animation not needed) */
+.inspectres .marching-ants-alt {
+  border: 2px dashed var(--inspectres-orange);
+  animation: pulse-hazard 1s ease-in-out infinite;
+}
+
+@keyframes pulse-hazard {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* ─── FORM GROUPS (Label + Input pairs) ─────────────────────── */
+
+.inspectres .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--inspectres-space-sm);
+  margin-bottom: var(--inspectres-space-md);
+}
+
+.inspectres .form-group label {
+  font-weight: 500;
+  color: var(--inspectres-text-primary);
+  font-size: 0.95em;
+}
+
+.inspectres .form-group.inline {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--inspectres-space-md);
+}
+
+.inspectres .form-group.inline label {
+  margin: 0;
+  flex-shrink: 0;
+  min-width: 100px;
+}
+
+/* ─── INPUT SIZING ────────────────────────────────────────────── */
+
+.inspectres input.input-sm,
+.inspectres select.input-sm,
+.inspectres textarea.input-sm {
+  padding: var(--inspectres-space-xs) var(--inspectres-space-sm);
+  font-size: 0.85em;
+}
+
+.inspectres input.input-lg,
+.inspectres select.input-lg,
+.inspectres textarea.input-lg {
+  padding: var(--inspectres-space-md) var(--inspectres-space-lg);
+  font-size: 1.05em;
+}
+
+/* ─── INPUT STATES ────────────────────────────────────────────── */
+
+/* Error state */
+.inspectres input.error,
+.inspectres textarea.error,
+.inspectres select.error {
+  border-color: var(--inspectres-orange);
+  box-shadow: 0 0 0 2px rgba(255, 140, 0, 0.1);
+}
+
+/* Success state */
+.inspectres input.success,
+.inspectres textarea.success,
+.inspectres select.success {
+  border-color: var(--inspectres-green-dark);
+  box-shadow: 0 0 0 2px rgba(56, 180, 74, 0.1);
+}
+
+/* Warning state */
+.inspectres input.warning,
+.inspectres textarea.warning,
+.inspectres select.warning {
+  border-color: #ffc107;
+  box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.1);
+}
+
+/* ─── FIELD LABELS & HELP TEXT ─────────────────────────────────── */
+
+.inspectres .field-label {
+  font-weight: 600;
+  color: var(--inspectres-text-primary);
+  font-size: 0.9em;
+  margin-bottom: var(--inspectres-space-xs);
+}
+
+.inspectres .field-help {
+  font-size: 0.8em;
+  color: var(--inspectres-text-secondary);
+  margin-top: var(--inspectres-space-xs);
+  font-style: italic;
+}
+
+.inspectres .field-error {
+  font-size: 0.8em;
+  color: var(--inspectres-orange);
+  margin-top: var(--inspectres-space-xs);
+  font-weight: 500;
+}
+
+/* ─── RANGE INPUTS ─────────────────────────────────────────── */
+
+.inspectres input[type="range"] {
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--inspectres-border-primary);
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.inspectres input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--inspectres-green-dark);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.inspectres input[type="range"]::-webkit-slider-thumb:hover {
+  background: var(--inspectres-button-bg-hover);
+  box-shadow: 0 0 0 4px var(--inspectres-focus-ring);
+}
+
+.inspectres input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--inspectres-green-dark);
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.inspectres input[type="range"]::-moz-range-thumb:hover {
+  background: var(--inspectres-button-bg-hover);
+  box-shadow: 0 0 0 4px var(--inspectres-focus-ring);
+}

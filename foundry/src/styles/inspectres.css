@@ -5,10 +5,9 @@
 @import url('./theme/utilities.css');
 @import url('./theme/sheets.css');
 @import url('./theme/windows.css');
-
-/* TODO Phase 2: dialogs.css */
-/* TODO Phase 3: controls.css */
-/* TODO Phase 4: chat.css */
+@import url('./theme/dialogs.css');
+@import url('./theme/controls.css');
+@import url('./theme/chat.css');
 
 /* ─── Outer V2 shell ────────────────────────────────────────────────────── */
 
