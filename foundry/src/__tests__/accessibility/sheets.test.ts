@@ -5,14 +5,10 @@
  * Issue #407: Comprehensive Playwright tests for contrast, usability, and navigation
  */
 
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect } from "vitest";
 import { calculateContrastRatio } from "./axe-setup.js";
 
 describe("Sheet Accessibility", () => {
-  beforeEach(() => {
-    // Setup before each test
-  });
-
   describe("Contrast ratios (black/gray text meets WCAG AA)", () => {
     it("should have sufficient contrast for secondary buttons (dark text)", () => {
       // Gray button text on light gray: #000000 on #e8e8e8
