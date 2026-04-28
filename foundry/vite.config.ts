@@ -29,48 +29,73 @@ export default defineConfig({
       apply: "build",
       enforce: "post",
       generateBundle() {
-        // Copy system.json
+        // Copy system.json (required)
         const systemJsonPath = path.resolve(__dirname, "system.json");
-        if (fs.existsSync(systemJsonPath)) {
+        if (!fs.existsSync(systemJsonPath)) {
+          throw new Error(`system.json not found at ${systemJsonPath} — required for Foundry system`);
+        }
+        try {
           const systemJson = fs.readFileSync(systemJsonPath, "utf-8");
           this.emitFile({
             type: "asset",
             fileName: "system.json",
             source: systemJson,
           });
+        } catch (err: unknown) {
+          const message = err instanceof Error ? err.message : String(err);
+          throw new Error(`Failed to read system.json: ${message}`);
         }
 
-        // Copy template.json
+        // Copy template.json (required)
         const templateJsonPath = path.resolve(__dirname, "template.json");
-        if (fs.existsSync(templateJsonPath)) {
+        if (!fs.existsSync(templateJsonPath)) {
+          throw new Error(`template.json not found at ${templateJsonPath} — required for Foundry system`);
+        }
+        try {
           const templateJson = fs.readFileSync(templateJsonPath, "utf-8");
           this.emitFile({
             type: "asset",
             fileName: "template.json",
             source: templateJson,
           });
+        } catch (err: unknown) {
+          const message = err instanceof Error ? err.message : String(err);
+          throw new Error(`Failed to read template.json: ${message}`);
         }
 
-        // Copy styles
+        // Copy styles (including theme subdirectory)
         const stylesDir = path.resolve(__dirname, "src/styles");
         if (fs.existsSync(stylesDir)) {
-          try {
-            for (const file of fs.readdirSync(stylesDir)) {
-              const filePath = path.join(stylesDir, file);
-              try {
-                const stat = fs.statSync(filePath);
-                if (stat.isFile()) {
-                  const content = fs.readFileSync(filePath, "utf-8");
-                  this.emitFile({ type: "asset", fileName: `styles/${file}`, source: content });
-                }
-              } catch (err: unknown) {
-                const message = err instanceof Error ? err.message : String(err);
-                throw new Error(`Failed to process style file ${filePath}: ${message}`);
-              }
+          const walkStylesDir = (dir: string, outPrefix: string = "styles", depth: number = 0): void => {
+            if (depth > 10) {
+              throw new Error(`Styles directory nesting too deep at ${dir}`);
             }
+            try {
+              for (const file of fs.readdirSync(dir)) {
+                const filePath = path.join(dir, file);
+                try {
+                  const stat = fs.statSync(filePath);
+                  if (stat.isDirectory()) {
+                    walkStylesDir(filePath, `${outPrefix}/${file}`, depth + 1);
+                  } else if (file.endsWith(".css")) {
+                    const content = fs.readFileSync(filePath, "utf-8");
+                    this.emitFile({ type: "asset", fileName: `${outPrefix}/${file}`, source: content });
+                  }
+                } catch (err: unknown) {
+                  const message = err instanceof Error ? err.message : String(err);
+                  throw new Error(`Failed to process style file ${filePath}: ${message}`);
+                }
+              }
+            } catch (err: unknown) {
+              const message = err instanceof Error ? err.message : String(err);
+              throw new Error(`Failed to walk styles directory ${dir}: ${message}`);
+            }
+          };
+          try {
+            walkStylesDir(stylesDir);
           } catch (err: unknown) {
             const message = err instanceof Error ? err.message : String(err);
-            throw new Error(`Failed to read styles directory at ${stylesDir}: ${message}`);
+            throw new Error(`Failed to copy styles: ${message}`);
           }
         }
 
@@ -138,7 +163,12 @@ export default defineConfig({
         // Source JSON in packs/ must be compiled via fvtt-cli before building.
         const compiledPacksDir = path.resolve(__dirname, "packs-compiled");
         if (fs.existsSync(compiledPacksDir)) {
-          function copyDir(ctx: typeof this, dir: string, outPrefix: string, depth: number = 0): void {
+          function copyDir(
+            ctx: { emitFile(options: { type: "asset"; fileName: string; source: Uint8Array }): void },
+            dir: string,
+            outPrefix: string,
+            depth: number = 0,
+          ): void {
             if (depth > 10) {
               throw new Error(`Pack directory nesting too deep at ${dir}`);
             }

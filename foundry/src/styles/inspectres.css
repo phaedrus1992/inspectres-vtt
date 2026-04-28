@@ -1,50 +1,13 @@
 /* InSpectres System Stylesheet */
 
-:root {
-  /* Brand palette */
-  --inspectres-primary:   #2c3e50;
-  --inspectres-secondary: #3498db;
-  --inspectres-accent:    #e74c3c;
-  --inspectres-success:   #27ae60;
+/* Theme system */
+@import url('./theme/variables.css');
+@import url('./theme/sheets.css');
+@import url('./theme/windows.css');
 
-  /* Sheet surfaces */
-  --inspectres-sheet-bg:  #f0f3f5;
-  --inspectres-section-bg: #ffffff;
-
-  /* Text */
-  --inspectres-text:         #1a2530;
-  --inspectres-text-muted:   #5a6a7a;
-  --inspectres-text-faint:   #627080;   /* #8a9aaa was ~3.2:1 on white; this is ~5:1 (WCAG AA) */
-  --inspectres-success-text: #1a7a40;   /* darker than --inspectres-success for small-text contrast */
-
-  /* Inputs */
-  --inspectres-input-bg:     #ffffff;
-  --inspectres-input-border: #c8d4dc;
-  --inspectres-input-focus:  var(--inspectres-secondary);
-
-  /* Buttons */
-  --inspectres-btn-bg:     #e0e8ed;
-  --inspectres-btn-color:  var(--inspectres-text);
-  --inspectres-btn-border: #b8c8d4;
-
-  /* State */
-  --inspectres-disabled: #aab8c2;
-  --inspectres-inactive: #d0dce4;
-
-  /* Debt / warning banner */
-  --inspectres-warn-bg:     #fff8e1;
-  --inspectres-warn-border: #f0ad4e;
-  --inspectres-warn-text:   #7a5000;
-
-  /* Death / recovery banner */
-  --inspectres-dead-bg:     #ffeaea;
-  --inspectres-dead-border: #c41e3a;
-  --inspectres-dead-text:   #7a0000;
-
-  /* Misc */
-  --inspectres-radius:    4px;
-  --inspectres-radius-lg: 6px;
-}
+/* TODO Phase 2: dialogs.css */
+/* TODO Phase 3: controls.css */
+/* TODO Phase 4: chat.css */
 
 /* ─── Outer V2 shell ────────────────────────────────────────────────────── */
 

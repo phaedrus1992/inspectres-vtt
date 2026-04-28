@@ -1,0 +1,166 @@
+/* foundry/src/styles/theme/sheets.css */
+
+/* ============================================================
+   INSPECTRES SHEET STYLING
+   White background, black text, green accents
+   ============================================================ */
+
+.inspectres .sheet {
+  background: var(--inspectres-bg-primary);
+  color: var(--inspectres-text-primary);
+  border: 1px solid var(--inspectres-border-primary);
+}
+
+.inspectres .sheet-header {
+  background: var(--inspectres-white);
+  border-bottom: 1px solid var(--inspectres-border-primary);
+  padding: var(--inspectres-space-lg);
+}
+
+.inspectres .sheet-tabs {
+  border-bottom: 1px solid var(--inspectres-border-primary);
+  background: var(--inspectres-white);
+  margin: 0;
+  padding: 0;
+}
+
+.inspectres .sheet-tabs button {
+  color: var(--inspectres-text-secondary);
+  border: none;
+  background: transparent;
+  padding: var(--inspectres-space-md) var(--inspectres-space-lg);
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.inspectres .sheet-tabs button:hover {
+  color: var(--inspectres-text-primary);
+  background: var(--inspectres-bg-hover);
+}
+
+.inspectres .sheet-tabs button.active {
+  color: var(--inspectres-button-text);
+  background: var(--inspectres-button-bg);
+  border-bottom: 2px solid var(--inspectres-green-dark);
+  padding-bottom: calc(var(--inspectres-space-md) - 2px);
+}
+
+.inspectres .sheet-body {
+  background: var(--inspectres-white);
+  padding: var(--inspectres-space-lg);
+}
+
+.inspectres .sheet-section {
+  margin-bottom: var(--inspectres-space-lg);
+  border: 1px solid var(--inspectres-border-primary);
+  padding: var(--inspectres-space-md);
+  background: var(--inspectres-bg-section);
+}
+
+.inspectres .sheet-section h3 {
+  margin: 0 0 var(--inspectres-space-md) 0;
+  color: var(--inspectres-text-primary);
+  font-weight: 600;
+  border-bottom: 2px solid var(--inspectres-green-light);
+  padding-bottom: var(--inspectres-space-sm);
+}
+
+/* Form fields in sheets */
+.inspectres .sheet input[type="text"],
+.inspectres .sheet input[type="number"],
+.inspectres .sheet input[type="email"],
+.inspectres .sheet textarea,
+.inspectres .sheet select {
+  background: var(--inspectres-bg-input);
+  color: var(--inspectres-text-primary);
+  border: 1px solid var(--inspectres-border-primary);
+  padding: var(--inspectres-space-sm);
+  border-radius: var(--inspectres-radius);
+}
+
+.inspectres .sheet input:focus,
+.inspectres .sheet textarea:focus,
+.inspectres .sheet select:focus {
+  outline: none;
+  border-color: var(--inspectres-border-focus);
+  box-shadow: 0 0 0 2px var(--inspectres-focus-ring);
+}
+
+.inspectres .sheet input:disabled,
+.inspectres .sheet textarea:disabled,
+.inspectres .sheet select:disabled {
+  background: var(--inspectres-bg-disabled);
+  color: var(--inspectres-text-secondary);
+  cursor: not-allowed;
+}
+
+/* Labels */
+.inspectres .sheet label {
+  color: var(--inspectres-text-primary);
+  font-weight: 500;
+  margin-bottom: var(--inspectres-space-sm);
+  display: block;
+}
+
+/* Agent-specific sheet styles */
+.inspectres .agent-sheet .sheet-tabs button.active {
+  border-color: var(--inspectres-green-dark);
+}
+
+.inspectres .agent-sheet .recovery-status {
+  padding: var(--inspectres-space-md);
+  background: var(--inspectres-bg-highlight);
+  border-left: 4px solid var(--inspectres-green-dark);
+  margin-bottom: var(--inspectres-space-lg);
+}
+
+.inspectres .agent-sheet .status-label {
+  font-weight: 600;
+  color: var(--inspectres-text-primary);
+}
+
+/* Death mode indicator */
+.inspectres .agent-sheet.dead .sheet {
+  border: 3px solid var(--inspectres-status-dead);
+  background: linear-gradient(135deg,
+    var(--inspectres-white) 0%,
+    var(--inspectres-orange-overlay) 100%);
+}
+
+.inspectres .agent-sheet.dead .sheet-header {
+  background: var(--inspectres-orange-overlay-dark);
+  border-bottom-color: var(--inspectres-status-dead);
+}
+
+/* Recovering status */
+.inspectres .agent-sheet.recovering .recovery-status {
+  background: var(--inspectres-focus-ring-light);
+  border-left-color: var(--inspectres-green-dark);
+}
+
+/* Franchise-specific styles */
+.inspectres .franchise-sheet .sheet {
+  background: var(--inspectres-white);
+}
+
+.inspectres .franchise-sheet .resources-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--inspectres-space-lg);
+  margin: var(--inspectres-space-lg) 0;
+}
+
+.inspectres .franchise-sheet .resource-block {
+  background: var(--inspectres-bg-section);
+  border: 1px solid var(--inspectres-border-primary);
+  padding: var(--inspectres-space-md);
+  text-align: center;
+  border-radius: var(--inspectres-radius-lg);
+}
+
+.inspectres .franchise-sheet .resource-value {
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--inspectres-green-dark);
+}
