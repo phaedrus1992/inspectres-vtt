@@ -73,7 +73,7 @@ export class MissionTrackerApp extends foundry.applications.api.ApplicationV2 {
   private async openDistributionDialog(): Promise<void> {
     const franchise = findFranchiseActor();
     if (!franchise) {
-      ui.notifications?.warn(game.i18n?.localize("INSPECTRES.ErrorNoFranchise") ?? "No franchise actor found.");
+      ui.notifications?.error("No franchise actor found. Cannot distribute mission pool.");
       return;
     }
     const system = franchiseSystemData(franchise);
