@@ -1,0 +1,204 @@
+/* foundry/src/styles/theme/windows.css */
+
+/* ============================================================
+   FOUNDRY CORE WINDOW OVERRIDES
+   Full override of Foundry's default dark chrome
+   ============================================================ */
+
+/* Base window styling */
+.window.app {
+  background: var(--inspectres-white);
+  border: 1px solid var(--inspectres-border-primary);
+  box-shadow: var(--inspectres-shadow-lg);
+}
+
+.window.app .window-header {
+  background: var(--inspectres-white);
+  border-bottom: 1px solid var(--inspectres-border-primary);
+  color: var(--inspectres-text-primary);
+  padding: var(--inspectres-space-md) var(--inspectres-space-lg);
+}
+
+.window.app .window-title {
+  color: var(--inspectres-text-primary);
+  font-weight: 600;
+  flex: 1;
+}
+
+.window.app .header-button {
+  color: var(--inspectres-text-secondary);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.window.app .header-button:hover {
+  color: var(--inspectres-green-dark);
+}
+
+.window.app .window-content {
+  background: var(--inspectres-white);
+  color: var(--inspectres-text-primary);
+  padding: var(--inspectres-space-lg);
+}
+
+/* Actor sheet (InSpectres + any other actor types) */
+.window.sheet.actor {
+  background: var(--inspectres-white);
+}
+
+.window.sheet.actor .sheet-header {
+  background: var(--inspectres-white);
+  border-bottom: 1px solid var(--inspectres-border-primary);
+}
+
+.window.sheet.actor .sheet-tabs button.active {
+  background: var(--inspectres-button-bg);
+  color: var(--inspectres-button-text);
+  border-bottom: 2px solid var(--inspectres-green-dark);
+}
+
+/* Item sheet */
+.window.sheet.item {
+  background: var(--inspectres-white);
+}
+
+.window.sheet.item .item-properties {
+  background: var(--inspectres-bg-section);
+  border: 1px solid var(--inspectres-border-primary);
+}
+
+/* Chat message styling */
+.chat-message {
+  background: var(--inspectres-white);
+  border: 1px solid var(--inspectres-border-primary);
+  color: var(--inspectres-text-primary);
+}
+
+.chat-message .message-header {
+  background: var(--inspectres-bg-hover);
+  border-bottom: 1px solid var(--inspectres-border-primary);
+  padding: var(--inspectres-space-md);
+}
+
+.chat-message .message-sender {
+  font-weight: 600;
+  color: var(--inspectres-text-primary);
+}
+
+.chat-message .message-content {
+  padding: var(--inspectres-space-lg);
+}
+
+/* Combat Tracker */
+#combat-tracker {
+  background: var(--inspectres-white);
+  border: 1px solid var(--inspectres-border-primary);
+}
+
+#combat-tracker .combatant {
+  background: var(--inspectres-white);
+  border-bottom: 1px solid var(--inspectres-border-primary);
+  padding: var(--inspectres-space-md);
+}
+
+#combat-tracker .combatant.active {
+  background: var(--inspectres-bg-highlight);
+  border-left: 4px solid var(--inspectres-green-dark);
+}
+
+#combat-tracker .combatant-name {
+  color: var(--inspectres-text-primary);
+  font-weight: 500;
+}
+
+/* Sidebar panels */
+.sidebar-tab {
+  background: var(--inspectres-white);
+  border: 1px solid var(--inspectres-border-primary);
+  color: var(--inspectres-text-primary);
+}
+
+.sidebar-tab .directory-list .document.folder {
+  background: var(--inspectres-bg-hover);
+}
+
+.sidebar-tab .directory-list .document:hover {
+  background: var(--inspectres-bg-highlight);
+  cursor: pointer;
+}
+
+/* Buttons in windows */
+.window.app button,
+.window.sheet button {
+  background: var(--inspectres-button-bg);
+  color: var(--inspectres-button-text);
+  border: none;
+  padding: var(--inspectres-space-sm) var(--inspectres-space-md);
+  border-radius: 3px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.window.app button:hover,
+.window.sheet button:hover {
+  background: var(--inspectres-button-bg-hover);
+  box-shadow: var(--inspectres-shadow-md);
+}
+
+.window.app button:disabled,
+.window.sheet button:disabled {
+  background: var(--inspectres-button-bg-disabled);
+  color: var(--inspectres-button-text-disabled);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Form inputs in windows */
+.window.app input[type="text"],
+.window.app input[type="number"],
+.window.app textarea,
+.window.app select,
+.window.sheet input[type="text"],
+.window.sheet input[type="number"],
+.window.sheet textarea,
+.window.sheet select {
+  background: var(--inspectres-bg-input);
+  color: var(--inspectres-text-primary);
+  border: 1px solid var(--inspectres-border-primary);
+  padding: var(--inspectres-space-sm);
+  border-radius: 3px;
+}
+
+.window.app input:focus,
+.window.app textarea:focus,
+.window.app select:focus,
+.window.sheet input:focus,
+.window.sheet textarea:focus,
+.window.sheet select:focus {
+  outline: none;
+  border-color: var(--inspectres-border-focus);
+  box-shadow: 0 0 0 2px var(--inspectres-focus-ring);
+}
+
+/* Scrollbars in windows (webkit browsers) */
+.window.app ::-webkit-scrollbar,
+.window.sheet ::-webkit-scrollbar {
+  width: 8px;
+}
+
+.window.app ::-webkit-scrollbar-track,
+.window.sheet ::-webkit-scrollbar-track {
+  background: var(--inspectres-bg-hover);
+}
+
+.window.app ::-webkit-scrollbar-thumb,
+.window.sheet ::-webkit-scrollbar-thumb {
+  background: var(--inspectres-border-primary);
+  border-radius: 4px;
+}
+
+.window.app ::-webkit-scrollbar-thumb:hover,
+.window.sheet ::-webkit-scrollbar-thumb:hover {
+  background: var(--inspectres-green-dark);
+}
