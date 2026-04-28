@@ -563,6 +563,11 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
       return;
     }
     const system = agentSystemData(this.actor);
+    const status = computeRecoveryStatus(system, getCurrentDay());
+    if (status.status === "recovering" || status.status === "dead") {
+      ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnActionBlockedRecovery") ?? "Cannot act while recovering");
+      return;
+    }
     if (system.cool < 1) {
       ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnNoCoolToRestore") ?? "No Cool available to restore skills");
       return;

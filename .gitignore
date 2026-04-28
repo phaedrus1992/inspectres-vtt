@@ -4,3 +4,4 @@
 
 /docker/docker-compose.override.yml
 /docker/.env
+mewt.sqlite
