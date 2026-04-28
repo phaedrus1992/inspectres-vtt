@@ -466,6 +466,16 @@ describe("executeStressRoll", () => {
 // ---------------------------------------------------------------------------
 
 describe("executeClientRoll", () => {
+  it("throws error when franchise system is null or not an object", async () => {
+    const badFranchise: RollActor = {
+      id: "bad-123",
+      name: "Invalid",
+      system: null as unknown as object,
+      update: vi.fn(),
+    };
+    await expect(executeClientRoll(badFranchise)).rejects.toThrow(/franchise|actor\.system/i);
+  });
+
   it("posts a chat message without modifying franchise", async () => {
     (globalThis as unknown as { Roll: typeof MockRoll }).Roll = class extends MockRoll {
       constructor(formula: string) {

@@ -690,6 +690,18 @@ export function buildPenaltyNote(face: 1 | 2 | 3, stressDiceCount: number): stri
 // ---------------------------------------------------------------------------
 
 export async function executeClientRoll(franchise: RollActor): Promise<void> {
+  // Client rolls require a franchise actor — cannot be run as a standalone tool.
+  // The franchise provides the GM context for generating random client attributes.
+  // #274: Validate that franchise system is valid before proceeding.
+  let franchiseSystem: FranchiseData;
+  try {
+    franchiseSystem = getActorSystem<FranchiseData>(franchise);
+  } catch (err: unknown) {
+    throw new Error(
+      `Client roll requires a valid franchise actor with complete system data. Received: ${franchise.name} (ID: ${franchise.id}). Cannot run client roll as a standalone tool.`,
+    );
+  }
+
   const attributes = ["personality", "clientType", "occurrence", "location"] as const;
   const rolls: Roll[] = [];
   const generated: Record<string, string> = {};
