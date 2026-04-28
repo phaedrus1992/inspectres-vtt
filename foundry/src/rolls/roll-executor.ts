@@ -693,12 +693,19 @@ export async function executeClientRoll(franchise: RollActor): Promise<void> {
   // Client rolls require a franchise actor — cannot be run as a standalone tool.
   // The franchise provides the GM context for generating random client attributes.
   // #274: Validate that franchise system is valid before proceeding.
-  let franchiseSystem: FranchiseData;
   try {
-    franchiseSystem = getActorSystem<FranchiseData>(franchise);
+    getActorSystem<FranchiseData>(franchise);
   } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("[INSPECTRES] Client roll validation failed:", {
+      franchiseId: franchise.id,
+      franchiseName: franchise.name,
+      error: err,
+      errorMessage: message,
+    });
+    ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorClientRollFailed") ?? "Client roll requires valid franchise actor");
     throw new Error(
-      `Client roll requires a valid franchise actor with complete system data. Received: ${franchise.name} (ID: ${franchise.id}). Cannot run client roll as a standalone tool.`,
+      `Client roll requires valid franchise actor with system data. ${franchise.name} (ID: ${franchise.id}): ${message}`,
     );
   }
 

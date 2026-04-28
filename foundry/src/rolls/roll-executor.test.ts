@@ -473,7 +473,7 @@ describe("executeClientRoll", () => {
       system: null as unknown as object,
       update: vi.fn(),
     };
-    await expect(executeClientRoll(badFranchise)).rejects.toThrow(/franchise|actor\.system/i);
+    await expect(executeClientRoll(badFranchise)).rejects.toThrow(/Client roll requires valid franchise/);
   });
 
   it("posts a chat message without modifying franchise", async () => {
