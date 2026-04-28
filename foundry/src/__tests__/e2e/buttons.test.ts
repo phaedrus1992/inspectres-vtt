@@ -36,15 +36,14 @@ test.describe("Button usability and interaction states (E2E - Playwright)", () =
   test("should test hover state visual feedback", async ({ page }) => {
     await page.goto("/");
     const button = page.locator("button").first();
+    await expect(button).toBeVisible();
     await button.hover();
     await page.screenshot({ path: "test-results/e2e-screenshots/03-button-hover.png" });
     const shadow = await button.evaluate((el) => {
-      if (!el) return null;
+      if (!el) throw new Error("Button element not found");
       return window.getComputedStyle(el).boxShadow;
     });
-    if (shadow !== null) {
-      expect(shadow).not.toBe("none");
-    }
+    expect(shadow).not.toBe("none");
   });
 
   test("should test focus state for keyboard navigation", async ({ page }) => {
@@ -63,29 +62,23 @@ test.describe("Button usability and interaction states (E2E - Playwright)", () =
 
   test("should test disabled button state", async ({ page }) => {
     await page.goto("/");
+    await page.waitForSelector("button[disabled]", { timeout: 5000 });
     const buttons = page.locator("button[disabled]");
-    const hasDisabled = await buttons.count() > 0;
-    if (!hasDisabled) {
-      // No disabled buttons found; test passes vacuously
-      // This is acceptable if disabled buttons are optional in the test environment
-      return;
-    }
     await page.screenshot({ path: "test-results/e2e-screenshots/05-button-disabled.png" });
     const opacity = await buttons.first().evaluate((el) => {
-      if (!el) return null;
+      if (!el) throw new Error("Disabled button element not found");
       return window.getComputedStyle(el).opacity;
     });
-    if (opacity !== null) {
-      expect(parseFloat(opacity)).toBeLessThan(1);
-    }
+    expect(parseFloat(opacity)).toBeLessThan(1);
   });
 
   test("should test button contrast and readability", async ({ page }) => {
     await page.goto("/");
     const button = page.locator("button").first();
+    await expect(button).toBeVisible();
     await page.screenshot({ path: "test-results/e2e-screenshots/06-button-contrast.png" });
     const styles = await button.evaluate((el) => {
-      if (!el) return null;
+      if (!el) throw new Error("Button element not found");
       const computed = window.getComputedStyle(el);
       return {
         color: computed.color,
@@ -93,9 +86,8 @@ test.describe("Button usability and interaction states (E2E - Playwright)", () =
         fontSize: computed.fontSize,
       };
     });
-    if (styles !== null) {
-      const fontSizePx = parseFloat(styles.fontSize);
-      expect(fontSizePx).toBeGreaterThanOrEqual(12);
-    }
+    const fontSizePx = parseFloat(styles.fontSize);
+    expect(fontSizePx).not.toBeNaN();
+    expect(fontSizePx).toBeGreaterThanOrEqual(12);
   });
 });
