@@ -39,7 +39,7 @@
   /* Text colors */
   --inspectres-text-primary: var(--inspectres-black);
   --inspectres-text-secondary: var(--inspectres-gray-400);
-  --inspectres-text-muted: var(--inspectres-gray-300);
+  --inspectres-text-muted: var(--inspectres-gray-400);
 
   /* Borders */
   --inspectres-border-primary: var(--inspectres-gray-300);
@@ -50,8 +50,8 @@
   /* Interactive elements */
   --inspectres-button-bg: var(--inspectres-green-dark);
   --inspectres-button-text: var(--inspectres-white);
-  --inspectres-button-bg-hover: var(--inspectres-green-dark);
-  --inspectres-button-bg-active: var(--inspectres-green-dark);
+  --inspectres-button-bg-hover: #2d8a38;
+  --inspectres-button-bg-active: #1e5a27;
   --inspectres-button-bg-disabled: var(--inspectres-gray-200);
   --inspectres-button-text-disabled: var(--inspectres-gray-400);
 
