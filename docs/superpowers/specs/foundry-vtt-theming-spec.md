@@ -1,10 +1,17 @@
-# Foundry VTT Theming Specification
+---
+title: Foundry VTT Theming Specification
+sidebar_position: 1
+---
 
 ## Overview
 
-This specification provides comprehensive guidance for creating, extending, and overriding themes in Foundry VTT. It synthesizes patterns from production themes including Twilight UI, PF2e Dorako UI, RPG Styled UI, Horror UI, and Samsira DnD UI.
+This specification provides comprehensive guidance for creating, extending, and overriding
+themes in Foundry VTT. It synthesizes patterns from production themes including Twilight
+UI, PF2e Dorako UI, RPG Styled UI, Horror UI, and Samsira DnD UI.
 
-**Key Principle:** Theming in Foundry is a **layered, progressive approach** combining CSS variables, stylesheet loading order, JavaScript hooks for dynamic application, and user-configurable settings.
+**Key Principle:** Theming in Foundry is a **layered, progressive approach** combining CSS
+variables, stylesheet loading order, JavaScript hooks for dynamic application, and
+user-configurable settings.
 
 ---
 
@@ -69,12 +76,12 @@ Every theme is a Foundry **module** with a `module.json` manifest. The manifest 
 
 | Field | Purpose | Notes |
 |-------|---------|-------|
-| `compatibility` | Foundry core version targeting | Use semantic versioning; update with each Foundry release |
-| `relationships.systems` | System compatibility + version constraints | Critical for game system-specific theming |
-| `styles` | CSS/SCSS files to load | `layer: null` loads before system styles; specific layer numbers create priority |
-| `esmodules` | JavaScript modules for dynamic theming | Use for settings registration, hooks, dynamic CSS injection |
+| `compatibility` | Foundry core version targeting | Use semantic versioning; update per release |
+| `relationships.systems` | System compatibility | Critical for game system-specific theming |
+| `styles` | CSS/SCSS files | `layer: null` loads before system; numbers set priority |
+| `esmodules` | JavaScript modules for dynamic theming | Use for settings, hooks, CSS injection |
 | `languages` | i18n translation files | One per language supported |
-| `hotReload.extensions` | Watch extensions for dev | Optional; enables HMR for `.css`, `.json` during development |
+| `hotReload.extensions` | Watch extensions | Optional; enables HMR for `.css`, `.json` in dev |
 
 ---
 
@@ -108,7 +115,8 @@ Themes use a **three-level CSS variable system** to balance flexibility with spe
 }
 ```
 
-**Purpose:** Map your variables to Foundry's standard palette names. Allows Foundry core to use your colors without modification.
+**Purpose:** Map your variables to Foundry's standard palette names. Allows Foundry core
+to use your colors without modification.
 
 #### Level 3: Functional Variables (consumer level)
 In your SCSS/CSS, reference **either** the Foundry palette or your theme variables:
@@ -122,7 +130,8 @@ In your SCSS/CSS, reference **either** the Foundry palette or your theme variabl
 
 **Pattern:** `var(--palette-NAME, var(--theme-FALLBACK))`
 
-**Purpose:** If Foundry updates a color name, your fallback ensures your theme still works. If user installs a competing theme that changes palette colors, your fallback ensures consistent theming.
+**Purpose:** If Foundry updates a color name, your fallback ensures theme still works. If
+user installs a competing theme that changes palette colors, fallback ensures consistency.
 
 ### 2.2 CSS Organization by Feature
 
@@ -200,7 +209,8 @@ Hooks.on("renderApplication", (app, html, data) => {
   
   // Apply to the app's element
   const elem = app.element instanceof jQuery ? app.element[0] : app.element;
-  elem.dataset.theme = theme;
+  if (!elem) return; // Element may not exist in edge cases; skip theming
+  elem.dataset.theme = theme || ""; // Default to empty string if theme invalid
   if (colorScheme) elem.dataset.colorScheme = colorScheme;
   
   // Optional: limit scope (some apps only get partial theming)
@@ -305,14 +315,19 @@ export class ThemeSettings {
 
 ```javascript
 Hooks.on("renderApplication", (app) => {
-  // Read user choice
-  const themeChoice = game.settings.get("my-theme", "theme.choice");
-  
-  // Read custom color override
-  const primaryColor = game.settings.get("my-theme", "customization.primary-color");
-  
-  // Apply to DOM
-  app.element.style.setProperty("--user-primary-color", primaryColor);
+  try {
+    // Read user choice (defaults to "no-theme" if missing)
+    const themeChoice = game.settings.get("my-theme", "theme.choice") || "no-theme";
+    
+    // Read custom color override (validate hex format)
+    const primaryColor = game.settings.get("my-theme", "customization.primary-color") || "#f56d12";
+    if (!/^#[0-9A-F]{6}$/i.test(primaryColor)) return; // Invalid color; skip
+    
+    // Apply to DOM
+    if (app.element) app.element.style.setProperty("--user-primary-color", primaryColor);
+  } catch (err) {
+    console.warn("Theme settings error:", err); // Don't break app if settings fail
+  }
 });
 ```
 
@@ -1001,7 +1016,8 @@ input { background: var(--palette-dialog-darker); border-color: var(--palette-pr
 
 ## Conclusion
 
-Theming in Foundry VTT is powerful and flexible. The key is **layering** CSS variables, stylesheets, and JavaScript hooks to achieve:
+Theming in Foundry VTT is powerful and flexible. The key is **layering** CSS variables,
+stylesheets, and JavaScript hooks to achieve:
 
 1. **Consistency** — Use variables everywhere, not hardcoded colors
 2. **Flexibility** — Support game system variations via scoped rules
