@@ -1,8 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
-  testDir: "./src/__tests__/accessibility",
-  testMatch: "*.test.ts",
+  testDir: "./src/__tests__/e2e",
+  testMatch: "**/*.test.ts",
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
@@ -27,4 +27,8 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
   },
+
+  // Isolate Playwright from vitest globals
+  globalSetup: undefined,
+  globalTeardown: undefined,
 });

@@ -5,7 +5,7 @@ export default defineConfig({
     environment: "jsdom",
     globals: true,
     setupFiles: ["src/__mocks__/setup.ts"],
-    exclude: ["src/__tests__/accessibility/**", "node_modules/**"],
+    exclude: ["src/__tests__/e2e/**", "node_modules/**"],
     coverage: {
       provider: "v8",
       reporter: ["text", "json-summary", "lcov"],
