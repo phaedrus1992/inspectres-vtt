@@ -189,7 +189,9 @@
       "RemoveCharacteristic": "Remove characteristic",
       "StressRoll": "Roll for stress",
       "SkillAdjust": "Adjust {skill} skill",
-      "EditPortrait": "Click to change portrait"
+      "EditPortrait": "Click to change portrait",
+      "PreviousDay": "Previous day",
+      "NextDay": "Next day"
     },
     "ClientPersonality": {
       "Horny": "Horny",
