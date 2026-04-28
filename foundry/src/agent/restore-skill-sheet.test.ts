@@ -3,6 +3,8 @@ import { AgentSheet } from "./AgentSheet.js";
 import { MockActorSheetV2 } from "../__mocks__/setup.js";
 import type { AgentData } from "./agent-schema.js";
 
+// Type assertion: MockActorSheetV2 satisfies AgentSheet interface for testing action handlers.
+// The mock lacks Foundry ApplicationV2 properties unused in these tests, hence the minimal interface.
 describe("AgentSheet.onRestoreSkill - Cool-to-skill recovery button", () => {
   let mockSheet: MockActorSheetV2;
   let agent: any;
@@ -49,7 +51,8 @@ describe("AgentSheet.onRestoreSkill - Cool-to-skill recovery button", () => {
   it("shows warning when agent has no Cool available", async () => {
     const sheet = mockSheet as unknown as AgentSheet;
     agent.system.cool = 0;
-    const warnSpy = vi.spyOn(ui.notifications!, "warn").mockImplementation(() => ({} as any));
+    // Mock returns minimal Notification-like object
+    const warnSpy = vi.spyOn(ui.notifications!, "warn").mockReturnValue({} as any);
 
     const target = document.createElement("button");
     target.setAttribute("data-skill", "academics");
@@ -100,17 +103,22 @@ describe("AgentSheet.onRestoreSkill - Cool-to-skill recovery button", () => {
 
     const target = document.createElement("button");
     target.setAttribute("data-skill", "academics");
+    // Handler calls executeSkillRecovery which calls agent.update
+    // Fire the handler and verify update is called (which executeSkillRecovery does)
     await AgentSheet.onRestoreSkill.call(sheet, new Event("click"), target);
 
-    // Should have called executeSkillRecovery which updates the actor
-    // Verify the skill penalty was reduced and Cool was spent
-    await new Promise((resolve) => setTimeout(resolve, 100));
-    expect(agent.update).toHaveBeenCalled();
+    // Verify the update was called (indicates executeSkillRecovery succeeded)
+    expect(agent.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        [`system.skills.academics.penalty`]: 1, // penalty reduced from 2 to 1
+        "system.cool": 1, // cool reduced from 2 to 1
+      }),
+    );
   });
 
   it("does nothing when dialog is cancelled", async () => {
     const sheet = mockSheet as unknown as AgentSheet;
-    const updateSpy = vi.spyOn(agent, "update").mockResolvedValue(agent);
+    vi.spyOn(agent, "update").mockResolvedValue(agent);
 
     vi.spyOn(foundry.applications.api.DialogV2, "wait").mockResolvedValue("cancel");
 
@@ -118,7 +126,6 @@ describe("AgentSheet.onRestoreSkill - Cool-to-skill recovery button", () => {
     target.setAttribute("data-skill", "academics");
     await AgentSheet.onRestoreSkill.call(sheet, new Event("click"), target);
 
-    await new Promise((resolve) => setTimeout(resolve, 100));
-    expect(updateSpy).not.toHaveBeenCalled();
+    expect(agent.update).not.toHaveBeenCalled();
   });
 });

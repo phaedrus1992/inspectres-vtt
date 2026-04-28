@@ -80,35 +80,26 @@ export async function executeSkillRecovery(
   const newCool = system.cool - coolSpent;
 
   // Apply updates
-  try {
-    const updateData = {
-      [`system.skills.${skillName}.penalty`]: newPenalty,
-      "system.cool": newCool,
-    } as unknown as Parameters<typeof agent.update>[0];
+  const updateData = {
+    [`system.skills.${skillName}.penalty`]: newPenalty,
+    "system.cool": newCool,
+  } as unknown as Parameters<typeof agent.update>[0];
 
-    await agent.update(updateData);
+  await agent.update(updateData);
 
-    // Notify success
-    const recovered = currentPenalty - newPenalty;
-    ui.notifications?.info(
-      game.i18n?.format("INSPECTRES.NotifySkillRecovered", {
-        skill: game.i18n?.localize(`INSPECTRES.Skill.${skillName}`) ?? skillName,
-        recovered: String(recovered),
-        cool: String(coolSpent),
-      }) ??
-        `Recovered ${recovered} ${skillName} point(s) for ${coolSpent} Cool die(cool=${newCool} remaining).`,
-    );
+  // Notify success
+  const recovered = currentPenalty - newPenalty;
+  ui.notifications?.info(
+    game.i18n?.format("INSPECTRES.NotifySkillRecovered", {
+      skill: game.i18n?.localize(`INSPECTRES.Skill.${skillName}`) ?? skillName,
+      recovered: String(recovered),
+      cool: String(coolSpent),
+    }) ??
+      `Recovered ${recovered} ${skillName} point(s) for ${coolSpent} Cool die(cool=${newCool} remaining).`,
+  );
 
-    return {
-      success: true,
-      notificationKey: "INSPECTRES.NotifySkillRecovered",
-    };
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : String(err);
-    ui.notifications?.error(`Failed to spend Cool: ${message}`);
-    return {
-      success: false,
-      reason: `Update failed: ${message}`,
-    };
-  }
+  return {
+    success: true,
+    notificationKey: "INSPECTRES.NotifySkillRecovered",
+  };
 }
