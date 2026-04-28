@@ -25,46 +25,39 @@ test.describe("Form field rendering and input validation (E2E - Playwright)", ()
     await page.goto("/");
     await page.waitForSelector(".window-app");
     const input = page.locator("input[type='text']").first();
-    if (await input.count() > 0) {
-      const border = await input.evaluate((el) =>
-        window.getComputedStyle(el).borderWidth,
-      );
-      expect(border).not.toBe("0px");
-    }
+    const border = await input.evaluate((el) =>
+      window.getComputedStyle(el).borderWidth,
+    );
+    expect(border).not.toBe("0px");
   });
 
   test("should test input value handling", async ({ page }) => {
     await page.goto("/");
     await page.waitForSelector(".window-app");
     const input = page.locator("input[type='text']").first();
-    if (await input.count() > 0) {
-      await input.fill("test value");
-      const value = await input.inputValue();
-      expect(value).toBe("test value");
-    }
+    await input.fill("test value");
+    const value = await input.inputValue();
+    expect(value).toBe("test value");
   });
 
   test("should test form field focus and interaction", async ({ page }) => {
     await page.goto("/");
     await page.waitForSelector(".window-app");
     const input = page.locator("input").first();
-    if (await input.count() > 0) {
-      await input.focus();
-      const focused = await page.evaluate(
-        () => document.activeElement === document.querySelector("input"),
-      );
-      expect(focused).toBe(true);
-    }
+    await input.focus();
+    const focused = await page.evaluate(
+      () => document.activeElement === document.querySelector("input"),
+    );
+    expect(focused).toBe(true);
   });
 
   test("should test form validation", async ({ page }) => {
     await page.goto("/");
     await page.waitForSelector(".window-app");
     const requiredInput = page.locator("input[required]").first();
-    if (await requiredInput.count() > 0) {
-      const isRequired = await requiredInput.getAttribute("required");
-      expect(isRequired).not.toBeNull();
-    }
+    await page.waitForSelector("input[required]", { timeout: 5000 }).catch(() => {});
+    const isRequired = await requiredInput.getAttribute("required");
+    expect(isRequired).not.toBeNull();
   });
 
   test("should test textarea and select field handling", async ({ page }) => {
@@ -72,10 +65,11 @@ test.describe("Form field rendering and input validation (E2E - Playwright)", ()
     await page.waitForSelector(".window-app");
     const textarea = page.locator("textarea").first();
     const select = page.locator("select").first();
-    if (await textarea.count() > 0) {
+    await page.waitForSelector("textarea, select", { timeout: 5000 }).catch(() => {});
+    if ((await textarea.count()) > 0) {
       await expect(textarea).toBeVisible();
     }
-    if (await select.count() > 0) {
+    if ((await select.count()) > 0) {
       await expect(select).toBeVisible();
     }
   });
@@ -84,10 +78,9 @@ test.describe("Form field rendering and input validation (E2E - Playwright)", ()
     await page.goto("/");
     await page.waitForSelector(".window-app");
     const inputs = page.locator("input, textarea, select");
+    await page.waitForSelector("input, textarea, select", { timeout: 5000 }).catch(() => {});
     const count = await inputs.count();
-    if (count > 0) {
-      // At least one accessible form element should be present
-      expect(count).toBeGreaterThan(0);
-    }
+    // At least one accessible form element should be present
+    expect(count).toBeGreaterThan(0);
   });
 });

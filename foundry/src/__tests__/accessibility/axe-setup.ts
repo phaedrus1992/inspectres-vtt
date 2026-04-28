@@ -77,24 +77,28 @@ function parseColor(color: string): [number, number, number] {
   // Handle hex colors
   if (color.startsWith("#")) {
     const hex = color.replace("#", "");
-    return [
-      parseInt(hex.substring(0, 2), 16),
-      parseInt(hex.substring(2, 4), 16),
-      parseInt(hex.substring(4, 6), 16),
-    ];
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    if (isNaN(r) || isNaN(g) || isNaN(b)) {
+      throw new Error(`parseColor: invalid hex color '${color}'`);
+    }
+    return [r, g, b];
   }
 
   // Handle rgb/rgba
   const match = color.match(/\d+/g);
   if (match && match.length >= 3) {
-    return [
-      parseInt(match[0] ?? "0", 10),
-      parseInt(match[1] ?? "0", 10),
-      parseInt(match[2] ?? "0", 10),
-    ];
+    const r = parseInt(match[0] ?? "0", 10);
+    const g = parseInt(match[1] ?? "0", 10);
+    const b = parseInt(match[2] ?? "0", 10);
+    if (![r, g, b].every((v) => v >= 0 && v <= 255)) {
+      throw new Error(`parseColor: RGB values must be 0–255, got [${r}, ${g}, ${b}]`);
+    }
+    return [r, g, b];
   }
 
-  throw new Error(`parseColor: unrecognized color format '${color}'. Expected hex (#RRGGBB), rgb(), or CSS color keyword.`);
+  throw new Error(`parseColor: unrecognized color format '${color}'. Expected hex (#RRGGBB) or rgb(r, g, b).`);
 }
 
 function getRelativeLuminance(rgb: [number, number, number]): number {

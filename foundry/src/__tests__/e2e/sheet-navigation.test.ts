@@ -16,56 +16,45 @@ test.describe("Sheet navigation and tab switching (E2E - Playwright)", () => {
     await page.waitForSelector(".window-app");
     // Find a sheet with tabs
     const tabs = page.locator("[role='tab']");
-    const count = await tabs.count();
-    if (count > 0) {
-      await expect(tabs.first()).toBeVisible();
-    }
+    // Wait for sheet content to render before checking tabs
+    await page.waitForSelector("[role='tab']", { timeout: 5000 }).catch(() => {});
+    await expect(tabs.first()).toBeVisible();
   });
 
   test("should test active tab indication", async ({ page }) => {
     await page.goto("/");
     await page.waitForSelector(".window-app");
     const activeTab = page.locator("[role='tab'][aria-selected='true']");
-    if ((await activeTab.count()) > 0) {
-      const ariaSelected = await activeTab.first().getAttribute("aria-selected");
-      expect(ariaSelected).toBe("true");
-    }
+    await page.waitForSelector("[role='tab'][aria-selected='true']", { timeout: 5000 }).catch(() => {});
+    const ariaSelected = await activeTab.first().getAttribute("aria-selected");
+    expect(ariaSelected).toBe("true");
   });
 
   test("should test tab switching behavior", async ({ page }) => {
     await page.goto("/");
     await page.waitForSelector(".window-app");
     const tabs = page.locator("[role='tab']");
-    const count = await tabs.count();
-    if (count > 1) {
-      const secondTab = tabs.nth(1);
-      await secondTab.click();
-      const selected = await secondTab.getAttribute("aria-selected");
-      expect(selected).toBe("true");
-    }
+    await page.waitForSelector("[role='tab']:nth-of-type(2)", { timeout: 5000 }).catch(() => {});
+    const secondTab = tabs.nth(1);
+    await secondTab.click();
+    const selected = await secondTab.getAttribute("aria-selected");
+    expect(selected).toBe("true");
   });
 
   test("should test content visibility and accessibility", async ({ page }) => {
     await page.goto("/");
     await page.waitForSelector(".window-app");
-    const tabpanels = page.locator("[role='tabpanel']");
-    const count = await tabpanels.count();
-    if (count > 0) {
-      // At least one tabpanel should be visible
-      const visibleCount = await page.locator("[role='tabpanel']:visible").count();
-      expect(visibleCount).toBeGreaterThan(0);
-    }
+    await page.waitForSelector("[role='tabpanel']", { timeout: 5000 }).catch(() => {});
+    const visibleCount = await page.locator("[role='tabpanel']:visible").count();
+    expect(visibleCount).toBeGreaterThan(0);
   });
 
   test("should test tab accessibility attributes", async ({ page }) => {
     await page.goto("/");
     await page.waitForSelector(".window-app");
     const tabs = page.locator("[role='tab']");
-    const count = await tabs.count();
-    if (count > 0) {
-      // Tab should have aria-selected
-      const role = await tabs.first().getAttribute("role");
-      expect(role).toBe("tab");
-    }
+    await page.waitForSelector("[role='tab']", { timeout: 5000 }).catch(() => {});
+    const role = await tabs.first().getAttribute("role");
+    expect(role).toBe("tab");
   });
 });
