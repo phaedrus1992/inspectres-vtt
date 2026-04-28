@@ -14,6 +14,8 @@ export default defineConfig({
     screenshot: "only-on-failure",
   },
 
+  outputDir: "./test-results/e2e-screenshots",
+
   projects: [
     {
       name: "chromium",
