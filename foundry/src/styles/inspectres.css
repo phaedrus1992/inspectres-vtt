@@ -909,3 +909,51 @@ details > summary {
     }
   }
 }
+
+/* ─── Sidebar directory buttons (Create Actor, Create Folder) ──────────────── */
+
+.sidebar-tab .directory-header button {
+  background: var(--inspectres-button-bg);
+  color: var(--inspectres-button-text);
+  border: none;
+  padding: var(--inspectres-space-sm) var(--inspectres-space-md);
+  border-radius: var(--inspectres-radius);
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.9em;
+  transition: all 0.2s ease;
+}
+
+.sidebar-tab .directory-header button:hover {
+  background: var(--inspectres-button-bg-hover);
+  box-shadow: var(--inspectres-shadow-md);
+}
+
+.sidebar-tab .directory-header button:active {
+  background: var(--inspectres-button-bg-active);
+  transform: translateY(1px);
+}
+
+.sidebar-tab .directory-header button:disabled {
+  background: var(--inspectres-button-bg-disabled);
+  color: var(--inspectres-button-text-disabled);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* ─── Sidebar tab document buttons (common actions on items) ────────────── */
+
+.sidebar-tab .directory-list .document-button {
+  background: var(--inspectres-button-bg);
+  color: var(--inspectres-button-text);
+  border: none;
+  padding: 2px 6px;
+  border-radius: var(--inspectres-radius);
+  cursor: pointer;
+  font-size: 0.8em;
+  transition: all 0.15s ease;
+}
+
+.sidebar-tab .directory-list .document-button:hover {
+  background: var(--inspectres-button-bg-hover);
+}

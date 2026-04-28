@@ -22,6 +22,7 @@ function makeAgentSheetWithRecovery(
     talent: "",
     cool: 1,
     isWeird: false,
+    power: null,
     characteristics: [],
     isDead: recoveryStatus === "dead",
     daysOutOfAction: recoveryStatus === "recovering" ? 20 : 0,
