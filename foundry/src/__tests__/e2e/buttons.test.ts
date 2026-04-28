@@ -46,8 +46,13 @@ test.describe("Button usability and interaction states (E2E - Playwright)", () =
     await page.goto("/");
     const button = page.locator("button").first();
     await button.focus();
-    const focused = await page.evaluate(() => document.activeElement?.tagName);
-    expect(focused).toBe("BUTTON");
+    // Verify the button element is actually focused (not just any button)
+    const focused = await page.evaluate(async () => {
+      const firstButton = document.querySelector("button");
+      const activeElement = document.activeElement;
+      return firstButton === activeElement ? "focused" : "not-focused";
+    });
+    expect(focused).toBe("focused");
   });
 
   test("should test disabled button state", async ({ page }) => {
