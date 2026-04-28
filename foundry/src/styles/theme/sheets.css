@@ -129,13 +129,13 @@
 }
 
 .inspectres .agent-sheet.dead .sheet-header {
-  background: rgba(255, 140, 0, 0.1);
+  background: var(--inspectres-orange-overlay-dark);
   border-bottom-color: var(--inspectres-status-dead);
 }
 
 /* Recovering status */
 .inspectres .agent-sheet.recovering .recovery-status {
-  background: rgba(56, 180, 74, 0.1);
+  background: var(--inspectres-focus-ring-light);
   border-left-color: var(--inspectres-green-dark);
 }
 

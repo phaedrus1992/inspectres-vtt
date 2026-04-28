@@ -92,6 +92,12 @@
 
   /* Orange overlay (semi-transparent orange for death mode background) */
   --inspectres-orange-overlay: rgba(255, 140, 0, 0.05);
+
+  /* Orange overlay darker (for death mode header background) */
+  --inspectres-orange-overlay-dark: rgba(255, 140, 0, 0.1);
+
+  /* Green overlay light (for recovering status background) */
+  --inspectres-focus-ring-light: rgba(56, 180, 74, 0.1);
 }
 
 /* --- COMPONENT OVERRIDES (Component-specific customizations) --- */
