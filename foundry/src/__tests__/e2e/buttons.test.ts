@@ -87,6 +87,7 @@ test.describe("Button usability and interaction states (E2E - Playwright)", () =
       };
     });
     const fontSizePx = parseFloat(styles.fontSize);
+    expect(fontSizePx).not.toBeNaN();
     expect(fontSizePx).toBeGreaterThanOrEqual(12);
   });
 });
