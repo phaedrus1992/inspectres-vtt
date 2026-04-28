@@ -68,6 +68,16 @@
               {{#if skill.penalty}}
                 <div class="skill-penalty-line">
                   −{{skill.penalty}} {{localize "INSPECTRES.PenaltyFromStress"}}
+                  {{#if (gt system.cool 0)}}
+                    <button
+                      type="button"
+                      class="restore-skill-button"
+                      data-action="restoreSkill"
+                      data-skill="{{skillName}}"
+                      title="{{localize "INSPECTRES.TooltipRestoreSkill"}}"
+                      aria-label="{{localize "INSPECTRES.AriaLabel.RestoreSkill"}}"
+                    ><i class="fas fa-redo"></i></button>
+                  {{/if}}
                 </div>
               {{/if}}
             </div>
