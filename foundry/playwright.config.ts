@@ -16,19 +16,19 @@ export default defineConfig({
 
   outputDir: "./test-results/e2e-screenshots",
 
-  projects: [
-    {
-      name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
-    },
-  ],
-
   webServer: {
     command: "npm run dev",
     url: "http://localhost:30000",
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
   },
+
+  projects: [
+    {
+      name: "chromium",
+      use: { ...devices["Desktop Chrome"] },
+    },
+  ],
 
   // Isolate Playwright from vitest globals
   globalSetup: undefined,

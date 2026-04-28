@@ -13,7 +13,7 @@ import { test, expect } from "@playwright/test";
 test.describe("Form field rendering and input validation (E2E - Playwright)", () => {
   test("should test form field visibility with styling", async ({ page }) => {
     await page.goto("/");
-    await page.waitForSelector(".window-app");
+    await page.waitForSelector(".window-app", { timeout: 10000 });
     const inputs = page.locator("input[type='text'], input[type='number']");
     await expect(inputs.first()).toBeVisible();
     await page.screenshot({ path: "test-results/e2e-screenshots/12-form-fields.png", fullPage: true });
@@ -30,7 +30,7 @@ test.describe("Form field rendering and input validation (E2E - Playwright)", ()
 
   test("should test input field styling with border verification", async ({ page }) => {
     await page.goto("/");
-    await page.waitForSelector(".window-app");
+    await page.waitForSelector(".window-app", { timeout: 10000 });
     const input = page.locator("input[type='text']").first();
     await expect(input).toBeVisible();
     await page.screenshot({ path: "test-results/e2e-screenshots/13-input-styling.png", fullPage: true });
@@ -53,7 +53,7 @@ test.describe("Form field rendering and input validation (E2E - Playwright)", ()
 
   test("should test input value handling", async ({ page }) => {
     await page.goto("/");
-    await page.waitForSelector(".window-app");
+    await page.waitForSelector(".window-app", { timeout: 10000 });
     const input = page.locator("input[type='text']").first();
     await expect(input).toBeVisible();
     await input.fill("test value");
@@ -64,7 +64,7 @@ test.describe("Form field rendering and input validation (E2E - Playwright)", ()
 
   test("should test form field focus and interaction with visual feedback", async ({ page }) => {
     await page.goto("/");
-    await page.waitForSelector(".window-app");
+    await page.waitForSelector(".window-app", { timeout: 10000 });
     const input = page.locator("input").first();
     await expect(input).toBeVisible();
 
@@ -93,7 +93,7 @@ test.describe("Form field rendering and input validation (E2E - Playwright)", ()
 
   test("should test form validation with required fields", async ({ page }) => {
     await page.goto("/");
-    await page.waitForSelector(".window-app");
+    await page.waitForSelector(".window-app", { timeout: 10000 });
     const requiredInput = page.locator("input[required]").first();
     await expect(requiredInput).toBeVisible();
     await page.screenshot({ path: "test-results/e2e-screenshots/16-form-validation.png", fullPage: true });
@@ -108,7 +108,7 @@ test.describe("Form field rendering and input validation (E2E - Playwright)", ()
 
   test("should test textarea and select field handling with styling", async ({ page }) => {
     await page.goto("/");
-    await page.waitForSelector(".window-app");
+    await page.waitForSelector(".window-app", { timeout: 10000 });
     // Wait for at least one form element with multiple field types
     await page.waitForSelector("textarea, select", { timeout: 5000 });
     const textareas = page.locator("textarea");
@@ -136,7 +136,7 @@ test.describe("Form field rendering and input validation (E2E - Playwright)", ()
 
   test("should test form accessibility with ARIA attributes", async ({ page }) => {
     await page.goto("/");
-    await page.waitForSelector(".window-app");
+    await page.waitForSelector(".window-app", { timeout: 10000 });
     await page.waitForSelector("input, textarea, select", { timeout: 5000 });
     const inputs = page.locator("input, textarea, select");
     const count = await inputs.count();
@@ -159,7 +159,7 @@ test.describe("Form field rendering and input validation (E2E - Playwright)", ()
         break;
       }
     }
-    // At least some fields should have accessible names
-    expect(hasAccessibility || count > 0).toBe(true);
+    // Verify fields exist AND some have accessible names
+    expect(hasAccessibility).toBe(true);
   });
 });

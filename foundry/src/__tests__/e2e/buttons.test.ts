@@ -128,10 +128,12 @@ test.describe("Button usability and interaction states (E2E - Playwright)", () =
     const result = await button.evaluate((el) => {
       if (!el) throw new Error("Button element not found");
       const computed = window.getComputedStyle(el);
+      const fontSize = parseFloat(computed.fontSize);
+      if (Number.isNaN(fontSize)) throw new Error(`Invalid fontSize from CSS: ${computed.fontSize}`);
       return {
         color: computed.color,
         background: computed.backgroundColor,
-        fontSize: parseFloat(computed.fontSize),
+        fontSize,
         fontWeight: computed.fontWeight,
       };
     });
