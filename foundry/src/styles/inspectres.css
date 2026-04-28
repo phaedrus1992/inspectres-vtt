@@ -2,6 +2,7 @@
 
 /* Theme system */
 @import url('./theme/variables.css');
+@import url('./theme/utilities.css');
 @import url('./theme/sheets.css');
 @import url('./theme/windows.css');
 

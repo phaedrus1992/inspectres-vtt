@@ -1,0 +1,140 @@
+/* foundry/src/styles/theme/utilities.css */
+
+/* ============================================================
+   INSPECTRES UTILITY CLASSES
+   Reusable state styling utilities (button, border, background)
+   ============================================================ */
+
+/* --- Button utilities --- */
+
+/* Primary button (interactive elements) */
+.inspectres .btn-primary {
+  background: var(--inspectres-button-bg);
+  color: var(--inspectres-button-text);
+  border: none;
+  padding: var(--inspectres-space-sm) var(--inspectres-space-md);
+  border-radius: var(--inspectres-radius);
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.inspectres .btn-primary:hover {
+  background: var(--inspectres-button-bg-hover);
+  box-shadow: var(--inspectres-shadow-md);
+}
+
+.inspectres .btn-primary:active {
+  background: var(--inspectres-button-bg-active);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.inspectres .btn-primary:disabled {
+  background: var(--inspectres-button-bg-disabled);
+  color: var(--inspectres-button-text-disabled);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Secondary button (alternative action) */
+.inspectres .btn-secondary {
+  background: var(--inspectres-bg-section);
+  color: var(--inspectres-text-primary);
+  border: 1px solid var(--inspectres-border-primary);
+  padding: var(--inspectres-space-sm) var(--inspectres-space-md);
+  border-radius: var(--inspectres-radius);
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.inspectres .btn-secondary:hover {
+  background: var(--inspectres-bg-hover);
+  border-color: var(--inspectres-border-active);
+  box-shadow: var(--inspectres-shadow-sm);
+}
+
+.inspectres .btn-secondary:active {
+  background: var(--inspectres-bg-highlight);
+  border-color: var(--inspectres-border-active);
+}
+
+.inspectres .btn-secondary:disabled {
+  background: var(--inspectres-bg-disabled);
+  color: var(--inspectres-text-secondary);
+  border-color: var(--inspectres-border-disabled);
+  cursor: not-allowed;
+}
+
+/* --- Border utilities --- */
+
+/* Primary border (divider, section boundary) */
+.inspectres .border-primary {
+  border: 1px solid var(--inspectres-border-primary);
+}
+
+/* Active border (focused, selected element) */
+.inspectres .border-active {
+  border: 2px solid var(--inspectres-border-active);
+}
+
+/* Focus border (keyboard focus indicator) */
+.inspectres .border-focus {
+  border: 1px solid var(--inspectres-border-focus);
+  box-shadow: 0 0 0 2px var(--inspectres-focus-ring);
+}
+
+/* Disabled border (inactive element) */
+.inspectres .border-disabled {
+  border: 1px solid var(--inspectres-border-disabled);
+}
+
+/* --- Background utilities --- */
+
+/* Highlight background (selected, hover state) */
+.inspectres .bg-highlight {
+  background: var(--inspectres-bg-highlight);
+}
+
+/* Hover background (interactive background on hover) */
+.inspectres .bg-hover {
+  background: var(--inspectres-bg-hover);
+}
+
+/* Section background (grouped content container) */
+.inspectres .bg-section {
+  background: var(--inspectres-bg-section);
+}
+
+/* Disabled background (inactive elements) */
+.inspectres .bg-disabled {
+  background: var(--inspectres-bg-disabled);
+}
+
+/* --- Combined state utilities --- */
+
+/* Active state (selected tab, active row, highlighted item) */
+.inspectres .state-active {
+  background: var(--inspectres-bg-highlight);
+  border-left: 4px solid var(--inspectres-border-active);
+}
+
+/* Tab active state (sheet tabs, navigation tabs) */
+.inspectres .tab-active {
+  background: var(--inspectres-button-bg);
+  color: var(--inspectres-button-text);
+  border-bottom: 2px solid var(--inspectres-green-dark);
+}
+
+/* Tab hover state */
+.inspectres .tab-hover {
+  color: var(--inspectres-text-primary);
+  background: var(--inspectres-bg-hover);
+}
+
+/* Status indicator (left border accent) */
+.inspectres .status-bar {
+  border-left: 4px solid var(--inspectres-green-dark);
+  padding: var(--inspectres-space-md);
+  background: var(--inspectres-bg-highlight);
+}
