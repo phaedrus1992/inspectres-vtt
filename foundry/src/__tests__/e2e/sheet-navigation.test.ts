@@ -34,17 +34,20 @@ test.describe("Sheet navigation and tab switching (E2E - Playwright)", () => {
     await page.goto("/");
     await page.waitForSelector(".window-app");
     const tabs = page.locator("[role='tab']");
-    // Ensure we can switch between multiple tabs
+    // Ensure at least 2 tabs exist to test switching behavior
     await expect(tabs).toHaveCount(2, { timeout: 5000 });
     const secondTab = tabs.nth(1);
+    const secondTabId = await secondTab.getAttribute("id");
     await secondTab.click();
     await page.waitForTimeout(500); // Wait for Foundry to render new tab content
     await page.screenshot({ path: "test-results/e2e-screenshots/09-tab-switched.png" });
     const selected = await secondTab.getAttribute("aria-selected");
     expect(selected).toBe("true");
-    // Verify content actually changed (not just aria attribute)
+    // Verify the visible panel is associated with the second tab
     const visiblePanel = page.locator("[role='tabpanel']:visible");
     await expect(visiblePanel).toHaveCount(1);
+    const panelLabel = await visiblePanel.first().getAttribute("aria-labelledby");
+    expect(panelLabel).toBe(secondTabId);
   });
 
   test("should test content visibility and accessibility", async ({ page }) => {
