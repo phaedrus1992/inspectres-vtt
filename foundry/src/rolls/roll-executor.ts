@@ -513,6 +513,7 @@ async function buildSkillRollDialog(opts: SkillRollDialogOptions): Promise<Skill
       },
     ],
   });
+  if (result === null || result === undefined) return null;
   return result as SkillRollAugmentation;
 }
 
