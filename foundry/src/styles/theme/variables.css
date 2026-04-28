@@ -96,6 +96,11 @@
   /* Orange overlay darker (for death mode header background) */
   --inspectres-orange-overlay-dark: rgba(255, 140, 0, 0.1);
 
+  /* Warn (yellow) overlays for roll outcomes */
+  --inspectres-warn-overlay-light: rgba(255, 193, 7, 0.05);
+  --inspectres-warn-overlay-medium: rgba(255, 193, 7, 0.1);
+  --inspectres-warn-overlay-dark: rgba(255, 193, 7, 0.15);
+
   /* Green overlay light (for recovering status background) */
   --inspectres-focus-ring-light: rgba(56, 180, 74, 0.1);
 
@@ -106,6 +111,9 @@
 
   /* Accent color (interactive elements) */
   --inspectres-accent: var(--inspectres-green-dark);
+
+  /* Select dropdown SVG icon (down chevron) */
+  --inspectres-select-arrow: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3e%3cpath fill='%23000' d='M1 1l5 5 5-5'/%3e%3c/svg%3e");
 
   /* Radius scale */
   --inspectres-radius: 3px;

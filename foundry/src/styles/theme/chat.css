@@ -28,10 +28,10 @@
 }
 
 .inspectres .roll-card.partial {
-  border-left-color: #ffc107;
+  border-left-color: var(--inspectres-warn-bg);
   background: linear-gradient(
     90deg,
-    rgba(255, 193, 7, 0.05) 0%,
+    var(--inspectres-warn-overlay-light) 0%,
     var(--inspectres-white) 20%
   );
 }
@@ -40,7 +40,7 @@
   border-left-color: var(--inspectres-orange);
   background: linear-gradient(
     90deg,
-    rgba(255, 140, 0, 0.05) 0%,
+    var(--inspectres-orange-overlay) 0%,
     var(--inspectres-white) 20%
   );
 }
@@ -63,7 +63,7 @@
 }
 
 .inspectres .outcome-badge.partial {
-  background: #ffc107;
+  background: var(--inspectres-warn-bg);
   color: var(--inspectres-black);
 }
 
@@ -227,10 +227,10 @@
 }
 
 .inspectres-toast.warn {
-  border-left-color: #ffc107;
+  border-left-color: var(--inspectres-warn-bg);
   background: linear-gradient(
     90deg,
-    rgba(255, 193, 7, 0.05) 0%,
+    var(--inspectres-warn-overlay-light) 0%,
     var(--inspectres-white) 20%
   );
 }
@@ -239,7 +239,7 @@
   border-left-color: var(--inspectres-orange);
   background: linear-gradient(
     90deg,
-    rgba(255, 140, 0, 0.05) 0%,
+    var(--inspectres-orange-overlay) 0%,
     var(--inspectres-white) 20%
   );
 }
@@ -264,7 +264,7 @@
 }
 
 .inspectres-toast.warn .inspectres-toast-icon {
-  color: #ffc107;
+  color: var(--inspectres-warn-bg);
 }
 
 .inspectres-toast.error .inspectres-toast-icon {
@@ -335,13 +335,13 @@
 }
 
 .inspectres .inline-roll-card.partial {
-  background: rgba(255, 193, 7, 0.15);
-  border-color: #ffc107;
-  color: #ff9800;
+  background: var(--inspectres-warn-overlay-dark);
+  border-color: var(--inspectres-warn-bg);
+  color: var(--inspectres-orange);
 }
 
 .inspectres .inline-roll-card.bad {
-  background: rgba(255, 140, 0, 0.15);
+  background: var(--inspectres-orange-overlay-dark);
   border-color: var(--inspectres-orange);
   color: var(--inspectres-orange);
 }
@@ -425,7 +425,7 @@
 }
 
 .inspectres .roll-modifier.negative {
-  background: rgba(255, 140, 0, 0.2);
+  background: var(--inspectres-orange-overlay-dark);
   color: var(--inspectres-orange);
 }
 

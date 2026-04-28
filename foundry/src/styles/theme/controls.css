@@ -39,6 +39,11 @@
   font-weight: 600;
 }
 
+.inspectres .sheet-tabs button:focus-visible {
+  outline: 2px solid var(--inspectres-focus-ring);
+  outline-offset: 2px;
+}
+
 /* ─── BUTTON VARIANTS ────────────────────────────────────────── */
 
 /* Primary button (default green) */
@@ -75,6 +80,12 @@
   transform: none;
 }
 
+.inspectres button.primary:focus-visible,
+.inspectres button.default:focus-visible {
+  outline: 2px solid var(--inspectres-focus-ring);
+  outline-offset: 2px;
+}
+
 /* Secondary button (light background) */
 .inspectres button.secondary {
   background: var(--inspectres-bg-disabled);
@@ -102,6 +113,11 @@
   cursor: not-allowed;
 }
 
+.inspectres button.secondary:focus-visible {
+  outline: 2px solid var(--inspectres-focus-ring);
+  outline-offset: 2px;
+}
+
 /* Danger button (for destructive actions) */
 .inspectres button.danger {
   background: var(--inspectres-orange);
@@ -115,7 +131,7 @@
 }
 
 .inspectres button.danger:hover {
-  background: #cc7000;
+  background: var(--inspectres-orange);
   box-shadow: var(--inspectres-shadow-md);
 }
 
@@ -128,6 +144,11 @@
   background: var(--inspectres-button-bg-disabled);
   color: var(--inspectres-button-text-disabled);
   cursor: not-allowed;
+}
+
+.inspectres button.danger:focus-visible {
+  outline: 2px solid var(--inspectres-focus-ring);
+  outline-offset: 2px;
 }
 
 /* ─── FORM INPUTS ────────────────────────────────────────────── */
@@ -187,7 +208,7 @@
 .inspectres select {
   cursor: pointer;
   appearance: none;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3e%3cpath fill='%23000' d='M1 1l5 5 5-5'/%3e%3c/svg%3e");
+  background-image: var(--inspectres-select-arrow);
   background-repeat: no-repeat;
   background-position: right var(--inspectres-space-sm) center;
   padding-right: calc(var(--inspectres-space-md) + 12px);
@@ -304,7 +325,7 @@
 .inspectres textarea.error,
 .inspectres select.error {
   border-color: var(--inspectres-orange);
-  box-shadow: 0 0 0 2px rgba(255, 140, 0, 0.1);
+  box-shadow: 0 0 0 2px var(--inspectres-orange-overlay);
 }
 
 /* Success state */
@@ -319,8 +340,8 @@
 .inspectres input.warning,
 .inspectres textarea.warning,
 .inspectres select.warning {
-  border-color: #ffc107;
-  box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.1);
+  border-color: var(--inspectres-warn-bg);
+  box-shadow: 0 0 0 2px var(--inspectres-warn-overlay-medium);
 }
 
 /* ─── FIELD LABELS & HELP TEXT ─────────────────────────────────── */
