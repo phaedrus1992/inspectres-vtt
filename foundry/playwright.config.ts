@@ -40,7 +40,9 @@ export default defineConfig({
       name: "chromium",
       use: {
         ...devices["Desktop Chrome"],
-        // Foundry's PIXI canvas warns when WebGL hardware acceleration is unavailable.
+        // Foundry requires 1366x768 minimum; Desktop Chrome default (1280x720) triggers
+        // a resolution warning that can affect rendering and test stability.
+        viewport: { width: 1366, height: 768 },
         // SwiftShader gives headless Chromium a working GL backend so the permanent
         // "hardware acceleration disabled" warning does not appear and clutter the UI.
         launchOptions: {
