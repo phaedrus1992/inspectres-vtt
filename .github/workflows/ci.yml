@@ -185,6 +185,7 @@ jobs:
         run: docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d
 
       - name: Wait for Foundry to be ready
+        working-directory: docker
         run: |
           for i in $(seq 1 60); do
             if curl -sf -o /dev/null http://localhost:30000; then
@@ -194,7 +195,7 @@ jobs:
             sleep 1
           done
           echo "ERROR: Foundry did not start within 60s"
-          docker compose -f docker/docker-compose.yml -f docker/docker-compose.ci.yml logs --tail=80
+          docker compose -f docker-compose.yml -f docker-compose.ci.yml logs --tail=80
           exit 1
 
       - name: Run E2E tests
