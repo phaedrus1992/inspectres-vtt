@@ -15,7 +15,6 @@ test.describe("Sheet navigation and tab switching (E2E - Playwright)", () => {
     await page.waitForSelector(".inspectres", { timeout: 10000 });
     await page.waitForSelector(".inspectres [role='tab']", { timeout: 5000 });
     const tabs = page.locator(".inspectres [role='tab']");
-    await page.screenshot({ path: "test-results/e2e-screenshots/07-sheet-tabs.png" });
     await expect(tabs.first()).toBeVisible();
     // Verify tab labels are readable
     const tabCount = await tabs.count();
@@ -26,7 +25,6 @@ test.describe("Sheet navigation and tab switching (E2E - Playwright)", () => {
     await page.waitForSelector(".inspectres", { timeout: 10000 });
     await page.waitForSelector(".inspectres [role='tab'][aria-selected='true']", { timeout: 5000 });
     const activeTab = page.locator(".inspectres [role='tab'][aria-selected='true']");
-    await page.screenshot({ path: "test-results/e2e-screenshots/08-active-tab.png" });
 
     const activeStyle = await activeTab.first().evaluate((el) => ({
       ariaSelected: el.getAttribute("aria-selected"),
@@ -60,7 +58,6 @@ test.describe("Sheet navigation and tab switching (E2E - Playwright)", () => {
 
     await secondTab.click();
     await page.waitForSelector(`.inspectres [role='tabpanel']#${secondTabPanelId}:visible`);
-    await page.screenshot({ path: "test-results/e2e-screenshots/09-tab-switched.png" });
 
     const selected = await secondTab.getAttribute("aria-selected");
     expect(selected).toBe("true");
@@ -82,7 +79,6 @@ test.describe("Sheet navigation and tab switching (E2E - Playwright)", () => {
   test("should test content visibility and accessibility with panel verification", async ({ page }) => {
     await page.waitForSelector(".inspectres", { timeout: 10000 });
     await page.waitForSelector(".inspectres [role='tabpanel']", { timeout: 5000 });
-    await page.screenshot({ path: "test-results/e2e-screenshots/10-tabpanel-content.png" });
 
     const panelInfo = await page.evaluate(() => {
       const panels = document.querySelectorAll(".inspectres [role='tabpanel']");
@@ -113,7 +109,6 @@ test.describe("Sheet navigation and tab switching (E2E - Playwright)", () => {
     // Test arrow key navigation (if implemented)
     await page.keyboard.press("ArrowRight");
     await page.waitForTimeout(300);
-    await page.screenshot({ path: "test-results/e2e-screenshots/11-tab-keyboard-nav.png" });
 
     // Note: Implementation may vary; this test documents the expected behavior
   });
@@ -122,7 +117,6 @@ test.describe("Sheet navigation and tab switching (E2E - Playwright)", () => {
     await page.waitForSelector(".inspectres", { timeout: 10000 });
     await page.waitForSelector(".inspectres [role='tab']", { timeout: 5000 });
     const tabs = page.locator(".inspectres [role='tab']");
-    await page.screenshot({ path: "test-results/e2e-screenshots/12-tab-aria-attrs.png" });
 
     const tabCount = await tabs.count();
     for (let i = 0; i < Math.min(tabCount, 3); i++) {

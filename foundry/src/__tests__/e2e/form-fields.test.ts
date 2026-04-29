@@ -15,7 +15,6 @@ test.describe("Form field rendering and input validation (E2E - Playwright)", ()
     await page.waitForSelector(".inspectres", { timeout: 10000 });
     const inputs = page.locator(".inspectres input[type='text'], .inspectres input[type='number']");
     await expect(inputs.first()).toBeVisible();
-    await page.screenshot({ path: "test-results/e2e-screenshots/12-form-fields.png" });
 
     // Verify field is readable (has color and is not invisible)
     const style = await inputs.first().evaluate((el) => ({
@@ -31,7 +30,6 @@ test.describe("Form field rendering and input validation (E2E - Playwright)", ()
     await page.waitForSelector(".inspectres", { timeout: 10000 });
     const input = page.locator(".inspectres input[type='text']").first();
     await expect(input).toBeVisible();
-    await page.screenshot({ path: "test-results/e2e-screenshots/13-input-styling.png" });
 
     const style = await input.evaluate((el) => {
       if (!el) throw new Error("Text input element not found");
@@ -56,7 +54,6 @@ test.describe("Form field rendering and input validation (E2E - Playwright)", ()
     await input.fill("test value");
     // Wait for the value to be set (toHaveValue includes built-in wait)
     await expect(input).toHaveValue("test value");
-    await page.screenshot({ path: "test-results/e2e-screenshots/14-input-value.png" });
   });
 
   test("should test form field focus and interaction with visual feedback", async ({ page }) => {
@@ -71,7 +68,6 @@ test.describe("Form field rendering and input validation (E2E - Playwright)", ()
     }));
 
     await input.focus();
-    await page.screenshot({ path: "test-results/e2e-screenshots/15-input-focus.png" });
 
     const focused = await page.evaluate(() => document.activeElement === document.querySelector(".inspectres input"));
     expect(focused).toBe(true);
@@ -98,7 +94,6 @@ test.describe("Form field rendering and input validation (E2E - Playwright)", ()
 
     const requiredInput = requiredInputs.first();
     await expect(requiredInput).toBeVisible();
-    await page.screenshot({ path: "test-results/e2e-screenshots/16-form-validation.png" });
 
     const attrs = await requiredInput.evaluate((el) => ({
       required: el.getAttribute("required"),
@@ -125,7 +120,6 @@ test.describe("Form field rendering and input validation (E2E - Playwright)", ()
     expect(textareaCount > 0 || selectCount > 0).toBe(true);
 
     if (textareaCount > 0) {
-      await page.screenshot({ path: "test-results/e2e-screenshots/17-textarea.png" });
       const style = await textareas.first().evaluate((el) => ({
         borderWidth: window.getComputedStyle(el).borderWidth,
         padding: window.getComputedStyle(el).padding,
@@ -134,7 +128,6 @@ test.describe("Form field rendering and input validation (E2E - Playwright)", ()
     }
 
     if (selectCount > 0) {
-      await page.screenshot({ path: "test-results/e2e-screenshots/18-select.png" });
       await expect(selects.first()).toBeVisible();
     }
   });
@@ -147,7 +140,6 @@ test.describe("Form field rendering and input validation (E2E - Playwright)", ()
     });
     const inputs = page.locator(".inspectres input, .inspectres textarea, .inspectres select");
     const count = await inputs.count();
-    await page.screenshot({ path: "test-results/e2e-screenshots/19-form-accessibility.png" });
 
     // At least one form element should be present
     expect(count).toBeGreaterThan(0);
