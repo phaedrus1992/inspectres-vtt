@@ -1,15 +1,21 @@
-# CI override — no secrets file required.
+# Standalone CI compose — does not extend docker-compose.yml.
 # felddy/foundryvtt reads FOUNDRY_USERNAME, FOUNDRY_PASSWORD, and
-# FOUNDRY_LICENSE_KEY directly from the environment when no config.json is present.
-# Run as root (0:0) so the container can write to bind-mounted dist/ checked out by GHA.
-
-secrets: {}
+# FOUNDRY_LICENSE_KEY directly from the environment; no config.json needed.
+# Run as root (0:0) so the container can write to the GHA-checked-out dist/.
 
 services:
   foundry:
-    secrets: []
+    image: ghcr.io/felddy/foundryvtt:13
+    hostname: foundry
+    ports:
+      - "30000:30000"
     user: "0:0"
     environment:
       FOUNDRY_USERNAME: "${FOUNDRY_USERNAME}"
       FOUNDRY_PASSWORD: "${FOUNDRY_PASSWORD}"
       FOUNDRY_LICENSE_KEY: "${FOUNDRY_LICENSE_KEY}"
+      FOUNDRY_HOSTNAME: foundry
+      CONTAINER_PRESERVE_CONFIG: "true"
+    volumes:
+      - ./data:/data
+      - ../foundry/dist:/data/Data/systems/inspectres

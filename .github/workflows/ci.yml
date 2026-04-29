@@ -182,7 +182,7 @@ jobs:
 
       - name: Start Foundry container
         working-directory: docker
-        run: docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d
+        run: docker compose -f docker-compose.ci.yml up -d
 
       - name: Wait for Foundry to be ready
         working-directory: docker
@@ -195,7 +195,7 @@ jobs:
             sleep 1
           done
           echo "ERROR: Foundry did not start within 60s"
-          docker compose -f docker-compose.yml -f docker-compose.ci.yml logs --tail=80
+          docker compose -f docker-compose.ci.yml logs --tail=80
           exit 1
 
       - name: Run E2E tests
@@ -205,7 +205,7 @@ jobs:
       - name: Stop Foundry container
         if: always()
         working-directory: docker
-        run: docker compose -f docker-compose.yml -f docker-compose.ci.yml down
+        run: docker compose -f docker-compose.ci.yml down
 
       - name: Upload test artifacts
         if: failure()
