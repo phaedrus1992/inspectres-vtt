@@ -11,7 +11,7 @@ Browser-based inspection + E2E testing (Playwright v1.59+). Prefer over agent br
 
 ## Login Boilerplate
 
-6sec load time after join redirect:
+6sec load after join redirect:
 
 ```js
 const { chromium } = require('playwright');
@@ -31,7 +31,7 @@ const { chromium } = require('playwright');
 })();
 ```
 
-Run with `node /tmp/my-script.js`. No build step needed — `playwright` is a CommonJS require.
+Run with `node /tmp/my-script.js`. No build step — `playwright` is CommonJS require.
 
 ## Foundry Globals
 
@@ -119,6 +119,37 @@ const tests = ['dialog:has(form.dialog-form)', '.application:has(form)'];
 return Object.fromEntries(tests.map(sel => [sel, !!document.querySelector(sel)]));
 ```
 
+## Test Interaction Discipline
+
+Tests interact through UI same way real user does. Test that bypasses UI gate passes even when gate broken.
+
+**Rule: user must take action to reach state → test takes that action too.**
+
+| Scenario | Wrong | Right |
+|----------|-------|-------|
+| Field hidden until button clicked | `page.evaluate(() => actor.update(...))` or direct DOM access | Click button first, then interact with revealed field |
+| Dialog opened by roll button | `page.evaluate(() => new MyDialog().render(true))` | Click roll button, wait for dialog |
+| Tab panel content not visible | `document.querySelector('.tab-content input')` (tab inactive) | Click tab, query now-visible content |
+| Stat updated via form submit | Patch actor via `game.actors...update()` | Fill form field, submit form |
+| Dropdown reveals sub-options | Access sub-options directly | Change dropdown, wait for sub-options |
+
+**Assert visible state, not data model.** Check what user sees (visible text, element presence, CSS classes). Read `game.actors` only when UI gives no observable confirmation.
+
+### Waiting after interaction
+
+Use `waitForSelector` for newly-revealed elements. Fixed timeout only for Foundry init (page load, sheet render) where no DOM signal exists.
+
+```js
+// Wrong — asserts before UI updates
+await page.click('[data-action="openPanel"]');
+const text = await page.textContent('.panel-content'); // may not exist yet
+
+// Right — wait for revealed element
+await page.click('[data-action="openPanel"]');
+await page.waitForSelector('.panel-content', { state: 'visible' });
+const text = await page.textContent('.panel-content');
+```
+
 ## Interaction patterns
 
 ### Open an actor sheet
@@ -131,7 +162,7 @@ await page.evaluate(async () => {
 });
 ```
 
-### Click buttons inside the sheet
+### Click buttons inside sheet
 
 ```js
 // Use page.click with scoped selectors
@@ -172,4 +203,4 @@ Write to `/tmp/inspect-<thing>.js`, run `node`. Copy boilerplate from `/tmp/insp
 | Actor update propagation | 500ms |
 | CSS change (after build + browser refresh) | — (manual) |
 
-Avoid `waitForSelector` on Foundry UI (fragile). Prefer fixed timeout after action.
+Fixed timeouts for Foundry init only. Use `waitForSelector({ state: 'visible' })` for UI-triggered reveals.
