@@ -1,6 +1,6 @@
 import { test as base, expect, type Page } from "@playwright/test";
 import { ConsoleBuffer } from "./console-capture";
-import { workerStorageStatePath, workerUsername, E2E_VIEWPORT } from "./global-setup.js";
+import { workerStorageStatePath, workerUsername, E2E_VIEWPORT, WORKER_COUNT } from "./global-setup.js";
 
 const JOIN_TIMEOUT = 30_000;
 const READY_TIMEOUT = 60_000;
@@ -26,21 +26,23 @@ async function unpauseGame(page: Page): Promise<void> {
   });
 }
 
-async function openFranchiseSheet(page: Page): Promise<void> {
-  // Tests need a sheet open with form fields, tabs, etc. Franchise sheet renders
-  // reliably on a fresh world (agent sheet has a render bug with default state).
-  await page.evaluate(async () => {
+async function openFranchiseSheet(page: Page, workerSlot: number): Promise<void> {
+  // Each worker opens its own franchise actor to avoid parallel render collisions.
+  // With fullyParallel, two workers hitting the same actor simultaneously can cause
+  // double-render or visibility conflicts in the shared Foundry session.
+  const actorName = `E2E Franchise ${workerSlot}`;
+  await page.evaluate(async (name: string) => {
     // @ts-expect-error - Foundry runtime globals
     const ActorCls = globalThis.CONFIG?.Actor?.documentClass ?? globalThis.Actor;
     // @ts-expect-error - Foundry runtime global
     let franchise = globalThis.game.actors.find(
-      (a: { type: string; name: string }) => a.type === "franchise" && a.name === "E2E Franchise",
+      (a: { type: string; name: string }) => a.type === "franchise" && a.name === name,
     );
     if (!franchise) {
-      franchise = await ActorCls.create({ name: "E2E Franchise", type: "franchise" });
+      franchise = await ActorCls.create({ name, type: "franchise" });
     }
     await franchise.sheet.render(true);
-  });
+  }, actorName);
   await page.waitForSelector(".inspectres", { timeout: SHEET_RENDER_TIMEOUT });
 }
 
@@ -70,7 +72,10 @@ export const test = base.extend({
   // Playwright creates one BrowserContext per test; by overriding `context` we can
   // seed it with the cookies captured for this worker's Foundry user in global-setup.
   context: async ({ browser }, use, testInfo) => {
-    const statePath = workerStorageStatePath(testInfo.workerIndex);
+    // Retry workers can get indices beyond WORKER_COUNT (Playwright spawns extra workers
+    // when retrying failed tests). Wrap to stay within provisioned users + storage files.
+    const workerSlot = testInfo.workerIndex % WORKER_COUNT;
+    const statePath = workerStorageStatePath(workerSlot);
     const ctx = await browser.newContext({
       storageState: statePath,
       viewport: E2E_VIEWPORT,
@@ -95,7 +100,7 @@ export const test = base.extend({
     await page.goto("/", { waitUntil: "domcontentloaded" });
 
     if (page.url().includes("/join")) {
-      const username = workerUsername(testInfo.workerIndex);
+      const username = workerUsername(testInfo.workerIndex % WORKER_COUNT);
       await page.selectOption('select[name="userid"]', { label: username });
       await page.click('button[type="submit"]:has-text("Join Game Session")');
       await page.waitForURL(/\/game/, { timeout: JOIN_TIMEOUT });
@@ -109,7 +114,7 @@ export const test = base.extend({
 
     await dismissStartupNotifications(page);
     await unpauseGame(page);
-    await openFranchiseSheet(page);
+    await openFranchiseSheet(page, testInfo.workerIndex % WORKER_COUNT);
 
     await use(page);
 
