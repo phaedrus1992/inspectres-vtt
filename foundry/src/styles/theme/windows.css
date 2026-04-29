@@ -41,17 +41,20 @@
   padding: var(--inspectres-space-lg);
 }
 
-/* Actor sheet (InSpectres + any other actor types) */
-.window.sheet.actor {
+/* Actor sheet (InSpectres + any other actor types).
+   Skip InSpectres sheets — they own their own header chrome via .inspectres .inspectres-header.
+   The nested .sheet-header inside .inspectres-header is a layout container, not the
+   Foundry-default header strip; don't repaint it white. */
+.window.sheet.actor:not(.inspectres) {
   background: var(--inspectres-white);
 }
 
-.window.sheet.actor .sheet-header {
+.window.sheet.actor:not(.inspectres) .sheet-header {
   background: var(--inspectres-white);
   border-bottom: 1px solid var(--inspectres-border-primary);
 }
 
-.window.sheet.actor .sheet-tabs button.active {
+.window.sheet.actor:not(.inspectres) .sheet-tabs button.active {
   background: var(--inspectres-button-bg);
   color: var(--inspectres-button-text);
   border-bottom: 2px solid var(--inspectres-green-dark);
@@ -127,9 +130,12 @@
   cursor: pointer;
 }
 
-/* Buttons in windows */
-.window.app button,
-.window.sheet button {
+/* Buttons in windows.
+   Skips InSpectres sheets — sheet-tab buttons follow the white/grey-base convention
+   (see .inspectres .inspectres-tabs in inspectres.css), and roll buttons follow the
+   green primary convention (see .inspectres .inspectres-roll-button). */
+.window.app:not(:has(.inspectres)) button,
+.window.sheet:not(.inspectres):not(:has(.inspectres)) button {
   background: var(--inspectres-button-bg);
   color: var(--inspectres-button-text);
   border: none;
@@ -140,29 +146,31 @@
   transition: all 0.2s ease;
 }
 
-.window.app button:hover,
-.window.sheet button:hover {
+.window.app:not(:has(.inspectres)) button:hover,
+.window.sheet:not(.inspectres):not(:has(.inspectres)) button:hover {
   background: var(--inspectres-button-bg-hover);
   box-shadow: var(--inspectres-shadow-md);
 }
 
-.window.app button:disabled,
-.window.sheet button:disabled {
+.window.app:not(:has(.inspectres)) button:disabled,
+.window.sheet:not(.inspectres):not(:has(.inspectres)) button:disabled {
   background: var(--inspectres-button-bg-disabled);
   color: var(--inspectres-button-text-disabled);
   cursor: not-allowed;
   box-shadow: none;
 }
 
-/* Form inputs in windows */
-.window.app input[type="text"],
-.window.app input[type="number"],
-.window.app textarea,
-.window.app select,
-.window.sheet input[type="text"],
-.window.sheet input[type="number"],
-.window.sheet textarea,
-.window.sheet select {
+/* Form inputs in windows.
+   Skips InSpectres sheets — they own their own input styling (inspectres.css) and the
+   header inputs need light-on-dark contrast inside the green gradient header. */
+.window.app:not(:has(.inspectres)) input[type="text"],
+.window.app:not(:has(.inspectres)) input[type="number"],
+.window.app:not(:has(.inspectres)) textarea,
+.window.app:not(:has(.inspectres)) select,
+.window.sheet:not(.inspectres):not(:has(.inspectres)) input[type="text"],
+.window.sheet:not(.inspectres):not(:has(.inspectres)) input[type="number"],
+.window.sheet:not(.inspectres):not(:has(.inspectres)) textarea,
+.window.sheet:not(.inspectres):not(:has(.inspectres)) select {
   background: var(--inspectres-bg-input);
   color: var(--inspectres-text-primary);
   border: 1px solid var(--inspectres-border-primary);
@@ -170,12 +178,12 @@
   border-radius: 3px;
 }
 
-.window.app input:focus,
-.window.app textarea:focus,
-.window.app select:focus,
-.window.sheet input:focus,
-.window.sheet textarea:focus,
-.window.sheet select:focus {
+.window.app:not(:has(.inspectres)) input:focus,
+.window.app:not(:has(.inspectres)) textarea:focus,
+.window.app:not(:has(.inspectres)) select:focus,
+.window.sheet:not(.inspectres):not(:has(.inspectres)) input:focus,
+.window.sheet:not(.inspectres):not(:has(.inspectres)) textarea:focus,
+.window.sheet:not(.inspectres):not(:has(.inspectres)) select:focus {
   outline: none;
   border-color: var(--inspectres-border-focus);
   box-shadow: 0 0 0 2px var(--inspectres-focus-ring);

@@ -75,9 +75,9 @@
 /* ─── Header ────────────────────────────────────────────────────────────── */
 
 .inspectres .inspectres-header {
-  background: linear-gradient(140deg, var(--inspectres-primary) 0%, color-mix(in srgb, var(--inspectres-primary), var(--inspectres-secondary) 40%) 100%);
+  background: linear-gradient(140deg, var(--inspectres-primary) 0%, var(--inspectres-secondary) 100%);
   padding: 0.875rem 1rem;
-  border-bottom: 3px solid var(--inspectres-secondary);
+  border-bottom: 3px solid var(--inspectres-primary);
 
   .sheet-header {
     display: flex;
@@ -143,29 +143,34 @@
 
 .inspectres .inspectres-tabs {
   display: flex;
-  border-bottom: 2px solid var(--inspectres-input-border);
+  border-bottom: 2px solid var(--inspectres-gray-base);
   background: var(--inspectres-section-bg);
   padding: 0 1rem;
-  gap: 0;
+  gap: 0.25rem;
 
   .sheet-tab {
     padding: 0.45rem 0.9rem;
     font-size: 0.78rem;
     font-weight: 600;
     letter-spacing: 0.04em;
-    color: var(--inspectres-text-muted);
+    background: var(--inspectres-white);
+    color: var(--inspectres-gray-400);
     cursor: pointer;
-    border-bottom: 2px solid transparent;
+    border: 1px solid var(--inspectres-gray-base);
+    border-bottom: none;
+    border-top-left-radius: var(--inspectres-radius);
+    border-top-right-radius: var(--inspectres-radius);
     margin-bottom: -2px;
     text-transform: uppercase;
-    transition: color 0.12s, border-color 0.12s;
+    transition: background 0.12s, color 0.12s;
     user-select: none;
 
-    &:hover { color: var(--inspectres-text); }
+    &:hover { background: var(--inspectres-gray-100); }
 
     &.active {
-      color: var(--inspectres-secondary);
-      border-bottom-color: var(--inspectres-secondary);
+      background: var(--inspectres-gray-base);
+      color: var(--inspectres-white);
+      border-color: var(--inspectres-gray-base);
     }
   }
 }
@@ -203,7 +208,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  background: var(--inspectres-secondary);
+  background: var(--inspectres-primary);
   color: white;
   border: none;
   padding: 0.4rem 0.875rem;
@@ -214,7 +219,7 @@
   letter-spacing: 0.03em;
   transition: background 0.15s, transform 0.1s;
 
-  &:hover  { background: color-mix(in srgb, var(--inspectres-secondary), black 15%); }
+  &:hover  { background: color-mix(in srgb, var(--inspectres-primary), black 15%); }
   &:active { transform: translateY(1px); }
 
   &:disabled {

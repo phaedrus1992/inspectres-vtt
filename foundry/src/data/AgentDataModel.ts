@@ -36,7 +36,7 @@ export class AgentDataModel extends TypeDataModelBase {
         description: new StringField({ required: true, initial: "" }),
         baseSkill: new StringField({ required: true, choices: ["athletics", "contact"], initial: "athletics" }),
         coolCost: new NumberField({ required: true, integer: true, min: 1, initial: 1 }),
-      }, { required: false, initial: null }),
+      }, { required: false, nullable: true, initial: null }),
       characteristics: new ArrayField(new SchemaField({
         text: new StringField({ required: true, initial: "" }),
         used: new BooleanField({ required: true, initial: false }),

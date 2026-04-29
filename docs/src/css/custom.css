@@ -1,30 +1,199 @@
 /**
- * Any CSS included here will be global. The classic template
- * bundles Infima by default. Infima is a simple framework built on top of it.
- * For more details, see: https://infima.dev/
+ * InSpectres VTT — Docusaurus theme
+ *
+ * Maps the canonical InSpectres palette (greens, gray-base, signal orange/danger)
+ * onto Infima's variables so the docs site matches the in-system theme.
+ *
+ * Source palette (foundry/src/styles/theme/variables.css):
+ *   --inspectres-green-dark: #38b44a
+ *   --inspectres-green-light: #7cc576
+ *   --inspectres-gray-base:  #9d9e9d
+ *   --inspectres-orange:     #d84315
+ *   --inspectres-danger:     #c41e3a
  */
 
-/* You can override the default Infima variables here. */
+/* ============================================================
+   PALETTE — InSpectres tokens (mirrors foundry/src/styles/theme/variables.css)
+   ============================================================ */
 :root {
-  --ifm-color-primary: #2e8b57;
-  --ifm-color-primary-dark: #246b48;
-  --ifm-color-primary-darker: #225f42;
-  --ifm-color-primary-darkest: #1a4732;
-  --ifm-color-primary-light: #3ba666;
-  --ifm-color-primary-lighter: #4bb06f;
-  --ifm-color-primary-lightest: #6bc87a;
-  --ifm-code-font-size: 95%;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+  --inspectres-green-dark: #38b44a;
+  --inspectres-green-light: #7cc576;
+  --inspectres-green-darker: #2d8a38;
+  --inspectres-green-darkest: #1e5a27;
+  --inspectres-gray-100: #f5f5f5;
+  --inspectres-gray-200: #e8e8e8;
+  --inspectres-gray-300: #d0d0d0;
+  --inspectres-gray-base: #9d9e9d;
+  --inspectres-gray-400: #666666;
+  --inspectres-orange: #d84315;
+  --inspectres-danger: #c41e3a;
+  --inspectres-white: #ffffff;
+  --inspectres-black: #000000;
 }
 
-/* For readability concerns, you should choose a lighter palette in dark mode. */
+/* ============================================================
+   INFIMA OVERRIDES — Light mode
+   Primary = green-dark; success = green-dark; danger = #c41e3a; warning = orange
+   Steps follow Infima's convention: darkest → light progression.
+   ============================================================ */
+:root {
+  --ifm-color-primary: #38b44a;
+  --ifm-color-primary-dark: #2d9e3f;
+  --ifm-color-primary-darker: #2a953b;
+  --ifm-color-primary-darkest: #237b31;
+  --ifm-color-primary-light: #4dbe5d;
+  --ifm-color-primary-lighter: #58c267;
+  --ifm-color-primary-lightest: #7cc576;
+
+  --ifm-color-success: #38b44a;
+  --ifm-color-success-dark: #2d9e3f;
+  --ifm-color-success-darker: #2a953b;
+  --ifm-color-success-darkest: #237b31;
+  --ifm-color-success-light: #4dbe5d;
+  --ifm-color-success-lighter: #58c267;
+  --ifm-color-success-lightest: #7cc576;
+
+  --ifm-color-danger: #c41e3a;
+  --ifm-color-danger-dark: #b01a34;
+  --ifm-color-danger-darker: #a51831;
+  --ifm-color-danger-darkest: #881428;
+  --ifm-color-danger-light: #d3354f;
+  --ifm-color-danger-lighter: #d8425b;
+  --ifm-color-danger-lightest: #df607a;
+
+  --ifm-color-warning: #d84315;
+  --ifm-color-warning-dark: #c33c13;
+  --ifm-color-warning-darker: #b73912;
+  --ifm-color-warning-darkest: #962f0f;
+  --ifm-color-warning-light: #e0552a;
+  --ifm-color-warning-lighter: #e25e35;
+  --ifm-color-warning-lightest: #e87455;
+
+  /* Neutral / chrome */
+  --ifm-color-secondary: #9d9e9d;
+  --ifm-color-secondary-dark: #898a89;
+  --ifm-color-secondary-darker: #818281;
+  --ifm-color-secondary-darkest: #6a6b6a;
+  --ifm-color-secondary-light: #b1b2b1;
+  --ifm-color-secondary-lighter: #babbba;
+  --ifm-color-secondary-lightest: #cbcccb;
+
+  /* Typography + general */
+  --ifm-font-family-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --ifm-heading-font-weight: 600;
+  --ifm-heading-color: #1a1a1a;
+
+  /* Code blocks */
+  --ifm-code-font-size: 92%;
+  --ifm-code-background: var(--inspectres-gray-100);
+  --ifm-code-border-radius: 3px;
+  --docusaurus-highlighted-code-line-bg: rgba(56, 180, 74, 0.12);
+
+  /* Links */
+  --ifm-link-color: var(--inspectres-green-darker);
+  --ifm-link-hover-color: var(--inspectres-green-darkest);
+
+  /* Navbar + footer chrome */
+  --ifm-navbar-background-color: var(--inspectres-white);
+  --ifm-navbar-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  --ifm-footer-background-color: #1a1a1a;
+  --ifm-footer-color: var(--inspectres-gray-200);
+  --ifm-footer-link-color: var(--inspectres-gray-200);
+  --ifm-footer-title-color: var(--inspectres-white);
+
+  /* Tables */
+  --ifm-table-stripe-background: var(--inspectres-gray-100);
+  --ifm-table-border-color: var(--inspectres-gray-300);
+}
+
+/* ============================================================
+   INFIMA OVERRIDES — Dark mode
+   Lighter primary for WCAG AA contrast on dark backgrounds.
+   ============================================================ */
 [data-theme='dark'] {
-  --ifm-color-primary: #4bb06f;
-  --ifm-color-primary-dark: #3ba666;
-  --ifm-color-primary-darker: #35a05f;
-  --ifm-color-primary-darkest: #2a7f4a;
-  --ifm-color-primary-light: #5bc07e;
-  --ifm-color-primary-lighter: #67c888;
-  --ifm-color-primary-lightest: #8fd4a3;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+  --ifm-color-primary: #7cc576;
+  --ifm-color-primary-dark: #62b95c;
+  --ifm-color-primary-darker: #56b350;
+  --ifm-color-primary-darkest: #449340;
+  --ifm-color-primary-light: #93cd8e;
+  --ifm-color-primary-lighter: #9fd29c;
+  --ifm-color-primary-lightest: #bcdfb9;
+
+  --ifm-color-success: #7cc576;
+  --ifm-color-success-dark: #62b95c;
+  --ifm-color-success-darker: #56b350;
+  --ifm-color-success-darkest: #449340;
+  --ifm-color-success-light: #93cd8e;
+  --ifm-color-success-lighter: #9fd29c;
+  --ifm-color-success-lightest: #bcdfb9;
+
+  --ifm-color-danger: #e0526a;
+  --ifm-color-danger-dark: #d83a55;
+  --ifm-color-danger-darker: #d22e4a;
+  --ifm-color-danger-darkest: #ad253c;
+  --ifm-color-danger-light: #e66a7f;
+  --ifm-color-danger-lighter: #e9778a;
+  --ifm-color-danger-lightest: #f094a3;
+
+  --ifm-color-warning: #e87455;
+  --ifm-color-warning-dark: #e25c3a;
+  --ifm-color-warning-darker: #df502c;
+  --ifm-color-warning-darkest: #ba4022;
+  --ifm-color-warning-light: #ed8a70;
+  --ifm-color-warning-lighter: #ee957d;
+  --ifm-color-warning-lightest: #f3aea0;
+
+  --ifm-heading-color: var(--inspectres-white);
+  --ifm-link-color: #93cd8e;
+  --ifm-link-hover-color: #bcdfb9;
+
+  --ifm-code-background: rgba(255, 255, 255, 0.06);
+  --docusaurus-highlighted-code-line-bg: rgba(124, 197, 118, 0.16);
+
+  --ifm-navbar-background-color: #1a1a1a;
+  --ifm-footer-background-color: #0f0f0f;
+
+  --ifm-table-stripe-background: rgba(255, 255, 255, 0.03);
+  --ifm-table-border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* ============================================================
+   COMPONENT ACCENTS
+   ============================================================ */
+
+/* Sidebar — active link uses brand green underline */
+.menu__link--active:not(.menu__link--sublist) {
+  border-left: 3px solid var(--ifm-color-primary);
+  font-weight: 600;
+}
+
+/* Inline code — green accent on token color */
+code {
+  color: var(--inspectres-green-darker);
+  background: var(--ifm-code-background);
+  border: 1px solid var(--inspectres-gray-200);
+}
+
+[data-theme='dark'] code {
+  color: var(--inspectres-green-light);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Block quotes — left border in brand green */
+blockquote {
+  border-left: 4px solid var(--ifm-color-primary);
+  background: rgba(56, 180, 74, 0.05);
+  padding: 0.75rem 1rem;
+  border-radius: 0 3px 3px 0;
+}
+
+[data-theme='dark'] blockquote {
+  background: rgba(124, 197, 118, 0.08);
+}
+
+/* Admonitions — keep default Infima coloring; only adjust note/info to brand green */
+.alert--info,
+.alert--secondary {
+  --ifm-alert-background-color: rgba(56, 180, 74, 0.08);
+  --ifm-alert-border-color: var(--ifm-color-primary);
 }

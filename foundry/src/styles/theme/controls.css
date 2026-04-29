@@ -136,7 +136,7 @@
 }
 
 .inspectres button.danger:active {
-  background: #994c00;
+  background: var(--inspectres-orange-darkest);
   transform: translateY(1px);
 }
 

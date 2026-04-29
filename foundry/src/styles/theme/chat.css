@@ -166,7 +166,7 @@
 
 .inspectres .die.failure {
   background: var(--inspectres-orange);
-  border-color: #cc7000;
+  border-color: var(--inspectres-orange-darker);
   color: var(--inspectres-white);
 }
 
