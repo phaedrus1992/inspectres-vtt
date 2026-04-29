@@ -51,7 +51,7 @@ export class ConsoleBuffer {
   #enforceCapacity(): void {
     if (this.entries.length > MAX_ENTRIES) {
       const excess = this.entries.length - MAX_ENTRIES;
-      this.entries.splice(0, excess);
+      this.entries.splice(0, excess + 1);
       this.entries.unshift(`[truncated ${excess} more entries]`);
     }
   }
