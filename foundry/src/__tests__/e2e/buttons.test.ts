@@ -14,7 +14,7 @@
  * - npm run dev watching for changes in another terminal
  */
 
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 
 // TODO Phase 2: Add contrast ratio helpers for WCAG AA verification (4.5:1 for normal text)
 // function parseColor(rgb: string): { r: number; g: number; b: number } {
@@ -35,24 +35,21 @@ import { test, expect } from "@playwright/test";
 
 test.describe("Button usability and interaction states (E2E - Playwright)", () => {
   test("should navigate to agent sheet and load", async ({ page }) => {
-    await page.goto("/");
-    // Wait for Foundry to load
-    await page.waitForSelector(".window-app", { timeout: 10000 });
+    // Fixture guarantees /game and game.ready before this runs.
     await page.screenshot({ path: "test-results/e2e-screenshots/01-foundry-loaded.png", fullPage: true });
-    expect(page.url()).toContain("localhost:30000");
+    expect(page.url()).toContain("/game");
   });
 
   test("should test button visibility in default state", async ({ page }) => {
-    await page.goto("/");
-    // Navigate to actors sidebar and find an agent
-    const actorButton = page.locator("a.document.actor").first();
-    await expect(actorButton).toBeVisible();
+    // Fixture opens a franchise sheet — at minimum its buttons should be visible.
+    const sheetButton = page.locator(".inspectres button").first();
+    await expect(sheetButton).toBeVisible();
     await page.screenshot({ path: "test-results/e2e-screenshots/02-button-visibility.png", fullPage: true });
   });
 
   test("should test hover state visual feedback with styling verification", async ({ page }) => {
-    await page.goto("/");
-    const button = page.locator("button").first();
+    // Use a sheet button — sidebar nav buttons may not have hover style transitions.
+    const button = page.locator(".inspectres button").first();
     await expect(button).toBeVisible();
 
     // Get styles before and after hover
@@ -76,8 +73,7 @@ test.describe("Button usability and interaction states (E2E - Playwright)", () =
   });
 
   test("should test focus state for keyboard navigation with visibility verification", async ({ page }) => {
-    await page.goto("/");
-    const button = page.locator("button").first();
+const button = page.locator("button").first();
     await button.focus();
     await page.screenshot({ path: "test-results/e2e-screenshots/04-button-focus.png", fullPage: true });
 
@@ -100,8 +96,8 @@ test.describe("Button usability and interaction states (E2E - Playwright)", () =
   });
 
   test("should test disabled button state with styling verification", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForSelector("button[disabled]", { timeout: 5000 });
+    // Disabled buttons may be hidden in collapsed sidebar tabs — wait for any to exist in DOM.
+    await page.waitForSelector("button[disabled]", { timeout: 5000, state: "attached" });
     const buttons = page.locator("button[disabled]");
     await page.screenshot({ path: "test-results/e2e-screenshots/05-button-disabled.png", fullPage: true });
 
@@ -120,8 +116,7 @@ test.describe("Button usability and interaction states (E2E - Playwright)", () =
   });
 
   test("should test button contrast and readability with WCAG verification", async ({ page }) => {
-    await page.goto("/");
-    const button = page.locator("button").first();
+const button = page.locator("button").first();
     await expect(button).toBeVisible();
     await page.screenshot({ path: "test-results/e2e-screenshots/06-button-contrast.png", fullPage: true });
 
@@ -144,8 +139,7 @@ test.describe("Button usability and interaction states (E2E - Playwright)", () =
   });
 
   test("should verify button click interaction works", async ({ page }) => {
-    await page.goto("/");
-    const button = page.locator("button").first();
+const button = page.locator("button").first();
     let clickFired = false;
 
     await page.evaluate(() => {

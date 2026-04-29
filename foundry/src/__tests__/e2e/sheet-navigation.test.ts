@@ -8,14 +8,13 @@
  * Run with: npm run test:e2e (with Docker setup)
  */
 
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures";
 
 test.describe("Sheet navigation and tab switching (E2E - Playwright)", () => {
   test("should test tab visibility and structure", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForSelector(".window-app", { timeout: 10000 });
-    await page.waitForSelector("[role='tab']", { timeout: 5000 });
-    const tabs = page.locator("[role='tab']");
+    await page.waitForSelector(".inspectres", { timeout: 10000 });
+    await page.waitForSelector(".inspectres [role='tab']", { timeout: 5000 });
+    const tabs = page.locator(".inspectres [role='tab']");
     await page.screenshot({ path: "test-results/e2e-screenshots/07-sheet-tabs.png", fullPage: true });
     await expect(tabs.first()).toBeVisible();
     // Verify tab labels are readable
@@ -24,10 +23,9 @@ test.describe("Sheet navigation and tab switching (E2E - Playwright)", () => {
   });
 
   test("should test active tab indication with styling", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForSelector(".window-app", { timeout: 10000 });
-    await page.waitForSelector("[role='tab'][aria-selected='true']", { timeout: 5000 });
-    const activeTab = page.locator("[role='tab'][aria-selected='true']");
+    await page.waitForSelector(".inspectres", { timeout: 10000 });
+    await page.waitForSelector(".inspectres [role='tab'][aria-selected='true']", { timeout: 5000 });
+    const activeTab = page.locator(".inspectres [role='tab'][aria-selected='true']");
     await page.screenshot({ path: "test-results/e2e-screenshots/08-active-tab.png", fullPage: true });
 
     const activeStyle = await activeTab.first().evaluate((el) => ({
@@ -43,33 +41,35 @@ test.describe("Sheet navigation and tab switching (E2E - Playwright)", () => {
   });
 
   test("should test tab switching behavior with panel transition", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForSelector(".window-app", { timeout: 10000 });
-    const tabs = page.locator("[role='tab']");
+    await page.waitForSelector(".inspectres", { timeout: 10000 });
+    const tabs = page.locator(".inspectres [role='tab']");
     // Ensure at least 2 tabs exist to test switching behavior
     await expect(tabs).toHaveCount(2, { timeout: 5000 });
     const secondTab = tabs.nth(1);
-    const secondTabId = await secondTab.getAttribute("id");
+    // Foundry tabs link to panels via aria-controls (referencing the panel's id),
+    // not via id+aria-labelledby on the panel. See sheet-tabs HBS for relationship.
+    const secondTabPanelId = await secondTab.getAttribute("aria-controls");
+    expect(secondTabPanelId).toBeTruthy();
 
     // Get first tab's content
-    const firstPanel = page.locator("[role='tabpanel']").first();
+    const firstPanel = page.locator(".inspectres [role='tabpanel']").first();
     const firstContent = await firstPanel.evaluate((el) => {
       if (!el?.textContent) return "";
       return el.textContent.slice(0, 50);
     });
 
     await secondTab.click();
-    await page.waitForSelector(`[role='tabpanel'][aria-labelledby='${secondTabId}']`);
+    await page.waitForSelector(`.inspectres [role='tabpanel']#${secondTabPanelId}:visible`);
     await page.screenshot({ path: "test-results/e2e-screenshots/09-tab-switched.png", fullPage: true });
 
     const selected = await secondTab.getAttribute("aria-selected");
     expect(selected).toBe("true");
 
-    // Verify the visible panel is associated with the second tab
-    const visiblePanel = page.locator("[role='tabpanel']:visible");
+    // Verify the visible panel is the one controlled by the second tab
+    const visiblePanel = page.locator(".inspectres [role='tabpanel']:visible");
     await expect(visiblePanel).toHaveCount(1);
-    const panelLabel = await visiblePanel.first().getAttribute("aria-labelledby");
-    expect(panelLabel).toBe(secondTabId);
+    const visiblePanelId = await visiblePanel.first().getAttribute("id");
+    expect(visiblePanelId).toBe(secondTabPanelId);
 
     // Verify content changed
     const secondContent = await visiblePanel.first().evaluate((el) => {
@@ -80,13 +80,12 @@ test.describe("Sheet navigation and tab switching (E2E - Playwright)", () => {
   });
 
   test("should test content visibility and accessibility with panel verification", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForSelector(".window-app", { timeout: 10000 });
-    await page.waitForSelector("[role='tabpanel']", { timeout: 5000 });
+    await page.waitForSelector(".inspectres", { timeout: 10000 });
+    await page.waitForSelector(".inspectres [role='tabpanel']", { timeout: 5000 });
     await page.screenshot({ path: "test-results/e2e-screenshots/10-tabpanel-content.png", fullPage: true });
 
     const panelInfo = await page.evaluate(() => {
-      const panels = document.querySelectorAll("[role='tabpanel']");
+      const panels = document.querySelectorAll(".inspectres [role='tabpanel']");
       return {
         visibleCount: Array.from(panels).filter((p) => {
           const style = window.getComputedStyle(p);
@@ -103,10 +102,9 @@ test.describe("Sheet navigation and tab switching (E2E - Playwright)", () => {
   });
 
   test("should test tab keyboard navigation (arrow keys)", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForSelector(".window-app", { timeout: 10000 });
-    await page.waitForSelector("[role='tab']", { timeout: 5000 });
-    const firstTab = page.locator("[role='tab']").first();
+    await page.waitForSelector(".inspectres", { timeout: 10000 });
+    await page.waitForSelector(".inspectres [role='tab']", { timeout: 5000 });
+    const firstTab = page.locator(".inspectres [role='tab']").first();
 
     await firstTab.focus();
     const initialSelected = await firstTab.getAttribute("aria-selected");
@@ -121,10 +119,9 @@ test.describe("Sheet navigation and tab switching (E2E - Playwright)", () => {
   });
 
   test("should test tab accessibility attributes and ARIA compliance", async ({ page }) => {
-    await page.goto("/");
-    await page.waitForSelector(".window-app", { timeout: 10000 });
-    await page.waitForSelector("[role='tab']", { timeout: 5000 });
-    const tabs = page.locator("[role='tab']");
+    await page.waitForSelector(".inspectres", { timeout: 10000 });
+    await page.waitForSelector(".inspectres [role='tab']", { timeout: 5000 });
+    const tabs = page.locator(".inspectres [role='tab']");
     await page.screenshot({ path: "test-results/e2e-screenshots/12-tab-aria-attrs.png", fullPage: true });
 
     const tabCount = await tabs.count();
