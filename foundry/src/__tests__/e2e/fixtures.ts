@@ -63,12 +63,15 @@ export const test = base.extend({
   page: async ({ page }, use, testInfo) => {
     const consoleBuffer = new ConsoleBuffer();
 
-    page.on("console", (msg) => {
+    const consoleHandler = (msg: { type: () => string; text: () => string }) => {
       consoleBuffer.recordConsole(msg.type(), msg.text());
-    });
-    page.on("pageerror", (err) => {
+    };
+    const errorHandler = (err: Error) => {
       consoleBuffer.recordPageError(err);
-    });
+    };
+
+    page.on("console", consoleHandler);
+    page.on("pageerror", errorHandler);
 
     await page.goto("/", { waitUntil: "domcontentloaded" });
 
@@ -89,6 +92,12 @@ export const test = base.extend({
     await openFranchiseSheet(page);
 
     await use(page);
+
+    // Explicit listener cleanup to prevent stale handlers on test retry.
+    // Playwright closes the BrowserContext between tests, but retained listeners
+    // can theoretically fire on reused page objects during retry scenarios.
+    page.off("console", consoleHandler);
+    page.off("pageerror", errorHandler);
 
     if (testInfo.status !== testInfo.expectedStatus && !consoleBuffer.isEmpty()) {
       try {
