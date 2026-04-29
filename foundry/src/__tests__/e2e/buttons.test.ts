@@ -37,12 +37,14 @@ test.describe("Button usability and interaction states (E2E - Playwright)", () =
   test("should navigate to agent sheet and load", async ({ page }) => {
     // Fixture guarantees /game and game.ready before this runs.
     expect(page.url()).toContain("/game");
+    await page.screenshot({ path: "test-results/e2e-screenshots/buttons-01-loaded.png", timeout: 5000 }).catch(() => {});
   });
 
   test("should test button visibility in default state", async ({ page }) => {
     // Fixture opens a franchise sheet — at minimum its buttons should be visible.
     const sheetButton = page.locator(".inspectres button").first();
     await expect(sheetButton).toBeVisible();
+    await page.screenshot({ path: "test-results/e2e-screenshots/buttons-02-visibility.png", timeout: 5000 }).catch(() => {});
   });
 
   test("should test hover state visual feedback with styling verification", async ({ page }) => {
@@ -58,6 +60,7 @@ test.describe("Button usability and interaction states (E2E - Playwright)", () =
     expect(isInteractive).toBe(true);
 
     await button.hover();
+    await page.screenshot({ path: "test-results/e2e-screenshots/buttons-03-hover.png", timeout: 5000 }).catch(() => {});
   });
 
   test("should test focus state for keyboard navigation with visibility verification", async ({ page }) => {
@@ -80,6 +83,7 @@ const button = page.locator("button").first();
     expect(focusResult.isFocused).toBe(true);
     // Focus state should have visible indicator (outline or border change)
     expect(focusResult.outline !== "none" || focusResult.borderColor).toBeTruthy();
+    await page.screenshot({ path: "test-results/e2e-screenshots/buttons-04-focus.png", timeout: 5000 }).catch(() => {});
   });
 
   test("should test disabled button state with styling verification", async ({ page }) => {
@@ -99,6 +103,7 @@ const button = page.locator("button").first();
 
     // Disabled button should have reduced opacity or cursor change
     expect(disabledStyle.opacity < 1 || disabledStyle.cursor === "not-allowed").toBe(true);
+    await page.screenshot({ path: "test-results/e2e-screenshots/buttons-05-disabled.png", timeout: 5000 }).catch(() => {});
   });
 
   test("should test button contrast and readability with WCAG verification", async ({ page }) => {
@@ -121,6 +126,7 @@ const button = page.locator("button").first();
     expect(result.fontSize).toBeGreaterThanOrEqual(12);
     // Verify non-transparent background (readable)
     expect(result.background).not.toMatch(/rgba\(\d+,\s*\d+,\s*\d+,\s*0\)/);
+    await page.screenshot({ path: "test-results/e2e-screenshots/buttons-06-contrast.png", timeout: 5000 }).catch(() => {});
   });
 
   test("should verify button click interaction works", async ({ page }) => {

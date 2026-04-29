@@ -24,6 +24,7 @@ test.describe("Form field rendering and input validation (E2E - Playwright)", ()
     }));
     expect(style.display).not.toBe("none");
     expect(parseFloat(style.opacity)).toBeGreaterThan(0);
+    await page.screenshot({ path: "test-results/e2e-screenshots/form-01-visibility.png", timeout: 5000 }).catch(() => {});
   });
 
   test("should test input field styling with border verification", async ({ page }) => {
@@ -45,6 +46,7 @@ test.describe("Form field rendering and input validation (E2E - Playwright)", ()
 
     expect(style.borderWidth).not.toBe("0px");
     expect(style.backgroundColor).toBeTruthy();
+    await page.screenshot({ path: "test-results/e2e-screenshots/form-02-border.png", timeout: 5000 }).catch(() => {});
   });
 
   test("should test input value handling", async ({ page }) => {
@@ -54,6 +56,7 @@ test.describe("Form field rendering and input validation (E2E - Playwright)", ()
     await input.fill("test value");
     // Wait for the value to be set (toHaveValue includes built-in wait)
     await expect(input).toHaveValue("test value");
+    await page.screenshot({ path: "test-results/e2e-screenshots/form-03-value.png", timeout: 5000 }).catch(() => {});
   });
 
   test("should test form field focus and interaction with visual feedback", async ({ page }) => {
@@ -81,6 +84,7 @@ test.describe("Form field rendering and input validation (E2E - Playwright)", ()
     // Focus should change visual appearance
     const styleChanged = beforeFocus.borderColor !== afterFocus.borderColor || beforeFocus.outline !== afterFocus.outline;
     expect(styleChanged || afterFocus.outline !== "none").toBe(true);
+    await page.screenshot({ path: "test-results/e2e-screenshots/form-04-focus.png", timeout: 5000 }).catch(() => {});
   });
 
   test("should test form validation with required fields", async ({ page }) => {
@@ -101,6 +105,7 @@ test.describe("Form field rendering and input validation (E2E - Playwright)", ()
     }));
 
     expect(attrs.required !== null || attrs.aria_required === "true").toBe(true);
+    await page.screenshot({ path: "test-results/e2e-screenshots/form-05-required.png", timeout: 5000 }).catch(() => {});
   });
 
   test("should test textarea and select field handling with styling", async ({ page }) => {
@@ -130,6 +135,7 @@ test.describe("Form field rendering and input validation (E2E - Playwright)", ()
     if (selectCount > 0) {
       await expect(selects.first()).toBeVisible();
     }
+    await page.screenshot({ path: "test-results/e2e-screenshots/form-06-textarea-select.png", timeout: 5000 }).catch(() => {});
   });
 
   test("should test form accessibility with ARIA attributes", async ({ page }) => {
@@ -183,5 +189,6 @@ test.describe("Form field rendering and input validation (E2E - Playwright)", ()
     }
 
     expect(hasAnyLabelling).toBe(true);
+    await page.screenshot({ path: "test-results/e2e-screenshots/form-07-aria.png", timeout: 5000 }).catch(() => {});
   });
 });
