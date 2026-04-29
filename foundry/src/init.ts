@@ -14,7 +14,6 @@ import { MissionTrackerApp } from "./mission/MissionTrackerApp.js";
 import { onMissionSocketEvent } from "./mission/socket.js";
 import { handleActionError } from "./utils/ui-errors.js";
 import { autoClearRecoveredAgents } from "./agent/recovery-utils.js";
-import { getCurrentDaySetting } from "./utils/settings-utils.js";
 import { validateAndFixCoolCap } from "./agent/agent-system-data.js";
 
 // Helper to re-render Mission Tracker with error handling
@@ -27,7 +26,7 @@ function rerenderMissionTracker(context: string): void {
 
 Hooks.once("init", async function () {
   try {
-    await loadTemplates([
+    await foundry.applications.handlebars.loadTemplates([
       "systems/inspectres/templates/agent-sheet.hbs",
       "systems/inspectres/templates/franchise-sheet.hbs",
       "systems/inspectres/templates/roll-card.hbs",
@@ -110,13 +109,13 @@ Hooks.once("init", async function () {
   });
 
   // Register sheets — cast needed because fvtt-types' registerSheet expects V1 constructor type
-  Actors.registerSheet("inspectres", AgentSheet as never, {
+  foundry.documents.collections.Actors.registerSheet("inspectres", AgentSheet as never, {
     types: ["agent" as never],
     makeDefault: true,
     label: "INSPECTRES.SheetAgent",
   });
 
-  Actors.registerSheet("inspectres", FranchiseSheet as never, {
+  foundry.documents.collections.Actors.registerSheet("inspectres", FranchiseSheet as never, {
     types: ["franchise" as never],
     makeDefault: true,
     label: "INSPECTRES.SheetFranchise",

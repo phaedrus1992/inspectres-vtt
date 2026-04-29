@@ -597,12 +597,24 @@ export async function executeStressRoll(
     }
   }
 
-  // Apply updates — meltdown takes precedence over coolGain
+  // Issue #440: Validate all player inputs (penalty dialogs) BEFORE applying any state changes.
+  // This ensures atomicity: if any dialog fails, no state is modified.
+  // Penalty dialogs are awaited first, before Cool deduction or death outcome application.
+  let meltdownSkill: SkillName | null = null;
+  let penaltySkill: SkillName | null = null;
+  if (effectiveFace === 1) {
+    // Meltdown: ask player which skill to penalize
+    meltdownSkill = await getPlayerPenaltyChoice(system, stressDiceCount);
+  } else if (outcome.skillPenalty > 0) {
+    // Non-meltdown outcome with skill penalty: ask player
+    penaltySkill = await getPlayerPenaltyChoice(system, outcome.skillPenalty);
+  }
+
+  // All dialogs completed (player may have cancelled). Now apply updates atomically.
   const updateData: Record<string, unknown> = {};
   if (effectiveFace === 1) {
-    // Meltdown: zero cool, skill penalty pool = stress dice count (ask player which skill)
+    // Meltdown: zero cool, apply the penalty choice if player selected one
     updateData["system.cool"] = 0;
-    const meltdownSkill = await getPlayerPenaltyChoice(system, stressDiceCount);
     if (meltdownSkill) {
       applySkillPenalty(updateData, system, stressDiceCount, meltdownSkill);
     }
@@ -610,12 +622,9 @@ export async function executeStressRoll(
     if (outcome.coolGain > 0) {
       updateData["system.cool"] = system.cool + outcome.coolGain;
     }
-    // Apply outcome-based skill penalty (ask player which skill to penalize)
-    if (outcome.skillPenalty > 0) {
-      const penaltySkill = await getPlayerPenaltyChoice(system, outcome.skillPenalty);
-      if (penaltySkill) {
-        applySkillPenalty(updateData, system, outcome.skillPenalty, penaltySkill);
-      }
+    // Apply the penalty choice if player selected one
+    if (penaltySkill) {
+      applySkillPenalty(updateData, system, outcome.skillPenalty, penaltySkill);
     }
   }
 

@@ -13,6 +13,14 @@ declare class FormDataExtended extends FormData {
   readonly dtypes: Record<string, string>;
 }
 
+/**
+ * Foundry V13 Handlebars utilities — namespaced under foundry.applications.handlebars.
+ * The global loadTemplates is deprecated in V13; this is the replacement.
+ */
+declare namespace foundry.applications.handlebars {
+  function loadTemplates(paths: string[] | Record<string, string>): Promise<HandlebarsTemplateDelegate[]>;
+}
+
 declare namespace foundry.applications.api {
   interface ApplicationV2Options {
     id?: string;
