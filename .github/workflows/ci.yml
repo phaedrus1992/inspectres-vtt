@@ -176,9 +176,21 @@ jobs:
         working-directory: foundry
         run: npm ci
 
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684  # v4.2.3
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ hashFiles('foundry/package-lock.json') }}
+
       - name: Install Playwright browsers
         working-directory: foundry
-        run: npx playwright install --with-deps chromium
+        run: |
+          if [ '${{ steps.playwright-cache.outputs.cache-hit }}' = 'true' ]; then
+            npx playwright install chromium
+          else
+            npx playwright install --with-deps chromium
+          fi
 
       - name: Start Foundry container
         working-directory: docker
