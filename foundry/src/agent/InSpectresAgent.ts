@@ -3,7 +3,6 @@
  * Represents a player character (paranormal investigator)
  */
 
-import type { AgentData } from "./agent-schema.js";
 import { agentSystemData } from "./agent-system-data.js";
 
 const ERROR_RECOVERY_STATE_GM_ONLY = "Recovery state can only be modified by the GM";
@@ -114,10 +113,43 @@ export class InSpectresAgent extends Actor {
     }
 
     // Issue #256: Validate skill distribution budget
-    if (systemChanges && ("skills" in systemChanges || "isWeird" in systemChanges)) {
+    // Issue #443: Also validate when any skill field changes (base or penalty), not just when "skills" key exists
+    const hasAnySkillChange = systemChanges && (
+      "skills" in systemChanges ||
+      "isWeird" in systemChanges ||
+      Object.keys(systemChanges).some(key => key.startsWith("skills."))
+    );
+    if (hasAnySkillChange && systemChanges) {
       const isWeird = (systemChanges["isWeird"] ?? agentSystemData(this as Actor).isWeird) as boolean;
-      const skills = (systemChanges["skills"] ?? agentSystemData(this as Actor).skills) as Record<string, { base: number }> | undefined;
-      this.validateSkillBudget(isWeird, skills);
+      const currentSkills = agentSystemData(this as Actor).skills as Record<string, { base: number; penalty: number }>;
+      // Merge incoming skill changes (which may be partial, e.g., penalty only) with current state
+      const mergedSkills = { ...currentSkills };
+      if ("skills" in systemChanges && systemChanges["skills"]) {
+        const incomingSkills = systemChanges["skills"] as Record<string, Partial<{ base: number; penalty: number }>>;
+        for (const [skillName, incomingData] of Object.entries(incomingSkills)) {
+          const current = mergedSkills[skillName];
+          if (current && incomingData) {
+            mergedSkills[skillName] = {
+              base: incomingData.base ?? current.base,
+              penalty: incomingData.penalty ?? current.penalty,
+            };
+          }
+        }
+      }
+      // Also handle dot-notation changes like "skills.academics.penalty"
+      for (const [key, value] of Object.entries(systemChanges)) {
+        if (key.startsWith("skills.")) {
+          const match = key.match(/^skills\.(\w+)\.(\w+)$/);
+          if (match && match[1] && match[2]) {
+            const skillName = match[1];
+            const fieldName = match[2];
+            if (skillName in mergedSkills) {
+              (mergedSkills[skillName] as Record<string, unknown>)[fieldName] = value;
+            }
+          }
+        }
+      }
+      this.validateSkillBudget(isWeird, mergedSkills as Record<string, { base: number }>);
     }
 
     return result;

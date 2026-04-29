@@ -32,6 +32,8 @@ function getRecoveryBannerText(recoveryStatus: ReturnType<typeof computeRecovery
       return `${i18n} (${days} ${dayLabel} left)`;
     }
     case "returned":
+      // Issue #441: Show intermediate "returned" status so GM knows recovery has expired
+      return game.i18n?.localize("INSPECTRES.RecoveryStatusReturned") ?? "Returned to active duty";
     case "active":
       return null;
     default:
