@@ -26,6 +26,8 @@
 
   /* Signal colors */
   --inspectres-orange: #d84315;        /* death mode, critical warnings — darker, more saturated */
+  --inspectres-orange-darker: #cc7000; /* die failure border, accent on orange surfaces */
+  --inspectres-orange-darkest: #994c00; /* danger button :active state */
 
   /* --- SEMANTIC TOKENS (Purpose-driven, map palette to use cases) --- */
 
