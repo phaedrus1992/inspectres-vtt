@@ -33,6 +33,43 @@ async function declineUsageDataSharing(page: Page): Promise<void> {
   }
 }
 
+async function acceptLicenseIfPresent(page: Page): Promise<void> {
+  if (!page.url().includes("/license")) return;
+
+  const formInfo = await page.evaluate(() => {
+    const keyInput = document.querySelector('input[name="licenseKey"]') as HTMLInputElement | null;
+    const eulaCheckbox = document.querySelector(
+      'input[name="agree"], input[name="eula"], input[type="checkbox"]',
+    ) as HTMLInputElement | null;
+    return {
+      hasKeyInput: !!keyInput,
+      keyValue: keyInput?.value ?? "",
+      hasEulaCheckbox: !!eulaCheckbox,
+    };
+  });
+
+  if (formInfo.hasKeyInput && !formInfo.keyValue) {
+    throw new Error(
+      "Foundry is on /license and the license key field is empty. " +
+        "Set FOUNDRY_LICENSE_KEY in docker/.env (or docker/secrets/config.json) and recreate the container. " +
+        "global-setup does not bypass licensing.",
+    );
+  }
+
+  // EULA-only: tick the agree checkbox and submit.
+  if (formInfo.hasEulaCheckbox) {
+    await page.evaluate(() => {
+      const cb = document.querySelector(
+        'input[name="agree"], input[name="eula"], input[type="checkbox"]',
+      ) as HTMLInputElement | null;
+      if (cb && !cb.checked) cb.click();
+    });
+  }
+  await page.click('button[type="submit"]');
+  await page.waitForURL((url) => !url.pathname.includes("/license"), { timeout: 30_000 });
+  await page.waitForTimeout(800);
+}
+
 async function dismissTourOverlay(page: Page): Promise<void> {
   // Foundry shows a guided tour overlay on first visit; ESC closes it.
   await page.keyboard.press("Escape");
@@ -113,6 +150,7 @@ async function globalSetup(): Promise<void> {
       return;
     }
 
+    await acceptLicenseIfPresent(page);
     await declineUsageDataSharing(page);
     await dismissTourOverlay(page);
 
