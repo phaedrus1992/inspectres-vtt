@@ -8,6 +8,8 @@
  *   4. Launch world
  *   5. Join as Gamemaster (no password — fresh world)
  *   6. Wait until `game.ready === true`
+ *   7. Provision N test worker users (test-worker-0 … test-worker-N) via Foundry User API
+ *   8. Save a separate storage-state file for each worker
  *
  * Idempotent: if a world already exists and game is reachable, just verifies it.
  * Selectors verified against Foundry V13 (felddy/foundryvtt:13).
@@ -18,12 +20,25 @@ import { fileURLToPath } from "url";
 import { chromium, type Browser, type Page } from "@playwright/test";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const STORAGE_STATE = path.resolve(__dirname, "../../../.tmp/playwright-storage-state.json");
+const TMP_DIR = path.resolve(__dirname, "../../../.tmp");
+
+// Must match WORKER_COUNT in playwright.config.ts.
+const WORKER_COUNT = Number(process.env["PLAYWRIGHT_WORKERS"] ?? "2");
 
 const FOUNDRY_URL = "http://localhost:30000";
 const WORLD_ID = "test-world";
 const WORLD_TITLE = "Test World";
 const SYSTEM_ID = "inspectres";
+
+/** Returns the storage-state path for a given worker index. */
+export function workerStorageStatePath(workerIndex: number): string {
+  return path.join(TMP_DIR, `playwright-storage-state-${workerIndex}.json`);
+}
+
+/** Username for a given worker index. */
+export function workerUsername(workerIndex: number): string {
+  return `test-worker-${workerIndex}`;
+}
 
 async function declineUsageDataSharing(page: Page): Promise<void> {
   const decline = await page.$('button[data-action="no"]');
@@ -134,6 +149,66 @@ async function launchAndJoin(page: Page): Promise<void> {
   );
 }
 
+/**
+ * Provisions N test worker users in Foundry and saves a storage-state file for each.
+ *
+ * Runs inside the Gamemaster browser context. Creates `test-worker-0 … test-worker-N`
+ * users with GM role so each worker can access all actors and settings without
+ * ownership restrictions. Existing users are reused (idempotent).
+ *
+ * Then logs in as each user in a fresh browser context to capture per-worker cookies.
+ */
+async function provisionWorkerUsers(gmPage: Page, browser: Browser): Promise<void> {
+  // Create users via Foundry's User document API (GM context required).
+  const usernames = Array.from({ length: WORKER_COUNT }, (_, i) => workerUsername(i));
+
+  await gmPage.evaluate(async (names: string[]) => {
+    // Accessing Foundry runtime globals — these exist in the browser context only.
+    const g = globalThis as Record<string, unknown>;
+    const game = g["game"] as { users?: { getName: (n: string) => unknown } } | undefined;
+    const UserCls = (g["User"] ?? game?.users?.constructor) as
+      | { create: (data: Record<string, unknown>) => Promise<void> }
+      | undefined;
+    if (!UserCls) throw new Error("User class not available in Foundry globals");
+
+    for (const name of names) {
+      const existing = game?.users?.getName(name);
+      if (!existing) {
+        // ROLE_GAMEMASTER = 4 in Foundry constants; gives full access without restrictions.
+        await UserCls.create({ name, role: 4, password: "" });
+      }
+    }
+  }, usernames);
+
+  console.log(`✓ Provisioned ${WORKER_COUNT} worker user(s): ${usernames.join(", ")}`);
+
+  // Capture a storage state for each worker by joining as that user.
+  for (let i = 0; i < WORKER_COUNT; i++) {
+    const username = workerUsername(i);
+    const statePath = workerStorageStatePath(i);
+
+    const ctx = await browser.newContext({ viewport: { width: 1366, height: 768 } });
+    try {
+      const page = await ctx.newPage();
+      await page.goto(`${FOUNDRY_URL}/join`, { waitUntil: "networkidle" });
+
+      await page.selectOption('select[name="userid"]', { label: username });
+      await page.click('button[type="submit"]:has-text("Join Game Session")');
+      await page.waitForURL(/\/game/, { timeout: 30_000 });
+      await page.waitForFunction(
+        // @ts-expect-error - Foundry runtime global
+        () => globalThis.game?.ready === true,
+        { timeout: 60_000 },
+      );
+
+      await ctx.storageState({ path: statePath });
+      console.log(`✓ Storage state saved for ${username} → ${statePath}`);
+    } finally {
+      await ctx.close();
+    }
+  }
+}
+
 async function globalSetup(): Promise<void> {
   console.log("\n=== Foundry E2E Test Setup ===");
   let browser: Browser | undefined;
@@ -145,36 +220,38 @@ async function globalSetup(): Promise<void> {
     await page.goto(FOUNDRY_URL, { waitUntil: "networkidle" });
     await page.waitForTimeout(800);
 
-    if (page.url().includes("/game")) {
-      console.log("✓ Already in game; setup not required.");
-      return;
+    let alreadyInGame = page.url().includes("/game");
+
+    if (!alreadyInGame) {
+      await acceptLicenseIfPresent(page);
+      await declineUsageDataSharing(page);
+      await dismissTourOverlay(page);
+
+      if (page.url().includes("/setup")) {
+        await createWorldIfNeeded(page);
+        await launchAndJoin(page);
+      } else if (page.url().includes("/join")) {
+        // World was launched previously; just join.
+        await page.selectOption('select[name="userid"]', { label: "Gamemaster" });
+        await page.click('button[type="submit"]:has-text("Join Game Session")');
+        await page.waitForURL(/\/game/, { timeout: 30_000 });
+        await page.waitForFunction(
+          // @ts-expect-error - Foundry runtime global
+          () => globalThis.game?.ready === true,
+          { timeout: 60_000 },
+        );
+      } else {
+        throw new Error(`Unexpected starting URL: ${page.url()}`);
+      }
+
+      alreadyInGame = true;
     }
 
-    await acceptLicenseIfPresent(page);
-    await declineUsageDataSharing(page);
-    await dismissTourOverlay(page);
-
-    if (page.url().includes("/setup")) {
-      await createWorldIfNeeded(page);
-      await launchAndJoin(page);
-    } else if (page.url().includes("/join")) {
-      // World was launched previously; just join.
-      await page.selectOption('select[name="userid"]', { label: "Gamemaster" });
-      await page.click('button[type="submit"]:has-text("Join Game Session")');
-      await page.waitForURL(/\/game/, { timeout: 30_000 });
-      await page.waitForFunction(
-        // @ts-expect-error - Foundry runtime global
-        () => globalThis.game?.ready === true,
-        { timeout: 60_000 },
-      );
-    } else {
-      throw new Error(`Unexpected starting URL: ${page.url()}`);
-    }
-
-    // Persist auth/session cookies so per-test browser contexts skip the join step.
-    await page.context().storageState({ path: STORAGE_STATE });
     console.log(`✓ Foundry ready at ${page.url()}`);
-    console.log(`✓ Storage state saved to ${STORAGE_STATE}`);
+
+    // Provision per-worker users and capture their storage states.
+    await provisionWorkerUsers(page, browser);
+
     console.log("=== Setup Complete ===\n");
   } finally {
     await browser?.close();

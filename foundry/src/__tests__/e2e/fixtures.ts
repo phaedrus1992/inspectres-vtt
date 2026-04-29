@@ -1,5 +1,6 @@
 import { test as base, expect, type Page } from "@playwright/test";
 import { ConsoleBuffer } from "./console-capture";
+import { workerStorageStatePath, workerUsername } from "./global-setup.js";
 
 const JOIN_TIMEOUT = 30_000;
 const READY_TIMEOUT = 60_000;
@@ -46,20 +47,38 @@ async function openFranchiseSheet(page: Page): Promise<void> {
 /**
  * Per-test fixture that ensures `page` is in the Foundry game UI with a sheet open.
  *
+ * Each Playwright worker authenticates as a distinct Foundry user (test-worker-N),
+ * provisioned by global-setup.ts. This allows fullyParallel: true without session
+ * conflicts — each worker has its own browser context and Foundry session.
+ *
  * Foundry sessions don't survive across browser contexts, so the auto-launched world
  * places each fresh context on /join. This fixture:
- *   1. Subscribes to browser console errors/warnings and uncaught page errors.
- *   2. Joins the game as Gamemaster.
- *   3. Waits for `game.ready`.
- *   4. Dismisses permanent startup notifications.
- *   5. Unpauses the game.
- *   6. Opens a franchise sheet so DOM elements expected by tests (tabs, inputs, etc.) exist.
+ *   1. Creates a browser context seeded with the worker's Foundry session cookies.
+ *   2. Subscribes to browser console errors/warnings and uncaught page errors.
+ *   3. Joins the game as the worker's assigned user (test-worker-N).
+ *   4. Waits for `game.ready`.
+ *   5. Dismisses permanent startup notifications.
+ *   6. Unpauses the game.
+ *   7. Opens a franchise sheet so DOM elements expected by tests (tabs, inputs, etc.) exist.
  *
  * On failure, the captured console log is attached to the Playwright report so
  * browser-side errors (validation, render exceptions, hook failures) surface
  * directly in the test output instead of requiring a manual repro. See #428.
  */
 export const test = base.extend({
+  // Override the context fixture to inject per-worker storage state.
+  // Playwright creates one BrowserContext per test; by overriding `context` we can
+  // seed it with the cookies captured for this worker's Foundry user in global-setup.
+  context: async ({ browser }, use, testInfo) => {
+    const statePath = workerStorageStatePath(testInfo.workerIndex);
+    const ctx = await browser.newContext({
+      storageState: statePath,
+      viewport: { width: 1366, height: 768 },
+    });
+    await use(ctx);
+    await ctx.close();
+  },
+
   page: async ({ page }, use, testInfo) => {
     const consoleBuffer = new ConsoleBuffer();
 
@@ -76,7 +95,8 @@ export const test = base.extend({
     await page.goto("/", { waitUntil: "domcontentloaded" });
 
     if (page.url().includes("/join")) {
-      await page.selectOption('select[name="userid"]', { label: "Gamemaster" });
+      const username = workerUsername(testInfo.workerIndex);
+      await page.selectOption('select[name="userid"]', { label: username });
       await page.click('button[type="submit"]:has-text("Join Game Session")');
       await page.waitForURL(/\/game/, { timeout: JOIN_TIMEOUT });
     }

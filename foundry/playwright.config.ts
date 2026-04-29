@@ -4,28 +4,35 @@ import { fileURLToPath } from "url";
 import { defineConfig, devices } from "@playwright/test";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const STORAGE_STATE = path.resolve(__dirname, "./.tmp/playwright-storage-state.json");
 
-// Playwright errors if storageState path doesn't exist before the run.
-// Seed with an empty state so global-setup can populate it on first run.
-if (!fs.existsSync(STORAGE_STATE)) {
-  fs.mkdirSync(path.dirname(STORAGE_STATE), { recursive: true });
-  fs.writeFileSync(STORAGE_STATE, JSON.stringify({ cookies: [], origins: [] }));
+// Worker count: 2 matches ubuntu-latest (2 vCPUs). Override with PLAYWRIGHT_WORKERS env var.
+const WORKER_COUNT = Number(process.env["PLAYWRIGHT_WORKERS"] ?? "2");
+
+// Seed empty storage-state files for each worker so global-setup can overwrite them.
+// Playwright requires the storageState path to exist before the run when set statically,
+// but we set it dynamically in fixtures — these files exist only as a creation guard.
+const storageTmpDir = path.resolve(__dirname, "./.tmp");
+fs.mkdirSync(storageTmpDir, { recursive: true });
+for (let i = 0; i < WORKER_COUNT; i++) {
+  const statePath = path.join(storageTmpDir, `playwright-storage-state-${i}.json`);
+  if (!fs.existsSync(statePath)) {
+    fs.writeFileSync(statePath, JSON.stringify({ cookies: [], origins: [] }));
+  }
 }
 
 export default defineConfig({
   testDir: "./src/__tests__/e2e",
   testMatch: "**/*.test.ts",
-  fullyParallel: false,
+  fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: 1,
+  workers: WORKER_COUNT,
   reporter: "html",
   use: {
     baseURL: "http://localhost:30000",
     trace: "on-first-retry",
     screenshot: "only-on-failure",
-    storageState: STORAGE_STATE,
+    // storageState is set per-worker in fixtures.ts via the workerStorageState fixture.
   },
 
   outputDir: "./test-results/e2e-screenshots",
