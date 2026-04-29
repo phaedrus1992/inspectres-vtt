@@ -58,7 +58,16 @@ test.describe("Sheet navigation and tab switching (E2E - Playwright)", () => {
       return el.textContent.slice(0, 50);
     });
 
-    await secondTab.click();
+    // Scroll the second tab into view and force-click via JS to bypass any
+    // Foundry notification overlays that might intercept pointer events in CI.
+    await page.evaluate(() => {
+      const tabs = document.querySelectorAll<HTMLElement>(".inspectres [role='tab']");
+      const second = tabs[1];
+      if (second) {
+        second.scrollIntoView({ block: "nearest" });
+        second.click();
+      }
+    });
     // Wait for the panel to become visible — tab switching toggles the .active class
     // which maps display:none → display:block
     await expect(page.locator(`.inspectres [role='tabpanel']#${secondTabPanelId}`)).toBeVisible({ timeout: 5000 });
