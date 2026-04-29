@@ -22,8 +22,20 @@ import { chromium, type Browser, type Page } from "@playwright/test";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const TMP_DIR = path.resolve(__dirname, "../../../.tmp");
 
-// Must match WORKER_COUNT in playwright.config.ts.
-const WORKER_COUNT = Number(process.env["PLAYWRIGHT_WORKERS"] ?? "2");
+const rawWorkers = Number(process.env["PLAYWRIGHT_WORKERS"] ?? "2");
+if (!Number.isFinite(rawWorkers) || rawWorkers < 1) {
+  throw new Error(
+    `PLAYWRIGHT_WORKERS must be a positive integer, got: ${process.env["PLAYWRIGHT_WORKERS"]}`,
+  );
+}
+/** Number of parallel Playwright workers. Imported by playwright.config.ts. */
+export const WORKER_COUNT = rawWorkers;
+
+/** Viewport used for both storage-state capture and per-test contexts. */
+export const E2E_VIEWPORT = { width: 1920, height: 1080 } as const;
+
+/** Foundry role value for Gamemaster (CONST.USER_ROLES.GAMEMASTER in Foundry v13). */
+const FOUNDRY_ROLE_GAMEMASTER = 4;
 
 const FOUNDRY_URL = "http://localhost:30000";
 const WORLD_ID = "test-world";
@@ -162,23 +174,25 @@ async function provisionWorkerUsers(gmPage: Page, browser: Browser): Promise<voi
   // Create users via Foundry's User document API (GM context required).
   const usernames = Array.from({ length: WORKER_COUNT }, (_, i) => workerUsername(i));
 
-  await gmPage.evaluate(async (names: string[]) => {
-    // Accessing Foundry runtime globals — these exist in the browser context only.
-    const g = globalThis as Record<string, unknown>;
-    const game = g["game"] as { users?: { getName: (n: string) => unknown } } | undefined;
-    const UserCls = (g["User"] ?? game?.users?.constructor) as
-      | { create: (data: Record<string, unknown>) => Promise<void> }
-      | undefined;
-    if (!UserCls) throw new Error("User class not available in Foundry globals");
+  await gmPage.evaluate(
+    async ([names, gmRole]: [string[], number]) => {
+      // Accessing Foundry runtime globals — these exist in the browser context only.
+      const g = globalThis as Record<string, unknown>;
+      const game = g["game"] as { users?: { getName: (n: string) => unknown } } | undefined;
+      const UserCls = (g["User"] ?? game?.users?.constructor) as
+        | { create: (data: Record<string, unknown>) => Promise<void> }
+        | undefined;
+      if (!UserCls) throw new Error("User class not available in Foundry globals");
 
-    for (const name of names) {
-      const existing = game?.users?.getName(name);
-      if (!existing) {
-        // ROLE_GAMEMASTER = 4 in Foundry constants; gives full access without restrictions.
-        await UserCls.create({ name, role: 4, password: "" });
+      for (const name of names) {
+        const existing = game?.users?.getName(name);
+        if (!existing) {
+          await UserCls.create({ name, role: gmRole, password: "" });
+        }
       }
-    }
-  }, usernames);
+    },
+    [usernames, FOUNDRY_ROLE_GAMEMASTER] as [string[], number],
+  );
 
   console.log(`✓ Provisioned ${WORKER_COUNT} worker user(s): ${usernames.join(", ")}`);
 
@@ -187,7 +201,7 @@ async function provisionWorkerUsers(gmPage: Page, browser: Browser): Promise<voi
     const username = workerUsername(i);
     const statePath = workerStorageStatePath(i);
 
-    const ctx = await browser.newContext({ viewport: { width: 1366, height: 768 } });
+    const ctx = await browser.newContext({ viewport: E2E_VIEWPORT });
     try {
       const page = await ctx.newPage();
       await page.goto(`${FOUNDRY_URL}/join`, { waitUntil: "networkidle" });

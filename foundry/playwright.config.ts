@@ -2,11 +2,9 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { defineConfig, devices } from "@playwright/test";
+import { WORKER_COUNT, workerStorageStatePath } from "./src/__tests__/e2e/global-setup.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-// Worker count: 2 matches ubuntu-latest (2 vCPUs). Override with PLAYWRIGHT_WORKERS env var.
-const WORKER_COUNT = Number(process.env["PLAYWRIGHT_WORKERS"] ?? "2");
 
 // Seed empty storage-state files for each worker so global-setup can overwrite them.
 // Playwright requires the storageState path to exist before the run when set statically,
@@ -14,7 +12,7 @@ const WORKER_COUNT = Number(process.env["PLAYWRIGHT_WORKERS"] ?? "2");
 const storageTmpDir = path.resolve(__dirname, "./.tmp");
 fs.mkdirSync(storageTmpDir, { recursive: true });
 for (let i = 0; i < WORKER_COUNT; i++) {
-  const statePath = path.join(storageTmpDir, `playwright-storage-state-${i}.json`);
+  const statePath = workerStorageStatePath(i);
   if (!fs.existsSync(statePath)) {
     fs.writeFileSync(statePath, JSON.stringify({ cookies: [], origins: [] }));
   }

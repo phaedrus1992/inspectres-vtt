@@ -1,6 +1,6 @@
 import { test as base, expect, type Page } from "@playwright/test";
 import { ConsoleBuffer } from "./console-capture";
-import { workerStorageStatePath, workerUsername } from "./global-setup.js";
+import { workerStorageStatePath, workerUsername, E2E_VIEWPORT } from "./global-setup.js";
 
 const JOIN_TIMEOUT = 30_000;
 const READY_TIMEOUT = 60_000;
@@ -73,7 +73,7 @@ export const test = base.extend({
     const statePath = workerStorageStatePath(testInfo.workerIndex);
     const ctx = await browser.newContext({
       storageState: statePath,
-      viewport: { width: 1366, height: 768 },
+      viewport: E2E_VIEWPORT,
     });
     await use(ctx);
     await ctx.close();

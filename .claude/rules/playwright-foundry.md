@@ -189,6 +189,23 @@ const messages = await page.evaluate(() =>
 );
 ```
 
+## Local Validation Before Push
+
+**When working on E2E tests or test infrastructure (global-setup, fixtures, playwright.config), always run the E2E suite locally against a live Foundry instance before pushing to CI.**
+
+```bash
+# Requires docker compose already running (docker/docker-compose.yml)
+npm run test:e2e
+```
+
+CI is expensive and slow for E2E failures. Local validation catches:
+- Selector breakage (Foundry UI changes)
+- Auth/session flow regressions (global-setup, fixtures)
+- Parallel worker conflicts (new workers, storage state issues)
+- Timing regressions
+
+Do not push E2E changes and say "CI will validate" — run it locally first.
+
 ## Scratch Scripts
 
 Write to `/tmp/inspect-<thing>.js`, run `node`. Copy boilerplate from `/tmp/inspect-dialog*.js`. Don't commit. Move durable patterns to `e2e/`.
