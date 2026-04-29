@@ -230,6 +230,10 @@ Object.assign(globalThis, {
               if (opts.required !== undefined) this.required = opts.required;
               if (opts.nullable !== undefined) this.nullable = opts.nullable;
               if (opts.initial !== undefined) this.initial = opts.initial;
+              // Foundry V13 constraint: initial: null requires nullable: true
+              if (opts.initial === null && !opts.nullable) {
+                throw new Error("initial: null requires nullable: true");
+              }
             }
           }
         },
