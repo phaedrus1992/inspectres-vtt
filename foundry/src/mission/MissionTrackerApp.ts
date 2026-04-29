@@ -4,7 +4,9 @@ import { promptDistribution } from "../utils/distribution-dialog.js";
 import { emitMissionPoolUpdated } from "./socket.js";
 import { getCurrentDaySetting } from "../utils/settings-utils.js";
 
-export class MissionTrackerApp extends foundry.applications.api.ApplicationV2 {
+// HandlebarsApplicationMixin provides _renderHTML/_replaceHTML required by ApplicationV2
+// for PARTS-based templates. Without it Foundry throws when render() is called.
+export class MissionTrackerApp extends foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.api.ApplicationV2) {
   static instance: MissionTrackerApp | null = null;
 
   static open(): void {
