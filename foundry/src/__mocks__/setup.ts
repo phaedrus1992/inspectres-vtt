@@ -221,9 +221,16 @@ Object.assign(globalThis, {
         ArrayField: class { constructor(element?: unknown, opts?: unknown) { void element; void opts; } },
         SchemaField: class {
           fields: Record<string, unknown>;
-          constructor(fields: Record<string, unknown>, opts?: unknown) {
+          required?: boolean;
+          nullable?: boolean;
+          initial?: unknown;
+          constructor(fields: Record<string, unknown>, opts?: { required?: boolean; nullable?: boolean; initial?: unknown }) {
             this.fields = fields;
-            void opts;
+            if (opts) {
+              if (opts.required !== undefined) this.required = opts.required;
+              if (opts.nullable !== undefined) this.nullable = opts.nullable;
+              if (opts.initial !== undefined) this.initial = opts.initial;
+            }
           }
         },
       },

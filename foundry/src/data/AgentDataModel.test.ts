@@ -60,6 +60,17 @@ describe("AgentDataModel", () => {
       // Optional fields have required: false or are not marked required
       expect(powerField.required).not.toBe(true);
     });
+
+    // Issue #425: agent.sheet.render(true) on a freshly-created actor threw
+    // "power: may not be null" because the SchemaField had initial: null
+    // without the matching nullable: true. Foundry V13 enforces this.
+    it("power field is nullable (Foundry V13 requires nullable:true when initial is null)", async () => {
+      const { AgentDataModel } = await import("./AgentDataModel.js");
+      const schema = AgentDataModel.defineSchema();
+      const powerField = schema["power"] as { nullable?: boolean; initial?: unknown };
+      expect(powerField.nullable).toBe(true);
+      expect(powerField.initial).toBeNull();
+    });
   });
 
   // Issue #218: Weird agent skill range must allow 0-10
