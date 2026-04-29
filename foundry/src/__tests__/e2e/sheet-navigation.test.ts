@@ -15,18 +15,17 @@ test.describe("Sheet navigation and tab switching (E2E - Playwright)", () => {
     await page.waitForSelector(".inspectres", { timeout: 10000 });
     await page.waitForSelector(".inspectres [role='tab']", { timeout: 5000 });
     const tabs = page.locator(".inspectres [role='tab']");
-    await page.screenshot({ path: "test-results/e2e-screenshots/07-sheet-tabs.png", fullPage: true });
     await expect(tabs.first()).toBeVisible();
     // Verify tab labels are readable
     const tabCount = await tabs.count();
     expect(tabCount).toBeGreaterThan(0);
+    await page.screenshot({ path: "test-results/e2e-screenshots/nav-01-tabs.png", timeout: 5000 }).catch(() => {});
   });
 
   test("should test active tab indication with styling", async ({ page }) => {
     await page.waitForSelector(".inspectres", { timeout: 10000 });
     await page.waitForSelector(".inspectres [role='tab'][aria-selected='true']", { timeout: 5000 });
     const activeTab = page.locator(".inspectres [role='tab'][aria-selected='true']");
-    await page.screenshot({ path: "test-results/e2e-screenshots/08-active-tab.png", fullPage: true });
 
     const activeStyle = await activeTab.first().evaluate((el) => ({
       ariaSelected: el.getAttribute("aria-selected"),
@@ -38,6 +37,7 @@ test.describe("Sheet navigation and tab switching (E2E - Playwright)", () => {
     expect(activeStyle.ariaSelected).toBe("true");
     // Active tab should have distinct styling (border, bg, or color change)
     expect(activeStyle.borderBottomColor || activeStyle.backgroundColor || activeStyle.color).toBeTruthy();
+    await page.screenshot({ path: "test-results/e2e-screenshots/nav-02-active-tab.png", timeout: 5000 }).catch(() => {});
   });
 
   test("should test tab switching behavior with panel transition", async ({ page }) => {
@@ -60,7 +60,6 @@ test.describe("Sheet navigation and tab switching (E2E - Playwright)", () => {
 
     await secondTab.click();
     await page.waitForSelector(`.inspectres [role='tabpanel']#${secondTabPanelId}:visible`);
-    await page.screenshot({ path: "test-results/e2e-screenshots/09-tab-switched.png", fullPage: true });
 
     const selected = await secondTab.getAttribute("aria-selected");
     expect(selected).toBe("true");
@@ -77,12 +76,12 @@ test.describe("Sheet navigation and tab switching (E2E - Playwright)", () => {
       return el.textContent.slice(0, 50);
     });
     expect(firstContent).not.toBe(secondContent);
+    await page.screenshot({ path: "test-results/e2e-screenshots/nav-03-tab-switch.png", timeout: 5000 }).catch(() => {});
   });
 
   test("should test content visibility and accessibility with panel verification", async ({ page }) => {
     await page.waitForSelector(".inspectres", { timeout: 10000 });
     await page.waitForSelector(".inspectres [role='tabpanel']", { timeout: 5000 });
-    await page.screenshot({ path: "test-results/e2e-screenshots/10-tabpanel-content.png", fullPage: true });
 
     const panelInfo = await page.evaluate(() => {
       const panels = document.querySelectorAll(".inspectres [role='tabpanel']");
@@ -99,6 +98,7 @@ test.describe("Sheet navigation and tab switching (E2E - Playwright)", () => {
     expect(panelInfo.visibleCount).toBeGreaterThan(0);
     expect(panelInfo.totalCount).toBeGreaterThan(0);
     expect(panelInfo.hasContent).toBe(true);
+    await page.screenshot({ path: "test-results/e2e-screenshots/nav-04-panel-content.png", timeout: 5000 }).catch(() => {});
   });
 
   test("should test tab keyboard navigation (arrow keys)", async ({ page }) => {
@@ -113,7 +113,7 @@ test.describe("Sheet navigation and tab switching (E2E - Playwright)", () => {
     // Test arrow key navigation (if implemented)
     await page.keyboard.press("ArrowRight");
     await page.waitForTimeout(300);
-    await page.screenshot({ path: "test-results/e2e-screenshots/11-tab-keyboard-nav.png", fullPage: true });
+    await page.screenshot({ path: "test-results/e2e-screenshots/nav-05-keyboard.png", timeout: 5000 }).catch(() => {});
 
     // Note: Implementation may vary; this test documents the expected behavior
   });
@@ -122,7 +122,6 @@ test.describe("Sheet navigation and tab switching (E2E - Playwright)", () => {
     await page.waitForSelector(".inspectres", { timeout: 10000 });
     await page.waitForSelector(".inspectres [role='tab']", { timeout: 5000 });
     const tabs = page.locator(".inspectres [role='tab']");
-    await page.screenshot({ path: "test-results/e2e-screenshots/12-tab-aria-attrs.png", fullPage: true });
 
     const tabCount = await tabs.count();
     for (let i = 0; i < Math.min(tabCount, 3); i++) {
@@ -135,5 +134,6 @@ test.describe("Sheet navigation and tab switching (E2E - Playwright)", () => {
       expect(["true", "false"]).toContain(ariaSelected);
       expect(ariaControls).toBeTruthy(); // Tab should control a panel
     }
+    await page.screenshot({ path: "test-results/e2e-screenshots/nav-06-aria.png", timeout: 5000 }).catch(() => {});
   });
 });

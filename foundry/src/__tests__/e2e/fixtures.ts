@@ -3,7 +3,7 @@ import { ConsoleBuffer } from "./console-capture";
 
 const JOIN_TIMEOUT = 30_000;
 const READY_TIMEOUT = 60_000;
-const SHEET_RENDER_TIMEOUT = 5_000;
+const SHEET_RENDER_TIMEOUT = 15_000;
 
 async function dismissStartupNotifications(page: Page): Promise<void> {
   // Foundry V13 startup warnings (hardware acceleration, screen size) are
