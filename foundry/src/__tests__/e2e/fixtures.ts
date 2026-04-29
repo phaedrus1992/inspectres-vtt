@@ -1,4 +1,5 @@
 import { test as base, expect, type Page } from "@playwright/test";
+import { ConsoleBuffer } from "./console-capture";
 
 const JOIN_TIMEOUT = 30_000;
 const READY_TIMEOUT = 60_000;
@@ -47,14 +48,28 @@ async function openFranchiseSheet(page: Page): Promise<void> {
  *
  * Foundry sessions don't survive across browser contexts, so the auto-launched world
  * places each fresh context on /join. This fixture:
- *   1. Joins the game as Gamemaster.
- *   2. Waits for `game.ready`.
- *   3. Dismisses permanent startup notifications.
- *   4. Unpauses the game.
- *   5. Opens a franchise sheet so DOM elements expected by tests (tabs, inputs, etc.) exist.
+ *   1. Subscribes to browser console errors/warnings and uncaught page errors.
+ *   2. Joins the game as Gamemaster.
+ *   3. Waits for `game.ready`.
+ *   4. Dismisses permanent startup notifications.
+ *   5. Unpauses the game.
+ *   6. Opens a franchise sheet so DOM elements expected by tests (tabs, inputs, etc.) exist.
+ *
+ * On failure, the captured console log is attached to the Playwright report so
+ * browser-side errors (validation, render exceptions, hook failures) surface
+ * directly in the test output instead of requiring a manual repro. See #428.
  */
 export const test = base.extend({
-  page: async ({ page }, use) => {
+  page: async ({ page }, use, testInfo) => {
+    const consoleBuffer = new ConsoleBuffer();
+
+    page.on("console", (msg) => {
+      consoleBuffer.recordConsole(msg.type(), msg.text());
+    });
+    page.on("pageerror", (err) => {
+      consoleBuffer.recordPageError(err);
+    });
+
     await page.goto("/", { waitUntil: "domcontentloaded" });
 
     if (page.url().includes("/join")) {
@@ -74,6 +89,21 @@ export const test = base.extend({
     await openFranchiseSheet(page);
 
     await use(page);
+
+    if (testInfo.status !== testInfo.expectedStatus && !consoleBuffer.isEmpty()) {
+      try {
+        await testInfo.attach("browser-console.log", {
+          body: consoleBuffer.toString(),
+          contentType: "text/plain",
+        });
+      } catch (err: unknown) {
+        // Don't let an attachment failure mask the actual test failure — that's
+        // the whole point of capturing the buffer. Log and move on so the
+        // original assertion error remains the reported result.
+        const message = err instanceof Error ? err.message : String(err);
+        console.warn(`Failed to attach browser-console.log: ${message}`);
+      }
+    }
   },
 });
 
