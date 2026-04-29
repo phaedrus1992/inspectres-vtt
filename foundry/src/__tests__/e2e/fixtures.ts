@@ -42,12 +42,13 @@ async function openFranchiseSheet(page: Page, workerSlot: number): Promise<void>
       franchise = await ActorCls.create({ name, type: "franchise" });
     }
     await franchise.sheet.render(true);
+    if (!franchise.id) throw new Error(`Actor "${name}" has no id after create — sheet render cannot be scoped`);
     return franchise.id as string;
   }, actorName);
   // Scope selector to this actor's sheet — multiple workers share the same Foundry
   // world, so other workers' franchise sheets are also present in the DOM. Using the
   // actor ID avoids a "locator resolved to 2 elements" timeout on the generic selector.
-  await page.waitForSelector(`.inspectres[id*="${actorId}"]`, { timeout: SHEET_RENDER_TIMEOUT });
+  await page.waitForSelector(`.inspectres[id="${actorId}"]`, { timeout: SHEET_RENDER_TIMEOUT });
 }
 
 /**

@@ -140,6 +140,18 @@ async function createWorldIfNeeded(page: Page): Promise<void> {
   if (!created) throw new Error(`World ${WORLD_ID} did not appear after creation`);
 }
 
+async function joinAsUser(page: Page, username: string): Promise<void> {
+  await page.selectOption('select[name="userid"]', { label: username });
+  await page.click('button[type="submit"]:has-text("Join Game Session")');
+  await page.waitForURL(/\/game/, { timeout: 30_000 });
+  // Wait for Foundry's init/ready hooks to complete.
+  await page.waitForFunction(
+    // @ts-expect-error - Foundry runtime global
+    () => globalThis.game?.ready === true,
+    { timeout: 60_000 },
+  );
+}
+
 async function launchAndJoin(page: Page): Promise<void> {
   // The launch link is hover-only (CSS `:hover` reveals it), so click via DOM.
   await page.evaluate(() => {
@@ -148,17 +160,7 @@ async function launchAndJoin(page: Page): Promise<void> {
   });
   await page.waitForURL(/\/join/, { timeout: 30_000 });
   await page.waitForTimeout(1500);
-
-  await page.selectOption('select[name="userid"]', { label: "Gamemaster" });
-  await page.click('button[type="submit"]:has-text("Join Game Session")');
-  await page.waitForURL(/\/game/, { timeout: 30_000 });
-
-  // Wait for Foundry's init/ready hooks to complete.
-  await page.waitForFunction(
-    // @ts-expect-error - Foundry runtime global
-    () => globalThis.game?.ready === true,
-    { timeout: 60_000 },
-  );
+  await joinAsUser(page, "Gamemaster");
 }
 
 /**
@@ -179,10 +181,11 @@ async function provisionWorkerUsers(gmPage: Page, browser: Browser): Promise<voi
       // Accessing Foundry runtime globals — these exist in the browser context only.
       const g = globalThis as Record<string, unknown>;
       const game = g["game"] as { users?: { getName: (n: string) => unknown } } | undefined;
-      const UserCls = (g["User"] ?? game?.users?.constructor) as
+      // Foundry exports User to globalThis during init — no fallback needed.
+      const UserCls = g["User"] as
         | { create: (data: Record<string, unknown>) => Promise<void> }
         | undefined;
-      if (!UserCls) throw new Error("User class not available in Foundry globals");
+      if (!UserCls) throw new Error("User class not available in Foundry globals (game.ready must be true before calling provisionWorkerUsers)");
 
       for (const name of names) {
         const existing = game?.users?.getName(name);
@@ -205,16 +208,7 @@ async function provisionWorkerUsers(gmPage: Page, browser: Browser): Promise<voi
     try {
       const page = await ctx.newPage();
       await page.goto(`${FOUNDRY_URL}/join`, { waitUntil: "networkidle" });
-
-      await page.selectOption('select[name="userid"]', { label: username });
-      await page.click('button[type="submit"]:has-text("Join Game Session")');
-      await page.waitForURL(/\/game/, { timeout: 30_000 });
-      await page.waitForFunction(
-        // @ts-expect-error - Foundry runtime global
-        () => globalThis.game?.ready === true,
-        { timeout: 60_000 },
-      );
-
+      await joinAsUser(page, username);
       await ctx.storageState({ path: statePath });
       console.log(`✓ Storage state saved for ${username} → ${statePath}`);
     } finally {
@@ -246,14 +240,7 @@ async function globalSetup(): Promise<void> {
         await launchAndJoin(page);
       } else if (page.url().includes("/join")) {
         // World was launched previously; just join.
-        await page.selectOption('select[name="userid"]', { label: "Gamemaster" });
-        await page.click('button[type="submit"]:has-text("Join Game Session")');
-        await page.waitForURL(/\/game/, { timeout: 30_000 });
-        await page.waitForFunction(
-          // @ts-expect-error - Foundry runtime global
-          () => globalThis.game?.ready === true,
-          { timeout: 60_000 },
-        );
+        await joinAsUser(page, "Gamemaster");
       } else {
         throw new Error(`Unexpected starting URL: ${page.url()}`);
       }
