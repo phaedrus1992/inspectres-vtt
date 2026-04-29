@@ -31,19 +31,23 @@ async function openFranchiseSheet(page: Page, workerSlot: number): Promise<void>
   // With fullyParallel, two workers hitting the same actor simultaneously can cause
   // double-render or visibility conflicts in the shared Foundry session.
   const actorName = `E2E Franchise ${workerSlot}`;
-  await page.evaluate(async (name: string) => {
+  const actorId = await page.evaluate(async (name: string) => {
     // @ts-expect-error - Foundry runtime globals
     const ActorCls = globalThis.CONFIG?.Actor?.documentClass ?? globalThis.Actor;
     // @ts-expect-error - Foundry runtime global
     let franchise = globalThis.game.actors.find(
-      (a: { type: string; name: string }) => a.type === "franchise" && a.name === name,
+      (a: { type: string; name: string; id: string }) => a.type === "franchise" && a.name === name,
     );
     if (!franchise) {
       franchise = await ActorCls.create({ name, type: "franchise" });
     }
     await franchise.sheet.render(true);
+    return franchise.id as string;
   }, actorName);
-  await page.waitForSelector(".inspectres", { timeout: SHEET_RENDER_TIMEOUT });
+  // Scope selector to this actor's sheet — multiple workers share the same Foundry
+  // world, so other workers' franchise sheets are also present in the DOM. Using the
+  // actor ID avoids a "locator resolved to 2 elements" timeout on the generic selector.
+  await page.waitForSelector(`.inspectres[id*="${actorId}"]`, { timeout: SHEET_RENDER_TIMEOUT });
 }
 
 /**
