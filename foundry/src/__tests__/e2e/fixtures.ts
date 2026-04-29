@@ -91,10 +91,18 @@ export const test = base.extend({
     await use(page);
 
     if (testInfo.status !== testInfo.expectedStatus && !consoleBuffer.isEmpty()) {
-      await testInfo.attach("browser-console.log", {
-        body: consoleBuffer.toString(),
-        contentType: "text/plain",
-      });
+      try {
+        await testInfo.attach("browser-console.log", {
+          body: consoleBuffer.toString(),
+          contentType: "text/plain",
+        });
+      } catch (err: unknown) {
+        // Don't let an attachment failure mask the actual test failure — that's
+        // the whole point of capturing the buffer. Log and move on so the
+        // original assertion error remains the reported result.
+        const message = err instanceof Error ? err.message : String(err);
+        console.warn(`Failed to attach browser-console.log: ${message}`);
+      }
     }
   },
 });
