@@ -3,6 +3,8 @@
 # FOUNDRY_LICENSE_KEY directly from the environment when no config.json is present.
 # Run as root (0:0) so the container can write to bind-mounted dist/ checked out by GHA.
 
+secrets: {}
+
 services:
   foundry:
     secrets: []
