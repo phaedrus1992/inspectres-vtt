@@ -1,0 +1,15 @@
+# CI override — no secrets file required.
+# felddy/foundryvtt reads FOUNDRY_USERNAME, FOUNDRY_PASSWORD, and
+# FOUNDRY_LICENSE_KEY directly from the environment when no config.json is present.
+# GHA runners run as root so user override is not needed.
+
+secrets: {}
+
+services:
+  foundry:
+    secrets: []
+    user: "0:0"
+    environment:
+      FOUNDRY_USERNAME: "${FOUNDRY_USERNAME}"
+      FOUNDRY_PASSWORD: "${FOUNDRY_PASSWORD}"
+      FOUNDRY_LICENSE_KEY: "${FOUNDRY_LICENSE_KEY}"
