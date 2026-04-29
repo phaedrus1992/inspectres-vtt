@@ -36,7 +36,7 @@ describe("mission completion invariants", () => {
         fc.integer({ min: 1, max: 30 }),
         (goal, deficit) => {
           const pool = Math.max(0, goal - deficit);
-          if (pool >= goal) return; // skip edge where deficit makes them equal
+          fc.pre(pool < goal);
           expect(isMissionComplete(pool, goal)).toBe(false);
         },
       ),

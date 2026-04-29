@@ -78,9 +78,8 @@ describe("recovery day math invariants", () => {
         fc.integer({ min: 0, max: 9000 }),
         (startDay, duration, deficit) => {
           const completionDay = startDay + duration;
-          const currentDay = Math.max(startDay, completionDay - deficit - 1);
-          // Guard: only valid if currentDay is strictly before completion
-          if (currentDay >= completionDay) return;
+          const currentDay = startDay + deficit;
+          fc.pre(currentDay < completionDay);
           const system = {
             isDead: false,
             daysOutOfAction: duration,
@@ -117,7 +116,8 @@ describe("recovery day math invariants", () => {
         fc.integer({ min: 0, max: 10 }),
         (startDay, duration, elapsed) => {
           const currentDay = startDay + elapsed;
-          if (currentDay + 2 >= startDay + duration) return; // skip near-completion cases
+          // Need at least 2 days before completion so both day1 and day2 are recovering
+          fc.pre(currentDay + 2 < startDay + duration);
           const system = {
             isDead: false,
             daysOutOfAction: duration,
@@ -138,9 +138,9 @@ describe("recovery day math invariants", () => {
           };
           const day1 = computeRecoveryStatus(system, currentDay);
           const day2 = computeRecoveryStatus(system, currentDay + 1);
-          if (day1.status === "recovering" && day2.status === "recovering") {
-            expect(day2.daysRemaining).toBe(day1.daysRemaining - 1);
-          }
+          expect(day1.status).toBe("recovering");
+          expect(day2.status).toBe("recovering");
+          expect(day2.daysRemaining).toBe(day1.daysRemaining - 1);
         },
       ),
       { numRuns: 1000 },

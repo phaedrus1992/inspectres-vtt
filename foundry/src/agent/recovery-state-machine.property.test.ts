@@ -58,15 +58,14 @@ describe("recovery state machine invariants", () => {
           const startDay = system.recoveryStartedAt === 0 ? 1 : system.recoveryStartedAt;
           const completionDay = startDay + system.daysOutOfAction;
           const currentDay = completionDay - offsetWithinRecovery - 1;
-          if (currentDay < startDay) return; // skip degenerate cases
+          fc.pre(currentDay >= startDay && currentDay < completionDay);
           const info = computeRecoveryStatus(
             { ...system, recoveryStartedAt: startDay },
             currentDay,
           );
-          if (info.status === "recovering") {
-            expect(info.status).not.toBe("dead");
-            expect(info.daysRemaining).toBeGreaterThan(0);
-          }
+          expect(info.status).toBe("recovering");
+          expect(info.status).not.toBe("dead");
+          expect(info.daysRemaining).toBeGreaterThan(0);
         },
       ),
       { numRuns: 1000 },
@@ -77,9 +76,8 @@ describe("recovery state machine invariants", () => {
     fc.assert(
       fc.property(agentData(), dayNumber(), (system, currentDay) => {
         const info = computeRecoveryStatus(system, currentDay);
-        if (info.status === "returned") {
-          expect(info.daysRemaining).toBe(0);
-        }
+        fc.pre(info.status === "returned");
+        expect(info.daysRemaining).toBe(0);
       }),
       { numRuns: 1000 },
     );
