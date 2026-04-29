@@ -59,14 +59,16 @@ test.describe("Sheet navigation and tab switching (E2E - Playwright)", () => {
     });
 
     await secondTab.click();
-    await page.waitForSelector(`.inspectres [role='tabpanel']#${secondTabPanelId}:visible`);
+    // Wait for the panel to become visible — tab switching toggles the .active class
+    // which maps display:none → display:block
+    await expect(page.locator(`.inspectres [role='tabpanel']#${secondTabPanelId}`)).toBeVisible({ timeout: 5000 });
 
     const selected = await secondTab.getAttribute("aria-selected");
     expect(selected).toBe("true");
 
     // Verify the visible panel is the one controlled by the second tab
     const visiblePanel = page.locator(".inspectres [role='tabpanel']:visible");
-    await expect(visiblePanel).toHaveCount(1);
+    await expect(visiblePanel).toHaveCount(1, { timeout: 5000 });
     const visiblePanelId = await visiblePanel.first().getAttribute("id");
     expect(visiblePanelId).toBe(secondTabPanelId);
 

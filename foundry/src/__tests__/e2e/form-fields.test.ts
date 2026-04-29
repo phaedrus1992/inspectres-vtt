@@ -61,10 +61,10 @@ test.describe("Form field rendering and input validation (E2E - Playwright)", ()
 
   test("should test form field focus and interaction with visual feedback", async ({ page }) => {
     await page.waitForSelector(".inspectres", { timeout: 10000 });
-    const input = page.locator(".inspectres input").first();
+    // Use the name input in the header — always visible on any tab
+    const input = page.locator(".inspectres input[name='name']").first();
     await expect(input).toBeVisible();
 
-    // Get styles before focus
     const beforeFocus = await input.evaluate((el) => ({
       borderColor: window.getComputedStyle(el).borderColor,
       outline: window.getComputedStyle(el).outline,
@@ -72,16 +72,14 @@ test.describe("Form field rendering and input validation (E2E - Playwright)", ()
 
     await input.focus();
 
-    const focused = await page.evaluate(() => document.activeElement === document.querySelector(".inspectres input"));
+    const focused = await page.evaluate(() => document.activeElement === document.querySelector(".inspectres input[name='name']"));
     expect(focused).toBe(true);
 
-    // Get styles after focus
     const afterFocus = await input.evaluate((el) => ({
       borderColor: window.getComputedStyle(el).borderColor,
       outline: window.getComputedStyle(el).outline,
     }));
 
-    // Focus should change visual appearance
     const styleChanged = beforeFocus.borderColor !== afterFocus.borderColor || beforeFocus.outline !== afterFocus.outline;
     expect(styleChanged || afterFocus.outline !== "none").toBe(true);
     await page.screenshot({ path: "test-results/e2e-screenshots/form-04-focus.png", timeout: 5000 }).catch(() => {});
@@ -110,41 +108,29 @@ test.describe("Form field rendering and input validation (E2E - Playwright)", ()
 
   test("should test textarea and select field handling with styling", async ({ page }) => {
     await page.waitForSelector(".inspectres", { timeout: 10000 });
-    // Wait for at least one to be present in the DOM. Textareas may live in an
-    // inactive tab (display:none) — `state: "attached"` accepts hidden elements.
-    await page.waitForSelector(".inspectres textarea, .inspectres select", {
-      timeout: 5000,
-      state: "attached",
-    });
-    const textareas = page.locator(".inspectres textarea");
-    const selects = page.locator(".inspectres select");
-    const textareaCount = await textareas.count();
-    const selectCount = await selects.count();
+    // The textarea lives in the Notes tab — navigate there like a real user would
+    await page.click(".inspectres [role='tab'][aria-controls='tab-notes']");
+    await page.waitForSelector(".inspectres textarea", { timeout: 5000 });
 
-    // At least one field type must exist (verified by waitForSelector above)
-    expect(textareaCount > 0 || selectCount > 0).toBe(true);
+    const textarea = page.locator(".inspectres textarea").first();
+    await expect(textarea).toBeVisible();
 
-    if (textareaCount > 0) {
-      const style = await textareas.first().evaluate((el) => ({
-        borderWidth: window.getComputedStyle(el).borderWidth,
-        padding: window.getComputedStyle(el).padding,
-      }));
-      expect(style.borderWidth).not.toBe("0px");
-    }
+    const style = await textarea.evaluate((el) => ({
+      borderWidth: window.getComputedStyle(el).borderWidth,
+      padding: window.getComputedStyle(el).padding,
+    }));
+    expect(style.borderWidth).not.toBe("0px");
 
-    if (selectCount > 0) {
-      await expect(selects.first()).toBeVisible();
-    }
     await page.screenshot({ path: "test-results/e2e-screenshots/form-06-textarea-select.png", timeout: 5000 }).catch(() => {});
   });
 
   test("should test form accessibility with ARIA attributes", async ({ page }) => {
     await page.waitForSelector(".inspectres", { timeout: 10000 });
-    await page.waitForSelector(".inspectres input, .inspectres textarea, .inspectres select", {
+    // Only inspect visible fields — hidden tabs contain fields that users can't currently interact with
+    await page.waitForSelector(".inspectres input:visible, .inspectres select:visible", {
       timeout: 5000,
-      state: "attached",
     });
-    const inputs = page.locator(".inspectres input, .inspectres textarea, .inspectres select");
+    const inputs = page.locator(".inspectres input:visible, .inspectres textarea:visible, .inspectres select:visible");
     const count = await inputs.count();
 
     // At least one form element should be present

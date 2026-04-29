@@ -27,7 +27,7 @@ function rerenderMissionTracker(context: string): void {
 
 Hooks.once("init", async function () {
   try {
-    await loadTemplates([
+    await foundry.applications.handlebars.loadTemplates([
       "systems/inspectres/templates/agent-sheet.hbs",
       "systems/inspectres/templates/franchise-sheet.hbs",
       "systems/inspectres/templates/roll-card.hbs",
