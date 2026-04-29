@@ -25,6 +25,18 @@ describe("ConsoleBuffer", () => {
       const lastLine = buffer.lines[buffer.lines.length - 1];
       expect(lastLine).toMatch(/\[truncated.*more entries\]/);
     });
+
+    it("does not add truncation marker at exactly MAX_ENTRIES", () => {
+      const buffer = new ConsoleBuffer();
+
+      for (let i = 0; i < 500; i++) {
+        buffer.recordConsole("error", `Entry ${i}`);
+      }
+
+      expect(buffer.lines.length).toBe(500);
+      const lastLine = buffer.lines[buffer.lines.length - 1];
+      expect(lastLine).not.toMatch(/\[truncated/);
+    });
   });
 
   describe("logging documentation", () => {
