@@ -191,20 +191,17 @@ const messages = await page.evaluate(() =>
 
 ## Local Validation Before Push
 
-**When working on E2E tests or test infrastructure (global-setup, fixtures, playwright.config), always run the E2E suite locally against a live Foundry instance before pushing to CI.**
+**Always run the E2E suite locally before pushing when:**
+- Any E2E test file changed (`*.test.ts` in `e2e/`, `fixtures.ts`, `global-setup.ts`, `playwright.config.ts`)
+- E2E tests are currently failing on CI (fix locally, confirm green, then push)
+- You made any change that could affect browser session state, selectors, or Foundry init
 
 ```bash
 # Requires docker compose already running (docker/docker-compose.yml)
 npm run test:e2e
 ```
 
-CI is expensive and slow for E2E failures. Local validation catches:
-- Selector breakage (Foundry UI changes)
-- Auth/session flow regressions (global-setup, fixtures)
-- Parallel worker conflicts (new workers, storage state issues)
-- Timing regressions
-
-Do not push E2E changes and say "CI will validate" — run it locally first.
+CI is expensive and slow for E2E failures. Do not push and say "CI will validate" — run it locally first. This applies even for small refactors to test infrastructure; timing and selector issues only surface against a live Foundry instance.
 
 ## Scratch Scripts
 

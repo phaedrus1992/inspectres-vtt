@@ -200,3 +200,4 @@ See CLAUDE.md "GM Control Surface Design" for full principles.
 | Game state controllable only via settings | Add direct button/control to relevant sheet |
 | Auto-setting critical flags with no override | Always provide GM button to change state |
 | `return { ...base, system }` with raw DataModel instance | `return { ...base, system: foundry.utils.deepClone(system) }` |
+| `[id="${actorId}"]` exact match in E2E selectors | `[id*="${actorId}"]` — Foundry prefixes ids as `t-Actor-<id>` |

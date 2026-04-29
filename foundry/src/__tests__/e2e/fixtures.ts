@@ -48,7 +48,9 @@ async function openFranchiseSheet(page: Page, workerSlot: number): Promise<void>
   // Scope selector to this actor's sheet — multiple workers share the same Foundry
   // world, so other workers' franchise sheets are also present in the DOM. Using the
   // actor ID avoids a "locator resolved to 2 elements" timeout on the generic selector.
-  await page.waitForSelector(`.inspectres[id="${actorId}"]`, { timeout: SHEET_RENDER_TIMEOUT });
+  // Foundry element id is "t-Actor-<actorId>", not the bare actor id.
+  // Substring match scopes to this actor's sheet while handling the prefix.
+  await page.waitForSelector(`.inspectres[id*="${actorId}"]`, { timeout: SHEET_RENDER_TIMEOUT });
 }
 
 /**
