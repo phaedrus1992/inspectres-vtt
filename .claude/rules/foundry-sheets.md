@@ -78,7 +78,8 @@ export class AbilitySheet extends foundry.applications.sheets.ItemSheetV2 {
   };
   override async _prepareContext(_options): Promise<Record<string, unknown>> {
     const base = await super._prepareContext(_options);
-    return { ...base, system: this.item.system as AbilityData };
+    const system = this.item.system as unknown as AbilityData;
+    return { ...base, system: foundry.utils.deepClone(system) };
   }
 }
 ```
@@ -110,14 +111,16 @@ Pre-compute in `_prepareContext()` / `getData()`:
 - Pre-enrich HTML fields
 - Use `this.isEditable` for edit-only UI
 
+**Always `deepClone` system data before returning it in context.** Foundry V13 TypeDataModel instances are not plain objects — `actor.system` is a DataModel proxy. Foundry's Handlebars `#each` helper calls `Object.entries()` on nested values, which throws `"Object.entries requires that input parameter not be null or undefined"` when passed a DataModel instance. `foundry.utils.deepClone()` converts it to a serializable plain object.
+
 ```typescript
 override async _prepareContext(_options): Promise<Record<string, unknown>> {
   const base = await super._prepareContext(_options);
-  const system = this.actor.system as unknown as AgentData;
+  const system = getActorSystem<AgentData>(this.actor);
   const abilities = this.actor.items
     .filter(i => i.type === "ability")
     .sort((a, b) => a.name.localeCompare(b.name));
-  return { ...base, system, abilities };
+  return { ...base, system: foundry.utils.deepClone(system), abilities };
 }
 ```
 
@@ -196,3 +199,4 @@ See CLAUDE.md "GM Control Surface Design" for full principles.
 | `extends ActorSheet` / `extends ItemSheet` (V1, deprecated V13) | `foundry.applications.sheets.ActorSheetV2` |
 | Game state controllable only via settings | Add direct button/control to relevant sheet |
 | Auto-setting critical flags with no override | Always provide GM button to change state |
+| `return { ...base, system }` with raw DataModel instance | `return { ...base, system: foundry.utils.deepClone(system) }` |
