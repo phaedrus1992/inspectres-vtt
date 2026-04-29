@@ -17,6 +17,7 @@
   --inspectres-gray-100: #f5f5f5;
   --inspectres-gray-200: #e8e8e8;
   --inspectres-gray-300: #d0d0d0;
+  --inspectres-gray-base: #9d9e9d;     /* canonical InSpectres grey */
   --inspectres-gray-400: #666666;
 
   /* Brand greens */
@@ -101,11 +102,13 @@
 
   /* --- V2 SHEET COMPATIBILITY (used in inspectres.css) --- */
 
-  /* Primary palette */
-  --inspectres-primary: #38b44a;
-  --inspectres-secondary: #c41e3a;
-  --inspectres-accent: #c41e3a;
-  --inspectres-success: #38b44a;
+  /* Primary palette — both primary and secondary are greens (canonical brand colors).
+     A separate --inspectres-danger handles red-tinted alert/critical states. */
+  --inspectres-primary: var(--inspectres-green-dark);
+  --inspectres-secondary: var(--inspectres-green-light);
+  --inspectres-accent: var(--inspectres-green-dark);
+  --inspectres-success: var(--inspectres-green-dark);
+  --inspectres-danger: #c41e3a;
 
   /* Sheet backgrounds */
   --inspectres-sheet-bg: #ffffff;
@@ -142,22 +145,11 @@
   --inspectres-disabled: #d0d0d0;
   --inspectres-inactive: #e8e8e8;
 
-  /* Sizing & Radius */
-  --inspectres-radius: 3px;
-  --inspectres-radius-lg: 6px;
-  --inspectres-warn-overlay-medium: rgba(255, 193, 7, 0.1);
+  /* Warn overlay variants */
   --inspectres-warn-overlay-dark: rgba(255, 193, 7, 0.15);
 
   /* Green overlay light (for recovering status background) */
   --inspectres-focus-ring-light: rgba(56, 180, 74, 0.1);
-
-  /* Semantic colors for warnings (yellow palette) */
-  --inspectres-warn-bg: #ffc107;
-  --inspectres-warn-border: #ff9800;
-  --inspectres-warn-text: #ffb300;
-
-  /* Accent color (interactive elements) */
-  --inspectres-accent: var(--inspectres-green-dark);
 
   /* Select dropdown SVG icon (down chevron) */
   --inspectres-select-arrow: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3e%3cpath fill='%23000' d='M1 1l5 5 5-5'/%3e%3c/svg%3e");
