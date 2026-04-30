@@ -303,15 +303,15 @@ Add `"verbatimModuleSyntax": true` (required by TS rules). Combined with `"isola
 
 ## Deprecated Global APIs (V13)
 
-Foundry V13 moved several globals into namespaces. Use the namespaced forms:
+Globals moved to namespaces in V13:
 
-| Deprecated global | Replacement |
+| Deprecated | Use |
 |---|---|
 | `renderTemplate(path, data)` | `foundry.applications.handlebars.renderTemplate(path, data)` |
 | `loadTemplates(paths)` | `foundry.applications.handlebars.loadTemplates(paths)` |
 | `Dialog.wait(config)` | `foundry.applications.api.DialogV2.wait(config)` |
 
-When migrating, update `src/types/foundry-v2.d.ts` if the namespaced function is not yet typed in fvtt-types. Update test mocks to target `foundry.applications.handlebars.renderTemplate` instead of the global.
+If namespaced form missing from fvtt-types, add to `src/types/foundry-v2.d.ts`. Update test mocks to target `foundry.applications.handlebars.renderTemplate` not the global.
 
 ## Anti-Patterns
 

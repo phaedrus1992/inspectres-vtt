@@ -189,8 +189,8 @@ const POLL_TIMEOUT_MS = 30_000; // 30s = server-side request timeout
 - String: `String(x)` or template literals. No `"" + x`
 - Number: `Number(x)` then check `isNaN`. No unary `+`. `parseInt` only non-base-10
 - Boolean: implicit truthiness in conditionals. No `!!x`. Explicit comparisons (`arr.length > 0`) fine
-- **`Number.isNaN` not `isNaN`** — `isNaN` coerces to number first (`isNaN("abc")` is `true`); `Number.isNaN` is precise
-- **Template literal interpolation** — always `${String(x)}` when `x` is `unknown` or could be an object; bare `${x}` produces `[object Object]` for File/FormData/any non-primitive
+- **`Number.isNaN` not `isNaN`** — `isNaN` coerces first (`isNaN("abc")` = `true`); `Number.isNaN` precise
+- **Template literal interpolation** — `${String(x)}` when `x` is `unknown` or object; bare `${x}` → `[object Object]` for File/FormData/non-primitives
 
 ## Spread
 
@@ -208,14 +208,12 @@ const POLL_TIMEOUT_MS = 30_000; // 30s = server-side request timeout
 
 ## Null-coalescing and optional chaining
 
-Prefer compact, idiomatic forms over verbose conditionals:
-
 ```typescript
-// ??= for lazy initialization
+// ??= for lazy init
 loggerInstance ??= new DevLogger();       // not: if (!loggerInstance) loggerInstance = new DevLogger()
 hookHandlers[event] ??= [];               // not: if (!hookHandlers[event]) hookHandlers[event] = []
 
-// Optional chain to simplify guarded access
+// Optional chain
 if (!element?.isConnected) ...            // not: if (!element || !element.isConnected)
 const match = key.match(/pat/);
 if (match?.[1] && match[2]) ...           // not: if (match && match[1] && match[2])
@@ -223,17 +221,15 @@ if (match?.[1] && match[2]) ...           // not: if (match && match[1] && match
 
 ## Element attributes
 
-Prefer `.dataset` over `getAttribute("data-*")`:
+`.dataset` over `getAttribute("data-*")` — no `data-` prefix, camelCase-normalized, returns `undefined` not `null`:
 
 ```typescript
 const rollType = target.dataset["rollType"] ?? null;   // not: target.getAttribute("data-roll-type")
 ```
 
-`dataset` avoids the `data-` prefix, is camelCase-normalized, and returns `undefined` instead of `null`.
-
 ## Throw types
 
-Throw `TypeError` for type/value validation failures (wrong shape, unexpected type), `Error` for logic/state failures:
+`TypeError` for type/value failures; `Error` for logic/state failures:
 
 ```typescript
 if (typeof input !== "string") throw new TypeError("Expected string, got " + typeof input);
@@ -242,19 +238,17 @@ if (!scene.exists) throw new Error("Scene not found: " + id);
 
 ## Re-exports
 
-Use `export ... from` to re-export symbols (avoids import+export duplication):
-
 ```typescript
 export { expect } from "@playwright/test";   // not: import { expect } from ...; export { expect };
 ```
 
 ## Node built-in imports
 
-Always use `node:` prefix for built-in modules:
+Always `node:` prefix:
 
 ```typescript
-import fs from "node:fs";     // not: import fs from "fs"
-import path from "node:path"; // not: import path from "path"
+import fs from "node:fs";
+import path from "node:path";
 ```
 
 ## Anti-Patterns
