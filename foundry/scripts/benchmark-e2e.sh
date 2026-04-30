@@ -37,26 +37,26 @@ fi
 
 # Ensure docker compose is running and ready
 echo "📦 Checking Foundry container..."
-if ! docker compose -f "$REPO_ROOT/docker/docker-compose.ci.yml" ps foundry &>/dev/null; then
+if ! docker compose -f "$REPO_ROOT/docker/docker compose.ci.yml" ps foundry &>/dev/null; then
   echo "⚠️  Foundry container not running. Start with:"
-  echo "   cd docker && docker compose -f docker-compose.ci.yml up -d"
+  echo "   cd docker && docker compose -f docker compose.ci.yml up -d"
   echo "   Then run this script again."
   exit 1
 fi
 
 # Verify container is actually listening on port 30000 (not just running)
 echo "📡 Waiting for Foundry to be ready..."
-MAX_RETRIES=30
+MAX_RETRIES=120
 RETRY=0
 while [ $RETRY -lt $MAX_RETRIES ]; do
-  if curl -s http://localhost:30000/ >/dev/null 2>&1; then
+  if nc -z localhost 30000 2>/dev/null; then
     echo "✓ Foundry ready on http://localhost:30000"
     break
   fi
   RETRY=$((RETRY + 1))
   if [ $RETRY -eq $MAX_RETRIES ]; then
     echo "❌ Foundry did not become ready after $((MAX_RETRIES / 2))s. Container may be crashing."
-    echo "   Check container logs: docker compose -f docker/docker-compose.ci.yml logs foundry"
+    echo "   Check container logs: docker compose -f docker/docker compose.ci.yml logs foundry"
     exit 1
   fi
   sleep 0.5
@@ -94,10 +94,11 @@ if [ -f "$LOG_FILE" ]; then
   if [ -f "$REPORT_JSON" ]; then
     # Parse via jq if available, else parse manually
     if command -v jq &> /dev/null; then
-      TOTAL_TESTS=$(jq '[.suites[].tests[]] | length' "$REPORT_JSON" 2>/dev/null || echo "0")
-      PASSED=$(jq '[.suites[].tests[] | select(.status=="passed")] | length' "$REPORT_JSON" 2>/dev/null || echo "0")
-      FAILED=$(jq '[.suites[].tests[] | select(.status=="failed")] | length' "$REPORT_JSON" 2>/dev/null || echo "0")
-      DURATION=$(jq '.startTime as $start | .endTime as $end | (($end - $start) / 1000) | "\(.)s"' "$REPORT_JSON" 2>/dev/null || echo "unknown")
+      # Playwright JSON: { "tests": [ { "title": "...", "status": "passed|failed|skipped", ... } ], "startTime": 123, "endTime": 456 }
+      TOTAL_TESTS=$(jq '.tests | length' "$REPORT_JSON" 2>/dev/null || echo "0")
+      PASSED=$(jq '[.tests[] | select(.status=="passed")] | length' "$REPORT_JSON" 2>/dev/null || echo "0")
+      FAILED=$(jq '[.tests[] | select(.status=="failed")] | length' "$REPORT_JSON" 2>/dev/null || echo "0")
+      DURATION=$(jq '(.endTime - .startTime) as $ms | ($ms / 1000) | "\(.)s"' "$REPORT_JSON" 2>/dev/null || echo "unknown")
     else
       # Fallback: parse log but validate before using
       TOTAL_TESTS=$(grep -c "✓\|✕" "$LOG_FILE" 2>/dev/null || echo "0")
