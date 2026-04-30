@@ -262,27 +262,3 @@ jobs:
           path: foundry/coverage/lcov.info
           if-no-files-found: error
 
-  sonar:
-    name: SonarQube analysis
-    runs-on: ubuntu-latest
-    needs: [unit-test]
-    permissions:
-      contents: read
-    steps:
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
-        with:
-          persist-credentials: false
-          fetch-depth: 0
-
-      - name: Download coverage artifact
-        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e  # v4.2.1
-        with:
-          name: coverage-lcov
-          path: foundry/coverage/
-
-      - name: SonarQube scan
-        uses: sonarsource/sonarqube-scan-action@0303d6b62e310685c0e34d0b9cde218036885c4d  # v5.0.0
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
