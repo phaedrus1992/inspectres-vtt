@@ -25,7 +25,9 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: WORKER_COUNT,
-  reporter: process.env["CI"] ? [["list"], ["html"]] : "html",
+  reporter: process.env["CI"]
+    ? [["list"], ["html"], ["json", { outputFile: "./test-results/test-results.json" }]]
+    : [["html"], ["json", { outputFile: "./test-results/test-results.json" }]],
   // 2 min per test: Foundry fixture setup (join + game.ready + sheet render) is ~30-60s
   // in CI, leaving headroom for actual test assertions.
   timeout: 120_000,

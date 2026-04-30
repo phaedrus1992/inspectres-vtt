@@ -338,17 +338,15 @@ await Promise.all(assets.map(url => fetch(`${baseUrl}/${url}`)));
 
 **File:** `foundry/src/__tests__/e2e/buttons.test.ts:89`
 
-**Before:**
+**Before (Current Broken Code):**
 ```typescript
-await page.waitForFunction(
-  () => document.querySelector("button[disabled]") !== null,
-  undefined,
-  { timeout: 5000 },
-);
+// Race condition: ApplicationV2 re-renders detach element mid-wait
+await page.waitForSelector("button[disabled]", { timeout: 5000 });
 ```
 
-**After:**
+**After (Fixed Code):**
 ```typescript
+// Safe: waitForFunction polls until element is present AND has non-zero size
 await page.waitForFunction(
   () => {
     const el = document.querySelector("button[disabled]");
