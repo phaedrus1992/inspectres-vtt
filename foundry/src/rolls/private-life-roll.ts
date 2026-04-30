@@ -12,7 +12,7 @@ export interface Augmentations {
 
 function validateAugmentationState(state: unknown): asserts state is AugmentationState {
   if (typeof state !== "object" || state === null) {
-    throw new Error("Augmentation state must be an object");
+    throw new TypeError("Augmentation state must be an object");
   }
   const obj = state as Record<string, unknown>;
   if (typeof obj["available"] !== "boolean") {

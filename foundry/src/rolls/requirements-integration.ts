@@ -5,13 +5,13 @@ export interface MissionState {
 
 function validateMissionState(mission: unknown): asserts mission is MissionState {
   if (typeof mission !== "object" || mission === null) {
-    throw new Error("Mission state must be an object");
+    throw new TypeError("Mission state must be an object");
   }
   const obj = mission as Record<string, unknown>;
 
   const validRarities = ["common", "rare", "exotic"];
   if (!validRarities.includes(obj["itemRarity"] as string)) {
-    throw new Error("Mission itemRarity must be one of: common, rare, exotic");
+    throw new TypeError("Mission itemRarity must be one of: common, rare, exotic");
   }
 
   if (typeof obj["requirementsMet"] !== "boolean") {
