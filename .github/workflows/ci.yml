@@ -176,6 +176,27 @@ jobs:
         working-directory: foundry
         run: npm ci
 
+      - name: Cache apt packages (Playwright fonts + X deps)
+        id: apt-cache
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684  # v4.2.3
+        with:
+          path: /var/cache/apt/archives
+          key: apt-playwright-chromium-${{ runner.os }}-v1
+
+      - name: Install apt dependencies for Playwright
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            fonts-freefont-ttf \
+            fonts-ipafont-gothic \
+            fonts-tlwg-loma-otf \
+            fonts-unifont \
+            fonts-wqy-zenhei \
+            xfonts-cyrillic \
+            xfonts-encodings \
+            xfonts-scalable \
+            xfonts-utils
+
       - name: Cache Playwright browsers
         id: playwright-cache
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684  # v4.2.3
@@ -183,15 +204,27 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-${{ hashFiles('foundry/package-lock.json') }}-${{ runner.os }}
 
-      - name: Install Playwright browsers (full, cache miss)
+      - name: Install Playwright browsers
         if: steps.playwright-cache.outputs.cache-hit != 'true'
         working-directory: foundry
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install chromium
 
-      - name: Install Playwright system deps (cache hit)
-        if: steps.playwright-cache.outputs.cache-hit == 'true'
-        working-directory: foundry
-        run: npx playwright install-deps chromium
+      - name: Cache Foundry Docker image
+        id: foundry-image-cache
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684  # v4.2.3
+        with:
+          path: /tmp/foundry-image.tar
+          key: docker-foundry-v13-${{ runner.os }}-v1
+
+      - name: Load Foundry image from cache
+        if: steps.foundry-image-cache.outputs.cache-hit == 'true'
+        run: docker load -i /tmp/foundry-image.tar
+
+      - name: Pull Foundry image and save to cache
+        if: steps.foundry-image-cache.outputs.cache-hit != 'true'
+        run: |
+          docker pull ghcr.io/felddy/foundryvtt:13
+          docker save ghcr.io/felddy/foundryvtt:13 -o /tmp/foundry-image.tar
 
       - name: Start Foundry container
         working-directory: docker
