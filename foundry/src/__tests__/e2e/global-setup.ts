@@ -140,15 +140,15 @@ async function createWorldIfNeeded(page: Page): Promise<void> {
   if (!created) throw new Error(`World ${WORLD_ID} did not appear after creation`);
 }
 
-async function joinAsUser(page: Page, username: string): Promise<void> {
+async function joinAsUser(page: Page, username: string, timeouts = { url: 30_000, ready: 60_000 }): Promise<void> {
   await page.selectOption('select[name="userid"]', { label: username });
   await page.click('button[type="submit"]:has-text("Join Game Session")');
-  await page.waitForURL(/\/game/, { timeout: 30_000 });
+  await page.waitForURL(/\/game/, { timeout: timeouts.url });
   // Wait for Foundry's init/ready hooks to complete.
   await page.waitForFunction(
     // @ts-expect-error - Foundry runtime global
     () => globalThis.game?.ready === true,
-    { timeout: 60_000 },
+    { timeout: timeouts.ready },
   );
 }
 
@@ -200,6 +200,9 @@ async function provisionWorkerUsers(gmPage: Page, browser: Browser): Promise<voi
   console.log(`✓ Provisioned ${WORKER_COUNT} worker user(s): ${usernames.join(", ")}`);
 
   // Capture a storage state for each worker by joining as that user.
+  // Use generous timeouts: CI Foundry takes 60-90s per login when sessions
+  // are sequential and the server needs to reinitialize between them.
+  const provisionTimeouts = { url: 60_000, ready: 120_000 };
   for (let i = 0; i < WORKER_COUNT; i++) {
     const username = workerUsername(i);
     const statePath = workerStorageStatePath(i);
@@ -208,7 +211,7 @@ async function provisionWorkerUsers(gmPage: Page, browser: Browser): Promise<voi
     try {
       const page = await ctx.newPage();
       await page.goto(`${FOUNDRY_URL}/join`, { waitUntil: "networkidle" });
-      await joinAsUser(page, username);
+      await joinAsUser(page, username, provisionTimeouts);
       await ctx.storageState({ path: statePath });
       console.log(`✓ Storage state saved for ${username} → ${statePath}`);
     } finally {
