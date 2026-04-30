@@ -146,7 +146,7 @@ jobs:
   e2e:
     name: E2E tests
     runs-on: ubuntu-latest
-    needs: [build]
+    needs: [build, unit-test, typecheck]
     permissions:
       contents: read
     env:

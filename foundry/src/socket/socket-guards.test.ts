@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { isMissionSocketPayload, type MissionSocketPayload } from "./socket-guards.js";
+import { isMissionSocketPayload, getPayloadType, type MissionSocketPayload } from "./socket-guards.js";
 
 describe("Socket payload validation", () => {
   it("accepts valid MissionSocketPayload", () => {
@@ -84,5 +84,28 @@ describe("Socket payload validation", () => {
         franchiseId: "",
       }),
     ).toBe(false); // empty franchiseId is invalid
+  });
+});
+
+describe("getPayloadType", () => {
+  it("returns type string from valid payload", () => {
+    expect(getPayloadType({ type: "missionPoolUpdated", franchiseId: "123" })).toBe("missionPoolUpdated");
+  });
+
+  it("returns undefined for null", () => {
+    expect(getPayloadType(null)).toBeUndefined();
+  });
+
+  it("returns undefined for non-objects", () => {
+    expect(getPayloadType("string")).toBeUndefined();
+    expect(getPayloadType(42)).toBeUndefined();
+  });
+
+  it("returns undefined when type field is missing", () => {
+    expect(getPayloadType({ franchiseId: "123" })).toBeUndefined();
+  });
+
+  it("returns undefined when type field is not a string", () => {
+    expect(getPayloadType({ type: 42 })).toBeUndefined();
   });
 });
