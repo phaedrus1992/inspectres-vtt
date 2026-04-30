@@ -2,9 +2,12 @@ import { test as base, expect, type Page } from "@playwright/test";
 import { ConsoleBuffer } from "./console-capture";
 import { workerStorageStatePath, workerUsername, E2E_VIEWPORT, WORKER_COUNT } from "./global-setup.js";
 
-const JOIN_TIMEOUT = 30_000;
+const JOIN_TIMEOUT = 60_000;
 const READY_TIMEOUT = 60_000;
-const SHEET_RENDER_TIMEOUT = 15_000;
+// Sheet render timeout raised: ApplicationV2 re-renders on parallel actor changes,
+// briefly detaching the element. The locator may resolve then disappear during a
+// re-render cycle. 30s gives enough headroom for the sheet to stabilize in CI.
+const SHEET_RENDER_TIMEOUT = 30_000;
 
 async function dismissStartupNotifications(page: Page): Promise<void> {
   // Foundry V13 startup warnings (hardware acceleration, screen size) are
@@ -50,7 +53,21 @@ async function openFranchiseSheet(page: Page, workerSlot: number): Promise<void>
   // actor ID avoids a "locator resolved to 2 elements" timeout on the generic selector.
   // Foundry element id is "t-Actor-<actorId>", not the bare actor id.
   // Substring match scopes to this actor's sheet while handling the prefix.
-  await page.waitForSelector(`.inspectres[id*="${actorId}"]`, { timeout: SHEET_RENDER_TIMEOUT });
+  //
+  // Use waitForFunction rather than waitForSelector: ApplicationV2 re-renders may briefly
+  // detach the element between render cycles, causing waitForSelector to miss it even when
+  // the element is logically visible. waitForFunction polls until the element is present
+  // AND visible, tolerating transient detach/re-attach during re-renders.
+  await page.waitForFunction(
+    (id: string) => {
+      const el = document.querySelector(`.inspectres[id*="${id}"]`);
+      if (!el) return false;
+      const rect = (el as HTMLElement).getBoundingClientRect();
+      return rect.width > 0 && rect.height > 0;
+    },
+    actorId,
+    { timeout: SHEET_RENDER_TIMEOUT },
+  );
 }
 
 /**
@@ -108,6 +125,19 @@ export const test = base.extend({
 
     if (page.url().includes("/join")) {
       const username = workerUsername(testInfo.workerIndex % WORKER_COUNT);
+      // Foundry keeps user sessions active briefly after the context closes. Wait for
+      // the user option to become enabled before selecting it — the prior session from
+      // global-setup or a previous test may still hold the session slot server-side.
+      await page.waitForFunction(
+        (name: string) => {
+          const select = document.querySelector('select[name="userid"]') as HTMLSelectElement | null;
+          if (!select) return false;
+          const opt = Array.from(select.options).find((o) => o.text === name);
+          return opt != null && !opt.disabled;
+        },
+        username,
+        { timeout: JOIN_TIMEOUT },
+      );
       await page.selectOption('select[name="userid"]', { label: username });
       await page.click('button[type="submit"]:has-text("Join Game Session")');
       await page.waitForURL(/\/game/, { timeout: JOIN_TIMEOUT });
