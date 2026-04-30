@@ -1,7 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { executeSkillRecovery, type RollActor } from "./skill-recovery.js";
+import { executeSkillRecovery } from "./skill-recovery.js";
 import { makeAgent } from "../__mocks__/test-fixtures.js";
 import type { AgentData } from "./agent-schema.js";
+import type { RollActor } from "../utils/system-cast.js";
 
 describe("executeSkillRecovery - mid-mission Cool → skill recovery", () => {
   it("restores 1 skill point per Cool die spent (1 Cool = +1 skill)", async () => {

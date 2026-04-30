@@ -7,18 +7,12 @@
 import { agentSystemData } from "./agent-system-data.js";
 import { computeRecoveryStatus, getCurrentDay } from "./recovery-utils.js";
 import type { SkillName } from "../rolls/roll-executor.js";
+import type { RollActor } from "../utils/system-cast.js";
 
 export interface SkillRecoveryResult {
   readonly success: boolean;
   readonly reason?: string;
   readonly notificationKey?: string;
-}
-
-export interface RollActor {
-  readonly id: string | null;
-  readonly name: string;
-  readonly system: object;
-  update(data: Record<string, unknown>): Promise<unknown>;
 }
 
 /**
