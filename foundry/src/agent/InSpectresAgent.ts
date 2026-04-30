@@ -139,7 +139,8 @@ export class InSpectresAgent extends Actor {
       // Also handle dot-notation changes like "skills.academics.penalty"
       for (const [key, value] of Object.entries(systemChanges)) {
         if (key.startsWith("skills.")) {
-          const match = key.match(/^skills\.(\w+)\.(\w+)$/);
+          const regex = /^skills\.(\w+)\.(\w+)$/;
+          const match = regex.exec(key);
           if (match?.[1] && match[2]) {
             const skillName = match[1];
             const fieldName = match[2];

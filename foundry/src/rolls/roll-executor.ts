@@ -1,6 +1,5 @@
+export { type RollActor } from "../utils/system-cast.js";
 import { getActorSystem, type RollActor } from "../utils/system-cast.js";
-
-export type { RollActor };
 import {
   SKILL_ROLL_CHART,
   STRESS_ROLL_CHART,
