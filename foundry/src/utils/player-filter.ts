@@ -26,7 +26,7 @@ export function getPlayersInvolved(_actors: RollActor[]): string[] {
 
   // Always include the current GM
   if (game.user?.isGM) {
-    players.add(game.user!.id);
+    players.add(game.user.id);
   }
 
   // In multi-player campaigns, add owners of involved actors

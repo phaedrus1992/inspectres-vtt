@@ -50,13 +50,13 @@ export function expectContrastCompliant(
   element: HTMLElement | null | undefined,
   minRatio: number = 4.5,
 ): void {
-  if (!element || !element.isConnected) {
-    throw new Error(`Element not connected to DOM: ${element?.tagName ?? "unknown"}`);
+  if (!element?.isConnected) {
+    throw new TypeError(`Element not connected to DOM: ${element?.tagName ?? "unknown"}`);
   }
 
   const styles = globalThis.getComputedStyle(element);
   if (!styles) {
-    throw new Error(`Failed to retrieve computed styles for ${element.tagName}`);
+    throw new TypeError(`Failed to retrieve computed styles for ${element.tagName}`);
   }
 
   const color = styles.color;

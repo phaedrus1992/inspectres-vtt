@@ -19,6 +19,7 @@ declare class FormDataExtended extends FormData {
  */
 declare namespace foundry.applications.handlebars {
   function loadTemplates(paths: string[] | Record<string, string>): Promise<HandlebarsTemplateDelegate[]>;
+  function renderTemplate(path: string, data?: Record<string, unknown>): Promise<string>;
 }
 
 declare namespace foundry.applications.api {

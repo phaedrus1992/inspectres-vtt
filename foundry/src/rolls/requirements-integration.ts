@@ -15,7 +15,7 @@ function validateMissionState(mission: unknown): asserts mission is MissionState
   }
 
   if (typeof obj["requirementsMet"] !== "boolean") {
-    throw new Error("Mission requirementsMet field must be boolean");
+    throw new TypeError("Mission requirementsMet field must be boolean");
   }
 }
 

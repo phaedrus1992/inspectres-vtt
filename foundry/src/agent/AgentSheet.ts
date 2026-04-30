@@ -77,8 +77,8 @@ async function buildStressRollDialog(agent: Actor): Promise<void> {
           const stressDiceCount = Math.max(1, Math.min(5, Number(data.get("stressDice") ?? 1)));
           const coolDiceUsed = Math.max(0, Math.min(maxCool, Number(data.get("coolIgnore") ?? 0)));
           return {
-            stressDiceCount: isNaN(stressDiceCount) ? 1 : stressDiceCount,
-            coolDiceUsed: isNaN(coolDiceUsed) ? 0 : coolDiceUsed,
+            stressDiceCount: Number.isNaN(stressDiceCount) ? 1 : stressDiceCount,
+            coolDiceUsed: Number.isNaN(coolDiceUsed) ? 0 : coolDiceUsed,
           };
         },
       },
@@ -99,7 +99,7 @@ async function buildStressRollDialog(agent: Actor): Promise<void> {
 // HandlebarsApplicationMixin provides _renderHTML/_replaceHTML required by ApplicationV2 for PARTS-based sheets
 export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.sheets.ActorSheetV2) {
 
-  static override DEFAULT_OPTIONS = {
+  static override readonly DEFAULT_OPTIONS = {
     classes: ["inspectres", "sheet", "actor", "agent"],
     position: { width: 600, height: 700 as number | "auto" },
     form: { submitOnChange: true, closeOnSubmit: false },
@@ -121,7 +121,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     },
   };
 
-  static override PARTS = {
+  static override readonly PARTS = {
     sheet: { template: "systems/inspectres/templates/agent-sheet.hbs" },
   };
 
@@ -200,7 +200,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
   }
 
   static async onSkillRoll(this: AgentSheet, _event: Event, target: HTMLElement): Promise<void> {
-    const skillAttr = target.getAttribute("data-skill");
+    const skillAttr = target.dataset["skill"] ?? null;
     if (!isSkillName(skillAttr)) {
       console.error("onSkillRoll: missing or invalid data-skill attribute", { skillAttr });
       return;
@@ -250,7 +250,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
 
   static async onSkillStep(this: AgentSheet, _event: Event, target: HTMLElement): Promise<void> {
     if (!this.isEditable) return;
-    const skillAttr = target.getAttribute("data-skill");
+    const skillAttr = target.dataset["skill"] ?? null;
     if (!isSkillName(skillAttr)) {
       console.error("onSkillStep: missing or invalid data-skill attribute", { skillAttr });
       return;
@@ -267,7 +267,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
       return;
     }
     const current = skillData.base;
-    const delta = target.getAttribute("data-action") === "skillIncrease" ? 1 : -1;
+    const delta = target.dataset["action"] === "skillIncrease" ? 1 : -1;
     const next = Math.min(4, Math.max(0, current + delta));
     if (next === current) return;
     // fvtt-types expects full document data shape for actor.update; partial update path is safe at runtime
@@ -279,7 +279,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
 
   static async onToggleCool(this: AgentSheet, _event: Event, target: HTMLElement): Promise<void> {
     if (!this.isEditable) return;
-    const valueStr = target.getAttribute("data-value");
+    const valueStr = target.dataset["value"];
     if (valueStr == null) {
       console.error("onToggleCool: missing data-value attribute");
       return;
@@ -312,7 +312,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
       ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnActionBlockedRecovery") ?? "Cannot act while recovering");
       return;
     }
-    const characteristics = (currentSystem.characteristics ?? []) as AgentCharacteristic[];
+    const characteristics = currentSystem.characteristics ?? [];
     // fvtt-types expects full document data shape for actor.update; partial update path is safe at runtime
     const updateData = { "system.characteristics": [...characteristics, { text: "", used: false }] } as unknown as Parameters<typeof this.actor.update>[0];
     void this.actor.update(updateData).catch((err: unknown) => {
@@ -322,7 +322,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
 
   static async onRemoveCharacteristic(this: AgentSheet, _event: Event, target: HTMLElement): Promise<void> {
     if (!this.isEditable) return;
-    const idxStr = target.getAttribute("data-idx");
+    const idxStr = target.dataset["idx"];
     if (idxStr == null) {
       console.error("onRemoveCharacteristic: missing data-idx attribute");
       return;
@@ -338,7 +338,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
       ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnActionBlockedRecovery") ?? "Cannot act while recovering");
       return;
     }
-    const characteristics = (currentSystem.characteristics ?? []) as AgentCharacteristic[];
+    const characteristics = currentSystem.characteristics ?? [];
     // fvtt-types expects full document data shape for actor.update; partial update path is safe at runtime
     const updateData = { "system.characteristics": characteristics.filter((_: AgentCharacteristic, i: number) => i !== idx) } as unknown as Parameters<typeof this.actor.update>[0];
     void this.actor.update(updateData).catch((err: unknown) => {
@@ -356,7 +356,8 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     }
     const type = target.dataset["type"] ?? "image";
     const current = this.actor.img ?? undefined;
-    const FilePicker = (foundry.applications.api as unknown as { FilePicker: unknown }).FilePicker as unknown as { new (options: { current?: string | undefined; type: string; callback?: (path: string) => void }): { browse(): void } };
+    type FilePickerCtor = new (options: { current?: string | undefined; type: string; callback?: ((path: string) => void) | undefined }) => { browse(): void };
+    const FilePicker = (foundry.applications.api as unknown as { FilePicker: unknown }).FilePicker as unknown as FilePickerCtor;
     const picker = new FilePicker({
       current,
       type,
@@ -503,7 +504,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
             const form = dialog.querySelector("form") as HTMLFormElement | null;
             if (!form) return null;
             const days = Math.max(1, Math.min(10, Number(new FormData(form).get("days") ?? 2)));
-            return { days: isNaN(days) ? 2 : days };
+            return { days: Number.isNaN(days) ? 2 : days };
           },
         },
         { action: "cancel", label: i18n?.localize("INSPECTRES.DialogCancel") ?? "Cancel" },
@@ -534,7 +535,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     const input = target as HTMLInputElement;
     const targetDay = Number(input.value);
     const MAX_RECOVERY_DAY = 365;
-    if (!Number.isInteger(targetDay) || isNaN(targetDay) || targetDay < 1 || targetDay > MAX_RECOVERY_DAY) {
+    if (!Number.isInteger(targetDay) || Number.isNaN(targetDay) || targetDay < 1 || targetDay > MAX_RECOVERY_DAY) {
       ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnInvalidDay") ?? "Invalid day number");
       return;
     }
@@ -562,7 +563,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
 
   static async onRestoreSkill(this: AgentSheet, _event: Event, target: HTMLElement): Promise<void> {
     if (!this.isEditable) return;
-    const skillAttr = target.getAttribute("data-skill");
+    const skillAttr = target.dataset["skill"] ?? null;
     if (!isSkillName(skillAttr)) {
       console.error("onRestoreSkill: missing or invalid data-skill attribute", { skillAttr });
       return;
@@ -596,7 +597,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
             const form = dialog.querySelector("form") as HTMLFormElement | null;
             if (!form) return null;
             const cool = Math.max(1, Math.min(maxCool, Number(new FormData(form).get("cool") ?? 1)));
-            return { cool: isNaN(cool) ? 1 : cool };
+            return { cool: Number.isNaN(cool) ? 1 : cool };
           },
         },
         { action: "cancel", label: i18n?.localize("INSPECTRES.DialogCancel") ?? "Cancel" },

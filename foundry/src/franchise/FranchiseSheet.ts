@@ -12,7 +12,7 @@ import { applyEndOfSessionBonuses, initiateBankruptcyRestart } from "./vacation-
 
 // HandlebarsApplicationMixin provides _renderHTML/_replaceHTML required by ApplicationV2 for PARTS-based sheets
 export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.sheets.ActorSheetV2) {
-  static override DEFAULT_OPTIONS = {
+  static override readonly DEFAULT_OPTIONS = {
     classes: ["inspectres", "sheet", "actor", "franchise"],
     position: { width: 600, height: 600 as number | "auto" },
     form: { submitOnChange: true, closeOnSubmit: false },
@@ -32,7 +32,7 @@ export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicati
     },
   };
 
-  static override PARTS = {
+  static override readonly PARTS = {
     sheet: { template: "systems/inspectres/templates/franchise-sheet.hbs" },
   };
 
@@ -206,7 +206,8 @@ export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicati
       });
 
     const baseMsg = game.i18n?.localize("INSPECTRES.MissionCompleteAnnounce") ?? "The mission is complete! Franchise dice have been distributed.";
-    const content2 = `<p>${baseMsg}</p><ul>${lines.map((l) => `<li>${l}</li>`).join("")}</ul>`;
+    const listItems = lines.map((l) => `<li>${l}</li>`).join("");
+    const content2 = `<p>${baseMsg}</p><ul>${listItems}</ul>`;
     await ChatMessage.create({ content: content2 } as unknown as Parameters<typeof ChatMessage.create>[0]);
   }
 

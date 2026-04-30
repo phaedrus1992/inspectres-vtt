@@ -301,6 +301,18 @@ Add `"verbatimModuleSyntax": true` (required by TS rules). Combined with `"isola
 `allowImportingTsExtensions: true` requires `noEmit: true`.
 `moduleResolution: "bundler"` correct for Vite.
 
+## Deprecated Global APIs (V13)
+
+Foundry V13 moved several globals into namespaces. Use the namespaced forms:
+
+| Deprecated global | Replacement |
+|---|---|
+| `renderTemplate(path, data)` | `foundry.applications.handlebars.renderTemplate(path, data)` |
+| `loadTemplates(paths)` | `foundry.applications.handlebars.loadTemplates(paths)` |
+| `Dialog.wait(config)` | `foundry.applications.api.DialogV2.wait(config)` |
+
+When migrating, update `src/types/foundry-v2.d.ts` if the namespaced function is not yet typed in fvtt-types. Update test mocks to target `foundry.applications.handlebars.renderTemplate` instead of the global.
+
 ## Anti-Patterns
 
 | Never | Use |
@@ -322,3 +334,6 @@ Add `"verbatimModuleSyntax": true` (required by TS rules). Combined with `"isola
 | `extends Application` (V1) | `ApplicationV2` |
 | `getData()` in V2 sheets | `_prepareContext()` |
 | `activateListeners(html: JQuery)` in V2 | `_onRender()` + actions |
+| Global `renderTemplate(...)` | `foundry.applications.handlebars.renderTemplate(...)` |
+| Global `loadTemplates(...)` | `foundry.applications.handlebars.loadTemplates(...)` |
+| Mock `globalThis.renderTemplate` in tests | Mock `foundry.applications.handlebars.renderTemplate` |

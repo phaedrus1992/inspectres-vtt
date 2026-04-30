@@ -10,9 +10,7 @@ export class MissionTrackerApp extends foundry.applications.api.HandlebarsApplic
   static instance: MissionTrackerApp | null = null;
 
   static open(): void {
-    if (!MissionTrackerApp.instance) {
-      MissionTrackerApp.instance = new MissionTrackerApp();
-    }
+    MissionTrackerApp.instance ??= new MissionTrackerApp();
     const instance = MissionTrackerApp.instance;
     void instance.render({ force: true }).catch((err: unknown) => {
       handleActionError(err, "Failed to open Mission Tracker", "INSPECTRES.ErrorMissionTrackerOpen", "Failed to open Mission Tracker");
@@ -22,7 +20,7 @@ export class MissionTrackerApp extends foundry.applications.api.HandlebarsApplic
     });
   }
 
-  static override DEFAULT_OPTIONS: foundry.applications.api.ApplicationV2Options = {
+  static override readonly DEFAULT_OPTIONS: foundry.applications.api.ApplicationV2Options = {
     id: "inspectres-mission-tracker",
     classes: ["inspectres", "inspectres-mission-tracker-window"],
     window: {
@@ -36,7 +34,7 @@ export class MissionTrackerApp extends foundry.applications.api.HandlebarsApplic
     },
   };
 
-  static override PARTS = {
+  static override readonly PARTS = {
     sheet: { template: "systems/inspectres/templates/mission-tracker.hbs" },
   };
 
@@ -101,13 +99,13 @@ export class MissionTrackerApp extends foundry.applications.api.HandlebarsApplic
     if (distributedTotal !== refreshedTotal) {
       const msg = game.i18n?.format("INSPECTRES.DistributeDialogTotalMismatch", { total: String(refreshedTotal) })
         ?? `Total must equal ${refreshedTotal} dice.`;
-      if (distributedTotal !== total) {
+      if (distributedTotal === total) {
+        ui.notifications?.warn(msg);
+      } else {
         ui.notifications?.warn(
           game.i18n?.localize("INSPECTRES.DistributeDialogPoolChanged")
             ?? `Mission pool changed from ${total} to ${refreshedTotal} while the dialog was open.`,
         );
-      } else {
-        ui.notifications?.warn(msg);
       }
       return;
     }
@@ -137,7 +135,8 @@ export class MissionTrackerApp extends foundry.applications.api.HandlebarsApplic
       });
 
     const baseMsg = game.i18n?.localize("INSPECTRES.MissionCompleteAnnounce") ?? "The mission is complete! Franchise dice have been distributed.";
-    const content = `<p>${baseMsg}</p><ul>${lines.map((l) => `<li>${l}</li>`).join("")}</ul>`;
+    const listItems = lines.map((l) => `<li>${l}</li>`).join("");
+    const content = `<p>${baseMsg}</p><ul>${listItems}</ul>`;
     await ChatMessage.create({ content } as unknown as Parameters<typeof ChatMessage.create>[0]);
 
     if (MissionTrackerApp.instance === this) {

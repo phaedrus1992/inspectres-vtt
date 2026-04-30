@@ -11,7 +11,7 @@ import { type AgentData } from "../agent/agent-schema.js";
 import { agentSystemData } from "../agent/agent-system-data.js";
 import { type FranchiseData } from "../franchise/franchise-schema.js";
 import { emitMissionPoolUpdated } from "../mission/socket.js";
-import { getCurrentDay, computeRecoveryStatus } from "../agent/recovery-utils.js";
+import { getCurrentDay } from "../agent/recovery-utils.js";
 import { type ItemRarity, isRollSufficient, checkDefect } from "../mission/requirements-checker.js";
 import { prepareSkillRollContext, type SkillRollContextInput } from "../agent/skill-roll-dialog.js";
 import { checkTechnologyRollRequirements } from "./skill-roll-executor.js";
@@ -23,6 +23,7 @@ import { checkTechnologyRollRequirements } from "./skill-roll-executor.js";
 export type SkillName = "academics" | "athletics" | "technology" | "contact";
 
 export type RollType = "skill" | "bank" | "stress" | "client";
+type D3Result = 1 | 2 | 3;
 
 type DieFace = 1 | 2 | 3 | 4 | 5 | 6;
 
@@ -369,7 +370,7 @@ export async function executeSkillRoll(
 
   // ChatMessage.getSpeaker requires the full Actor type; RollActor satisfies the needed fields at runtime
   const speaker = ChatMessage.getSpeaker({ actor: agent as Actor });
-  const content = await renderTemplate("systems/inspectres/templates/roll-card.hbs", {
+  const content = await foundry.applications.handlebars.renderTemplate("systems/inspectres/templates/roll-card.hbs", {
     rollType: "skill",
     title: `${game.i18n?.localize("INSPECTRES.SkillRoll") ?? "Skill Roll"}: ${skillName}`,
     result: outcome.result,
@@ -487,7 +488,8 @@ async function buildSkillRollDialog(opts: SkillRollDialogOptions): Promise<Skill
           const coolDice = Math.min(Number(data.get("coolDice") ?? 0), opts.availableCool);
           const talentDie = data.has("talentDie");
           const takesFour = data.has("takesFour");
-          const requirementTierRaw = String(data.get("requirementTier") ?? "");
+          const requirementTierEntry = data.get("requirementTier");
+          const requirementTierRaw = typeof requirementTierEntry === "string" ? requirementTierEntry : "";
           const requirementTier = (requirementTierRaw === "common" || requirementTierRaw === "rare" || requirementTierRaw === "exotic")
             ? requirementTierRaw
             : undefined;
@@ -498,8 +500,8 @@ async function buildSkillRollDialog(opts: SkillRollDialogOptions): Promise<Skill
           }
           return {
             cardDice,
-            bankDice: isNaN(bankDice) ? 0 : bankDice,
-            coolDice: isNaN(coolDice) ? 0 : coolDice,
+            bankDice: Number.isNaN(bankDice) ? 0 : bankDice,
+            coolDice: Number.isNaN(coolDice) ? 0 : coolDice,
             talentDie,
             takesFour,
             requirementTier,
@@ -538,7 +540,7 @@ export async function executeBankRoll(franchise: RollActor): Promise<void> {
 
   // ChatMessage.getSpeaker requires the full Actor type; RollActor satisfies the needed fields at runtime
   const speaker = ChatMessage.getSpeaker({ actor: franchise as Actor });
-  const content = await renderTemplate("systems/inspectres/templates/roll-card.hbs", {
+  const content = await foundry.applications.handlebars.renderTemplate("systems/inspectres/templates/roll-card.hbs", {
     rollType: "bank",
     title: game.i18n?.localize("INSPECTRES.BankRoll") ?? "Bank Roll",
     resolutions: summary.resolutions,
@@ -588,7 +590,7 @@ export async function executeStressRoll(
       console.error("[INSPECTRES] Death roll validation failed:", { agentId: agent.id, agentName: agent.name, deathRoll });
       throw new Error(errorMsg);
     }
-    const deathKey = deathRoll as 1 | 2 | 3;
+    const deathKey = deathRoll as D3Result;
     deathOutcome = DEATH_DISMEMBERMENT_CHART[deathKey];
     if (!deathOutcome) {
       const errorMsg = `Death outcome missing for d3 result ${deathKey}. This indicates corrupted DEATH_DISMEMBERMENT_CHART. Agent: ${agent.name} (${agent.id})`;
@@ -664,7 +666,7 @@ export async function executeStressRoll(
 
   // ChatMessage.getSpeaker requires the full Actor type; RollActor satisfies the needed fields at runtime
   const speaker = ChatMessage.getSpeaker({ actor: agent as Actor });
-  const content = await renderTemplate("systems/inspectres/templates/roll-card.hbs", {
+  const content = await foundry.applications.handlebars.renderTemplate("systems/inspectres/templates/roll-card.hbs", {
     rollType: "stress",
     title: game.i18n?.localize("INSPECTRES.StressRoll") ?? "Stress Roll",
     result: deathOutcome?.result ?? outcome.result,
@@ -734,7 +736,7 @@ export async function executeClientRoll(franchise: RollActor): Promise<void> {
 
   // ChatMessage.getSpeaker requires the full Actor type; RollActor satisfies the needed fields at runtime
   const speaker = ChatMessage.getSpeaker({ actor: franchise as Actor });
-  const content = await renderTemplate("systems/inspectres/templates/roll-card.hbs", {
+  const content = await foundry.applications.handlebars.renderTemplate("systems/inspectres/templates/roll-card.hbs", {
     rollType: "client",
     title: game.i18n?.localize("INSPECTRES.ClientRoll") ?? "Client Roll",
     client: generated,

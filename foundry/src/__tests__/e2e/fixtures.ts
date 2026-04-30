@@ -1,4 +1,6 @@
-import { test as base, expect, type Page } from "@playwright/test";
+import { test as base, type Page } from "@playwright/test";
+export { expect } from "@playwright/test";
+
 import { ConsoleBuffer } from "./console-capture";
 import { workerStorageStatePath, workerUsername, E2E_VIEWPORT, WORKER_COUNT } from "./global-setup.js";
 
@@ -195,4 +197,3 @@ export const test = base.extend({
   },
 });
 
-export { expect };

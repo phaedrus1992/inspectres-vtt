@@ -16,10 +16,10 @@ function validateAugmentationState(state: unknown): asserts state is Augmentatio
   }
   const obj = state as Record<string, unknown>;
   if (typeof obj["available"] !== "boolean") {
-    throw new Error("Augmentation state must be boolean for 'available' property");
+    throw new TypeError("Augmentation state must be boolean for 'available' property");
   }
   if (typeof obj["selected"] !== "boolean") {
-    throw new Error("Augmentation state must be boolean for 'selected' property");
+    throw new TypeError("Augmentation state must be boolean for 'selected' property");
   }
 }
 

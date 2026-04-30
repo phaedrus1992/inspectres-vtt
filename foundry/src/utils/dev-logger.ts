@@ -13,7 +13,7 @@ interface LogEntry {
 
 class DevLogger {
   private logs: LogEntry[] = [];
-  private maxLogs = 500;
+  private readonly maxLogs = 500;
 
   log(
     level: "info" | "warn" | "error",
@@ -75,8 +75,6 @@ class DevLogger {
 let loggerInstance: DevLogger | null = null;
 
 export function getDevLogger(): DevLogger {
-  if (!loggerInstance) {
-    loggerInstance = new DevLogger();
-  }
+  loggerInstance ??= new DevLogger();
   return loggerInstance;
 }

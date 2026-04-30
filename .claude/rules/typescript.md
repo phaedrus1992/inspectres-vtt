@@ -153,12 +153,13 @@ Always `const` or `let`. Default to `const`. No `var`.
 
 - Minimize exported surface
 - Never write `public` explicitly (it's default; exception: non-readonly constructor params)
-- Use `readonly` on non-reassigned properties
+- Use `readonly` on **every** property not reassigned after construction — including `static` overrides (`static override readonly DEFAULT_OPTIONS`)
 - Use parameter properties to avoid boilerplate
 - Initialize fields at declaration when possible
 - No `#private`. Use TypeScript `private` (better size/perf)
 - Getters pure (no side effects)
 - No arrow-function properties unless need stable `this` for unregistration
+- No empty constructors — delete them; JS provides a default
 
 ## Functions
 
@@ -188,6 +189,8 @@ const POLL_TIMEOUT_MS = 30_000; // 30s = server-side request timeout
 - String: `String(x)` or template literals. No `"" + x`
 - Number: `Number(x)` then check `isNaN`. No unary `+`. `parseInt` only non-base-10
 - Boolean: implicit truthiness in conditionals. No `!!x`. Explicit comparisons (`arr.length > 0`) fine
+- **`Number.isNaN` not `isNaN`** — `isNaN` coerces to number first (`isNaN("abc")` is `true`); `Number.isNaN` is precise
+- **Template literal interpolation** — always `${String(x)}` when `x` is `unknown` or could be an object; bare `${x}` produces `[object Object]` for File/FormData/any non-primitive
 
 ## Spread
 
@@ -202,6 +205,57 @@ const POLL_TIMEOUT_MS = 30_000; // 30s = server-side request timeout
 - Mock boundaries only (network, filesystem, external)
 - Colocate tests (`*.test.ts` next to source)
 - Use `vitest`
+
+## Null-coalescing and optional chaining
+
+Prefer compact, idiomatic forms over verbose conditionals:
+
+```typescript
+// ??= for lazy initialization
+loggerInstance ??= new DevLogger();       // not: if (!loggerInstance) loggerInstance = new DevLogger()
+hookHandlers[event] ??= [];               // not: if (!hookHandlers[event]) hookHandlers[event] = []
+
+// Optional chain to simplify guarded access
+if (!element?.isConnected) ...            // not: if (!element || !element.isConnected)
+const match = key.match(/pat/);
+if (match?.[1] && match[2]) ...           // not: if (match && match[1] && match[2])
+```
+
+## Element attributes
+
+Prefer `.dataset` over `getAttribute("data-*")`:
+
+```typescript
+const rollType = target.dataset["rollType"] ?? null;   // not: target.getAttribute("data-roll-type")
+```
+
+`dataset` avoids the `data-` prefix, is camelCase-normalized, and returns `undefined` instead of `null`.
+
+## Throw types
+
+Throw `TypeError` for type/value validation failures (wrong shape, unexpected type), `Error` for logic/state failures:
+
+```typescript
+if (typeof input !== "string") throw new TypeError("Expected string, got " + typeof input);
+if (!scene.exists) throw new Error("Scene not found: " + id);
+```
+
+## Re-exports
+
+Use `export ... from` to re-export symbols (avoids import+export duplication):
+
+```typescript
+export { expect } from "@playwright/test";   // not: import { expect } from ...; export { expect };
+```
+
+## Node built-in imports
+
+Always use `node:` prefix for built-in modules:
+
+```typescript
+import fs from "node:fs";     // not: import fs from "fs"
+import path from "node:path"; // not: import path from "path"
+```
 
 ## Anti-Patterns
 
@@ -224,3 +278,11 @@ const POLL_TIMEOUT_MS = 30_000; // 30s = server-side request timeout
 | `debugger` | Remove before commit |
 | Empty `catch {}` | Handle or rethrow |
 | `console.log` in production | Structured logging |
+| `isNaN(x)` | `Number.isNaN(x)` |
+| `${unknownValue}` in template literals | `${String(unknownValue)}` when type is unknown/object |
+| `if (!x) x = y` | `x ??= y` |
+| `import fs from "fs"` | `import fs from "node:fs"` |
+| `target.getAttribute("data-foo")` | `target.dataset["foo"]` |
+| `throw new Error(...)` for type errors | `throw new TypeError(...)` |
+| Empty constructor `constructor() {}` | Delete it (JS default) |
+| `static override PARTS = ...` (non-readonly) | `static override readonly PARTS = ...` |

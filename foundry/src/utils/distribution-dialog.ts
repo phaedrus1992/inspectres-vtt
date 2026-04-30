@@ -74,8 +74,8 @@ export async function buildDistributionConfig(opts: DistributionDialogOptions): 
 
             const num = Number(rawValue);
             // Reject unparsable or negative values with clear context
-            if (isNaN(num) || num < 0) {
-              throw new Error(`Invalid dice count for ${player.name}: "${rawValue}". Please enter a whole number ≥ 0.`);
+            if (Number.isNaN(num) || num < 0) {
+              throw new Error(`Invalid dice count for ${player.name}: "${String(rawValue)}". Please enter a whole number ≥ 0.`);
             }
 
             distribution[player.id] = num;
