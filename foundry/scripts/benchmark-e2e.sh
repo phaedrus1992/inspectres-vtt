@@ -37,9 +37,9 @@ fi
 
 # Ensure docker compose is running and ready
 echo "📦 Checking Foundry container..."
-if ! docker compose -f "$REPO_ROOT/docker/docker compose.ci.yml" ps foundry &>/dev/null; then
+if ! docker compose -f "$REPO_ROOT/docker/docker-compose.ci.yml" ps foundry &>/dev/null; then
   echo "⚠️  Foundry container not running. Start with:"
-  echo "   cd docker && docker compose -f docker compose.ci.yml up -d"
+  echo "   cd docker && docker compose -f docker-compose.ci.yml up -d"
   echo "   Then run this script again."
   exit 1
 fi
@@ -56,7 +56,7 @@ while [ $RETRY -lt $MAX_RETRIES ]; do
   RETRY=$((RETRY + 1))
   if [ $RETRY -eq $MAX_RETRIES ]; then
     echo "❌ Foundry did not become ready after $((MAX_RETRIES / 2))s. Container may be crashing."
-    echo "   Check container logs: docker compose -f docker/docker compose.ci.yml logs foundry"
+    echo "   Check container logs: docker compose -f docker/docker-compose.ci.yml logs foundry"
     exit 1
   fi
   sleep 0.5
