@@ -16,6 +16,11 @@ import {
   type SkillName,
 } from "./roll-executor.js";
 
+// Set GM user for all tests that call executeSkillRoll/executeStressRoll
+beforeEach(() => {
+  (globalThis as unknown as { game: { user: { isGM: boolean } } }).game.user.isGM = true;
+});
+
 // ---------------------------------------------------------------------------
 // resolveBankDice — pure function tests
 // ---------------------------------------------------------------------------
