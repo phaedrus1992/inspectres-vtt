@@ -355,7 +355,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
       return;
     }
     const type = target.dataset["type"] ?? "image";
-    const current = this.actor.img;
+    const current = this.actor.img ?? undefined;
     type FilePickerCtor = new (options: { current?: string | undefined; type: string; callback?: ((path: string) => void) | undefined }) => { browse(): void };
     const FilePicker = (foundry.applications.api as unknown as { FilePicker: unknown }).FilePicker as unknown as FilePickerCtor;
     const picker = new FilePicker({
