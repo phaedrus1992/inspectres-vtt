@@ -99,14 +99,11 @@ export class MissionTrackerApp extends foundry.applications.api.HandlebarsApplic
     if (distributedTotal !== refreshedTotal) {
       const msg = game.i18n?.format("INSPECTRES.DistributeDialogTotalMismatch", { total: String(refreshedTotal) })
         ?? `Total must equal ${refreshedTotal} dice.`;
-      if (distributedTotal === total) {
-        ui.notifications?.warn(msg);
-      } else {
-        ui.notifications?.warn(
-          game.i18n?.localize("INSPECTRES.DistributeDialogPoolChanged")
-            ?? `Mission pool changed from ${total} to ${refreshedTotal} while the dialog was open.`,
-        );
-      }
+      const warnMsg = distributedTotal === total
+        ? msg
+        : game.i18n?.localize("INSPECTRES.DistributeDialogPoolChanged")
+          ?? `Mission pool changed from ${total} to ${refreshedTotal} while the dialog was open.`;
+      ui.notifications?.warn(warnMsg);
       return;
     }
 
