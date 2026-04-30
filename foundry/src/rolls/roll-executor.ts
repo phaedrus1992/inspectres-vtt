@@ -769,21 +769,24 @@ export async function executeStressRoll(
   // Hazard pay (rules: +1 franchise die per non-Weird agent at mission end) is deferred to mission resolution.
   // See GitHub issue for implementation of mission-end hazard pay calculation.
 
-  // ChatMessage.getSpeaker requires the full Actor type; RollActor satisfies the needed fields at runtime
-  const speaker = ChatMessage.getSpeaker({ actor: agent as Actor });
-  const content = await foundry.applications.handlebars.renderTemplate("systems/inspectres/templates/roll-card.hbs", {
-    rollType: "stress",
-    title: game.i18n?.localize("INSPECTRES.StressRoll") ?? "Stress Roll",
-    result: deathOutcome?.result ?? outcome.result,
-    narration: deathOutcome?.narration ?? outcome.narration,
-    stressDiceCount,
-    coolDiceUsed,
-    diceRolled: faces,
-    effectiveFace,
-    deathOutcome: deathOutcome ?? null,
-    penaltyNote: !deathOutcome && effectiveFace <= 3 ? buildPenaltyNote(effectiveFace as 1 | 2 | 3, stressDiceCount) : null,
-  });
-  await postChatCard(content, speaker, [roll]);
+  // Only post ChatMessage if franchise is not in debt mode (#455)
+  if (!franchiseSystem?.debtMode) {
+    // ChatMessage.getSpeaker requires the full Actor type; RollActor satisfies the needed fields at runtime
+    const speaker = ChatMessage.getSpeaker({ actor: agent as Actor });
+    const content = await foundry.applications.handlebars.renderTemplate("systems/inspectres/templates/roll-card.hbs", {
+      rollType: "stress",
+      title: game.i18n?.localize("INSPECTRES.StressRoll") ?? "Stress Roll",
+      result: deathOutcome?.result ?? outcome.result,
+      narration: deathOutcome?.narration ?? outcome.narration,
+      stressDiceCount,
+      coolDiceUsed,
+      diceRolled: faces,
+      effectiveFace,
+      deathOutcome: deathOutcome ?? null,
+      penaltyNote: !deathOutcome && effectiveFace <= 3 ? buildPenaltyNote(effectiveFace as 1 | 2 | 3, stressDiceCount) : null,
+    });
+    await postChatCard(content, speaker, [roll]);
+  }
 }
 
 export function buildPenaltyNote(face: 1 | 2 | 3, stressDiceCount: number): string {
