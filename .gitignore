@@ -1,6 +1,7 @@
 /.claude/skill-improver.*
 /.semgrep-results/
 .tmp/
+.scannerwork/
 
 /docker/docker-compose.override.yml
 /docker/.env
