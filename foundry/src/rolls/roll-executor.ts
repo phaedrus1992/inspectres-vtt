@@ -1,4 +1,6 @@
-import { getActorSystem } from "../utils/system-cast.js";
+import { getActorSystem, type RollActor } from "../utils/system-cast.js";
+
+export type { RollActor };
 import {
   SKILL_ROLL_CHART,
   STRESS_ROLL_CHART,
@@ -45,14 +47,6 @@ export interface StressRollParams {
   coolDiceUsed: number;
 }
 
-// Structural subset of Actor used by roll functions — avoids pulling in the full
-// Foundry Actor class (130+ properties) in call sites that only need these fields.
-export interface RollActor {
-  readonly id: string | null;
-  readonly name: string;
-  readonly system: object;
-  update(data: Record<string, unknown>): Promise<unknown>;
-}
 
 // ---------------------------------------------------------------------------
 // Guards and helpers
