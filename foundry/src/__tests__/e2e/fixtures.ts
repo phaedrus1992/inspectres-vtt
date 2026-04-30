@@ -156,6 +156,22 @@ export const test = base.extend({
 
     await use(page);
 
+    // Call game.logOut() to close the Foundry server-side session before the context
+    // is destroyed. Without this, Foundry keeps the user marked as "in session" until
+    // its internal timeout (~30-60s), which disables that user's option on the /join
+    // page for the next test — causing the "option being selected is not enabled" error.
+    try {
+      await page.evaluate(() => {
+        // @ts-expect-error - Foundry runtime global
+        if (typeof globalThis.game?.logOut === "function") globalThis.game.logOut();
+      });
+      // Brief wait for the logout navigation to initiate.
+      await page.waitForURL(/\/join/, { timeout: 3_000 }).catch(() => {});
+    } catch {
+      // Best-effort: if the page is already closed or Foundry isn't ready, ignore.
+      // The waitForFunction option-enabled guard in the next test is the safety net.
+    }
+
     // Explicit listener cleanup to prevent stale handlers on test retry.
     // Playwright closes the BrowserContext between tests, but retained listeners
     // can theoretically fire on reused page objects during retry scenarios.
