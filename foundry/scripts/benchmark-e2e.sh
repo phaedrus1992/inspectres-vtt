@@ -35,7 +35,7 @@ if ! command -v npm &> /dev/null; then
   exit 1
 fi
 
-# Ensure docker compose is running
+# Ensure docker compose is running and ready
 echo "📦 Checking Foundry container..."
 if ! docker compose -f "$REPO_ROOT/docker/docker-compose.ci.yml" ps foundry &>/dev/null; then
   echo "⚠️  Foundry container not running. Start with:"
@@ -44,7 +44,24 @@ if ! docker compose -f "$REPO_ROOT/docker/docker-compose.ci.yml" ps foundry &>/d
   exit 1
 fi
 
-echo "✓ Foundry running on http://localhost:30000"
+# Verify container is actually listening on port 30000 (not just running)
+echo "📡 Waiting for Foundry to be ready..."
+MAX_RETRIES=30
+RETRY=0
+while [ $RETRY -lt $MAX_RETRIES ]; do
+  if curl -s http://localhost:30000/ >/dev/null 2>&1; then
+    echo "✓ Foundry ready on http://localhost:30000"
+    break
+  fi
+  RETRY=$((RETRY + 1))
+  if [ $RETRY -eq $MAX_RETRIES ]; then
+    echo "❌ Foundry did not become ready after $((MAX_RETRIES / 2))s. Container may be crashing."
+    echo "   Check container logs: docker compose -f docker/docker-compose.ci.yml logs foundry"
+    exit 1
+  fi
+  sleep 0.5
+done
+
 echo ""
 
 # Run E2E tests and capture output
@@ -71,13 +88,34 @@ REPORT_PATH="$TMP_DIR/e2e-benchmark-report.md"
 if [ -f "$LOG_FILE" ]; then
   echo "📊 Generating benchmark report..."
 
-  # Extract test metrics from log
-  TOTAL_TESTS=$(grep -c "✓\|✕" "$LOG_FILE" || echo "0")
-  PASSED=$(grep -c "✓" "$LOG_FILE" || echo "0")
-  FAILED=$(grep -c "✕" "$LOG_FILE" || echo "0")
-
-  # Estimate total duration (rough)
-  DURATION=$(grep "Tests:" "$LOG_FILE" | grep -o "[0-9.]*ms" | head -1 || echo "unknown")
+  # Extract test metrics from Playwright JSON report for reliability
+  # Playwright writes structured data to .json; grep is fragile and error-prone
+  REPORT_JSON="$FOUNDRY_DIR/test-results/test-results.json"
+  if [ -f "$REPORT_JSON" ]; then
+    # Parse via jq if available, else parse manually
+    if command -v jq &> /dev/null; then
+      TOTAL_TESTS=$(jq '[.suites[].tests[]] | length' "$REPORT_JSON" 2>/dev/null || echo "0")
+      PASSED=$(jq '[.suites[].tests[] | select(.status=="passed")] | length' "$REPORT_JSON" 2>/dev/null || echo "0")
+      FAILED=$(jq '[.suites[].tests[] | select(.status=="failed")] | length' "$REPORT_JSON" 2>/dev/null || echo "0")
+      DURATION=$(jq '.startTime as $start | .endTime as $end | (($end - $start) / 1000) | "\(.)s"' "$REPORT_JSON" 2>/dev/null || echo "unknown")
+    else
+      # Fallback: parse log but validate before using
+      TOTAL_TESTS=$(grep -c "✓\|✕" "$LOG_FILE" 2>/dev/null || echo "0")
+      PASSED=$(grep -c "✓" "$LOG_FILE" 2>/dev/null || echo "0")
+      FAILED=$(grep -c "✕" "$LOG_FILE" 2>/dev/null || echo "0")
+      DURATION=$(grep "Tests:" "$LOG_FILE" 2>/dev/null | grep -o "[0-9.]*ms" | head -1 || echo "unknown")
+      if [ "$TOTAL_TESTS" = "0" ]; then
+        echo "⚠️  Warning: Could not extract test metrics from log. Install jq for reliable parsing."
+      fi
+    fi
+  else
+    # Playwright JSON not available; try log parsing as last resort
+    TOTAL_TESTS=$(grep -c "✓\|✕" "$LOG_FILE" 2>/dev/null || echo "0")
+    PASSED=$(grep -c "✓" "$LOG_FILE" 2>/dev/null || echo "0")
+    FAILED=$(grep -c "✕" "$LOG_FILE" 2>/dev/null || echo "0")
+    DURATION="unknown"
+    echo "⚠️  Warning: Playwright JSON report not found at $REPORT_JSON. Metric parsing is unreliable."
+  fi
 
   cat > "$REPORT_PATH" << EOF
 # E2E Test Benchmark Report
