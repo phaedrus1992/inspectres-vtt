@@ -322,7 +322,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
 
   static async onRemoveCharacteristic(this: AgentSheet, _event: Event, target: HTMLElement): Promise<void> {
     if (!this.isEditable) return;
-    const idxStr = target.dataset["idx"];
+    const idxStr = target.dataset["idx"] ?? null;
     if (idxStr == null) {
       console.error("onRemoveCharacteristic: missing data-idx attribute");
       return;
