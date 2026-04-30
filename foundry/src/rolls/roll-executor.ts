@@ -1,6 +1,5 @@
+export { type RollActor } from "../utils/system-cast.js";
 import { getActorSystem, type RollActor } from "../utils/system-cast.js";
-
-export type { RollActor };
 import {
   SKILL_ROLL_CHART,
   STRESS_ROLL_CHART,
@@ -8,6 +7,8 @@ import {
   CLIENT_GENERATION_TABLE,
   DEATH_DISMEMBERMENT_CHART,
   type DeathDismembermentOutcome,
+  type SkillRollOutcome,
+  type StressRollOutcome,
 } from "./roll-charts.js";
 import { type AgentData } from "../agent/agent-schema.js";
 import { agentSystemData } from "../agent/agent-system-data.js";
@@ -54,20 +55,6 @@ export interface StressRollParams {
 
 function isDieFace(n: number): n is DieFace {
   return n >= 1 && n <= 6;
-}
-
-function getRollTypeLabel(rollType: RollType): string {
-  switch (rollType) {
-    case "skill": return game.i18n?.localize("INSPECTRES.SkillRoll") ?? "Skill Roll";
-    case "bank": return game.i18n?.localize("INSPECTRES.BankRoll") ?? "Bank Roll";
-    case "stress": return game.i18n?.localize("INSPECTRES.StressRoll") ?? "Stress Roll";
-    case "client": return game.i18n?.localize("INSPECTRES.ClientRoll") ?? "Client Roll";
-    default: return assertNever(rollType);
-  }
-}
-
-function assertNever(x: never): never {
-  throw new Error(`Unexpected roll type: ${JSON.stringify(x)}`);
 }
 
 function extractFaces(roll: Roll): number[] {
@@ -201,6 +188,133 @@ const CARD_FOR_SKILL: Record<SkillName, keyof FranchiseData["cards"] | null> = {
 };
 
 // ---------------------------------------------------------------------------
+// Skill Roll Helpers (reduce executeSkillRoll complexity)
+// ---------------------------------------------------------------------------
+
+/** Extract skill roll parameters from actor systems. */
+function getSkillRollParams(
+  agent: RollActor,
+  franchise: RollActor | null,
+  skillName: SkillName,
+) {
+  const system = agentSystemData(agent);
+  const skill = system.skills[skillName];
+  const effectiveDice = Math.max(0, skill.base - skill.penalty);
+  const franchiseSystem = franchise ? getActorSystem<FranchiseData>(franchise) : null;
+  const cardType = CARD_FOR_SKILL[skillName];
+  return {
+    system,
+    skill,
+    effectiveDice,
+    franchiseSystem,
+    cardType,
+    availableCardDice: franchiseSystem && cardType ? franchiseSystem.cards[cardType] : 0,
+    availableBank: franchiseSystem ? franchiseSystem.bank : 0,
+    availableCool: system.cool,
+    talentText: system.talent.trim(),
+  };
+}
+
+/** Validate and compute main roll outcome (handles zero-dice, take-4, normal cases). */
+async function rollSkillDice(
+  effectiveDice: number,
+  takesFour: boolean,
+  augmentation: SkillRollAugmentation,
+): Promise<{ highestFace: DieFace; mainRoll: Roll }> {
+  let highestFace: DieFace;
+  let mainRoll: Roll;
+
+  if (takesFour) {
+    highestFace = 4;
+    mainRoll = new Roll("0d6");
+    await mainRoll.evaluate();
+  } else {
+    const totalDice =
+      effectiveDice +
+      augmentation.cardDice +
+      augmentation.bankDice +
+      augmentation.coolDice +
+      (augmentation.talentDie ? 1 : 0);
+
+    if (totalDice === 0) {
+      const { roll, faces } = await rollDice(2);
+      mainRoll = roll;
+      const lowestFace = faces.length > 0 ? Math.min(...faces) : 1;
+      highestFace = isDieFace(lowestFace) ? lowestFace : 1;
+    } else {
+      const { roll, faces } = await rollDice(totalDice);
+      mainRoll = roll;
+      const maxFace = faces.length > 0 ? Math.max(...faces) : 1;
+      highestFace = isDieFace(maxFace) ? maxFace : 1;
+    }
+  }
+
+  return { highestFace, mainRoll };
+}
+
+/** Apply requirement tier check if specified. */
+function applyRequirementTier(
+  outcome: SkillRollOutcome,
+  highestFace: DieFace,
+  skillName: SkillName,
+  requirementTier?: ItemRarity,
+): { outcome: SkillRollOutcome; requirementDefect: boolean; requirementCheckFailed: boolean } {
+  let result = outcome;
+  let requirementDefect = false;
+  let requirementCheckFailed = false;
+
+  if (requirementTier && skillName === "technology") {
+    const rollSufficient = isRollSufficient(highestFace, requirementTier);
+    if (!rollSufficient) {
+      result = SKILL_ROLL_CHART[1];
+      requirementCheckFailed = true;
+      requirementDefect = checkDefect(highestFace, requirementTier);
+    }
+  }
+
+  return { outcome: result, requirementDefect, requirementCheckFailed };
+}
+
+/** Update actor resources (card, cool, franchise). */
+async function deductSkillRollResources(
+  agent: RollActor,
+  franchise: RollActor | null,
+  franchiseSystem: FranchiseData | null,
+  augmentation: SkillRollAugmentation,
+  availableCardDice: number,
+  availableCool: number,
+  cardType: keyof FranchiseData["cards"] | null,
+): Promise<void> {
+  if (augmentation.takesFour) return;
+
+  try {
+    if (franchise && franchiseSystem && augmentation.cardDice > 0 && cardType) {
+      await actorUpdate(franchise, { [`system.cards.${cardType}`]: availableCardDice - augmentation.cardDice });
+    }
+    if (augmentation.coolDice > 0) {
+      await actorUpdate(agent, { "system.cool": availableCool - augmentation.coolDice });
+    }
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorUpdateFailed") ?? "Failed to update actor data");
+    throw new Error(`Failed to deduct resources from ${agent.name}: ${message}. Roll cancelled.`);
+  }
+}
+
+/** Award franchise mission pool if earned. */
+async function awardMissionPool(
+  franchise: RollActor | null,
+  franchiseSystem: FranchiseData | null,
+  outcome: SkillRollOutcome,
+  system: AgentData,
+): Promise<void> {
+  if (franchise && franchiseSystem && outcome.franchiseDice > 0 && !system.isWeird) {
+    await actorUpdate(franchise, { "system.missionPool": franchiseSystem.missionPool + outcome.franchiseDice });
+    if (franchise.id !== null) emitMissionPoolUpdated(franchise.id);
+  }
+}
+
+// ---------------------------------------------------------------------------
 // executeSkillRoll
 // ---------------------------------------------------------------------------
 
@@ -219,16 +333,17 @@ export async function executeSkillRoll(
   // Removing this defensive check prevents error translation loss and focuses validation at the boundary.
   // If an agent somehow rolls while recovering due to a UI race condition, the error should propagate to the caller.
 
-  const system = agentSystemData(agent);
-  const skill = system.skills[skillName];
-  const effectiveDice = Math.max(0, skill.base - skill.penalty);
-
-  const franchiseSystem = franchise ? getActorSystem<FranchiseData>(franchise) : null;
-  const cardType = CARD_FOR_SKILL[skillName];
-  const availableCardDice = franchiseSystem && cardType ? franchiseSystem.cards[cardType] : 0;
-  const availableBank = franchiseSystem ? franchiseSystem.bank : 0;
-  const availableCool = system.cool;
-  const talentText = system.talent.trim();
+  const {
+    system,
+    skill,
+    effectiveDice,
+    franchiseSystem,
+    cardType,
+    availableCardDice,
+    availableBank,
+    availableCool,
+    talentText,
+  } = getSkillRollParams(agent, franchise, skillName);
 
   // Phase 4: Apply private-life gating if applicable
   const isPrivateLife = options?.isPrivateLife ?? false;
@@ -283,50 +398,14 @@ export async function executeSkillRoll(
     }
   }
 
-  let highestFace: DieFace;
-  let mainRoll: Roll;
-
-  if (augmentation.takesFour) {
-    // Taking 4: guaranteed Fair result, no dice rolled
-    highestFace = 4;
-    mainRoll = new Roll("0d6");
-    await mainRoll.evaluate();
-  } else {
-    const totalDice =
-      effectiveDice +
-      augmentation.cardDice +
-      augmentation.bankDice +
-      augmentation.coolDice +
-      (augmentation.talentDie ? 1 : 0);
-
-    if (totalDice === 0) {
-      // Zero dice: roll 2d6 take lowest (rules: auto-fail at 0 skill = treated as 1)
-      const { roll, faces } = await rollDice(2);
-      mainRoll = roll;
-      const lowestFace = faces.length > 0 ? Math.min(...faces) : 1;
-      highestFace = isDieFace(lowestFace) ? lowestFace : 1;
-    } else {
-      const { roll, faces } = await rollDice(totalDice);
-      mainRoll = roll;
-      const maxFace = faces.length > 0 ? Math.max(...faces) : 1;
-      highestFace = isDieFace(maxFace) ? maxFace : 1;
-    }
-  }
-
-  // Phase 1: Requirements Checker — gate on requirement tier if set
-  let outcome = SKILL_ROLL_CHART[highestFace];
-  let requirementDefect = false;
-  let requirementCheckFailed = false;
-  if (requirementTier && skillName === "technology") {
-    const rollSufficient = isRollSufficient(highestFace, requirementTier);
-    const isDefect = !rollSufficient && checkDefect(highestFace, requirementTier);
-    if (!rollSufficient) {
-      // Auto-fail: set outcome to worst result
-      outcome = SKILL_ROLL_CHART[1];
-      requirementDefect = isDefect;
-      requirementCheckFailed = true;
-    }
-  }
+  // Roll dice and compute main outcome
+  const { highestFace, mainRoll } = await rollSkillDice(effectiveDice, augmentation.takesFour, augmentation);
+  let { outcome, requirementDefect, requirementCheckFailed } = applyRequirementTier(
+    SKILL_ROLL_CHART[highestFace],
+    highestFace,
+    skillName,
+    requirementTier,
+  );
 
   // Resolve bank dice augmentation (only when not taking a 4)
   let bankSummary: BankResolutionSummary | null = null;
@@ -336,35 +415,14 @@ export async function executeSkillRoll(
     bankSummary = resolveBankDice(bankFaces, availableBank);
   }
 
-  // Apply actor updates — skipped entirely when taking a 4 (no resources spent)
-  if (!augmentation.takesFour) {
-    try {
-      if (franchise && franchiseSystem) {
-        if (augmentation.cardDice > 0 && cardType) {
-          await actorUpdate(franchise, { [`system.cards.${cardType}`]: availableCardDice - augmentation.cardDice });
-        }
-        if (bankSummary !== null) {
-          await actorUpdate(franchise, { "system.bank": bankSummary.finalBankTotal });
-        }
-      }
-      if (augmentation.coolDice > 0) {
-        await actorUpdate(agent, { "system.cool": availableCool - augmentation.coolDice });
-      }
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : String(err);
-      const userError = new Error(
-        `Failed to deduct resources from ${agent.name}: ${message}. Roll cancelled.`,
-      );
-      ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorUpdateFailed") ?? "Failed to update actor data");
-      throw userError;
-    }
+  // Deduct resources and apply bank updates
+  await deductSkillRollResources(agent, franchise, franchiseSystem, augmentation, availableCardDice, availableCool, cardType);
+  if (!augmentation.takesFour && bankSummary !== null && franchise && franchiseSystem) {
+    await actorUpdate(franchise, { "system.bank": bankSummary.finalBankTotal });
   }
 
-  // Mission pool earned regardless of takesFour (it's an outcome, not a cost)
-  if (franchise && franchiseSystem && outcome.franchiseDice > 0 && !system.isWeird) {
-    await actorUpdate(franchise, { "system.missionPool": franchiseSystem.missionPool + outcome.franchiseDice });
-    if (franchise.id !== null) emitMissionPoolUpdated(franchise.id);
-  }
+  // Award mission pool
+  await awardMissionPool(franchise, franchiseSystem, outcome, system);
 
   // ChatMessage.getSpeaker requires the full Actor type; RollActor satisfies the needed fields at runtime
   const speaker = ChatMessage.getSpeaker({ actor: agent as Actor });
@@ -548,6 +606,99 @@ export async function executeBankRoll(franchise: RollActor): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
+// Stress Roll Helpers (reduce executeStressRoll complexity)
+// ---------------------------------------------------------------------------
+
+/** Compute effective face after cool dice removed. */
+function getStressOutcomeFace(faces: number[], coolDiceUsed: number): DieFace {
+  const sorted = [...faces].sort((a, b) => a - b);
+  const active = sorted.slice(coolDiceUsed);
+  const rawLowest = active.length > 0 ? (active[0] ?? 6) : 6;
+  return isDieFace(rawLowest) ? rawLowest : 1;
+}
+
+/** Roll for death outcome if death mode and outcome is fatal. */
+async function rollDeathOutcome(
+  agent: RollActor,
+  deathModeActive: boolean,
+  effectiveFace: DieFace,
+): Promise<DeathDismembermentOutcome | null> {
+  if (!deathModeActive || effectiveFace > 2) return null;
+
+  const deathRoll = Math.floor(Math.random() * 3) + 1;
+  if (deathRoll < 1 || deathRoll > 3) {
+    const errorMsg = `Invalid d3 result in death roll: ${deathRoll} (expected 1–3). Stress roll aborted. Agent: ${agent.name} (${agent.id})`;
+    ui.notifications?.error("[INSPECTRES] Death roll validation failed");
+    throw new Error(errorMsg);
+  }
+  const deathKey = deathRoll as D3Result;
+  const outcome = DEATH_DISMEMBERMENT_CHART[deathKey];
+  if (!outcome) {
+    const errorMsg = `Death outcome missing for d3 result ${deathKey}. This indicates corrupted DEATH_DISMEMBERMENT_CHART. Agent: ${agent.name} (${agent.id})`;
+    ui.notifications?.error("[INSPECTRES] Death chart lookup failed");
+    throw new Error(errorMsg);
+  }
+  return outcome;
+}
+
+/** Get penalty choices from player (before applying updates). */
+async function getPenaltyChoices(
+  system: AgentData,
+  effectiveFace: DieFace,
+  outcome: StressRollOutcome,
+  stressDiceCount: number,
+): Promise<{ meltdownSkill: SkillName | null; penaltySkill: SkillName | null }> {
+  let meltdownSkill: SkillName | null = null;
+  let penaltySkill: SkillName | null = null;
+
+  if (effectiveFace === 1) {
+    meltdownSkill = await getPlayerPenaltyChoice(system, stressDiceCount);
+  } else if (outcome.skillPenalty > 0) {
+    penaltySkill = await getPlayerPenaltyChoice(system, outcome.skillPenalty);
+  }
+
+  return { meltdownSkill, penaltySkill };
+}
+
+/** Build update data from stress roll outcome and choices. */
+function buildStressUpdateData(
+  system: AgentData,
+  effectiveFace: DieFace,
+  outcome: StressRollOutcome,
+  meltdownSkill: SkillName | null,
+  penaltySkill: SkillName | null,
+  deathOutcome: DeathDismembermentOutcome | null,
+  stressDiceCount: number,
+): Record<string, unknown> {
+  const updateData: Record<string, unknown> = {};
+
+  if (effectiveFace === 1) {
+    updateData["system.cool"] = 0;
+    if (meltdownSkill) {
+      applySkillPenalty(updateData, system, stressDiceCount, meltdownSkill);
+    }
+  } else {
+    if (outcome.coolGain > 0) {
+      updateData["system.cool"] = system.cool + outcome.coolGain;
+    }
+    if (penaltySkill) {
+      applySkillPenalty(updateData, system, outcome.skillPenalty, penaltySkill);
+    }
+  }
+
+  if (deathOutcome) {
+    if ("isDead" in deathOutcome && deathOutcome.isDead) {
+      updateData["system.isDead"] = true;
+    } else if ("daysOutOfAction" in deathOutcome) {
+      updateData["system.daysOutOfAction"] = deathOutcome.daysOutOfAction;
+      updateData["system.recoveryStartedAt"] = getCurrentDay();
+    }
+  }
+
+  return updateData;
+}
+
+// ---------------------------------------------------------------------------
 // executeStressRoll
 // ---------------------------------------------------------------------------
 
@@ -569,78 +720,18 @@ export async function executeStressRoll(
   const { stressDiceCount, coolDiceUsed } = params;
 
   const { roll, faces } = await rollDice(stressDiceCount);
-
-  // Sort ascending; remove the N lowest (cool ignores lowest; cool NOT spent)
-  const sorted = [...faces].sort((a, b) => a - b);
-  const active = sorted.slice(coolDiceUsed);
-
-  // active[0] is always defined here; ?? 6 satisfies noUncheckedIndexedAccess
-  const rawLowest = active.length > 0 ? (active[0] ?? 6) : 6;
-  const effectiveFace: DieFace = isDieFace(rawLowest) ? rawLowest : 1;
+  const effectiveFace = getStressOutcomeFace(faces, coolDiceUsed);
   const outcome = STRESS_ROLL_CHART[effectiveFace];
 
-  // Check if death mode is active and this is a death-level outcome
   const franchiseSystem = franchise ? getActorSystem<FranchiseData>(franchise) : null;
   const deathModeActive = franchiseSystem?.deathMode ?? false;
-  let deathOutcome: DeathDismembermentOutcome | null = null;
-  if (deathModeActive && effectiveFace <= 2) {
-    // Death mode activated: roll d3 for death outcomes (1=Maimed, 2=Crippled, 3=Killed)
-    // Death roll is never auditable — use bare Math.random(); death outcome must be spontaneous (not replicable)
-    const deathRoll = Math.floor(Math.random() * 3) + 1;
-    if (deathRoll < 1 || deathRoll > 3) {
-      const errorMsg = `Invalid d3 result in death roll: ${deathRoll} (expected 1–3). Stress roll aborted. Agent: ${agent.name} (${agent.id})`;
-      ui.notifications?.error("[INSPECTRES] Death roll validation failed");
-      throw new Error(errorMsg);
-    }
-    const deathKey = deathRoll as D3Result;
-    deathOutcome = DEATH_DISMEMBERMENT_CHART[deathKey];
-    if (!deathOutcome) {
-      const errorMsg = `Death outcome missing for d3 result ${deathKey}. This indicates corrupted DEATH_DISMEMBERMENT_CHART. Agent: ${agent.name} (${agent.id})`;
-      ui.notifications?.error("[INSPECTRES] Death chart lookup failed");
-      throw new Error(errorMsg);
-    }
-  }
+  const deathOutcome = await rollDeathOutcome(agent, deathModeActive, effectiveFace);
 
   // Issue #440: Validate all player inputs (penalty dialogs) BEFORE applying any state changes.
-  // This ensures atomicity: if any dialog fails, no state is modified.
-  // Penalty dialogs are awaited first, before Cool deduction or death outcome application.
-  let meltdownSkill: SkillName | null = null;
-  let penaltySkill: SkillName | null = null;
-  if (effectiveFace === 1) {
-    // Meltdown: ask player which skill to penalize
-    meltdownSkill = await getPlayerPenaltyChoice(system, stressDiceCount);
-  } else if (outcome.skillPenalty > 0) {
-    // Non-meltdown outcome with skill penalty: ask player
-    penaltySkill = await getPlayerPenaltyChoice(system, outcome.skillPenalty);
-  }
+  const { meltdownSkill, penaltySkill } = await getPenaltyChoices(system, effectiveFace, outcome, stressDiceCount);
 
-  // All dialogs completed (player may have cancelled). Now apply updates atomically.
-  const updateData: Record<string, unknown> = {};
-  if (effectiveFace === 1) {
-    // Meltdown: zero cool, apply the penalty choice if player selected one
-    updateData["system.cool"] = 0;
-    if (meltdownSkill) {
-      applySkillPenalty(updateData, system, stressDiceCount, meltdownSkill);
-    }
-  } else {
-    if (outcome.coolGain > 0) {
-      updateData["system.cool"] = system.cool + outcome.coolGain;
-    }
-    // Apply the penalty choice if player selected one
-    if (penaltySkill) {
-      applySkillPenalty(updateData, system, outcome.skillPenalty, penaltySkill);
-    }
-  }
-
-  // Apply death outcomes if active
-  if (deathOutcome) {
-    if ("isDead" in deathOutcome && deathOutcome.isDead) {
-      updateData["system.isDead"] = true;
-    } else if ("daysOutOfAction" in deathOutcome) {
-      updateData["system.daysOutOfAction"] = deathOutcome.daysOutOfAction;
-      updateData["system.recoveryStartedAt"] = getCurrentDay();
-    }
-  }
+  // Build update data from choices
+  const updateData = buildStressUpdateData(system, effectiveFace, outcome, meltdownSkill, penaltySkill, deathOutcome, stressDiceCount);
 
   if (Object.keys(updateData).length > 0) {
     try {

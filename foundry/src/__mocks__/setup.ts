@@ -215,6 +215,7 @@ Object.assign(globalThis, {
     },
     data: {
       fields: {
+        // Mock Foundry field classes for test environments
         StringField: class {},
         NumberField: class {},
         BooleanField: class {},

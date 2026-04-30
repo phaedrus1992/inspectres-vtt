@@ -81,7 +81,7 @@ function parseColor(color: string): [number, number, number] {
     const g = Number.parseInt(hex.substring(2, 4), 16);
     const b = Number.parseInt(hex.substring(4, 6), 16);
     if (Number.isNaN(r) || Number.isNaN(g) || Number.isNaN(b)) {
-      throw new Error(`parseColor: invalid hex color '${color}'`);
+      throw new TypeError(`parseColor: invalid hex color '${color}'`);
     }
     return [r, g, b];
   }
