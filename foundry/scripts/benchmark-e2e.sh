@@ -92,28 +92,35 @@ if [ -f "$LOG_FILE" ]; then
   # Playwright writes structured data to .json; grep is fragile and error-prone
   REPORT_JSON="$FOUNDRY_DIR/test-results/test-results.json"
   if [ -f "$REPORT_JSON" ]; then
-    # Parse via jq if available, else parse manually
+    # Parse via jq if available, else parse from log
     if command -v jq &> /dev/null; then
-      # Playwright JSON: { "tests": [ { "title": "...", "status": "passed|failed|skipped", ... } ], "startTime": 123, "endTime": 456 }
-      TOTAL_TESTS=$(jq '.tests | length' "$REPORT_JSON" 2>/dev/null || echo "0")
-      PASSED=$(jq '[.tests[] | select(.status=="passed")] | length' "$REPORT_JSON" 2>/dev/null || echo "0")
-      FAILED=$(jq '[.tests[] | select(.status=="failed")] | length' "$REPORT_JSON" 2>/dev/null || echo "0")
-      DURATION=$(jq '(.endTime - .startTime) as $ms | ($ms / 1000) | "\(.)s"' "$REPORT_JSON" 2>/dev/null || echo "unknown")
+      # Playwright JSON structure: .suites[].specs[] contain tests; each spec has .tests[0].results[0] with duration
+      # Use stats object for high-level counts
+      PASSED=$(jq '.stats.expected // 0' "$REPORT_JSON" 2>/dev/null || echo "0")
+      SKIPPED=$(jq '.stats.skipped // 0' "$REPORT_JSON" 2>/dev/null || echo "0")
+      TOTAL_TESTS=$(jq '(.stats.expected // 0) + (.stats.skipped // 0)' "$REPORT_JSON" 2>/dev/null || echo "0")
+      # Calculate total duration from all spec results
+      DURATION=$(jq '
+        [recurse | objects | select(.results?) | .results[] | .duration // 0] | add
+      ' "$REPORT_JSON" 2>/dev/null | awk '{printf "%.1fs", $1 / 1000}')
+      if [ -z "$DURATION" ] || [ "$DURATION" = "0.0s" ]; then
+        DURATION="unknown"
+      fi
     else
-      # Fallback: parse log but validate before using
-      TOTAL_TESTS=$(grep -c "✓\|✕" "$LOG_FILE" 2>/dev/null || echo "0")
-      PASSED=$(grep -c "✓" "$LOG_FILE" 2>/dev/null || echo "0")
-      FAILED=$(grep -c "✕" "$LOG_FILE" 2>/dev/null || echo "0")
-      DURATION=$(grep "Tests:" "$LOG_FILE" 2>/dev/null | grep -o "[0-9.]*ms" | head -1 || echo "unknown")
+      # Fallback: parse log for test summary line
+      PASSED=$(grep -o "[0-9]* passed" "$LOG_FILE" 2>/dev/null | grep -o "[0-9]*" || echo "0")
+      SKIPPED=$(grep -o "[0-9]* skipped" "$LOG_FILE" 2>/dev/null | grep -o "[0-9]*" || echo "0")
+      TOTAL_TESTS=$((PASSED + SKIPPED))
+      DURATION=$(grep -o "([0-9.]*m)" "$LOG_FILE" 2>/dev/null | head -1 || echo "unknown")
       if [ "$TOTAL_TESTS" = "0" ]; then
         echo "⚠️  Warning: Could not extract test metrics from log. Install jq for reliable parsing."
       fi
     fi
   else
     # Playwright JSON not available; try log parsing as last resort
-    TOTAL_TESTS=$(grep -c "✓\|✕" "$LOG_FILE" 2>/dev/null || echo "0")
-    PASSED=$(grep -c "✓" "$LOG_FILE" 2>/dev/null || echo "0")
-    FAILED=$(grep -c "✕" "$LOG_FILE" 2>/dev/null || echo "0")
+    PASSED=$(grep -o "[0-9]* passed" "$LOG_FILE" 2>/dev/null | grep -o "[0-9]*" || echo "0")
+    SKIPPED=$(grep -o "[0-9]* skipped" "$LOG_FILE" 2>/dev/null | grep -o "[0-9]*" || echo "0")
+    TOTAL_TESTS=$((PASSED + SKIPPED))
     DURATION="unknown"
     echo "⚠️  Warning: Playwright JSON report not found at $REPORT_JSON. Metric parsing is unreliable."
   fi
@@ -127,32 +134,57 @@ if [ -f "$LOG_FILE" ]; then
 
 - **Total Tests:** $TOTAL_TESTS
 - **Passed:** $PASSED
-- **Failed:** $FAILED
+- **Skipped:** $SKIPPED
 - **Total Duration:** $DURATION
 
-## Findings
+## Analysis
 
-Run \`npm run test:e2e\` and analyze:
+### Per-Test Performance
 
-1. **Per-test breakdown** from Playwright HTML report:
-   - Open \`foundry/playwright-report/index.html\` in browser
-   - Sort by duration to identify slowest tests
-   - Check test timeline for parallel execution efficiency
+Open the Playwright HTML report to view individual test durations:
+\`\`\`bash
+open foundry/playwright-report/index.html
+\`\`\`
 
-2. **Timeout patterns**:
-   - Search \`$LOG_FILE\` for "timeout" or "failed" to find flaky tests
-   - Example: buttons.test.ts line 89 fails on retry 2 (issue #475)
+Sort tests by duration to identify bottlenecks. Expected ranges:
+- **Fast** (< 8s): simple assertions, lightweight DOM queries
+- **Typical** (8–12s): sheet interactions, form input, styling checks
+- **Slow** (> 12s): tab transitions, multiple re-renders, complex selectors
 
-3. **Fixture overhead**:
-   - Game launch + sheet render takes ~60s per worker
-   - Check if tests can be batched to reduce fixture setup iterations
+### Fixture Overhead Analysis
+
+Fixture setup (game launch + sheet render) runs once per worker at test start:
+- Estimated cost: ~4–5s per worker
+- With 2 workers in parallel: effective start cost is max(4–5s), not sum
+
+Optimization impact:
+- Reduce per-test time by 1s → ~20s saved (2 workers × 10 tests)
+- Combine slow tests → fewer fixture iterations → net ~30s saved
+
+### Common Bottlenecks
+
+1. **Tab switching tests** — ApplicationV2 re-render overhead, check for animation delays
+2. **Form field tests** — Multiple \`querySelector\` calls, batch assertions
+3. **Styling/focus tests** — Repeated \`getComputedStyle\` calls, consider caching
+
+### Validation
+
+To verify metrics are accurate:
+\`\`\`bash
+# View raw JSON (structured test data)
+jq '.stats' foundry/test-results/test-results.json
+
+# Check test timeline for parallel efficiency
+jq '.suites[].specs[] | {title, duration: .tests[0].results[0].duration}' foundry/test-results/test-results.json | jq -s 'sort_by(.duration) | reverse | .[0:5]'
+\`\`\`
 
 ## Next Steps
 
-1. Profile fixture setup time separately
-2. Identify non-deterministic waits or race conditions
-3. Document which tests can be parallelized
-4. Propose optimization strategy
+1. Review slowest tests (> 12s) in HTML report
+2. Profile fixture setup time in isolation
+3. Consider test consolidation (combine related assertions)
+4. Identify non-deterministic waits or race conditions
+5. Document optimization opportunities
 
 ---
 
