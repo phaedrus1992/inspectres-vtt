@@ -15,8 +15,8 @@
  * Selectors verified against Foundry V13 (felddy/foundryvtt:13).
  */
 
-import path from "path";
-import { fileURLToPath } from "url";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { chromium, type Browser, type Page } from "@playwright/test";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -140,7 +140,9 @@ async function createWorldIfNeeded(page: Page): Promise<void> {
   if (!created) throw new Error(`World ${WORLD_ID} did not appear after creation`);
 }
 
-async function joinAsUser(page: Page, username: string, timeouts = { url: 30_000, ready: 60_000 }): Promise<void> {
+const DEFAULT_JOIN_TIMEOUTS = { url: 30_000, ready: 60_000 };
+
+async function joinAsUser(page: Page, username: string, timeouts = DEFAULT_JOIN_TIMEOUTS): Promise<void> {
   await page.selectOption('select[name="userid"]', { label: username });
   await page.click('button[type="submit"]:has-text("Join Game Session")');
   await page.waitForURL(/\/game/, { timeout: timeouts.url });
@@ -249,7 +251,6 @@ async function globalSetup(): Promise<void> {
         throw new Error(`Unexpected starting URL: ${page.url()}`);
       }
 
-      alreadyInGame = true;
     }
 
     console.log(`✓ Foundry ready at ${page.url()}`);

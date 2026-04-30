@@ -54,7 +54,7 @@ export function expectContrastCompliant(
     throw new Error(`Element not connected to DOM: ${element?.tagName ?? "unknown"}`);
   }
 
-  const styles = window.getComputedStyle(element);
+  const styles = globalThis.getComputedStyle(element);
   if (!styles) {
     throw new Error(`Failed to retrieve computed styles for ${element.tagName}`);
   }
@@ -77,10 +77,10 @@ function parseColor(color: string): [number, number, number] {
   // Handle hex colors
   if (color.startsWith("#")) {
     const hex = color.replace("#", "");
-    const r = parseInt(hex.substring(0, 2), 16);
-    const g = parseInt(hex.substring(2, 4), 16);
-    const b = parseInt(hex.substring(4, 6), 16);
-    if (isNaN(r) || isNaN(g) || isNaN(b)) {
+    const r = Number.parseInt(hex.substring(0, 2), 16);
+    const g = Number.parseInt(hex.substring(2, 4), 16);
+    const b = Number.parseInt(hex.substring(4, 6), 16);
+    if (Number.isNaN(r) || Number.isNaN(g) || Number.isNaN(b)) {
       throw new Error(`parseColor: invalid hex color '${color}'`);
     }
     return [r, g, b];
@@ -89,9 +89,9 @@ function parseColor(color: string): [number, number, number] {
   // Handle rgb/rgba
   const match = color.match(/\d+/g);
   if (match && match.length >= 3) {
-    const r = parseInt(match[0] ?? "0", 10);
-    const g = parseInt(match[1] ?? "0", 10);
-    const b = parseInt(match[2] ?? "0", 10);
+    const r = Number.parseInt(match[0] ?? "0", 10);
+    const g = Number.parseInt(match[1] ?? "0", 10);
+    const b = Number.parseInt(match[2] ?? "0", 10);
     if (![r, g, b].every((v) => v >= 0 && v <= 255)) {
       throw new Error(`parseColor: RGB values must be 0–255, got [${r}, ${g}, ${b}]`);
     }

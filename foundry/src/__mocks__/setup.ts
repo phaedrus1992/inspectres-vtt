@@ -36,10 +36,10 @@ class MockActorSheetV2 {
     };
   }
 
-  async _onRender(_context: unknown, _options: unknown) {}
+  async _onRender(_context: unknown, _options: unknown) { /* stub */ }
 
   render(_options?: unknown) { return Promise.resolve(this); }
-  async close(_options?: unknown) {}
+  async close(_options?: unknown) { /* stub */ }
 }
 
 // Mock ApplicationV2 class
@@ -52,7 +52,7 @@ class MockApplicationV2 {
   };
 
   render(_options?: unknown) { return Promise.resolve(this); }
-  async close(_options?: unknown) {}
+  async close(_options?: unknown) { /* stub */ }
 }
 
 // Mock Hooks
@@ -186,7 +186,7 @@ const ChatMessage = {
 };
 
 // Mock renderTemplate
-async function renderTemplate(path: string, data: unknown): Promise<string> {
+async function renderTemplate(_path: string, data: unknown): Promise<string> {
   return JSON.stringify(data);
 }
 
@@ -215,10 +215,10 @@ Object.assign(globalThis, {
     },
     data: {
       fields: {
-        StringField: class { constructor(opts?: unknown) { void opts; } },
-        NumberField: class { constructor(opts?: unknown) { void opts; } },
-        BooleanField: class { constructor(opts?: unknown) { void opts; } },
-        ArrayField: class { constructor(element?: unknown, opts?: unknown) { void element; void opts; } },
+        StringField: class { constructor(_opts?: unknown) {} },
+        NumberField: class { constructor(_opts?: unknown) {} },
+        BooleanField: class { constructor(_opts?: unknown) {} },
+        ArrayField: class { constructor(_element?: unknown, _opts?: unknown) {} },
         SchemaField: class {
           fields: Record<string, unknown>;
           required?: boolean;
