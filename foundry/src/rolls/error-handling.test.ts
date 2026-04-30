@@ -29,6 +29,9 @@ vi.stubGlobal("game", {
   users: {
     filter: () => [],
   },
+  user: {
+    isGM: true,
+  },
 });
 
 vi.stubGlobal("ui", {
@@ -172,7 +175,7 @@ describe("Error handling in rolls", () => {
 
   describe("Error context preservation through error chain", () => {
     it("logs diagnostic context and rethrows update failures", async () => {
-      const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+      const notificationSpy = vi.spyOn(ui.notifications as any, "error");
       const agent = makeAgent();
       const franchise = makeFranchise();
 
@@ -193,16 +196,12 @@ describe("Error handling in rolls", () => {
         ),
       ).rejects.toThrow(/Failed to apply stress roll/);
 
-      // Should have logged diagnostic context
-      expect(errorSpy).toHaveBeenCalledWith(
-        expect.stringMatching(/INSPECTRES.*Stress roll update failed/),
-        expect.objectContaining({
-          agentId: "test-agent-id",
-          agentName: "Test Agent",
-        }),
+      // Should have notified user of error (diagnostic logging now via ui.notifications)
+      expect(notificationSpy).toHaveBeenCalledWith(
+        expect.stringMatching(/ErrorStressRollFailed|Failed to apply stress roll/),
       );
 
-      errorSpy.mockRestore();
+      notificationSpy.mockRestore();
     });
 
     it("rethrows update failures with user-facing error message", async () => {

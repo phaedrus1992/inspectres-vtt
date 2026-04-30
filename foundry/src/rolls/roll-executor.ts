@@ -210,6 +210,10 @@ export async function executeSkillRoll(
   skillName: SkillName,
   options?: { requirementTier?: ItemRarity; isPrivateLife?: boolean }, // Phase 1: Requirements Checker + Phase 4: Private Life
 ): Promise<void> {
+  if (!game.user?.isGM) {
+    throw new Error("Skill rolls can only be initiated by the GM");
+  }
+
   // Recovery check is the responsibility of the UI layer (AgentSheet).
   // The UI displays warnings and prevents roll initiation for agents who are recovering/dead.
   // Removing this defensive check prevents error translation loss and focuses validation at the boundary.
@@ -552,6 +556,10 @@ export async function executeStressRoll(
   params: StressRollParams,
   franchise: RollActor | null = null,
 ): Promise<void> {
+  if (!game.user?.isGM) {
+    throw new Error("Stress rolls can only be initiated by the GM");
+  }
+
   // Recovery check is the responsibility of the UI layer (AgentSheet).
   // The UI displays warnings and prevents roll initiation for agents who are recovering/dead.
   // Removing this defensive check prevents error translation loss and focuses validation at the boundary.
@@ -581,14 +589,14 @@ export async function executeStressRoll(
     const deathRoll = Math.floor(Math.random() * 3) + 1;
     if (deathRoll < 1 || deathRoll > 3) {
       const errorMsg = `Invalid d3 result in death roll: ${deathRoll} (expected 1–3). Stress roll aborted. Agent: ${agent.name} (${agent.id})`;
-      console.error("[INSPECTRES] Death roll validation failed:", { agentId: agent.id, agentName: agent.name, deathRoll });
+      ui.notifications?.error("[INSPECTRES] Death roll validation failed");
       throw new Error(errorMsg);
     }
     const deathKey = deathRoll as D3Result;
     deathOutcome = DEATH_DISMEMBERMENT_CHART[deathKey];
     if (!deathOutcome) {
       const errorMsg = `Death outcome missing for d3 result ${deathKey}. This indicates corrupted DEATH_DISMEMBERMENT_CHART. Agent: ${agent.name} (${agent.id})`;
-      console.error("[INSPECTRES] Death chart lookup failed:", { agentId: agent.id, agentName: agent.name, deathKey, chartKeys: Object.keys(DEATH_DISMEMBERMENT_CHART) });
+      ui.notifications?.error("[INSPECTRES] Death chart lookup failed");
       throw new Error(errorMsg);
     }
   }
@@ -640,17 +648,10 @@ export async function executeStressRoll(
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
       const failedFields = Object.keys(updateData).join(", ");
-      console.error("[INSPECTRES] Stress roll update failed:", {
-        agentId: agent.id,
-        agentName: agent.name,
-        failedFields,
-        error: err,
-        errorMessage: message,
-      });
+      ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorStressRollFailed") ?? "Failed to apply stress roll to agent");
       const userError = new Error(
         `Failed to apply stress roll to ${agent.name}: ${message}. Failed fields: ${failedFields}`,
       );
-      ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorStressRollFailed") ?? "Failed to apply stress roll to agent");
       throw userError;
     }
   }
