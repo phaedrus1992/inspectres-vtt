@@ -8,7 +8,7 @@ import { activateTabs } from "../utils/sheet-tabs.js";
 import { enterDebtMode, attemptLoanRepayment } from "./bankruptcy-handler.js";
 import { emitMissionPoolUpdated } from "../mission/socket.js";
 import { getCurrentDaySetting, setCurrentDaySetting } from "../utils/settings-utils.js";
-import { applyEndOfSessionBonuses, initiateBankruptcyRestart, type EndOfSessionContext } from "./vacation-automation.js";
+import { applyEndOfSessionBonuses, initiateBankruptcyRestart } from "./vacation-automation.js";
 
 // HandlebarsApplicationMixin provides _renderHTML/_replaceHTML required by ApplicationV2 for PARTS-based sheets
 export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.sheets.ActorSheetV2) {
@@ -47,7 +47,11 @@ export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicati
     const isGm = game.user?.isGM ?? false;
     const missionComplete = system.missionGoal > 0 && system.missionPool >= system.missionGoal;
     const currentDay = getCurrentDaySetting();
-    return { ...base, system, isGm, missionComplete, currentDay };
+    // deepClone converts the TypeDataModel instance to a plain object for Handlebars
+    // rendering. Foundry V13's #each helper calls Object.entries() on nested values;
+    // DataModel instances aren't plain-object-iterable in all cases.
+    const systemPlain = foundry.utils.deepClone(system);
+    return { ...base, system: systemPlain, isGm, missionComplete, currentDay };
   }
 
   static async onBankRoll(this: FranchiseSheet, _event: Event, _target: HTMLElement): Promise<void> {

@@ -122,7 +122,8 @@ export class AgentSheet extends foundry.applications.sheets.ActorSheetV2 {
   };
   override async _prepareContext(_options): Promise<Record<string, unknown>> {
     const base = await super._prepareContext(_options);
-    return { ...base, system: this.actor.system as unknown as AgentData };
+    const system = this.actor.system as unknown as AgentData;
+    return { ...base, system: foundry.utils.deepClone(system) };
   }
   override async _onRender(_context, _options): Promise<void> {
     await super._onRender(_context, _options);

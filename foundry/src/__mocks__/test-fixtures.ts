@@ -25,7 +25,7 @@ function applyNestedUpdate(target: Record<string, unknown>, path: string, value:
         }
       }
     }
-    const lastPart = parts[parts.length - 1];
+    const lastPart = parts.at(-1);
     if (lastPart !== undefined) {
       obj[lastPart] = value;
     }

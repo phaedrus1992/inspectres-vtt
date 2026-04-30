@@ -1,31 +1,39 @@
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { defineConfig, devices } from "@playwright/test";
+import { WORKER_COUNT, workerStorageStatePath } from "./src/__tests__/e2e/global-setup.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const STORAGE_STATE = path.resolve(__dirname, "./.tmp/playwright-storage-state.json");
 
-// Playwright errors if storageState path doesn't exist before the run.
-// Seed with an empty state so global-setup can populate it on first run.
-if (!fs.existsSync(STORAGE_STATE)) {
-  fs.mkdirSync(path.dirname(STORAGE_STATE), { recursive: true });
-  fs.writeFileSync(STORAGE_STATE, JSON.stringify({ cookies: [], origins: [] }));
+// Seed empty storage-state files for each worker so global-setup can overwrite them.
+// Playwright requires the storageState path to exist before the run when set statically,
+// but we set it dynamically in fixtures — these files exist only as a creation guard.
+const storageTmpDir = path.resolve(__dirname, "./.tmp");
+fs.mkdirSync(storageTmpDir, { recursive: true });
+for (let i = 0; i < WORKER_COUNT; i++) {
+  const statePath = workerStorageStatePath(i);
+  if (!fs.existsSync(statePath)) {
+    fs.writeFileSync(statePath, JSON.stringify({ cookies: [], origins: [] }));
+  }
 }
 
 export default defineConfig({
   testDir: "./src/__tests__/e2e",
   testMatch: "**/*.test.ts",
-  fullyParallel: false,
+  fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: 1,
-  reporter: "html",
+  workers: WORKER_COUNT,
+  reporter: process.env["CI"] ? [["list"], ["html"]] : "html",
+  // 2 min per test: Foundry fixture setup (join + game.ready + sheet render) is ~30-60s
+  // in CI, leaving headroom for actual test assertions.
+  timeout: 120_000,
   use: {
     baseURL: "http://localhost:30000",
     trace: "on-first-retry",
     screenshot: "only-on-failure",
-    storageState: STORAGE_STATE,
+    // storageState is set per-worker in fixtures.ts via the workerStorageState fixture.
   },
 
   outputDir: "./test-results/e2e-screenshots",

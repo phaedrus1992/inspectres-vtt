@@ -131,7 +131,11 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     const currentDay = getCurrentDay();
     const recoveryStatus = computeRecoveryStatus(system, currentDay);
     const bannerText = getRecoveryBannerText(recoveryStatus);
-    return { ...base, system, recoveryStatus, bannerText };
+    // deepClone converts the TypeDataModel instance to a plain object for Handlebars
+    // rendering. Foundry V13's #each helper calls Object.entries() on nested values;
+    // DataModel instances aren't plain-object-iterable in all cases.
+    const systemPlain = foundry.utils.deepClone(system);
+    return { ...base, system: systemPlain, recoveryStatus, bannerText };
   }
 
   override async _onRender(context: Record<string, unknown>, options: foundry.applications.api.ApplicationV2Options): Promise<void> {
@@ -537,7 +541,6 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
 
     try {
       const system = agentSystemData(this.actor);
-      const currentDay = getCurrentDay();
       if (targetDay < system.recoveryStartedAt) {
         ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnRecoveryDayBeforeStart") ?? "Target day must be on or after the recovery start day");
         return;

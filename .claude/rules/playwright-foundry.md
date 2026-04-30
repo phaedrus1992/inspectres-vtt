@@ -137,17 +137,34 @@ Tests interact through UI same way real user does. Test that bypasses UI gate pa
 
 ### Waiting after interaction
 
-Use `waitForSelector` for newly-revealed elements. Fixed timeout only for Foundry init (page load, sheet render) where no DOM signal exists.
+**Never use `waitForSelector` for elements that can race with ApplicationV2 re-renders.**
+ApplicationV2 re-renders detach and re-attach elements. `waitForSelector` sees the element, then the element detaches during a re-render cycle, and the wait times out — even on retry.
+
+**Rule:** Any selector rooted at `.inspectres` (the sheet container) or any Foundry ApplicationV2 element must use `waitForFunction + getBoundingClientRect`:
 
 ```js
-// Wrong — asserts before UI updates
-await page.click('[data-action="openPanel"]');
-const text = await page.textContent('.panel-content'); // may not exist yet
+// Wrong — races with ApplicationV2 re-renders; fails even when element is logically visible
+await page.waitForSelector('.inspectres', { timeout: 10000 });
 
-// Right — wait for revealed element
-await page.click('[data-action="openPanel"]');
-await page.waitForSelector('.panel-content', { state: 'visible' });
-const text = await page.textContent('.panel-content');
+// Right — polls until element is present AND has non-zero size
+await page.waitForFunction(
+  () => {
+    const el = document.querySelector('.inspectres');
+    if (!el) return false;
+    const rect = el.getBoundingClientRect();
+    return rect.width > 0 && rect.height > 0;
+  },
+  undefined,
+  { timeout: 15_000 },
+);
+```
+
+Use `waitForSelector` only for elements revealed by user interaction (clicks, form submits) that don't re-render the entire sheet — e.g., a newly-opened dropdown or a revealed textarea after a tab click.
+
+```js
+// OK — textarea appears after tab click; no full re-render
+await page.click('.inspectres [role="tab"][aria-controls="tab-notes"]');
+await page.waitForSelector('.inspectres textarea', { timeout: 5000 });
 ```
 
 ## Interaction patterns
@@ -188,6 +205,59 @@ const messages = await page.evaluate(() =>
   game.messages.contents.map(m => ({ content: m.content, speaker: m.speaker }))
 );
 ```
+
+## Diagnostics When Investigating E2E Failures
+
+When working on a failing E2E test, add telemetry to the test or fixture before diagnosing. Don't guess — observe.
+
+**Attach browser console log on failure** — the fixture does this automatically via `ConsoleBuffer`. If the test file doesn't use the extended `test` from `fixtures.ts`, it won't have this. Always import from `./fixtures`, not `@playwright/test` directly.
+
+**Add a DOM snapshot when a selector fails:**
+```js
+// After a waitForFunction/waitForSelector failure, dump what's actually there
+const snapshot = await page.evaluate(() => ({
+  url: location.href,
+  sheets: Array.from(document.querySelectorAll('.inspectres')).map(el => ({
+    id: el.id,
+    visible: el.getBoundingClientRect().width > 0,
+  })),
+  gameReady: (globalThis as any).game?.ready,
+}));
+console.log('DOM snapshot:', JSON.stringify(snapshot));
+```
+
+**Screenshot at failure point** — already done via `screenshot: "only-on-failure"` in playwright.config.ts. But for timing-sensitive failures, add mid-test screenshots:
+```js
+await page.screenshot({ path: 'test-results/e2e-screenshots/debug-step-N.png', timeout: 5000 }).catch(() => {});
+```
+
+**Check Foundry game state in evaluate:**
+```js
+const state = await page.evaluate(() => ({
+  gameReady: (globalThis as any).game?.ready,
+  actorCount: (globalThis as any).game?.actors?.size,
+  userActive: (globalThis as any).game?.user?.active,
+}));
+```
+
+**When adding new E2E tests**, include at minimum:
+- One screenshot per test (for CI artifacts)
+- Browser console attached on failure (use `fixtures.ts` `test`)
+- `waitForFunction + getBoundingClientRect` instead of bare `waitForSelector` for sheet elements
+
+## Local Validation Before Push
+
+**Always run the E2E suite locally before pushing when:**
+- Any E2E test file changed (`*.test.ts` in `e2e/`, `fixtures.ts`, `global-setup.ts`, `playwright.config.ts`)
+- E2E tests are currently failing on CI (fix locally, confirm green, then push)
+- You made any change that could affect browser session state, selectors, or Foundry init
+
+```bash
+# Requires docker compose already running (docker/docker-compose.yml)
+npm run test:e2e
+```
+
+CI is expensive and slow for E2E failures. Do not push and say "CI will validate" — run it locally first. This applies even for small refactors to test infrastructure; timing and selector issues only surface against a live Foundry instance.
 
 ## Scratch Scripts
 
