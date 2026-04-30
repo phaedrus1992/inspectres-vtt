@@ -10,10 +10,25 @@
 
 import { test, expect } from "./fixtures";
 
+// ApplicationV2 re-renders briefly detach elements. waitForSelector on ".inspectres" can
+// time out even when the sheet is logically visible. Use waitForFunction + getBoundingClientRect
+// to tolerate transient detach/re-attach cycles.
+async function waitForSheet(page: import("@playwright/test").Page): Promise<void> {
+  await page.waitForFunction(
+    () => {
+      const el = document.querySelector(".inspectres");
+      if (!el) return false;
+      const rect = (el as HTMLElement).getBoundingClientRect();
+      return rect.width > 0 && rect.height > 0;
+    },
+    undefined,
+    { timeout: 15_000 },
+  );
+}
+
 test.describe("Sheet navigation and tab switching (E2E - Playwright)", () => {
   test("should test tab visibility and structure", async ({ page }) => {
-    await page.waitForSelector(".inspectres", { timeout: 10000 });
-    await page.waitForSelector(".inspectres [role='tab']", { timeout: 5000 });
+    await waitForSheet(page);
     const tabs = page.locator(".inspectres [role='tab']");
     await expect(tabs.first()).toBeVisible();
     // Verify tab labels are readable
@@ -23,9 +38,9 @@ test.describe("Sheet navigation and tab switching (E2E - Playwright)", () => {
   });
 
   test("should test active tab indication with styling", async ({ page }) => {
-    await page.waitForSelector(".inspectres", { timeout: 10000 });
-    await page.waitForSelector(".inspectres [role='tab'][aria-selected='true']", { timeout: 5000 });
+    await waitForSheet(page);
     const activeTab = page.locator(".inspectres [role='tab'][aria-selected='true']");
+    await expect(activeTab.first()).toBeVisible();
 
     const activeStyle = await activeTab.first().evaluate((el) => ({
       ariaSelected: el.getAttribute("aria-selected"),
@@ -41,7 +56,7 @@ test.describe("Sheet navigation and tab switching (E2E - Playwright)", () => {
   });
 
   test("should test tab switching behavior with panel transition", async ({ page }) => {
-    await page.waitForSelector(".inspectres", { timeout: 10000 });
+    await waitForSheet(page);
     const tabs = page.locator(".inspectres [role='tab']");
     // Ensure at least 2 tabs exist to test switching behavior
     await expect(tabs).toHaveCount(2, { timeout: 5000 });
@@ -61,8 +76,8 @@ test.describe("Sheet navigation and tab switching (E2E - Playwright)", () => {
     // Scroll the second tab into view and force-click via JS to bypass any
     // Foundry notification overlays that might intercept pointer events in CI.
     await page.evaluate(() => {
-      const tabs = document.querySelectorAll<HTMLElement>(".inspectres [role='tab']");
-      const second = tabs[1];
+      const allTabs = document.querySelectorAll<HTMLElement>(".inspectres [role='tab']");
+      const second = allTabs[1];
       if (second) {
         second.scrollIntoView({ block: "nearest" });
         second.click();
@@ -91,8 +106,7 @@ test.describe("Sheet navigation and tab switching (E2E - Playwright)", () => {
   });
 
   test("should test content visibility and accessibility with panel verification", async ({ page }) => {
-    await page.waitForSelector(".inspectres", { timeout: 10000 });
-    await page.waitForSelector(".inspectres [role='tabpanel']", { timeout: 5000 });
+    await waitForSheet(page);
 
     const panelInfo = await page.evaluate(() => {
       const panels = document.querySelectorAll(".inspectres [role='tabpanel']");
@@ -113,8 +127,7 @@ test.describe("Sheet navigation and tab switching (E2E - Playwright)", () => {
   });
 
   test("should test tab keyboard navigation (arrow keys)", async ({ page }) => {
-    await page.waitForSelector(".inspectres", { timeout: 10000 });
-    await page.waitForSelector(".inspectres [role='tab']", { timeout: 5000 });
+    await waitForSheet(page);
     const firstTab = page.locator(".inspectres [role='tab']").first();
 
     await firstTab.focus();
@@ -130,8 +143,7 @@ test.describe("Sheet navigation and tab switching (E2E - Playwright)", () => {
   });
 
   test("should test tab accessibility attributes and ARIA compliance", async ({ page }) => {
-    await page.waitForSelector(".inspectres", { timeout: 10000 });
-    await page.waitForSelector(".inspectres [role='tab']", { timeout: 5000 });
+    await waitForSheet(page);
     const tabs = page.locator(".inspectres [role='tab']");
 
     const tabCount = await tabs.count();

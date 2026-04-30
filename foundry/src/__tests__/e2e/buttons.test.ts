@@ -87,8 +87,13 @@ const button = page.locator("button").first();
   });
 
   test("should test disabled button state with styling verification", async ({ page }) => {
-    // Disabled buttons may be hidden in collapsed sidebar tabs — wait for any to exist in DOM.
-    await page.waitForSelector("button[disabled]", { timeout: 5000, state: "attached" });
+    // Use waitForFunction rather than waitForSelector: ApplicationV2 re-renders can briefly
+    // detach elements, causing waitForSelector to time out even when the element exists.
+    await page.waitForFunction(
+      () => document.querySelector("button[disabled]") !== null,
+      undefined,
+      { timeout: 5000 },
+    );
     const buttons = page.locator("button[disabled]");
 
     const disabledStyle = await buttons.first().evaluate((el) => {

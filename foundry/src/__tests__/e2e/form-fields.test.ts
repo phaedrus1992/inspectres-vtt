@@ -10,9 +10,25 @@
 
 import { test, expect } from "./fixtures";
 
+// ApplicationV2 re-renders briefly detach elements. waitForSelector on ".inspectres" can
+// time out even when the sheet is logically visible. Use waitForFunction + getBoundingClientRect
+// to tolerate transient detach/re-attach cycles.
+async function waitForSheet(page: import("@playwright/test").Page): Promise<void> {
+  await page.waitForFunction(
+    () => {
+      const el = document.querySelector(".inspectres");
+      if (!el) return false;
+      const rect = (el as HTMLElement).getBoundingClientRect();
+      return rect.width > 0 && rect.height > 0;
+    },
+    undefined,
+    { timeout: 15_000 },
+  );
+}
+
 test.describe("Form field rendering and input validation (E2E - Playwright)", () => {
   test("should test form field visibility with styling", async ({ page }) => {
-    await page.waitForSelector(".inspectres", { timeout: 10000 });
+    await waitForSheet(page);
     const inputs = page.locator(".inspectres input[type='text'], .inspectres input[type='number']");
     await expect(inputs.first()).toBeVisible();
 
@@ -28,7 +44,7 @@ test.describe("Form field rendering and input validation (E2E - Playwright)", ()
   });
 
   test("should test input field styling with border verification", async ({ page }) => {
-    await page.waitForSelector(".inspectres", { timeout: 10000 });
+    await waitForSheet(page);
     const input = page.locator(".inspectres input[type='text']").first();
     await expect(input).toBeVisible();
 
@@ -50,7 +66,7 @@ test.describe("Form field rendering and input validation (E2E - Playwright)", ()
   });
 
   test("should test input value handling", async ({ page }) => {
-    await page.waitForSelector(".inspectres", { timeout: 10000 });
+    await waitForSheet(page);
     const input = page.locator(".inspectres input[type='text']").first();
     await expect(input).toBeVisible();
     await input.fill("test value");
@@ -60,7 +76,7 @@ test.describe("Form field rendering and input validation (E2E - Playwright)", ()
   });
 
   test("should test form field focus and interaction with visual feedback", async ({ page }) => {
-    await page.waitForSelector(".inspectres", { timeout: 10000 });
+    await waitForSheet(page);
     // Use a numeric data field (bank) — always visible on stats tab and not subject
     // to Foundry's name-field special handling. Verify click focuses the field.
     const input = page.locator(".inspectres input[name='system.bank']").first();
@@ -78,7 +94,7 @@ test.describe("Form field rendering and input validation (E2E - Playwright)", ()
   });
 
   test("should test form validation with required fields", async ({ page }) => {
-    await page.waitForSelector(".inspectres", { timeout: 10000 });
+    await waitForSheet(page);
     // Franchise sheet has no inputs marked required at the HTML level — fields are
     // optional from a form-validation standpoint and validated by the data model.
     // Skip when none are present rather than asserting on absent UI.
@@ -99,7 +115,7 @@ test.describe("Form field rendering and input validation (E2E - Playwright)", ()
   });
 
   test("should test textarea and select field handling with styling", async ({ page }) => {
-    await page.waitForSelector(".inspectres", { timeout: 10000 });
+    await waitForSheet(page);
     // The textarea lives in the Notes tab — navigate there like a real user would
     await page.click(".inspectres [role='tab'][aria-controls='tab-notes']");
     await page.waitForSelector(".inspectres textarea", { timeout: 5000 });
@@ -117,10 +133,7 @@ test.describe("Form field rendering and input validation (E2E - Playwright)", ()
   });
 
   test("should test form accessibility with ARIA attributes", async ({ page }) => {
-    await page.waitForSelector(".inspectres", { timeout: 10000 });
-    await page.waitForSelector(".inspectres input:visible, .inspectres select:visible", {
-      timeout: 5000,
-    });
+    await waitForSheet(page);
 
     // Check all visible fields in a single evaluate to avoid multiple round-trips timing out in CI.
     // Accept aria-label, aria-labelledby, title, label[for=id], wrapping <label>, or adjacent <label>
