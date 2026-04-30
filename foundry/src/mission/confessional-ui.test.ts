@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import {
   loadConfessionalScene,
   returnFromConfessional,
@@ -6,6 +6,22 @@ import {
 } from "./confessional-ui.js";
 
 describe("Confessional UI Integration", () => {
+  beforeEach(() => {
+    // Mock game.scenes.get() to return scenes for integration tests
+    const mockScenes = new Map([
+      ["scene-123", { id: "scene-123" }],
+      ["new-scene", { id: "new-scene" }],
+      ["home-scene-456", { id: "home-scene-456" }],
+      ["confess-scene-789", { id: "confess-scene-789" }],
+      ["confess-123", { id: "confess-123" }],
+    ]);
+    (globalThis as any).game = {
+      ...(globalThis as any).game,
+      scenes: {
+        get: (id: string) => mockScenes.get(id),
+      },
+    };
+  });
   describe("loadConfessionalScene", () => {
     it("returns scene ID when confessional scene exists", async () => {
       const existingSceneId = "scene-123";

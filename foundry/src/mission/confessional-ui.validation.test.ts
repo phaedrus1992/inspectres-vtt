@@ -6,6 +6,19 @@ import {
 } from "./confessional-ui.js";
 
 describe("confessional-ui validation", () => {
+  beforeEach(() => {
+    // Mock game.scenes.get() to return scenes for GREEN tests
+    const mockScenes = new Map([
+      ["confessional-scene-id", { id: "confessional-scene-id" }],
+      ["home-scene-id", { id: "home-scene-id" }],
+    ]);
+    (globalThis as any).game = {
+      ...(globalThis as any).game,
+      scenes: {
+        get: (id: string) => mockScenes.get(id),
+      },
+    };
+  });
   describe("RED: Input validation (currently failing)", () => {
     it("rejects empty scene ID", async () => {
       // #330: Validation gap — no input validation
