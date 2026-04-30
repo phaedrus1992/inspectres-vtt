@@ -84,6 +84,9 @@ async function rollDice(count: number): Promise<{ roll: Roll; faces: number[] }>
 }
 
 function getOutcomeClassification(highestFace: number): "good" | "partial" | "bad" {
+  if (highestFace < 1 || highestFace > 6) {
+    throw new Error(`getOutcomeClassification: die face must be 1-6, got ${highestFace}`);
+  }
   if (highestFace >= 5) return "good";
   if (highestFace >= 3) return "partial";
   return "bad";
