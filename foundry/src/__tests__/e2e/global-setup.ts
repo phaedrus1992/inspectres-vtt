@@ -148,6 +148,7 @@ async function joinAsUser(page: Page, username: string, timeouts = { url: 30_000
   await page.waitForFunction(
     // @ts-expect-error - Foundry runtime global
     () => globalThis.game?.ready === true,
+    undefined,
     { timeout: timeouts.ready },
   );
 }

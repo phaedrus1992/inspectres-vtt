@@ -116,6 +116,7 @@ export const test = base.extend({
     await page.waitForFunction(
       // @ts-expect-error - Foundry runtime global
       () => globalThis.game?.ready === true,
+      undefined,
       { timeout: READY_TIMEOUT },
     );
 
