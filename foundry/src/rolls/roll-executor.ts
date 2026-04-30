@@ -83,6 +83,12 @@ async function rollDice(count: number): Promise<{ roll: Roll; faces: number[] }>
   return { roll, faces: extractFaces(roll) };
 }
 
+function getOutcomeClassification(highestFace: number): "good" | "partial" | "bad" {
+  if (highestFace >= 5) return "good";
+  if (highestFace >= 3) return "partial";
+  return "bad";
+}
+
 async function postChatCard(
   content: string,
   speaker: ReturnType<typeof ChatMessage.getSpeaker>,
@@ -439,7 +445,20 @@ export async function executeSkillRoll(
     requirementDefect, // Phase 1
     requirementCheckFailed, // Phase 1
   });
-  await postChatCard(content, speaker, [mainRoll]);
+
+  // Only post ChatMessage if franchise is not in debt mode (#455)
+  if (!franchiseSystem?.debtMode) {
+    await ChatMessage.create({
+      content,
+      speaker,
+      rolls: [mainRoll],
+      flags: {
+        inspectres: {
+          outcome: getOutcomeClassification(highestFace),
+        },
+      },
+    } as unknown as Parameters<typeof ChatMessage.create>[0]);
+  }
 }
 
 interface SkillRollDialogOptions {
