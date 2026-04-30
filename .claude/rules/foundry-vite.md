@@ -301,6 +301,18 @@ Add `"verbatimModuleSyntax": true` (required by TS rules). Combined with `"isola
 `allowImportingTsExtensions: true` requires `noEmit: true`.
 `moduleResolution: "bundler"` correct for Vite.
 
+## Deprecated Global APIs (V13)
+
+Globals moved to namespaces in V13:
+
+| Deprecated | Use |
+|---|---|
+| `renderTemplate(path, data)` | `foundry.applications.handlebars.renderTemplate(path, data)` |
+| `loadTemplates(paths)` | `foundry.applications.handlebars.loadTemplates(paths)` |
+| `Dialog.wait(config)` | `foundry.applications.api.DialogV2.wait(config)` |
+
+If namespaced form missing from fvtt-types, add to `src/types/foundry-v2.d.ts`. Update test mocks to target `foundry.applications.handlebars.renderTemplate` not the global.
+
 ## Anti-Patterns
 
 | Never | Use |
@@ -322,3 +334,6 @@ Add `"verbatimModuleSyntax": true` (required by TS rules). Combined with `"isola
 | `extends Application` (V1) | `ApplicationV2` |
 | `getData()` in V2 sheets | `_prepareContext()` |
 | `activateListeners(html: JQuery)` in V2 | `_onRender()` + actions |
+| Global `renderTemplate(...)` | `foundry.applications.handlebars.renderTemplate(...)` |
+| Global `loadTemplates(...)` | `foundry.applications.handlebars.loadTemplates(...)` |
+| Mock `globalThis.renderTemplate` in tests | Mock `foundry.applications.handlebars.renderTemplate` |

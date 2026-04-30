@@ -7,7 +7,6 @@
 import { agentSystemData } from "./agent-system-data.js";
 import { computeRecoveryStatus, getCurrentDay } from "./recovery-utils.js";
 import type { SkillName } from "../rolls/roll-executor.js";
-import type { AgentData } from "./agent-schema.js";
 
 export interface SkillRecoveryResult {
   readonly success: boolean;

@@ -1,6 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { readFileSync } from "fs";
-import { spawnSync } from "child_process";
+import { readFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
+import { resolve, dirname } from "node:path";
+
+const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../../../");
+const foundryRoot = resolve(repoRoot, "foundry");
 
 describe("system-cast consolidation (#363)", () => {
   it("should not have manual actor.system casts after #363 consolidation", () => {
@@ -17,7 +22,7 @@ describe("system-cast consolidation (#363)", () => {
       ],
       {
         encoding: "utf-8",
-        cwd: "/Users/ranger/git/inspectres",
+        cwd: repoRoot,
       },
     );
 
@@ -42,7 +47,7 @@ describe("system-cast consolidation (#363)", () => {
 
   it("getActorSystem should be imported and used in agent/franchise files", () => {
     const agentSystemContent = readFileSync(
-      "/Users/ranger/git/inspectres/foundry/src/agent/agent-system-data.ts",
+      resolve(foundryRoot, "src/agent/agent-system-data.ts"),
       "utf-8",
     );
 
@@ -51,7 +56,7 @@ describe("system-cast consolidation (#363)", () => {
 
   it("getActorSystem should be imported and used in franchise utils", () => {
     const franchiseUtilsContent = readFileSync(
-      "/Users/ranger/git/inspectres/foundry/src/franchise/franchise-utils.ts",
+      resolve(foundryRoot, "src/franchise/franchise-utils.ts"),
       "utf-8",
     );
 

@@ -1,5 +1,31 @@
-import { describe, it, expect } from "vitest";
-import { setCurrentDaySetting } from "./settings-utils.js";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { getCurrentDaySetting, setCurrentDaySetting } from "./settings-utils.js";
+
+describe("getCurrentDaySetting", () => {
+  const mockGet = vi.fn();
+
+  beforeEach(() => {
+    const g = globalThis as unknown as Record<string, unknown>;
+    g["game"] = {
+      ...(g["game"] as Record<string, unknown>),
+      settings: { get: mockGet },
+    };
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("returns setting value when available", () => {
+    mockGet.mockReturnValue(5);
+    expect(getCurrentDaySetting()).toBe(5);
+  });
+
+  it("returns 1 as fallback when setting is undefined", () => {
+    mockGet.mockReturnValue(undefined);
+    expect(getCurrentDaySetting()).toBe(1);
+  });
+});
 
 describe("Day Settings Validation", () => {
   describe("setCurrentDaySetting validation", () => {

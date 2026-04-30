@@ -18,7 +18,7 @@ class MockActorSheetV2 {
   actor: MockActor = new MockActor();
   isEditable: boolean = true;
 
-  static DEFAULT_OPTIONS = {
+  static readonly DEFAULT_OPTIONS = {
     id: "",
     classes: [] as string[],
     window: { title: "" },
@@ -26,7 +26,7 @@ class MockActorSheetV2 {
     actions: {} as Record<string, unknown>,
   };
 
-  static PARTS: Record<string, { template: string }> = {};
+  static readonly PARTS: Record<string, { template: string }> = {};
 
   async _prepareContext(_options: unknown) {
     return {
@@ -44,7 +44,7 @@ class MockActorSheetV2 {
 
 // Mock ApplicationV2 class
 class MockApplicationV2 {
-  static DEFAULT_OPTIONS = {
+  static readonly DEFAULT_OPTIONS = {
     id: "",
     classes: [] as string[],
     window: { title: "" },
@@ -60,11 +60,11 @@ const hookHandlers: Record<string, Function[]> = {};
 
 const Hooks = {
   once(event: string, fn: Function) {
-    if (!hookHandlers[event]) hookHandlers[event] = [];
+    hookHandlers[event] ??= [];
     hookHandlers[event].push(fn);
   },
   on(event: string, fn: Function) {
-    if (!hookHandlers[event]) hookHandlers[event] = [];
+    hookHandlers[event] ??= [];
     hookHandlers[event].push(fn);
   },
   call(event: string, ...args: unknown[]) {
@@ -191,8 +191,8 @@ async function renderTemplate(_path: string, data: unknown): Promise<string> {
 }
 
 // Mock loadTemplates
-async function loadTemplates(paths: string[]): Promise<void> {
-  void paths;
+async function loadTemplates(_paths: string[]): Promise<void> {
+  // stub
 }
 
 // Assign to global
@@ -215,10 +215,10 @@ Object.assign(globalThis, {
     },
     data: {
       fields: {
-        StringField: class { constructor(_opts?: unknown) {} },
-        NumberField: class { constructor(_opts?: unknown) {} },
-        BooleanField: class { constructor(_opts?: unknown) {} },
-        ArrayField: class { constructor(_element?: unknown, _opts?: unknown) {} },
+        StringField: class {},
+        NumberField: class {},
+        BooleanField: class {},
+        ArrayField: class {},
         SchemaField: class {
           fields: Record<string, unknown>;
           required?: boolean;
@@ -250,6 +250,10 @@ Object.assign(globalThis, {
         DialogV2: MockDialogV2,
         // Identity mixin — returns the base class unchanged so sheet class definitions type-check
         HandlebarsApplicationMixin: <T>(Base: T): T => Base,
+      },
+      handlebars: {
+        renderTemplate: renderTemplate,
+        loadTemplates: loadTemplates,
       },
       sheets: {
         ActorSheetV2: MockActorSheetV2,

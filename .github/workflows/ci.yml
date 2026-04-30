@@ -146,7 +146,7 @@ jobs:
   e2e:
     name: E2E tests
     runs-on: ubuntu-latest
-    needs: [build]
+    needs: [build, unit-test, typecheck]
     permissions:
       contents: read
     env:
@@ -176,6 +176,27 @@ jobs:
         working-directory: foundry
         run: npm ci
 
+      - name: Cache apt packages (Playwright fonts + X deps)
+        id: apt-cache
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684  # v4.2.3
+        with:
+          path: /var/cache/apt/archives
+          key: apt-playwright-chromium-${{ runner.os }}-v1
+
+      - name: Install apt dependencies for Playwright
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            fonts-freefont-ttf \
+            fonts-ipafont-gothic \
+            fonts-tlwg-loma-otf \
+            fonts-unifont \
+            fonts-wqy-zenhei \
+            xfonts-cyrillic \
+            xfonts-encodings \
+            xfonts-scalable \
+            xfonts-utils
+
       - name: Cache Playwright browsers
         id: playwright-cache
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684  # v4.2.3
@@ -183,15 +204,27 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-${{ hashFiles('foundry/package-lock.json') }}-${{ runner.os }}
 
-      - name: Install Playwright browsers (full, cache miss)
+      - name: Install Playwright browsers
         if: steps.playwright-cache.outputs.cache-hit != 'true'
         working-directory: foundry
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install chromium
 
-      - name: Install Playwright system deps (cache hit)
-        if: steps.playwright-cache.outputs.cache-hit == 'true'
-        working-directory: foundry
-        run: npx playwright install-deps chromium
+      - name: Cache Foundry Docker image
+        id: foundry-image-cache
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684  # v4.2.3
+        with:
+          path: /tmp/foundry-image.tar
+          key: docker-foundry-v13-${{ runner.os }}-v1
+
+      - name: Load Foundry image from cache
+        if: steps.foundry-image-cache.outputs.cache-hit == 'true'
+        run: docker load -i /tmp/foundry-image.tar
+
+      - name: Pull Foundry image and save to cache
+        if: steps.foundry-image-cache.outputs.cache-hit != 'true'
+        run: |
+          docker pull ghcr.io/felddy/foundryvtt:13
+          docker save ghcr.io/felddy/foundryvtt:13 -o /tmp/foundry-image.tar
 
       - name: Start Foundry container
         working-directory: docker
@@ -228,3 +261,37 @@ jobs:
           path: |
             foundry/playwright-report/
             foundry/test-results/
+
+  unit-test:
+    name: Unit tests + coverage
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Set up Node
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # v6.4.0
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: foundry/package-lock.json
+
+      - name: Install dependencies
+        working-directory: foundry
+        run: npm ci
+
+      - name: Run unit tests with coverage
+        working-directory: foundry
+        run: npm run test -- --coverage
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: coverage-lcov
+          path: foundry/coverage/lcov.info
+          if-no-files-found: error
+

@@ -516,7 +516,8 @@ describe("executeClientRoll", () => {
       }
     };
     let capturedContent = "";
-    vi.spyOn(globalThis as unknown as { renderTemplate: (path: string, data: Record<string, unknown>) => Promise<string> }, "renderTemplate")
+    const handlebars = (globalThis as unknown as { foundry: { applications: { handlebars: { renderTemplate: (path: string, data: Record<string, unknown>) => Promise<string> } } } }).foundry.applications.handlebars;
+    vi.spyOn(handlebars, "renderTemplate")
       .mockImplementation(async (_path: string, data: Record<string, unknown>) => {
         capturedContent = JSON.stringify(data);
         return capturedContent;

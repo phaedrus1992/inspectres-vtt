@@ -17,8 +17,8 @@ export function registerHandlebarsHelpers(): void {
 
   // String helpers
   Handlebars.registerHelper("inspectres-capitalize", (str: string) => {
-    if (typeof str !== "string") return str;
-    return str.charAt(0).toUpperCase() + str.slice(1);
+    if (typeof str === "string") return str.charAt(0).toUpperCase() + str.slice(1);
+    return str;
   });
 
   // Array helpers

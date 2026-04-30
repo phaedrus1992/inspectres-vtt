@@ -2,7 +2,7 @@ let activeConfessionalSceneId: string | null = null;
 
 function validateSceneId(sceneId: unknown, context: string): asserts sceneId is string {
   if (typeof sceneId !== "string") {
-    throw new Error(`Scene ID required for ${context}: received ${typeof sceneId}`);
+    throw new TypeError(`Scene ID required for ${context}: received ${typeof sceneId}`);
   }
   if (sceneId.trim() === "") {
     throw new Error(`Scene ID cannot be empty for ${context}`);

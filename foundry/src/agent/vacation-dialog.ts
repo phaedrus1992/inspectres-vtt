@@ -3,8 +3,6 @@
  * Per rules: Bank dice spent on vacation reduce stress by 1 per die, up to current stress
  */
 
-import { type FranchiseData } from "../franchise/franchise-schema.js";
-import { type AgentData } from "./agent-schema.js";
 
 export interface VacationOptions {
   agentStress: number;
@@ -95,7 +93,7 @@ export async function buildVacationDialog(options: VacationOptions): Promise<Vac
           const coolRestoreRaw = Number(data.get("coolRestore") ?? 0);
 
           if (!Number.isFinite(bankSpendRaw) || !Number.isFinite(coolRestoreRaw)) {
-            throw new Error("Invalid input: bank spending must be valid numbers");
+            throw new TypeError("Invalid input: bank spending must be valid numbers");
           }
 
           const bankSpentOnStress = Math.max(0, Math.min(maxStressSpendable, bankSpendRaw));

@@ -103,4 +103,18 @@ describe("activateTabs", () => {
     expect(notesTab.classList.contains("active")).toBe(true);
     expect(statsTab.classList.contains("active")).toBe(false);
   });
+
+  it("navigates to first tab with Home key", () => {
+    const { element, statsTab, notesBtn } = makeTabFixture("notes");
+    activateTabs(element, "notes");
+    notesBtn.dispatchEvent(new KeyboardEvent("keydown", { key: "Home", bubbles: true }));
+    expect(statsTab.classList.contains("active")).toBe(true);
+  });
+
+  it("navigates to last tab with End key", () => {
+    const { element, notesTab, statsBtn } = makeTabFixture();
+    activateTabs(element, "stats");
+    statsBtn.dispatchEvent(new KeyboardEvent("keydown", { key: "End", bubbles: true }));
+    expect(notesTab.classList.contains("active")).toBe(true);
+  });
 });

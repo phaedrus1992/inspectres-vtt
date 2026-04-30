@@ -1,6 +1,6 @@
 import { defineConfig } from "vite";
-import fs from "fs";
-import path from "path";
+import fs from "node:fs";
+import path from "node:path";
 
 const isProduction = process.env.NODE_ENV === "production";
 

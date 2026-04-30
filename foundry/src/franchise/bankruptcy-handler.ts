@@ -88,7 +88,7 @@ export async function enterDebtMode(franchiseActor: Actor, attemptedSpend: numbe
   await franchiseActor.update(updateData);
 
   ui.notifications?.warn(
-    game.i18n?.localize("INSPECTRES.NotifyDebtEntered") ?? `Franchise entered debt: borrowed ${borrowResult} dice.`,
+    game.i18n?.localize("INSPECTRES.NotifyDebtEntered") ?? `Franchise entered debt: borrowed ${String(borrowResult)} dice.`,
   );
 
   return true;
