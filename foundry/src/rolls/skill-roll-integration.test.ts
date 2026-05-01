@@ -1,40 +1,9 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { makeAgent, makeFranchise } from "../__mocks__/test-fixtures.js";
-import { executeSkillRoll } from "./roll-executor.js";
-
-type RollOutcome = "good" | "partial" | "bad";
-
-const VALID_OUTCOMES: RollOutcome[] = ["good", "partial", "bad"];
-
-interface GameGlobal {
-  game: { user: { isGM: boolean } };
-  ChatMessage: { create: ReturnType<typeof vi.fn> };
-}
-
-function getFirstMockCallArg<T>(mock: ReturnType<typeof vi.fn>): T | undefined {
-  const callArgs = mock.mock.calls[0];
-  if (!callArgs || callArgs.length === 0) return undefined;
-  return callArgs[0] as T;
-}
-
-function setupGlobalMocks(chatMessageMock: ReturnType<typeof vi.fn>): void {
-  const g = globalThis as unknown as Partial<GameGlobal>;
-  if (!g.game) g.game = { user: { isGM: false } };
-  if (g.game && "user" in g.game) {
-    (g.game as { user: { isGM: boolean } }).user.isGM = true;
-  }
-  const chatMessage = {
-    create: chatMessageMock,
-    getSpeaker: vi.fn(() => ({ actor: "test-actor", token: null })),
-  };
-  if (!g.ChatMessage) {
-    g.ChatMessage = chatMessage as unknown as { create: ReturnType<typeof vi.fn> };
-  } else {
-    const cm = g.ChatMessage as Record<string, unknown>;
-    cm["create"] = chatMessageMock;
-    cm["getSpeaker"] = chatMessage.getSpeaker;
-  }
-}
+import { getFirstMockCallArg, setupGlobalMocks } from "../__mocks__/test-utils.js";
+import { setupChatMessageMocks } from "../__mocks__/chat-message-mocks.js";
+import { VALID_OUTCOMES } from "../types/roll.js";
+import { executeSkillRoll, type SkillName } from "./roll-executor.js";
 
 describe("Skill Roll Integration — ChatMessage Output (#453)", () => {
   let chatMessageMock: ReturnType<typeof vi.fn>;
@@ -42,15 +11,7 @@ describe("Skill Roll Integration — ChatMessage Output (#453)", () => {
   beforeEach(() => {
     chatMessageMock = vi.fn();
     setupGlobalMocks(chatMessageMock);
-    // Mock foundry.applications.handlebars
-    const g = globalThis as unknown as Record<string, unknown>;
-    if (!g["foundry"]) g["foundry"] = {};
-    const foundry = g["foundry"] as Record<string, unknown>;
-    if (!foundry["applications"]) foundry["applications"] = {};
-    const applications = foundry["applications"] as Record<string, unknown>;
-    if (!applications["handlebars"]) applications["handlebars"] = {};
-    const handlebars = applications["handlebars"] as Record<string, unknown>;
-    handlebars["renderTemplate"] = vi.fn(() => Promise.resolve("<div>mocked</div>"));
+    setupChatMessageMocks();
   });
 
   afterEach(() => {
@@ -60,38 +21,40 @@ describe("Skill Roll Integration — ChatMessage Output (#453)", () => {
     delete g["ChatMessage"];
   });
 
-  it("calls ChatMessage.create when skill roll completes", async () => {
-    const agent = makeAgent({ skills: { academics: 2 }, cool: 2 });
-    const franchise = makeFranchise({ dice: 1 });
+  describe("ChatMessage creation with various skill/franchise combinations", () => {
+    const cases: Array<{ skill: SkillName; skillRank: number; franchiseDice: number; name: string }> = [
+      { skill: "academics", skillRank: 2, franchiseDice: 1, name: "academics with franchise bonus" },
+      { skill: "athletics", skillRank: 1, franchiseDice: 0, name: "athletics without franchise bonus" },
+      { skill: "contact", skillRank: 2, franchiseDice: 1, name: "contact with dice" },
+      { skill: "technology", skillRank: 0, franchiseDice: 2, name: "technology with high franchise" },
+    ];
 
-    await executeSkillRoll(agent, franchise, "academics");
+    for (const testCase of cases) {
+      it(`calls ChatMessage.create when skill roll completes — ${testCase.name}`, async () => {
+        const agent = makeAgent({ skills: { [testCase.skill]: testCase.skillRank }, cool: 2 });
+        const franchise = makeFranchise({ dice: testCase.franchiseDice });
 
-    expect(chatMessageMock).toHaveBeenCalledOnce();
-  });
+        await executeSkillRoll(agent, franchise, testCase.skill);
 
-  it("passes speaker information to ChatMessage", async () => {
-    const agent = makeAgent({ name: "Test Agent", skills: { athletics: 1 } });
-    const franchise = makeFranchise({ dice: 0 });
+        expect(chatMessageMock).toHaveBeenCalledOnce();
+      });
 
-    await executeSkillRoll(agent, franchise, "athletics");
+      it(`passes speaker and outcome in ChatMessage — ${testCase.name}`, async () => {
+        const agent = makeAgent({ name: `Test ${testCase.skill}`, skills: { [testCase.skill]: testCase.skillRank } });
+        const franchise = makeFranchise({ dice: testCase.franchiseDice });
 
-    const messageData = getFirstMockCallArg<Record<string, unknown>>(chatMessageMock);
-    expect(messageData).toBeDefined();
-    expect(messageData?.["speaker"]).toBeDefined();
-  });
+        await executeSkillRoll(agent, franchise, testCase.skill);
 
-  it("includes flags.inspectres with outcome classification in ChatMessage", async () => {
-    const agent = makeAgent({ skills: { contact: 2 } });
-    const franchise = makeFranchise({ dice: 1 });
+        const messageData = getFirstMockCallArg<Record<string, unknown>>(chatMessageMock);
+        expect(messageData).toBeDefined();
+        expect(messageData?.["speaker"]).toBeDefined();
 
-    await executeSkillRoll(agent, franchise, "contact");
-
-    const messageData = getFirstMockCallArg<Record<string, unknown>>(chatMessageMock);
-    const flags = messageData?.["flags"] as Record<string, Record<string, unknown>> | undefined;
-    const inspectresFlags = flags?.["inspectres"] as Record<string, unknown> | undefined;
-
-    expect(inspectresFlags).toBeDefined();
-    expect(VALID_OUTCOMES).toContain(inspectresFlags?.["outcome"]);
+        const flags = messageData?.["flags"] as Record<string, Record<string, unknown>> | undefined;
+        const inspectresFlags = flags?.["inspectres"] as Record<string, unknown> | undefined;
+        expect(inspectresFlags).toBeDefined();
+        expect(VALID_OUTCOMES).toContain(inspectresFlags?.["outcome"]);
+      });
+    }
   });
 
   it("does not call ChatMessage.create when franchise is in debt mode (#455)", async () => {
