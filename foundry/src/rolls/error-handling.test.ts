@@ -5,6 +5,7 @@ import {
   type RollActor,
 } from "./roll-executor.js";
 import { getCurrentDay } from "../agent/recovery-utils.js";
+import * as rng from "./seeded-rng.js";
 
 // Mock Foundry globals
 class MockRoll {
@@ -148,8 +149,8 @@ describe("Error handling in rolls", () => {
       const agent = makeAgent({ isDead: false });
       const franchise = makeFranchise({ deathMode: true });
 
-      // Mock Math.random to produce invalid d3 (0 or 4+, not 1–3)
-      const randomSpy = vi.spyOn(Math, "random").mockReturnValue(-0.1);
+      // Mock seeded RNG to produce invalid d3 (0 or 4+, not 1–3)
+      const randomSpy = vi.spyOn(rng, "random").mockReturnValue(-0.1);
       // Math.floor(-0.1 * 3) + 1 = Math.floor(-0.3) + 1 = -1 + 1 = 0 (invalid)
 
       try {
@@ -160,7 +161,7 @@ describe("Error handling in rolls", () => {
           }
         });
 
-        // executeStressRoll should hit death-roll code with mocked Math.random producing 0
+        // executeStressRoll should hit death-roll code with mocked random() producing 0
         await expect(
           executeStressRoll(agent, { stressDiceCount: 1, coolDiceUsed: 0 }, franchise),
         ).rejects.toThrow(/Invalid d3 result.*0/);

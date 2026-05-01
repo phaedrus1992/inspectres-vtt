@@ -4,6 +4,8 @@
  * Characteristics Bonus: +1 to random unused characteristic
  */
 
+import { random } from "../rolls/seeded-rng.js";
+
 export interface ActorWithWeirdFlag {
   readonly isWeird: boolean;
 }
@@ -22,6 +24,6 @@ export function calculateHazardPay(actors: ActorWithWeirdFlag[], deathMode: bool
  */
 export function selectRandomCharacteristic(unused: string[]): string | null {
   if (unused.length === 0) return null;
-  const index = Math.floor(Math.random() * unused.length);
+  const index = Math.floor(random() * unused.length);
   return unused[index] ?? null;
 }

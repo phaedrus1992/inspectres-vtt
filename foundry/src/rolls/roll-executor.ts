@@ -18,6 +18,7 @@ import { getCurrentDay } from "../agent/recovery-utils.js";
 import { type ItemRarity, isRollSufficient, checkDefect } from "../mission/requirements-checker.js";
 import { prepareSkillRollContext, type SkillRollContextInput } from "../agent/skill-roll-dialog.js";
 import { checkTechnologyRollRequirements } from "./skill-roll-executor.js";
+import { random } from "./seeded-rng.js";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -647,7 +648,7 @@ async function rollDeathOutcome(
 ): Promise<DeathDismembermentOutcome | null> {
   if (!deathModeActive || effectiveFace > 2) return null;
 
-  const deathRoll = Math.floor(Math.random() * 3) + 1;
+  const deathRoll = Math.floor(random() * 3) + 1;
   if (deathRoll < 1 || deathRoll > 3) {
     const errorMsg = `Invalid d3 result in death roll: ${deathRoll} (expected 1–3). Stress roll aborted. Agent: ${agent.name} (${agent.id})`;
     ui.notifications?.error("[INSPECTRES] Death roll validation failed");
