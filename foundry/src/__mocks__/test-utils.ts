@@ -8,6 +8,7 @@ import { vi } from "vitest";
 export function getFirstMockCallArg<T>(mock: ReturnType<typeof vi.fn>): T | undefined {
   const callArgs = mock.mock.calls[0];
   if (!callArgs || callArgs.length === 0) return undefined;
+  // Type narrowing: vitest mock.calls[0][0] is unknown; caller guarantees type T.
   return callArgs[0] as T;
 }
 
@@ -21,9 +22,14 @@ export function setupGlobalMocks(chatMessageMock: ReturnType<typeof vi.fn>): voi
     ChatMessage: { create: ReturnType<typeof vi.fn> };
   }
 
+  // Type narrowing: globalThis is unknown; we construct a partial GameGlobal shape for tests.
   const g = globalThis as unknown as Partial<GameGlobal>;
   if (!g.game) g.game = { user: { isGM: false } };
+  if (!g.game) {
+    throw new Error("game global initialization failed: game namespace is null");
+  }
   if (g.game && "user" in g.game) {
+    // Type narrowing: g.game exists and has "user" property; cast to access isGM safely.
     (g.game as { user: { isGM: boolean } }).user.isGM = true;
   }
   const chatMessage = {
@@ -31,8 +37,10 @@ export function setupGlobalMocks(chatMessageMock: ReturnType<typeof vi.fn>): voi
     getSpeaker: vi.fn(() => ({ actor: "test-actor", token: null })),
   };
   if (!g.ChatMessage) {
+    // Type narrowing: chatMessage object satisfies minimal ChatMessage interface needed for tests.
     g.ChatMessage = chatMessage as unknown as { create: ReturnType<typeof vi.fn> };
   } else {
+    // Type narrowing: g.ChatMessage exists; cast to Record for key access.
     const cm = g.ChatMessage as Record<string, unknown>;
     cm["create"] = chatMessageMock;
     cm["getSpeaker"] = chatMessage.getSpeaker;
