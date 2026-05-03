@@ -9,6 +9,18 @@ exclude: |
   )$
 
 repos:
+  # Block Math.random() — use Foundry Roll system instead
+  # Exception: allowed in test mocks and test files only
+  - repo: local
+    hooks:
+      - id: no-math-random
+        name: Forbid Math.random()
+        entry: bash -c 'grep -r "Math\.random" src/ --include="*.ts" --exclude="*.test.ts" --exclude-dir="__mocks__" && echo "❌ Found Math.random() in production code" && exit 1 || exit 0'
+        language: system
+        files: ^src/.*\.ts$
+        pass_filenames: false
+        stages: [pre-push]
+
   # Linting
   - repo: local
     hooks:

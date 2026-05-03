@@ -647,13 +647,14 @@ async function rollDeathOutcome(
 ): Promise<DeathDismembermentOutcome | null> {
   if (!deathModeActive || effectiveFace > 2) return null;
 
-  const deathRoll = Math.floor(Math.random() * 3) + 1;
-  if (deathRoll < 1 || deathRoll > 3) {
-    const errorMsg = `Invalid d3 result in death roll: ${deathRoll} (expected 1–3). Stress roll aborted. Agent: ${agent.name} (${agent.id})`;
+  const roll = await new Roll("1d3").evaluate();
+  const result = roll.total ?? 0;
+  if (result < 1 || result > 3) {
+    const errorMsg = `Invalid d3 result in death roll: ${result} (expected 1–3). Stress roll aborted. Agent: ${agent.name} (${agent.id})`;
     ui.notifications?.error("[INSPECTRES] Death roll validation failed");
     throw new Error(errorMsg);
   }
-  const deathKey = deathRoll as D3Result;
+  const deathKey = result as D3Result;
   const outcome = DEATH_DISMEMBERMENT_CHART[deathKey];
   if (!outcome) {
     const errorMsg = `Death outcome missing for d3 result ${deathKey}. This indicates corrupted DEATH_DISMEMBERMENT_CHART. Agent: ${agent.name} (${agent.id})`;

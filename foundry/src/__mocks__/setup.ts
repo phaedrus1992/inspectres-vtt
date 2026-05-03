@@ -137,7 +137,32 @@ class MockRoll {
     this.formula = formula;
   }
 
+  get total(): number | undefined {
+    let sum = 0;
+    for (const die of this.dice) {
+      for (const result of die.results) {
+        if (result.active) sum += result.result;
+      }
+    }
+    return sum || undefined;
+  }
+
   async evaluate() {
+    // Auto-generate results for common formulas if not already set
+    if (this.dice.length === 0) {
+      const match = this.formula.match(/(\d+)d(\d+)/);
+      if (match) {
+        const countStr = match[1] ?? "1";
+        const sidesStr = match[2] ?? "6";
+        const count = parseInt(countStr, 10);
+        const sides = parseInt(sidesStr, 10);
+        const results = Array.from({ length: count }, () => ({
+          result: Math.ceil(Math.random() * sides),
+          active: true,
+        }));
+        this.dice = [{ results }];
+      }
+    }
     return this;
   }
 
