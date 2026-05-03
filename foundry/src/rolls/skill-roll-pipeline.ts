@@ -10,26 +10,24 @@ interface Roll {
   evaluate(): Promise<Roll>;
 }
 
+type RollOutcome = "good" | "partial" | "bad";
+
 /** Execute a complete skill roll pipeline: configure, evaluate, post to chat. */
 export async function executeSkillRoll(
   actor: RollActor,
   skillName: string,
 ): Promise<void> {
-  // Stage 1: Open dialog to configure roll
   const config = await openRollDialog(skillName);
   if (!config) return;
 
-  // Stage 2: Evaluate roll
   const diceCount = Number(config["diceCount"]) || 2;
   const roll = await evaluateRoll(`${diceCount}d6`);
-
-  // Stage 3: Determine outcome
   const outcome = determineOutcome(roll.total);
 
-  // Stage 4: Post to chat
   await postRollMessage(actor, skillName, outcome, roll.total);
 }
 
+/** Open a dialog to configure roll parameters (dice count). */
 async function openRollDialog(skillName: string): Promise<DialogResult | null> {
   const g = globalThis as unknown as Record<string, unknown>;
   const foundry = g["foundry"] as unknown as {
@@ -52,6 +50,7 @@ async function openRollDialog(skillName: string): Promise<DialogResult | null> {
   return (result as Record<string, unknown> | null) ?? null;
 }
 
+/** Evaluate a roll formula using Foundry's Roll class. */
 async function evaluateRoll(formula: string): Promise<Roll> {
   const g = globalThis as unknown as { Roll: new (f: string) => Roll };
   const roll = new g.Roll(formula);
@@ -60,16 +59,18 @@ async function evaluateRoll(formula: string): Promise<Roll> {
   return evaluated as Roll;
 }
 
-function determineOutcome(total: number): "good" | "partial" | "bad" {
+/** Determine outcome (bad/partial/good) based on dice total. */
+function determineOutcome(total: number): RollOutcome {
   if (total <= 2) return "bad";
   if (total <= 4) return "partial";
   return "good";
 }
 
+/** Post the roll result to chat with outcome flags. */
 async function postRollMessage(
   actor: RollActor,
   skillName: string,
-  outcome: "good" | "partial" | "bad",
+  outcome: RollOutcome,
   total: number,
 ): Promise<void> {
   const g = globalThis as unknown as Record<string, unknown>;
