@@ -32,6 +32,7 @@ function applyNestedUpdate(target: Record<string, unknown>, path: string, value:
   }
 }
 
+/** Create a test agent fixture. Override system fields via the second parameter. */
 export function makeAgent(overrides: Record<string, unknown> = {}): RollActor {
   return {
     id: "test-agent-id",
@@ -64,6 +65,7 @@ export function makeAgent(overrides: Record<string, unknown> = {}): RollActor {
   };
 }
 
+/** Create a test franchise fixture. Override system fields via the second parameter. */
 export function makeFranchise(overrides: Record<string, unknown> = {}): RollActor {
   return {
     id: "test-franchise-id",

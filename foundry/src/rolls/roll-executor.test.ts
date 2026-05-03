@@ -262,6 +262,31 @@ describe("executeSkillRoll", () => {
         executeSkillRoll(agent, franchise, "academics", { requirementTier: "rare" }),
       ).rejects.toThrow(/Cannot set requirement tier.*academics.*Technology rolls/);
     });
+
+    describe("Privilege Gates", () => {
+      it("blocks non-GM players from initiating skill rolls", async () => {
+        (globalThis as unknown as { game: { user: { isGM: boolean } } }).game.user.isGM = false;
+        const agent = makeAgent();
+        const franchise = makeFranchise();
+        await expect(executeSkillRoll(agent, franchise, "academics")).rejects.toThrow(
+          "Skill rolls can only be initiated by the GM",
+        );
+      });
+
+      it("allows GM to initiate skill rolls", async () => {
+        (globalThis as unknown as { game: { user: { isGM: boolean } } }).game.user.isGM = true;
+        (globalThis as unknown as { Roll: typeof MockRoll }).Roll = class extends MockRoll {
+          constructor(formula: string) {
+            super(formula);
+            this.setResults([4]);
+          }
+        };
+        const agent = makeAgent();
+        const franchise = makeFranchise();
+        // Should not throw
+        await expect(executeSkillRoll(agent, franchise, "academics")).resolves.not.toThrow();
+      });
+    });
   });
 });
 
@@ -463,6 +488,29 @@ describe("executeStressRoll", () => {
     expect(skills["athletics"]?.["penalty"]).toBe(0);
     expect(skills["technology"]?.["penalty"]).toBe(0);
     expect(skills["contact"]?.["penalty"]).toBe(0);
+  });
+
+  describe("Privilege Gates", () => {
+    it("blocks non-GM players from initiating stress rolls", async () => {
+      (globalThis as unknown as { game: { user: { isGM: boolean } } }).game.user.isGM = false;
+      const agent = makeAgent();
+      await expect(executeStressRoll(agent, { stressDiceCount: 1, coolDiceUsed: 0 })).rejects.toThrow(
+        "Stress rolls can only be initiated by the GM",
+      );
+    });
+
+    it("allows GM to initiate stress rolls", async () => {
+      (globalThis as unknown as { game: { user: { isGM: boolean } } }).game.user.isGM = true;
+      (globalThis as unknown as { Roll: typeof MockRoll }).Roll = class extends MockRoll {
+        constructor(formula: string) {
+          super(formula);
+          this.setResults([5]);
+        }
+      };
+      const agent = makeAgent();
+      // Should not throw
+      await expect(executeStressRoll(agent, { stressDiceCount: 1, coolDiceUsed: 0 })).resolves.not.toThrow();
+    });
   });
 });
 

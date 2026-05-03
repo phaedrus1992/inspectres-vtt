@@ -145,6 +145,18 @@ declare namespace foundry.applications.sheets {
   }
 }
 
+declare namespace foundry.applications.api {
+  /** FilePicker — browse the server filesystem and select files. */
+  class FilePicker {
+    constructor(options: {
+      current?: string | undefined;
+      type?: string;
+      callback?: ((path: string) => void) | undefined;
+    });
+    browse(): void;
+  }
+}
+
 /**
  * Convenience type alias for the renderDialogV2 callback.
  * fvtt-types types the app parameter as `Any` — use this alias with a cast when you
