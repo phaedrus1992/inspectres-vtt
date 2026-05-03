@@ -4,8 +4,6 @@
  * Characteristics Bonus: +1 to random unused characteristic
  */
 
-import { random } from "../rolls/seeded-rng.js";
-
 export interface ActorWithWeirdFlag {
   readonly isWeird: boolean;
 }
@@ -22,8 +20,9 @@ export function calculateHazardPay(actors: ActorWithWeirdFlag[], deathMode: bool
  * Select a random unused characteristic for the end-of-session bonus
  * Returns null if no characteristics available
  */
-export function selectRandomCharacteristic(unused: string[]): string | null {
+export async function selectRandomCharacteristic(unused: string[]): Promise<string | null> {
   if (unused.length === 0) return null;
-  const index = Math.floor(random() * unused.length);
+  const roll = await new Roll(`1d${unused.length}`).evaluate();
+  const index = (roll.total ?? 1) - 1; // d1d{n} returns 1–n, subtract 1 for 0-based index
   return unused[index] ?? null;
 }

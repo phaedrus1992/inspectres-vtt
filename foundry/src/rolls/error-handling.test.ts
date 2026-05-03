@@ -1,20 +1,31 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import {
   executeSkillRoll,
   executeStressRoll,
   type RollActor,
 } from "./roll-executor.js";
 import { getCurrentDay } from "../agent/recovery-utils.js";
-import * as rng from "./seeded-rng.js";
 
 // Mock Foundry globals
 class MockRoll {
   dice: Array<{ results: Array<{ active: boolean; result: number }> }>;
+  total: number;
 
-  constructor(lowFace?: number) {
-    // Default to face 4 (no death roll). If lowFace provided, use it for death-roll testing.
-    const face = lowFace ?? 4;
-    this.dice = [{ results: [{ active: true, result: face }] }];
+  constructor(formula?: string, face?: number) {
+    // Support both old API (face: number) and formula-based API
+    // If face provided, use it directly; otherwise parse formula or default to 4
+    if (face !== undefined) {
+      this.total = face;
+      this.dice = [{ results: [{ active: true, result: face }] }];
+    } else if (formula === "1d3") {
+      // For d3 tests: allow passing invalid result via vi.stubGlobal override
+      this.total = 1; // default valid d3 result
+      this.dice = [{ results: [{ active: true, result: 1 }] }];
+    } else {
+      // Default to face 4 (no death roll)
+      this.total = 4;
+      this.dice = [{ results: [{ active: true, result: 4 }] }];
+    }
   }
 
   async evaluate() {
@@ -149,26 +160,26 @@ describe("Error handling in rolls", () => {
       const agent = makeAgent({ isDead: false });
       const franchise = makeFranchise({ deathMode: true });
 
-      // Mock seeded RNG to produce invalid d3 (0 or 4+, not 1–3)
-      const randomSpy = vi.spyOn(rng, "random").mockReturnValue(-0.1);
-      // Math.floor(-0.1 * 3) + 1 = Math.floor(-0.3) + 1 = -1 + 1 = 0 (invalid)
-
       try {
-        // Create Roll mock that returns face 1, triggering death-roll evaluation
+        // Mock Roll to return face 1 (triggers death roll) with invalid d3 result
+        let rollCount = 0;
         vi.stubGlobal("Roll", class extends MockRoll {
-          constructor() {
-            super(1); // face 1 triggers deathMode branch (effectiveFace <= 2)
+          constructor(formula?: string) {
+            if (formula === "1d3") {
+              // Return invalid d3 result (0 is out of bounds [1,3])
+              super(formula, 0);
+              rollCount++;
+            } else {
+              super(formula, 1); // skill roll returns face 1, triggering deathMode
+            }
           }
         });
 
-        // executeStressRoll should hit death-roll code with mocked random() producing 0
         await expect(
           executeStressRoll(agent, { stressDiceCount: 1, coolDiceUsed: 0 }, franchise),
-        ).rejects.toThrow(/Invalid d3 result.*0/);
-
-        expect(randomSpy).toHaveBeenCalled();
+        ).rejects.toThrow(/Invalid d3 result/);
+        expect(rollCount).toBe(1); // Verify d3 roll was actually called
       } finally {
-        randomSpy.mockRestore();
         vi.stubGlobal("Roll", MockRoll);
       }
     });
@@ -234,4 +245,8 @@ describe("Error handling in rolls", () => {
       );
     });
   });
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
 });

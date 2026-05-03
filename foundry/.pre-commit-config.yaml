@@ -9,6 +9,18 @@ exclude: |
   )$
 
 repos:
+  # Block Math.random() — use Foundry Roll system instead
+  - repo: local
+    hooks:
+      - id: no-math-random
+        name: Forbid Math.random()
+        entry: grep -r Math\.random src/
+        language: system
+        files: ^src/.*\.ts$
+        pass_filenames: false
+        stages: [pre-push]
+        exclude: ^src/.*\.test\.ts$
+
   # Linting
   - repo: local
     hooks:
