@@ -5,8 +5,9 @@ secrets:
 services:
   foundry:
     # Pinned to V13 — system.json minimum is 13, so we develop and verify against it.
-    # To upgrade to V14+: change to ghcr.io/felddy/foundryvtt:release
-    image: ghcr.io/felddy/foundryvtt:13
+    # Image pinned to SHA digest for reproducibility.
+    # To upgrade to V14+: update image digest and rebuild.
+    image: ghcr.io/felddy/foundryvtt@sha256:41d518782f2fabbec887413c56da8ef8175c22fb5a75fde45382661443a8ae6b
     hostname: foundry
     ports:
       - "30000:30000"

@@ -2,10 +2,13 @@
 # felddy/foundryvtt reads FOUNDRY_USERNAME, FOUNDRY_PASSWORD, and
 # FOUNDRY_LICENSE_KEY directly from the environment; no config.json needed.
 # Run as root (0:0) so the container can write to the GHA-checked-out dist/.
+#
+# Image pinned to SHA digest for reproducibility.
+# FOUNDRY_VERSION controls which image is used (default: v13).
 
 services:
   foundry:
-    image: ghcr.io/felddy/foundryvtt:13
+    image: ghcr.io/felddy/foundryvtt@sha256:${FOUNDRY_IMAGE_SHA:-41d518782f2fabbec887413c56da8ef8175c22fb5a75fde45382661443a8ae6b}
     hostname: foundry
     ports:
       - "30000:30000"
