@@ -89,3 +89,22 @@ export function makeFranchise(overrides: Record<string, unknown> = {}): RollActo
     },
   };
 }
+
+/** Set GM status for privilege gate tests. */
+export function setGMStatus(isGM: boolean): void {
+  (globalThis as unknown as { game: { user: { isGM: boolean } } }).game.user.isGM = isGM;
+}
+
+/** Access a nested system field using dot notation. */
+export function getSystemField(actor: RollActor, path: string): unknown {
+  const parts = path.split(".");
+  let value: unknown = actor.system;
+  for (const part of parts) {
+    if (typeof value === "object" && value !== null && part in (value as Record<string, unknown>)) {
+      value = (value as Record<string, unknown>)[part];
+    } else {
+      return undefined;
+    }
+  }
+  return value;
+}

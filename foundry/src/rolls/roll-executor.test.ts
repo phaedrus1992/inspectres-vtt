@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import * as fc from "fast-check";
 import { MockRoll } from "../__mocks__/setup.js";
-import { makeAgent, makeFranchise } from "../__mocks__/test-fixtures.js";
+import { makeAgent, makeFranchise, setGMStatus } from "../__mocks__/test-fixtures.js";
 
 // We import the pure helper indirectly by importing the module under test.
 // The pure resolveBankDice logic is exercised via executeSkillRoll and
@@ -18,7 +18,7 @@ import {
 
 // Set GM user for all tests that call executeSkillRoll/executeStressRoll
 beforeEach(() => {
-  (globalThis as unknown as { game: { user: { isGM: boolean } } }).game.user.isGM = true;
+  setGMStatus(true);
 });
 
 // ---------------------------------------------------------------------------
@@ -265,7 +265,7 @@ describe("executeSkillRoll", () => {
 
     describe("Privilege Gates", () => {
       it("blocks non-GM players from initiating skill rolls", async () => {
-        (globalThis as unknown as { game: { user: { isGM: boolean } } }).game.user.isGM = false;
+        setGMStatus(false);
         const agent = makeAgent();
         const franchise = makeFranchise();
         await expect(executeSkillRoll(agent, franchise, "academics")).rejects.toThrow(
@@ -274,7 +274,7 @@ describe("executeSkillRoll", () => {
       });
 
       it("allows GM to initiate skill rolls", async () => {
-        (globalThis as unknown as { game: { user: { isGM: boolean } } }).game.user.isGM = true;
+        setGMStatus(true);
         (globalThis as unknown as { Roll: typeof MockRoll }).Roll = class extends MockRoll {
           constructor(formula: string) {
             super(formula);
@@ -492,7 +492,7 @@ describe("executeStressRoll", () => {
 
   describe("Privilege Gates", () => {
     it("blocks non-GM players from initiating stress rolls", async () => {
-      (globalThis as unknown as { game: { user: { isGM: boolean } } }).game.user.isGM = false;
+      setGMStatus(false);
       const agent = makeAgent();
       await expect(executeStressRoll(agent, { stressDiceCount: 1, coolDiceUsed: 0 })).rejects.toThrow(
         "Stress rolls can only be initiated by the GM",
@@ -500,7 +500,7 @@ describe("executeStressRoll", () => {
     });
 
     it("allows GM to initiate stress rolls", async () => {
-      (globalThis as unknown as { game: { user: { isGM: boolean } } }).game.user.isGM = true;
+      setGMStatus(true);
       (globalThis as unknown as { Roll: typeof MockRoll }).Roll = class extends MockRoll {
         constructor(formula: string) {
           super(formula);
