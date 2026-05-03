@@ -21,6 +21,7 @@ function applyNestedUpdate(target: Record<string, unknown>, path: string, value:
         }
         const next = obj[part];
         if (typeof next === "object" && next !== null) {
+          // Type narrowing: TypeScript cannot narrow indexed access results through guards; explicit cast required
           obj = next as Record<string, unknown>;
         }
       }

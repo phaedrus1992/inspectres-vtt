@@ -4,16 +4,18 @@ import { makeAgent, makeFranchise, setGMStatus, getSystemField } from "./test-fi
 describe("Test fixture helpers", () => {
   describe("setGMStatus", () => {
     beforeEach(() => {
-      (globalThis as unknown as { game: { user: { isGM: boolean } } }).game.user.isGM = true;
+      setGMStatus(true);
     });
 
     it("sets GM status to false", () => {
       setGMStatus(false);
+      // Type narrowing: direct access to globalThis.game.user to verify setGMStatus side effects
       expect((globalThis as unknown as { game: { user: { isGM: boolean } } }).game.user.isGM).toBe(false);
     });
 
     it("sets GM status to true", () => {
       setGMStatus(true);
+      // Type narrowing: direct access to globalThis.game.user to verify setGMStatus side effects
       expect((globalThis as unknown as { game: { user: { isGM: boolean } } }).game.user.isGM).toBe(true);
     });
   });
