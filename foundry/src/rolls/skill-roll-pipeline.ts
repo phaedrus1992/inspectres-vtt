@@ -31,11 +31,11 @@ export async function executeSkillRoll(
 }
 
 async function openRollDialog(skillName: string): Promise<DialogResult | null> {
-  const globalAny = globalThis as unknown as Record<string, unknown>;
-  const foundryAny = globalAny["foundry"] as unknown as {
+  const g = globalThis as unknown as Record<string, unknown>;
+  const foundry = g["foundry"] as unknown as {
     applications: { api: { DialogV2: { wait: Function } } };
   };
-  const result = (await foundryAny.applications.api.DialogV2.wait({
+  const result = (await foundry.applications.api.DialogV2.wait({
     window: { title: `Roll ${skillName}` },
     content: `<form><input type="number" name="diceCount" value="2"></form>`,
     buttons: [
@@ -53,10 +53,11 @@ async function openRollDialog(skillName: string): Promise<DialogResult | null> {
 }
 
 async function evaluateRoll(formula: string): Promise<Roll> {
-  const RollConstructor = (
-    globalThis as unknown as { Roll: new (f: string) => Roll }
-  ).Roll;
-  return new RollConstructor(formula).evaluate();
+  const g = globalThis as unknown as { Roll: new (f: string) => Roll };
+  const roll = new g.Roll(formula);
+  const rollAny = roll as unknown as Record<string, unknown>;
+  const evaluated = await (rollAny["evaluate"] as () => Promise<unknown>)();
+  return evaluated as Roll;
 }
 
 function determineOutcome(total: number): "good" | "partial" | "bad" {
@@ -71,8 +72,8 @@ async function postRollMessage(
   outcome: "good" | "partial" | "bad",
   total: number,
 ): Promise<void> {
-  const globalAny = globalThis as unknown as Record<string, unknown>;
-  const chatMessage = globalAny["ChatMessage"] as unknown as {
+  const g = globalThis as unknown as Record<string, unknown>;
+  const chatMessage = g["ChatMessage"] as unknown as {
     create: (data: Record<string, unknown>) => Promise<unknown>;
   };
   await chatMessage.create({
