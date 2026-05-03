@@ -61,6 +61,21 @@ vi.stubGlobal("ChatMessage", {
 vi.stubGlobal("renderTemplate", vi.fn(async () => "<div></div>"));
 vi.stubGlobal("Roll", MockRoll);
 
+// Mock foundry.applications.handlebars.renderTemplate and DialogV2 (V2 APIs)
+vi.stubGlobal("foundry", {
+  applications: {
+    handlebars: {
+      renderTemplate: vi.fn(async () => "<div></div>"),
+    },
+    api: {
+      DialogV2: {
+        // Return a skill choice so that updateData is built and update() gets called
+        wait: vi.fn(async () => "academics"),
+      },
+    },
+  },
+});
+
 // Test helpers
 function makeAgent(overrides: Record<string, unknown> = {}): RollActor {
   return {
