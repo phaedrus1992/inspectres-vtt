@@ -143,6 +143,21 @@ async function createWorldIfNeeded(page: Page): Promise<void> {
 const DEFAULT_JOIN_TIMEOUTS = { url: 30_000, ready: 60_000 };
 
 async function joinAsUser(page: Page, username: string, timeouts = DEFAULT_JOIN_TIMEOUTS): Promise<void> {
+  // Check for critical failure or error page
+  const criticalFailure = await page.evaluate(() => {
+    const text = document.body.textContent || '';
+    if (text.includes('Critical Failure')) {
+      const errorSection = document.querySelector('section') || document.body;
+      return { isCritical: true, errorText: errorSection.textContent };
+    }
+    return { isCritical: false };
+  });
+
+  if (criticalFailure.isCritical) {
+    const errorMsg = criticalFailure.errorText?.slice(0, 500) || 'Unknown error';
+    throw new Error(`Foundry join failed with critical error: ${errorMsg}`);
+  }
+
   await page.selectOption('select[name="userid"]', { label: username });
   await page.click('button[type="submit"]:has-text("Join Game Session")');
   await page.waitForURL(/\/game/, { timeout: timeouts.url });
@@ -156,12 +171,40 @@ async function joinAsUser(page: Page, username: string, timeouts = DEFAULT_JOIN_
 }
 
 async function launchAndJoin(page: Page): Promise<void> {
-  // The launch link is hover-only (CSS `:hover` reveals it), so click via DOM.
+  // The launch link is hidden by default (CSS `:hover` reveals it).
+  // We need to make it visible and clickable before Playwright can click it.
+  console.log('[launchAndJoin] Current URL before launch:', page.url());
+
+  // Make the world package container visible and reveal the launch button
   await page.evaluate(() => {
-    const link = document.querySelector('a[data-action="worldLaunch"]') as HTMLElement | null;
-    link?.click();
+    const container = document.querySelector('[data-package-id="test-world"]') as HTMLElement | null;
+    if (!container) {
+      throw new Error('World package container not found');
+    }
+    // Force container visibility
+    container.style.setProperty('display', 'block', 'important');
+    container.style.setProperty('visibility', 'visible', 'important');
+
+    // Find launch button and make it visible (it's normally hidden by :hover CSS)
+    const launchBtn = container.querySelector('a[data-action="worldLaunch"]') as HTMLElement | null;
+    if (!launchBtn) {
+      throw new Error('World launch button not found');
+    }
+    // Override CSS hover state to always show the button
+    launchBtn.style.setProperty('display', 'block', 'important');
+    launchBtn.style.setProperty('visibility', 'visible', 'important');
+    launchBtn.style.setProperty('opacity', '1', 'important');
   });
+
+  // Now click the visible button
+  console.log('[launchAndJoin] Clicking world launch button...');
+  await page.click('[data-package-id="test-world"] a[data-action="worldLaunch"]', {
+    timeout: 5000,
+  });
+
+  console.log('[launchAndJoin] Waiting for /join redirect...');
   await page.waitForURL(/\/join/, { timeout: 30_000 });
+  console.log('[launchAndJoin] ✓ Navigated to /join');
   await page.waitForTimeout(1500);
   await joinAsUser(page, "Gamemaster");
 }

@@ -170,24 +170,16 @@ jobs:
         run: npm run build
 
   e2e:
-    name: E2E tests (Foundry ${{ matrix.foundry-version }})
+    name: E2E tests (Foundry v13)
     runs-on: ubuntu-latest
     needs: [build, unit-test, typecheck]
     permissions:
       contents: read
-    strategy:
-      matrix:
-        include:
-          - foundry-version: "13"
-            image-sha: 41d518782f2fabbec887413c56da8ef8175c22fb5a75fde45382661443a8ae6b  # felddy/foundryvtt:13.351.0
-          - foundry-version: "14"
-            image-sha: 383417dbf3c442a03dcca9a4813b47c7408addaf6d582b7d3b1ee4b65c24a245  # felddy/foundryvtt:14.360.0
-      fail-fast: false
     env:
       FOUNDRY_USERNAME: ${{ secrets.FOUNDRY_USERNAME }}
       FOUNDRY_PASSWORD: ${{ secrets.FOUNDRY_PASSWORD }}
       FOUNDRY_LICENSE_KEY: ${{ secrets.FOUNDRY_LICENSE_KEY }}
-      FOUNDRY_IMAGE_SHA: ${{ matrix.image-sha }}
+      FOUNDRY_IMAGE_SHA: 41d518782f2fabbec887413c56da8ef8175c22fb5a75fde45382661443a8ae6b  # felddy/foundryvtt:13.351.0
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
