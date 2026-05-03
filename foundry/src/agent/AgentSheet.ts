@@ -4,7 +4,7 @@
 
 import { getActorSystem } from "../utils/system-cast.js";
 import { type AgentCharacteristic } from "./agent-schema.js";
-import { executeSkillRoll, executeStressRoll, type SkillName } from "../rolls/roll-executor.js";
+import { executeSkillRoll, executeStressRoll, SKILL_NAMES, type SkillName } from "../rolls/roll-executor.js";
 import { agentSystemData } from "./agent-system-data.js";
 import { findFranchiseActor, franchiseSystemData } from "../franchise/franchise-utils.js";
 import { handleActionError } from "../utils/ui-errors.js";
@@ -14,8 +14,6 @@ import { computeRecoveryStatus, getCurrentDay } from "./recovery-utils.js";
 import { buildVacationDialog } from "./vacation-dialog.js";
 import { executeSkillRecovery } from "./skill-recovery.js";
 import { type FranchiseData } from "../franchise/franchise-schema.js";
-
-const SKILL_NAMES = ["academics", "athletics", "technology", "contact"] as const;
 
 function isSkillName(value: string | null): value is SkillName {
   return SKILL_NAMES.includes(value as SkillName);

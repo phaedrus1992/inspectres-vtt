@@ -104,7 +104,7 @@ async function postChatCard(
 // All valid skills for penalty selection — drives dialog rendering and validation.
 // Used to: (1) enumerate dialog options, (2) validate form input against known set.
 // If SkillName ever changes, this constant fails to compile until updated.
-const SKILL_NAMES = ["academics", "athletics", "technology", "contact"] as const satisfies readonly SkillName[];
+export const SKILL_NAMES = ["academics", "athletics", "technology", "contact"] as const satisfies readonly SkillName[];
 
 async function getPlayerPenaltyChoice(
   system: AgentData,
