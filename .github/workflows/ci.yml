@@ -17,7 +17,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        uses: actions/checkout@b4ffde65f46336ab88eb53b118029f4f16f1e2a6  # v6.2.0
         with:
           persist-credentials: false
 
@@ -43,7 +43,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        uses: actions/checkout@b4ffde65f46336ab88eb53b118029f4f16f1e2a6  # v6.2.0
         with:
           persist-credentials: false
 
@@ -59,7 +59,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        uses: actions/checkout@b4ffde65f46336ab88eb53b118029f4f16f1e2a6  # v6.2.0
         with:
           persist-credentials: false
 
@@ -85,7 +85,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        uses: actions/checkout@b4ffde65f46336ab88eb53b118029f4f16f1e2a6  # v6.2.0
         with:
           persist-credentials: false
 
@@ -120,7 +120,7 @@ jobs:
       changed: ${{ steps.check.outputs.changed }}
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        uses: actions/checkout@b4ffde65f46336ab88eb53b118029f4f16f1e2a6  # v6.2.0
         with:
           persist-credentials: false
           fetch-depth: 0
@@ -150,7 +150,7 @@ jobs:
     if: needs.check-docs.outputs.changed == 'true'
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        uses: actions/checkout@b4ffde65f46336ab88eb53b118029f4f16f1e2a6  # v6.2.0
         with:
           persist-credentials: false
 
@@ -179,9 +179,9 @@ jobs:
       matrix:
         include:
           - foundry-version: v13
-            image-sha: sha256:41d518782f2fabbec887413c56da8ef8175c22fb5a75fde45382661443a8ae6b
+            image-sha: sha256:41d518782f2fabbec887413c56da8ef8175c22fb5a75fde45382661443a8ae6b  # felddy/foundryvtt v13
           - foundry-version: v14
-            image-sha: sha256:383417dbf3c442a03dcca9a4813b47c7408addaf6d582b7d3b1ee4b65c24a245
+            image-sha: sha256:383417dbf3c442a03dcca9a4813b47c7408addaf6d582b7d3b1ee4b65c24a245  # felddy/foundryvtt v14
       fail-fast: false
     env:
       FOUNDRY_USERNAME: ${{ secrets.FOUNDRY_USERNAME }}
@@ -190,7 +190,7 @@ jobs:
       FOUNDRY_IMAGE_SHA: ${{ matrix.image-sha }}
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        uses: actions/checkout@b4ffde65f46336ab88eb53b118029f4f16f1e2a6  # v6.2.0
         with:
           persist-credentials: false
 
@@ -304,7 +304,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        uses: actions/checkout@b4ffde65f46336ab88eb53b118029f4f16f1e2a6  # v6.2.0
         with:
           persist-credentials: false
 

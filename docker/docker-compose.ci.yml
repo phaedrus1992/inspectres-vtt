@@ -8,7 +8,7 @@
 
 services:
   foundry:
-    image: ghcr.io/felddy/foundryvtt@sha256:${FOUNDRY_IMAGE_SHA:-41d518782f2fabbec887413c56da8ef8175c22fb5a75fde45382661443a8ae6b}
+    image: ghcr.io/felddy/foundryvtt@sha256:${FOUNDRY_IMAGE_SHA}
     hostname: foundry
     ports:
       - "30000:30000"
