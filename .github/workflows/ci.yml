@@ -180,6 +180,8 @@ jobs:
         include:
           - foundry-version: v13
             image-sha: 41d518782f2fabbec887413c56da8ef8175c22fb5a75fde45382661443a8ae6b  # felddy/foundryvtt:13.351.0
+          - foundry-version: v14
+            image-sha: 383417dbf3c442a03dcca9a4813b47c7408addaf6d582b7d3b1ee4b65c24a245  # felddy/foundryvtt:14.360.0
       fail-fast: false
     env:
       FOUNDRY_USERNAME: ${{ secrets.FOUNDRY_USERNAME }}
@@ -256,8 +258,8 @@ jobs:
       - name: Pull Foundry image and save to cache
         if: steps.foundry-image-cache.outputs.cache-hit != 'true'
         run: |
-          docker pull ghcr.io/felddy/foundryvtt@${{ matrix.image-sha }}
-          docker save ghcr.io/felddy/foundryvtt@${{ matrix.image-sha }} -o /tmp/foundry-image.tar
+          docker pull ghcr.io/felddy/foundryvtt@sha256:${{ matrix.image-sha }}
+          docker save ghcr.io/felddy/foundryvtt@sha256:${{ matrix.image-sha }} -o /tmp/foundry-image.tar
 
       - name: Start Foundry container
         working-directory: docker
