@@ -178,9 +178,9 @@ jobs:
     strategy:
       matrix:
         include:
-          - foundry-version: v13
+          - foundry-version: "13"
             image-sha: 41d518782f2fabbec887413c56da8ef8175c22fb5a75fde45382661443a8ae6b  # felddy/foundryvtt:13.351.0
-          - foundry-version: v14
+          - foundry-version: "14"
             image-sha: 383417dbf3c442a03dcca9a4813b47c7408addaf6d582b7d3b1ee4b65c24a245  # felddy/foundryvtt:14.360.0
       fail-fast: false
     env:
