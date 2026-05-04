@@ -178,25 +178,25 @@ jobs:
     strategy:
       matrix:
         include:
-          # v13: pin to specific release for reproducibility. Update via Renovate when newer patches available.
-          # Note: Cannot use ${{ env.FOUNDRY_V13_SHA }} here; matrix is evaluated before env vars exist.
-          # Keep SHA inline and update FOUNDRY_V13_SHA env var in parallel when bumping versions.
+          # Foundry image tags use major.build.patch format (e.g. 13.351.0, 14.360.0).
+          # SHA pins below are reproducible; update both tag and SHA together when bumping.
+          # Note: GitHub Actions does not interpolate ${{ env.* }} in matrix values, so SHAs
+          # must be inline here.
           - foundry-version: "13"
-            foundry-version-long: "13.6.0"
+            foundry-version-long: "13.351.0"
             image-sha: sha256:41d518782f2fabbec887413c56da8ef8175c22fb5a75fde45382661443a8ae6b
-          # v14: pin to specific release for reproducibility. Update via Renovate when newer patches available.
           - foundry-version: "14"
-            foundry-version-long: "14.2.1"
-            image-tag: "14"
+            foundry-version-long: "14.360.0"
+            image-sha: sha256:383417dbf3c442a03dcca9a4813b47c7408addaf6d582b7d3b1ee4b65c24a245
       fail-fast: false
     env:
       FOUNDRY_USERNAME: ${{ secrets.FOUNDRY_USERNAME }}
       FOUNDRY_PASSWORD: ${{ secrets.FOUNDRY_PASSWORD }}
       FOUNDRY_LICENSE_KEY: ${{ secrets.FOUNDRY_LICENSE_KEY }}
-      FOUNDRY_IMAGE_SHA: ${{ matrix.image-sha || '' }}
+      FOUNDRY_IMAGE_SHA: ${{ matrix.image-sha }}
       FOUNDRY_VERSION: ${{ matrix.foundry-version }}
-      # Shared across Start and Stop Foundry container steps to avoid duplication.
-      FOUNDRY_IMAGE_NAME: ${{ steps.image.outputs.image_name }}
+      # Computed once at job level so all docker/compose steps see the same value.
+      FOUNDRY_IMAGE_NAME: ghcr.io/felddy/foundryvtt@${{ matrix.image-sha }}
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
@@ -253,15 +253,6 @@ jobs:
         working-directory: foundry
         run: npx playwright install chromium
 
-      - name: Set Foundry image reference
-        id: image
-        run: |
-          if [ -n "${{ matrix.image-sha }}" ]; then
-            echo "image_name=ghcr.io/felddy/foundryvtt@${{ matrix.image-sha }}" >> $GITHUB_OUTPUT
-          else
-            echo "image_name=ghcr.io/felddy/foundryvtt:${{ matrix.image-tag }}" >> $GITHUB_OUTPUT
-          fi
-
       - name: Cache Foundry Docker image
         id: foundry-image-cache
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684  # v4.2.3
@@ -276,8 +267,8 @@ jobs:
       - name: Pull Foundry image and save to cache
         if: steps.foundry-image-cache.outputs.cache-hit != 'true'
         run: |
-          docker pull "${{ steps.image.outputs.image_name }}"
-          docker save "${{ steps.image.outputs.image_name }}" -o /tmp/foundry-image.tar
+          docker pull "$FOUNDRY_IMAGE_NAME"
+          docker save "$FOUNDRY_IMAGE_NAME" -o /tmp/foundry-image.tar
 
       - name: Start Foundry container
         working-directory: docker
