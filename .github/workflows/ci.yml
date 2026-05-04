@@ -9,6 +9,11 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Docker image SHA digests for reproducible Foundry pulls.
+# Update via Renovate or manually when pinning to new versions.
+env:
+  FOUNDRY_V13_SHA: sha256:41d518782f2fabbec887413c56da8ef8175c22fb5a75fde45382661443a8ae6b
+
 jobs:
   lint:
     name: Lint
@@ -178,11 +183,13 @@ jobs:
     strategy:
       matrix:
         include:
+          # v13: pin to specific release for reproducibility. Update via Renovate when newer patches available.
           - foundry-version: "13"
-            foundry-version-long: "13.351"
-            image-sha: sha256:41d518782f2fabbec887413c56da8ef8175c22fb5a75fde45382661443a8ae6b
+            foundry-version-long: "13.6.0"
+            image-sha: ${{ env.FOUNDRY_V13_SHA }}
+          # v14: pin to specific release for reproducibility. Update via Renovate when newer patches available.
           - foundry-version: "14"
-            foundry-version-long: "14.351"
+            foundry-version-long: "14.2.1"
             image-tag: "14"
       fail-fast: false
     env:
@@ -191,6 +198,8 @@ jobs:
       FOUNDRY_LICENSE_KEY: ${{ secrets.FOUNDRY_LICENSE_KEY }}
       FOUNDRY_IMAGE_SHA: ${{ matrix.image-sha || '' }}
       FOUNDRY_VERSION: ${{ matrix.foundry-version }}
+      # Shared across Start and Stop Foundry container steps to avoid duplication.
+      FOUNDRY_IMAGE_NAME: ${{ steps.image.outputs.image_name }}
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
@@ -275,8 +284,6 @@ jobs:
 
       - name: Start Foundry container
         working-directory: docker
-        env:
-          FOUNDRY_IMAGE_NAME: ${{ steps.image.outputs.image_name }}
         run: docker compose -f docker-compose.ci.yml up -d
 
       - name: Wait for Foundry to be ready
@@ -300,8 +307,6 @@ jobs:
       - name: Stop Foundry container
         if: always()
         working-directory: docker
-        env:
-          FOUNDRY_IMAGE_NAME: ${{ steps.image.outputs.image_name }}
         run: docker compose -f docker-compose.ci.yml down
 
       - name: Upload test artifacts
