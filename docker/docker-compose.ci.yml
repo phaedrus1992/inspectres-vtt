@@ -3,12 +3,12 @@
 # FOUNDRY_LICENSE_KEY directly from the environment; no config.json needed.
 # Run as root (0:0) so the container can write to the GHA-checked-out dist/.
 #
-# Image pinned to SHA digest for reproducibility.
-# FOUNDRY_VERSION controls which image is used (default: v13).
+# Image pinned to SHA digest for reproducibility (v13) or tag (v14).
+# FOUNDRY_IMAGE_NAME set by CI workflow (with SHA or tag already included).
 
 services:
   foundry:
-    image: ghcr.io/felddy/foundryvtt@sha256:${FOUNDRY_IMAGE_SHA}
+    image: ${FOUNDRY_IMAGE_NAME}
     hostname: foundry
     ports:
       - "30000:30000"

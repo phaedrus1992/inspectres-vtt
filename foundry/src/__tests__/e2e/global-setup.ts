@@ -171,40 +171,99 @@ async function joinAsUser(page: Page, username: string, timeouts = DEFAULT_JOIN_
 }
 
 async function launchAndJoin(page: Page): Promise<void> {
-  // The launch link is hidden by default (CSS `:hover` reveals it).
-  // We need to make it visible and clickable before Playwright can click it.
   console.log('[launchAndJoin] Current URL before launch:', page.url());
 
-  // Make the world package container visible and reveal the launch button
+  // Detect Foundry version by checking for V2 elements (v14 uses <dialog>, v13 uses <form>)
+  const isV2 = await page.evaluate(() => {
+    const appWindow = document.querySelector('dialog.app') || document.querySelector('form.window');
+    return !!(appWindow instanceof HTMLDialogElement);
+  });
+  console.log('[launchAndJoin] Detected V' + (isV2 ? '14 (V2)' : '13 (V1)'));
+
+  if (isV2) {
+    // V14: Try direct API if available, fall back to click
+    console.log('[launchAndJoin] Using V14 workflow...');
+    await launchAndJoinV14(page);
+  } else {
+    // V13: CSS override method (proven to work)
+    console.log('[launchAndJoin] Using V13 workflow...');
+    await launchAndJoinV13(page);
+  }
+}
+
+async function launchAndJoinV13(page: Page): Promise<void> {
+  // V13: The launch link is hidden by default (CSS `:hover` reveals it).
+  // Force visibility via JavaScript before clicking.
   await page.evaluate(() => {
     const container = document.querySelector('[data-package-id="test-world"]') as HTMLElement | null;
     if (!container) {
       throw new Error('World package container not found');
     }
-    // Force container visibility
     container.style.setProperty('display', 'block', 'important');
     container.style.setProperty('visibility', 'visible', 'important');
 
-    // Find launch button and make it visible (it's normally hidden by :hover CSS)
     const launchBtn = container.querySelector('a[data-action="worldLaunch"]') as HTMLElement | null;
     if (!launchBtn) {
       throw new Error('World launch button not found');
     }
-    // Override CSS hover state to always show the button
     launchBtn.style.setProperty('display', 'block', 'important');
     launchBtn.style.setProperty('visibility', 'visible', 'important');
     launchBtn.style.setProperty('opacity', '1', 'important');
   });
 
-  // Now click the visible button
-  console.log('[launchAndJoin] Clicking world launch button...');
+  console.log('[launchAndJoin] V13: Clicking world launch button...');
   await page.click('[data-package-id="test-world"] a[data-action="worldLaunch"]', {
     timeout: 5000,
   });
 
-  console.log('[launchAndJoin] Waiting for /join redirect...');
+  console.log('[launchAndJoin] V13: Waiting for /join redirect...');
   await page.waitForURL(/\/join/, { timeout: 30_000 });
-  console.log('[launchAndJoin] ✓ Navigated to /join');
+  console.log('[launchAndJoin] V13: ✓ Navigated to /join');
+  await page.waitForTimeout(1500);
+  await joinAsUser(page, "Gamemaster");
+}
+
+async function launchAndJoinV14(page: Page): Promise<void> {
+  // V14: May have different button structure or require different interaction pattern.
+  // Start with same CSS approach as V13, but log any differences.
+  const hasLaunchButton = await page.evaluate(
+    () => !!document.querySelector('[data-package-id="test-world"] a[data-action="worldLaunch"]'),
+  );
+
+  if (hasLaunchButton) {
+    // V14 has the same button structure as V13; try same approach
+    await page.evaluate(() => {
+      const container = document.querySelector('[data-package-id="test-world"]') as HTMLElement | null;
+      if (container) {
+        container.style.setProperty('display', 'block', 'important');
+        container.style.setProperty('visibility', 'visible', 'important');
+      }
+      const launchBtn = document.querySelector('[data-package-id="test-world"] a[data-action="worldLaunch"]') as HTMLElement | null;
+      if (launchBtn) {
+        launchBtn.style.setProperty('display', 'block', 'important');
+        launchBtn.style.setProperty('visibility', 'visible', 'important');
+        launchBtn.style.setProperty('opacity', '1', 'important');
+      }
+    });
+
+    console.log('[launchAndJoin] V14: Clicking world launch button...');
+    await page.click('[data-package-id="test-world"] a[data-action="worldLaunch"]', {
+      timeout: 5000,
+    });
+  } else {
+    // V14 may have a different UI; try alternate selectors
+    console.log('[launchAndJoin] V14: Launch button not found at expected selector, trying alternate...');
+    const altButton = await page.$('[role="button"][data-action="worldLaunch"], button[data-action="worldLaunch"]');
+    if (altButton) {
+      await altButton.click();
+    } else {
+      throw new Error('V14 launch button not found at any known selector');
+    }
+  }
+
+  console.log('[launchAndJoin] V14: Waiting for /join redirect...');
+  await page.waitForURL(/\/join/, { timeout: 30_000 });
+  console.log('[launchAndJoin] V14: ✓ Navigated to /join');
   await page.waitForTimeout(1500);
   await joinAsUser(page, "Gamemaster");
 }
