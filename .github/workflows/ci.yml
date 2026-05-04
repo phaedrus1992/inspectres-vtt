@@ -9,11 +9,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-# Docker image SHA digests for reproducible Foundry pulls.
-# Update via Renovate or manually when pinning to new versions.
-env:
-  FOUNDRY_V13_SHA: sha256:41d518782f2fabbec887413c56da8ef8175c22fb5a75fde45382661443a8ae6b
-
 jobs:
   lint:
     name: Lint
@@ -184,9 +179,11 @@ jobs:
       matrix:
         include:
           # v13: pin to specific release for reproducibility. Update via Renovate when newer patches available.
+          # Note: Cannot use ${{ env.FOUNDRY_V13_SHA }} here; matrix is evaluated before env vars exist.
+          # Keep SHA inline and update FOUNDRY_V13_SHA env var in parallel when bumping versions.
           - foundry-version: "13"
             foundry-version-long: "13.6.0"
-            image-sha: ${{ env.FOUNDRY_V13_SHA }}
+            image-sha: sha256:41d518782f2fabbec887413c56da8ef8175c22fb5a75fde45382661443a8ae6b
           # v14: pin to specific release for reproducibility. Update via Renovate when newer patches available.
           - foundry-version: "14"
             foundry-version-long: "14.2.1"
