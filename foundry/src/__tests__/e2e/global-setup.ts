@@ -107,18 +107,12 @@ async function dismissTourOverlay(page: Page): Promise<void> {
 /**
  * Detects whether the current page is Foundry v14's setup UI.
  *
- * v14 vs v13 distinguishing markers:
- * - v14: Create World button leads to a standalone `/create` page
- * - v14: System selection via package gallery (`li.package.system`)
- * - v14: Form field renamed `name="world-id"` (was `name="id"` in v13)
- * - v14: Auto-launches world on submit (no separate launch button click)
+ * v14 renamed the world id field from `name="id"` (v13) to `name="world-id"`.
+ * This field name is the most reliable distinguisher since both versions show
+ * a system package list elsewhere on the setup screen.
  */
 async function detectIsV14Setup(page: Page): Promise<boolean> {
-  return page.evaluate(() => {
-    const hasGallery = !!document.querySelector("li.package.system, li.package.module");
-    const hasV1Window = !!document.querySelector(".window-app form.application");
-    return hasGallery && !hasV1Window;
-  });
+  return page.evaluate(() => !!document.querySelector('input[name="world-id"]'));
 }
 
 async function createWorldIfNeeded(page: Page): Promise<void> {

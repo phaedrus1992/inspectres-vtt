@@ -8,7 +8,7 @@
  * Run with: npm run test:e2e (with Docker setup)
  */
 
-import { test, expect } from "./fixtures";
+import { test, expect, ELEMENT_WAIT_TIMEOUT } from "./fixtures";
 
 // ApplicationV2 re-renders briefly detach elements. waitForSelector on ".inspectres" can
 // time out even when the sheet is logically visible. Use waitForFunction + getBoundingClientRect
@@ -118,7 +118,7 @@ test.describe("Form field rendering and input validation (E2E - Playwright)", ()
     await waitForSheet(page);
     // The textarea lives in the Notes tab — navigate there like a real user would
     await page.click(".inspectres [role='tab'][aria-controls='tab-notes']");
-    await page.waitForSelector(".inspectres textarea", { timeout: 5000 });
+    await page.waitForSelector(".inspectres textarea", { timeout: ELEMENT_WAIT_TIMEOUT });
 
     const textarea = page.locator(".inspectres textarea").first();
     await expect(textarea).toBeVisible();
