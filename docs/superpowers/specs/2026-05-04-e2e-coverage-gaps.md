@@ -15,7 +15,7 @@ Location: `foundry/src/__tests__/e2e/`
 | File | Tests | Scope |
 |------|-------|-------|
 | `sheet-navigation.test.ts` | 6 | Tab visibility/structure, active tab styling, tab switching with panel transition, panel visibility, arrow-key keyboard nav (loosely asserted), ARIA tab roles + `aria-controls` |
-| `form-fields.test.ts` | 7 | Input visibility/styling, value handling on a generic `input[type=text]`, focus on `system.bank`, required attribute (skipped — no required inputs), notes-tab textarea border, ARIA labelling on first 5 visible inputs |
+| `form-fields.test.ts` | 7 | Input visibility/styling, value handling on a generic `input[type=text]`, focus on `system.bank`, required attribute (skipped — no required inputs), notes-tab textarea border, ARIA labelling sampled across the first 5 visible inputs (passes if any one of them carries a label) |
 | `buttons.test.ts` | 7 | Sheet load, button visibility (first button), hover/focus/disabled state styling, contrast/font-size, generic click event |
 
 Infrastructure:
