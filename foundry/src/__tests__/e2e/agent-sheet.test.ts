@@ -210,9 +210,18 @@ test.describe("AgentSheet — stats tab content", () => {
     const sheet = await openAgentSheet(page, agentId);
     await sheet.openTab("notes");
 
-    await page.waitForSelector(`.inspectres[id*="${agentId}"] textarea`, {
-      timeout: ELEMENT_WAIT_TIMEOUT,
-    });
+    // Use waitForFunction + getBoundingClientRect per playwright-foundry.md —
+    // waitForSelector races with ApplicationV2 re-renders that briefly detach elements.
+    await page.waitForFunction(
+      (id: string) => {
+        const el = document.querySelector(`.inspectres[id*="${id}"] textarea`);
+        if (!el) return false;
+        const rect = (el as HTMLElement).getBoundingClientRect();
+        return rect.width > 0 && rect.height > 0;
+      },
+      agentId,
+      { timeout: ELEMENT_WAIT_TIMEOUT },
+    );
 
     const textareaVisible = await page.evaluate((id: string) => {
       const ta = document.querySelector(`.inspectres[id*="${id}"] textarea`);
