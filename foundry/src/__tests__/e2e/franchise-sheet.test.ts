@@ -5,29 +5,12 @@
  * Requires Docker Foundry instance (npm run test:e2e).
  */
 import { test, expect, ELEMENT_WAIT_TIMEOUT } from "./fixtures.js";
-import type { Page } from "@playwright/test";
 import {
   createActor,
   deleteActor,
   getChatMessageCount,
+  openFranchiseSheet,
 } from "./pages/index.js";
-import { FranchiseSheetPage } from "./pages/FranchiseSheetPage.js";
-
-async function openAndGetFranchiseSheet(
-  page: Page,
-  actorId: string,
-): Promise<FranchiseSheetPage> {
-  await page.evaluate(async (id: string) => {
-    // @ts-expect-error - Foundry runtime global
-    const actor = globalThis.game?.actors?.get(id);
-    if (!actor) throw new Error(`Actor ${id} not found`);
-    await actor.sheet.render(true);
-  }, actorId);
-
-  const sheet = new FranchiseSheetPage(page, actorId);
-  await sheet.waitForVisible();
-  return sheet;
-}
 
 test.describe("FranchiseSheet — roll actions", () => {
   let franchiseId: string;
@@ -47,7 +30,7 @@ test.describe("FranchiseSheet — roll actions", () => {
   });
 
   test("bankRoll — produces a chat message", async ({ page }) => {
-    const sheet = await openAndGetFranchiseSheet(page, franchiseId);
+    const sheet = await openFranchiseSheet(page, franchiseId);
     const before = await getChatMessageCount(page);
 
     await sheet.clickBankRoll();
@@ -63,7 +46,7 @@ test.describe("FranchiseSheet — roll actions", () => {
   });
 
   test("clientRoll — produces a chat message", async ({ page }) => {
-    const sheet = await openAndGetFranchiseSheet(page, franchiseId);
+    const sheet = await openFranchiseSheet(page, franchiseId);
     const before = await getChatMessageCount(page);
 
     await sheet.clickClientRoll();
@@ -91,7 +74,7 @@ test.describe("FranchiseSheet — mission tracker", () => {
   });
 
   test("openMissionTracker — DialogV2 opens", async ({ page }) => {
-    const sheet = await openAndGetFranchiseSheet(page, franchiseId);
+    const sheet = await openFranchiseSheet(page, franchiseId);
     await sheet.clickOpenMissionTracker();
     await page.waitForTimeout(1000);
 
@@ -100,12 +83,11 @@ test.describe("FranchiseSheet — mission tracker", () => {
       timeout: 5000,
     }).catch(() => {});
 
-    // Mission tracker dialog or application should be present
+    // Mission tracker dialog should be present (class or id-based selector)
     const trackerOpen = await page.evaluate(() => {
       return (
         document.querySelector(".mission-tracker") !== null ||
-        document.querySelector('[id*="MissionTracker"]') !== null ||
-        document.querySelector("dialog.application") !== null
+        document.querySelector('[id*="MissionTracker"]') !== null
       );
     });
     expect(trackerOpen).toBe(true);
@@ -128,7 +110,7 @@ test.describe("FranchiseSheet — day controls", () => {
   });
 
   test("advanceDay — currentDay setting increments", async ({ page }) => {
-    const sheet = await openAndGetFranchiseSheet(page, franchiseId);
+    const sheet = await openFranchiseSheet(page, franchiseId);
     const before = await sheet.getCurrentDaySetting();
 
     await sheet.clickAdvanceDay();
@@ -150,7 +132,7 @@ test.describe("FranchiseSheet — day controls", () => {
       await globalThis.game?.settings?.set("inspectres", "currentDay", 5);
     });
 
-    const sheet = await openAndGetFranchiseSheet(page, franchiseId);
+    const sheet = await openFranchiseSheet(page, franchiseId);
     const before = await sheet.getCurrentDaySetting();
 
     await sheet.clickRegressDay();
@@ -184,7 +166,7 @@ test.describe("FranchiseSheet — debt mode", () => {
   });
 
   test("toggleDebtMode — debtMode flag changes", async ({ page }) => {
-    const sheet = await openAndGetFranchiseSheet(page, franchiseId);
+    const sheet = await openFranchiseSheet(page, franchiseId);
 
     const before = await page.evaluate((id: string) => {
       // @ts-expect-error - Foundry runtime global
@@ -222,7 +204,7 @@ test.describe("FranchiseSheet — form-bound inputs", () => {
   });
 
   test("bank input — value persists via actor.update", async ({ page }) => {
-    await openAndGetFranchiseSheet(page, franchiseId);
+    await openFranchiseSheet(page, franchiseId);
 
     // Fill the bank input
     const bankInput = page.locator(
@@ -250,7 +232,7 @@ test.describe("FranchiseSheet — form-bound inputs", () => {
   });
 
   test("description textarea — round-trip persistence", async ({ page }) => {
-    const sheet = await openAndGetFranchiseSheet(page, franchiseId);
+    const sheet = await openFranchiseSheet(page, franchiseId);
     await sheet.openTab("notes");
 
     const textarea = page.locator(
@@ -278,7 +260,7 @@ test.describe("FranchiseSheet — form-bound inputs", () => {
   });
 
   test("missionGoal input — value persists", async ({ page }) => {
-    await openAndGetFranchiseSheet(page, franchiseId);
+    await openFranchiseSheet(page, franchiseId);
 
     const missionGoalInput = page.locator(
       `.inspectres[id*="${franchiseId}"] input[name="system.missionGoal"]`,

@@ -10,10 +10,7 @@ import type { Page } from "@playwright/test";
 import { createActor, deleteActor, waitForSheet } from "./pages/index.js";
 
 async function openActorsDirectory(page: Page): Promise<void> {
-  await page.evaluate(() => {
-    // @ts-expect-error - Foundry runtime global
-    document.querySelector('[data-tab="actors"]')?.click();
-  });
+  await page.click('[data-tab="actors"]').catch(() => {});
   await page.waitForTimeout(500);
 }
 

@@ -45,14 +45,15 @@ test.describe("AgentSheet — action handlers", () => {
     // Wait for roll dialog or direct roll
     await page.waitForTimeout(1500);
 
-    // Dismiss dialog if one appeared (stress roll dialog etc.)
-    await page.evaluate(() => {
+    // Dismiss dialog if one appeared (roll dialog waits for user input)
+    const dismissed = await page.evaluate(() => {
       const btn = document.querySelector<HTMLButtonElement>(
         'dialog button[data-action="roll"], dialog button[type="submit"]',
       );
-      if (btn) btn.click();
+      if (btn) { btn.click(); return true; }
+      return false;
     });
-    await page.waitForTimeout(1000);
+    if (dismissed) await page.waitForTimeout(1000);
 
     await page.screenshot({
       path: "test-results/e2e-screenshots/agent-01-skill-roll.png",
@@ -60,8 +61,7 @@ test.describe("AgentSheet — action handlers", () => {
     }).catch(() => {});
 
     const afterCount = await getChatMessageCount(page);
-    // A new chat message should have been created (roll or notification)
-    expect(afterCount).toBeGreaterThanOrEqual(beforeCount);
+    expect(afterCount).toBeGreaterThan(beforeCount);
   });
 
   test("skillIncrease — clicking increase stepper updates actor.system", async ({ page }) => {
@@ -190,10 +190,12 @@ test.describe("AgentSheet — stats tab content", () => {
     for (const skill of SKILL_NAMES) {
       const rollBtnVisible = await page.evaluate(
         (args: { id: string; skill: string }) => {
-          const btn = document.querySelector(
+          const btn = document.querySelector<HTMLElement>(
             `.inspectres[id*="${args.id}"] [data-action="skillRoll"][data-skill="${args.skill}"]`,
           );
-          return btn !== null;
+          if (!btn) return false;
+          const rect = btn.getBoundingClientRect();
+          return rect.width > 0 && rect.height > 0;
         },
         { id: agentId, skill },
       );
@@ -306,7 +308,10 @@ test.describe("AgentSheet — conditional UI paths", () => {
     await page.waitForTimeout(1000);
 
     const penaltyLineExists = await page.evaluate((id: string) => {
-      return document.querySelector(`.inspectres[id*="${id}"] .skill-penalty-line`) !== null;
+      const el = document.querySelector<HTMLElement>(`.inspectres[id*="${id}"] .skill-penalty-line`);
+      if (!el) return false;
+      const rect = el.getBoundingClientRect();
+      return rect.width > 0 && rect.height > 0;
     }, agentId);
 
     expect(penaltyLineExists).toBe(true);
