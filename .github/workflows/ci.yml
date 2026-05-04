@@ -300,6 +300,8 @@ jobs:
       - name: Stop Foundry container
         if: always()
         working-directory: docker
+        env:
+          FOUNDRY_IMAGE_NAME: ${{ steps.image.outputs.image_name }}
         run: docker compose -f docker-compose.ci.yml down
 
       - name: Upload test artifacts
