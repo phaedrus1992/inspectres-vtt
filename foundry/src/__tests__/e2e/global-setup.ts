@@ -5,14 +5,15 @@
  *   1. Decline usage data sharing dialog (if present)
  *   2. Dismiss tour overlay (ESC)
  *   3. Create test world (system: inspectres) — only if none exists
- *   4. Launch world
+ *   4. Launch world (v13) or auto-launches on submit (v14)
  *   5. Join as Gamemaster (no password — fresh world)
  *   6. Wait until `game.ready === true`
  *   7. Provision N test worker users (test-worker-0 … test-worker-N) via Foundry User API
  *   8. Save a separate storage-state file for each worker
  *
  * Idempotent: if a world already exists and game is reachable, just verifies it.
- * Selectors verified against Foundry V13 (felddy/foundryvtt:13).
+ * Supports Foundry v13 (form-based dialog, hidden launch link) and v14
+ * (standalone /create page, package gallery system selector, auto-launch on submit).
  */
 
 import path from "node:path";
@@ -103,16 +104,36 @@ async function dismissTourOverlay(page: Page): Promise<void> {
   await page.waitForTimeout(300);
 }
 
+/**
+ * Detects whether the current page is Foundry v14's setup UI.
+ *
+ * v14 renamed the world id field from `name="id"` (v13) to `name="world-id"`.
+ * This field name is the most reliable distinguisher since both versions show
+ * a system package list elsewhere on the setup screen.
+ */
+async function detectIsV14Setup(page: Page): Promise<boolean> {
+  return page.evaluate(() => !!document.querySelector('input[name="world-id"]'));
+}
+
 async function createWorldIfNeeded(page: Page): Promise<void> {
   const exists = await page.evaluate(
-    (id) => !!document.querySelector(`#worlds-list [data-package-id="${id}"]`),
+    (id) => !!document.querySelector(`[data-package-id="${id}"]`),
     WORLD_ID,
   );
   if (exists) return;
 
   await page.click('button[data-action="worldCreate"]');
-  await page.waitForTimeout(1500);
+  await page.waitForTimeout(2000);
 
+  const isV14 = await detectIsV14Setup(page);
+  if (isV14) {
+    await createWorldV14(page);
+  } else {
+    await createWorldV13(page);
+  }
+}
+
+async function createWorldV13(page: Page): Promise<void> {
   await page.fill('input[name="title"]', WORLD_TITLE);
   await page.waitForTimeout(200);
   await page.fill('input[name="id"]', WORLD_ID);
@@ -129,20 +150,59 @@ async function createWorldIfNeeded(page: Page): Promise<void> {
     (form as HTMLFormElement).requestSubmit(submitBtn as HTMLButtonElement);
     return true;
   });
-  if (!submitted) throw new Error("Could not submit Create World form");
+  if (!submitted) throw new Error("Could not submit Create World form (v13)");
   await page.waitForTimeout(3000);
 
-  // Verify the world appeared
   const created = await page.evaluate(
     (id) => !!document.querySelector(`#worlds-list [data-package-id="${id}"]`),
     WORLD_ID,
   );
-  if (!created) throw new Error(`World ${WORLD_ID} did not appear after creation`);
+  if (!created) throw new Error(`World ${WORLD_ID} did not appear after creation (v13)`);
+}
+
+async function createWorldV14(page: Page): Promise<void> {
+  await page.fill('input[name="title"]', WORLD_TITLE);
+  await page.waitForTimeout(200);
+  await page.fill('input[name="world-id"]', WORLD_ID);
+  await page.waitForTimeout(200);
+
+  // V14 hides the native <select name="system"> behind a clickable package gallery.
+  // Clicking the system <li> sets the select value via Foundry's framework.
+  const systemPackage = await page.$(`li.package.system[data-package-id="${SYSTEM_ID}"]`);
+  if (!systemPackage) {
+    throw new Error(`V14 system package li not found for ${SYSTEM_ID}`);
+  }
+  await systemPackage.click();
+  await page.waitForTimeout(300);
+
+  // Submit the form. V14's submit button is a plain <button type="submit">Continue</button>.
+  await page.click('button[type="submit"]:not([data-action="cancel"])');
+
+  // V14 auto-launches the world on submit and redirects to /join (the players page).
+  await page.waitForURL((u) => u.pathname.includes("/join") || u.pathname.includes("/players"), {
+    timeout: 30_000,
+  });
+  await page.waitForTimeout(1500);
 }
 
 const DEFAULT_JOIN_TIMEOUTS = { url: 30_000, ready: 60_000 };
 
 async function joinAsUser(page: Page, username: string, timeouts = DEFAULT_JOIN_TIMEOUTS): Promise<void> {
+  // Check for critical failure or error page
+  const criticalFailure = await page.evaluate(() => {
+    const text = document.body.textContent || '';
+    if (text.includes('Critical Failure')) {
+      const errorSection = document.querySelector('section') || document.body;
+      return { isCritical: true, errorText: errorSection.textContent };
+    }
+    return { isCritical: false };
+  });
+
+  if (criticalFailure.isCritical) {
+    const errorMsg = criticalFailure.errorText?.slice(0, 500) || 'Unknown error';
+    throw new Error(`Foundry join failed with critical error: ${errorMsg}`);
+  }
+
   await page.selectOption('select[name="userid"]', { label: username });
   await page.click('button[type="submit"]:has-text("Join Game Session")');
   await page.waitForURL(/\/game/, { timeout: timeouts.url });
@@ -156,12 +216,55 @@ async function joinAsUser(page: Page, username: string, timeouts = DEFAULT_JOIN_
 }
 
 async function launchAndJoin(page: Page): Promise<void> {
-  // The launch link is hover-only (CSS `:hover` reveals it), so click via DOM.
+  console.log("[launchAndJoin] Current URL before launch:", page.url());
+
+  // V14 auto-launches the world on createWorld submit, so we may already be on /join.
+  // V13 leaves us on /setup with a separate launch button to click.
+  const url = page.url();
+  if (url.includes("/join") || url.includes("/players")) {
+    // V14 auto-launches on world creation and lands on /players (User
+    // Management page). /join is the actual login form and is reachable by
+    // server redirect when navigating fresh. Explicitly navigate to /join.
+    console.log("[launchAndJoin] V14 auto-launch landed on", url, "→ navigating to /join");
+    await page.goto(`${FOUNDRY_URL}/join`, { waitUntil: "domcontentloaded" });
+    await page.waitForSelector('select[name="userid"]', { timeout: 30_000 });
+    await joinAsUser(page, "Gamemaster");
+    return;
+  }
+
+  // Still on /setup: must click the launch button (v13 path).
+  console.log("[launchAndJoin] Still on /setup; using v13 launch flow");
+  await launchAndJoinV13(page);
+}
+
+async function launchAndJoinV13(page: Page): Promise<void> {
+  // V13: The launch link is hidden by default (CSS `:hover` reveals it).
+  // Force visibility via JavaScript before clicking.
   await page.evaluate(() => {
-    const link = document.querySelector('a[data-action="worldLaunch"]') as HTMLElement | null;
-    link?.click();
+    const container = document.querySelector('[data-package-id="test-world"]') as HTMLElement | null;
+    if (!container) {
+      throw new Error('World package container not found');
+    }
+    container.style.setProperty('display', 'block', 'important');
+    container.style.setProperty('visibility', 'visible', 'important');
+
+    const launchBtn = container.querySelector('a[data-action="worldLaunch"]') as HTMLElement | null;
+    if (!launchBtn) {
+      throw new Error('World launch button not found');
+    }
+    launchBtn.style.setProperty('display', 'block', 'important');
+    launchBtn.style.setProperty('visibility', 'visible', 'important');
+    launchBtn.style.setProperty('opacity', '1', 'important');
   });
+
+  console.log('[launchAndJoin] V13: Clicking world launch button...');
+  await page.click('[data-package-id="test-world"] a[data-action="worldLaunch"]', {
+    timeout: 5000,
+  });
+
+  console.log('[launchAndJoin] V13: Waiting for /join redirect...');
   await page.waitForURL(/\/join/, { timeout: 30_000 });
+  console.log('[launchAndJoin] V13: ✓ Navigated to /join');
   await page.waitForTimeout(1500);
   await joinAsUser(page, "Gamemaster");
 }

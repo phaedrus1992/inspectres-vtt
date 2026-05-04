@@ -1,0 +1,18 @@
+# Local v14 testing only — NOT committed for CI use.
+# Uses ./data-v14 for fresh state separate from v13's ./data.
+services:
+  foundry:
+    image: ghcr.io/felddy/foundryvtt:14
+    hostname: foundry
+    ports:
+      - "30000:30000"
+    user: "0:0"
+    environment:
+      FOUNDRY_USERNAME: "${FOUNDRY_USERNAME}"
+      FOUNDRY_PASSWORD: "${FOUNDRY_PASSWORD}"
+      FOUNDRY_LICENSE_KEY: "${FOUNDRY_LICENSE_KEY}"
+      FOUNDRY_HOSTNAME: foundry
+      CONTAINER_PRESERVE_CONFIG: "true"
+    volumes:
+      - ./data-v14:/data
+      - ../foundry/dist:/data/Data/systems/inspectres

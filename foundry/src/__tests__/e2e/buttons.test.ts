@@ -14,7 +14,7 @@
  * - npm run dev watching for changes in another terminal
  */
 
-import { test, expect } from "./fixtures";
+import { test, expect, ELEMENT_WAIT_TIMEOUT } from "./fixtures";
 
 // TODO Phase 2: Add contrast ratio helpers for WCAG AA verification (4.5:1 for normal text)
 // function parseColor(rgb: string): { r: number; g: number; b: number } {
@@ -92,7 +92,7 @@ const button = page.locator("button").first();
     await page.waitForFunction(
       () => document.querySelector("button[disabled]") !== null,
       undefined,
-      { timeout: 5000 },
+      { timeout: ELEMENT_WAIT_TIMEOUT },
     );
     const buttons = page.locator("button[disabled]");
 

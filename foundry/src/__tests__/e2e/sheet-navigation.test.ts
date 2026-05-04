@@ -8,7 +8,7 @@
  * Run with: npm run test:e2e (with Docker setup)
  */
 
-import { test, expect } from "./fixtures";
+import { test, expect, ELEMENT_WAIT_TIMEOUT } from "./fixtures";
 
 // ApplicationV2 re-renders briefly detach elements. waitForSelector on ".inspectres" can
 // time out even when the sheet is logically visible. Use waitForFunction + getBoundingClientRect
@@ -59,7 +59,7 @@ test.describe("Sheet navigation and tab switching (E2E - Playwright)", () => {
     await waitForSheet(page);
     const tabs = page.locator(".inspectres [role='tab']");
     // Ensure at least 2 tabs exist to test switching behavior
-    await expect(tabs).toHaveCount(2, { timeout: 5000 });
+    await expect(tabs).toHaveCount(2, { timeout: ELEMENT_WAIT_TIMEOUT });
     const secondTab = tabs.nth(1);
     // Foundry tabs link to panels via aria-controls (referencing the panel's id),
     // not via id+aria-labelledby on the panel. See sheet-tabs HBS for relationship.
@@ -85,14 +85,14 @@ test.describe("Sheet navigation and tab switching (E2E - Playwright)", () => {
     });
     // Wait for the panel to become visible — tab switching toggles the .active class
     // which maps display:none → display:block
-    await expect(page.locator(`.inspectres [role='tabpanel']#${secondTabPanelId}`)).toBeVisible({ timeout: 5000 });
+    await expect(page.locator(`.inspectres [role='tabpanel']#${secondTabPanelId}`)).toBeVisible({ timeout: ELEMENT_WAIT_TIMEOUT });
 
     const selected = await secondTab.getAttribute("aria-selected");
     expect(selected).toBe("true");
 
     // Verify the visible panel is the one controlled by the second tab
     const visiblePanel = page.locator(".inspectres [role='tabpanel']:visible");
-    await expect(visiblePanel).toHaveCount(1, { timeout: 5000 });
+    await expect(visiblePanel).toHaveCount(1, { timeout: ELEMENT_WAIT_TIMEOUT });
     const visiblePanelId = await visiblePanel.first().getAttribute("id");
     expect(visiblePanelId).toBe(secondTabPanelId);
 

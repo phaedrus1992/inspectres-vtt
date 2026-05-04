@@ -11,6 +11,12 @@ const READY_TIMEOUT = 60_000;
 // re-render cycle. 30s gives enough headroom for the sheet to stabilize in CI.
 const SHEET_RENDER_TIMEOUT = 30_000;
 
+// Shared timeout for in-test element waits (selectors, locator counts, etc.).
+// 5s is too tight under CI load (especially v14 which has slower init) and
+// causes spurious retries. 15s tolerates CI variance without slowing the
+// suite meaningfully when elements are present.
+export const ELEMENT_WAIT_TIMEOUT = 15_000;
+
 async function dismissStartupNotifications(page: Page): Promise<void> {
   // Foundry V13 startup warnings (hardware acceleration, screen size) are
   // permanent <li class="notification"> elements with no close button — they
