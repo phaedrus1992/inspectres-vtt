@@ -105,17 +105,25 @@ async function dismissTourOverlay(page: Page): Promise<void> {
 }
 
 /**
- * Detects whether the current page is Foundry v14's setup UI.
+ * Detects the running Foundry major version from the setup page globals.
  *
- * v14 renamed the world id field from `name="id"` (v13) to `name="world-id"`.
- * This field name is the most reliable distinguisher since both versions show
- * a system package list elsewhere on the setup screen.
+ * Reads `game.version` (e.g. "14.360") which Foundry exposes on every page.
+ * DOM-based detection (input field names, button text) breaks across builds —
+ * v14.360.0 dropped the `world-id` input we used previously. The version
+ * global is stable across builds.
  */
-async function detectIsV14Setup(page: Page): Promise<boolean> {
-  return page.evaluate(() => !!document.querySelector('input[name="world-id"]'));
+async function detectFoundryMajorVersion(page: Page): Promise<number> {
+  const version = await page.evaluate(() => {
+    const g = globalThis as { game?: { version?: string } };
+    return g.game?.version ?? null;
+  });
+  if (!version) throw new Error("Could not read game.version from setup page");
+  const major = Number.parseInt(version.split(".")[0] ?? "", 10);
+  if (!Number.isFinite(major)) throw new Error(`Unparsable game.version: ${version}`);
+  return major;
 }
 
-async function createWorldIfNeeded(page: Page): Promise<void> {
+async function createWorldIfNeeded(page: Page, majorVersion: number): Promise<void> {
   const exists = await page.evaluate(
     (id) => !!document.querySelector(`[data-package-id="${id}"]`),
     WORLD_ID,
@@ -125,8 +133,7 @@ async function createWorldIfNeeded(page: Page): Promise<void> {
   await page.click('button[data-action="worldCreate"]');
   await page.waitForTimeout(2000);
 
-  const isV14 = await detectIsV14Setup(page);
-  if (isV14) {
+  if (majorVersion >= 14) {
     await createWorldV14(page);
   } else {
     await createWorldV13(page);
@@ -215,57 +222,69 @@ async function joinAsUser(page: Page, username: string, timeouts = DEFAULT_JOIN_
   );
 }
 
-async function launchAndJoin(page: Page): Promise<void> {
-  console.log("[launchAndJoin] Current URL before launch:", page.url());
+async function launchAndJoin(page: Page, majorVersion: number): Promise<void> {
+  console.log(`[launchAndJoin] v${majorVersion}, current URL: ${page.url()}`);
 
-  // V14 auto-launches the world on createWorld submit, so we may already be on /join.
-  // V13 leaves us on /setup with a separate launch button to click.
+  // After createWorldV14, the page may already be on /join or /players because
+  // v14 auto-launches on form submit. Detect by URL, not version.
   const url = page.url();
   if (url.includes("/join") || url.includes("/players")) {
-    // V14 auto-launches on world creation and lands on /players (User
-    // Management page). /join is the actual login form and is reachable by
-    // server redirect when navigating fresh. Explicitly navigate to /join.
-    console.log("[launchAndJoin] V14 auto-launch landed on", url, "→ navigating to /join");
+    console.log("[launchAndJoin] Auto-launch landed on", url, "→ navigating to /join");
     await page.goto(`${FOUNDRY_URL}/join`, { waitUntil: "domcontentloaded" });
     await page.waitForSelector('select[name="userid"]', { timeout: 30_000 });
     await joinAsUser(page, "Gamemaster");
     return;
   }
 
-  // Still on /setup: must click the launch button (v13 path).
-  console.log("[launchAndJoin] Still on /setup; using v13 launch flow");
-  await launchAndJoinV13(page);
-}
-
-async function launchAndJoinV13(page: Page): Promise<void> {
-  // V13: The launch link is hidden by default (CSS `:hover` reveals it).
-  // Force visibility via JavaScript before clicking.
+  // Still on /setup with an existing world: click the launch link.
+  // v13 hides the link with `:hover` CSS; v14.360+ renders it visible by default.
+  // Forcing visibility is harmless on v14 and required on v13 — do it unconditionally.
   await page.evaluate(() => {
     const container = document.querySelector('[data-package-id="test-world"]') as HTMLElement | null;
-    if (!container) {
-      throw new Error('World package container not found');
-    }
-    container.style.setProperty('display', 'block', 'important');
-    container.style.setProperty('visibility', 'visible', 'important');
+    if (!container) throw new Error("World package container not found");
+    container.style.setProperty("display", "block", "important");
+    container.style.setProperty("visibility", "visible", "important");
 
     const launchBtn = container.querySelector('a[data-action="worldLaunch"]') as HTMLElement | null;
-    if (!launchBtn) {
-      throw new Error('World launch button not found');
-    }
-    launchBtn.style.setProperty('display', 'block', 'important');
-    launchBtn.style.setProperty('visibility', 'visible', 'important');
-    launchBtn.style.setProperty('opacity', '1', 'important');
+    if (!launchBtn) throw new Error("World launch button not found");
+    launchBtn.style.setProperty("display", "block", "important");
+    launchBtn.style.setProperty("visibility", "visible", "important");
+    launchBtn.style.setProperty("opacity", "1", "important");
   });
 
-  console.log('[launchAndJoin] V13: Clicking world launch button...');
-  await page.click('[data-package-id="test-world"] a[data-action="worldLaunch"]', {
-    timeout: 5000,
-  });
+  console.log("[launchAndJoin] Clicking worldLaunch link");
+  await page.click('[data-package-id="test-world"] a[data-action="worldLaunch"]', { timeout: 5000 });
 
-  console.log('[launchAndJoin] V13: Waiting for /join redirect...');
-  await page.waitForURL(/\/join/, { timeout: 30_000 });
-  console.log('[launchAndJoin] V13: ✓ Navigated to /join');
+  // v14 may show a "World Data Migration" dialog when the world's stored core
+  // version is older than the current core. Confirm with "Begin Migration".
+  // Race: either the migration dialog appears OR navigation away from /setup.
+  const migrationConfirmed = await Promise.race([
+    page
+      .waitForSelector('dialog.application.dialog button[data-action="yes"]', { timeout: 5_000 })
+      .then(() => true)
+      .catch(() => false),
+    page
+      .waitForURL((u) => !u.pathname.includes("/setup"), { timeout: 5_000 })
+      .then(() => "navigated" as const)
+      .catch(() => false),
+  ]);
+  if (migrationConfirmed === true) {
+    console.log("[launchAndJoin] World Data Migration dialog detected → confirming");
+    await page.click('dialog.application.dialog button[data-action="yes"]');
+  }
+
+  // v13 redirects to /join. v14 redirects to /players (User Management) first.
+  await page.waitForURL((u) => u.pathname.includes("/join") || u.pathname.includes("/players"), {
+    timeout: 60_000,
+  });
   await page.waitForTimeout(1500);
+
+  // If we landed on /players, navigate to /join to reach the actual login form.
+  if (!page.url().includes("/join")) {
+    console.log(`[launchAndJoin] Landed on ${page.url()} → navigating to /join`);
+    await page.goto(`${FOUNDRY_URL}/join`, { waitUntil: "domcontentloaded" });
+    await page.waitForSelector('select[name="userid"]', { timeout: 30_000 });
+  }
   await joinAsUser(page, "Gamemaster");
 }
 
@@ -345,8 +364,10 @@ async function globalSetup(): Promise<void> {
       await dismissTourOverlay(page);
 
       if (page.url().includes("/setup")) {
-        await createWorldIfNeeded(page);
-        await launchAndJoin(page);
+        const majorVersion = await detectFoundryMajorVersion(page);
+        console.log(`[setup] Foundry major version: ${majorVersion}`);
+        await createWorldIfNeeded(page, majorVersion);
+        await launchAndJoin(page, majorVersion);
       } else if (page.url().includes("/join")) {
         // World was launched previously; just join.
         await joinAsUser(page, "Gamemaster");
