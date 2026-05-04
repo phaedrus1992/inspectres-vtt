@@ -145,9 +145,9 @@ test.describe("FranchiseSheet — day controls", () => {
 
   test("regressDay — currentDay setting decrements", async ({ page }) => {
     // Set day to 5 first so we can decrement
-    await page.evaluate(() => {
+    await page.evaluate(async () => {
       // @ts-expect-error - Foundry runtime global
-      return globalThis.game?.settings?.set("inspectres", "currentDay", 5);
+      await globalThis.game?.settings?.set("inspectres", "currentDay", 5);
     });
 
     const sheet = await openAndGetFranchiseSheet(page, franchiseId);
