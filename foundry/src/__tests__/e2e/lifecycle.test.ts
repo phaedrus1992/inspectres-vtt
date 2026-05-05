@@ -195,10 +195,10 @@ test.describe("Actor creation via Foundry UI flow", () => {
       });
 
       if (dialogVisible) {
-        // Fill the name field
+        // Fill the name field — use catch to tolerate v14 mid-operation redirects.
         const nameInput = page.locator('dialog input[name="name"], .dialog input[name="name"]').first();
         if (await nameInput.isVisible({ timeout: 3000 }).catch(() => false)) {
-          await nameInput.fill(actorName);
+          await nameInput.fill(actorName).catch(() => {});
         }
 
         // Select type "agent" if dropdown present
@@ -207,10 +207,36 @@ test.describe("Actor creation via Foundry UI flow", () => {
           await typeSelect.selectOption("agent").catch(() => {});
         }
 
-        // Submit
+        // Submit. On v14, dialog submit can redirect to /join — race the click against
+        // a URL change so we don't block for the full test timeout if that happens.
         const submitBtn = page.locator('dialog button[type="submit"], .dialog button[type="submit"]').first();
         if (await submitBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
-          await submitBtn.click();
+          await Promise.race([
+            submitBtn.click(),
+            page.waitForURL(/\/(join|game)/, { timeout: 10_000 }),
+          ]).catch(() => {});
+        }
+        // If Foundry redirected to /join (v14 behaviour after dialog submit or session
+        // expiry mid-fill), re-join immediately so the session stays valid for teardown.
+        if (page.url().includes("/join")) {
+          const workerUsername = await page.evaluate(() => {
+            const opts = Array.from(
+              (document.querySelector('select[name="userid"]') as HTMLSelectElement | null)?.options ?? [],
+            );
+            return opts.find((o) => !o.disabled && o.value !== "")?.text ?? null;
+          });
+          if (workerUsername) {
+            await page.selectOption('select[name="userid"]', { label: workerUsername }).catch(() => {});
+            await page.click('button[type="submit"]:has-text("Join Game Session")').catch(() => {});
+            await page.waitForURL(/\/game/, { timeout: 30_000 }).catch(() => {});
+            await page.waitForFunction(
+              // @ts-expect-error - Foundry runtime global
+              () => globalThis.game?.ready === true,
+              undefined,
+              { timeout: 30_000 },
+            ).catch(() => {});
+          }
+        } else {
           await page.waitForTimeout(1500);
         }
       }
