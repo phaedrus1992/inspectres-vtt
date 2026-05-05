@@ -74,35 +74,8 @@ test.describe("AgentSheet — action handlers", () => {
     expect(afterCount).toBeGreaterThan(beforeCount);
   });
 
-  test("skillIncrease — clicking increase stepper updates actor.system", async ({ page }) => {
-    const sheet = await openAgentSheet(page, agentId);
-
-    const before = await page.evaluate((id: string) => {
-      // @ts-expect-error - Foundry runtime global
-      const actor = globalThis.game?.actors?.get(id);
-      return (actor?.system as { skills: { academics: { base: number } } })?.skills?.academics?.base ?? 0;
-    }, agentId);
-
-    await sheet.clickSkillIncrease("academics");
-    await waitForActorFieldChanged(page, agentId, "skills.academics.base", before);
-
-    const after = await page.evaluate((id: string) => {
-      // @ts-expect-error - Foundry runtime global
-      const actor = globalThis.game?.actors?.get(id);
-      return (actor?.system as { skills: { academics: { base: number } } })?.skills?.academics?.base ?? 0;
-    }, agentId);
-
-    // Skill increased (or capped at max)
-    expect(after).toBeGreaterThanOrEqual(before);
-
-    await page.screenshot({
-      path: "test-results/e2e-screenshots/agent-02-skill-increase.png",
-      timeout: 5000,
-    }).catch(() => {});
-  });
-
-  test("skillDecrease — clicking decrease stepper updates actor.system", async ({ page }) => {
-    // Set to 3 so there's room to decrease
+  test("skillIncrease + skillDecrease — steppers update independent skill fields", async ({ page }) => {
+    // Set athletics to 3 so there's room to decrease
     await page.evaluate(async (id: string) => {
       // @ts-expect-error - Foundry runtime global
       const actor = globalThis.game?.actors?.get(id);
@@ -110,16 +83,39 @@ test.describe("AgentSheet — action handlers", () => {
     }, agentId);
 
     const sheet = await openAgentSheet(page, agentId);
+
+    // Increase academics
+    const beforeIncrease = await page.evaluate((id: string) => {
+      // @ts-expect-error - Foundry runtime global
+      const actor = globalThis.game?.actors?.get(id);
+      return (actor?.system as { skills: { academics: { base: number } } })?.skills?.academics?.base ?? 0;
+    }, agentId);
+
+    await sheet.clickSkillIncrease("academics");
+    await waitForActorFieldChanged(page, agentId, "skills.academics.base", beforeIncrease);
+
+    const afterIncrease = await page.evaluate((id: string) => {
+      // @ts-expect-error - Foundry runtime global
+      const actor = globalThis.game?.actors?.get(id);
+      return (actor?.system as { skills: { academics: { base: number } } })?.skills?.academics?.base ?? 0;
+    }, agentId);
+    expect(afterIncrease).toBeGreaterThanOrEqual(beforeIncrease);
+
+    await page.screenshot({
+      path: "test-results/e2e-screenshots/agent-02-skill-increase.png",
+      timeout: 5000,
+    }).catch(() => {});
+
+    // Decrease athletics (independent field — no conflict with academics increase)
     await sheet.clickSkillDecrease("athletics");
     await waitForActorFieldChanged(page, agentId, "skills.athletics.base", 3);
 
-    const after = await page.evaluate((id: string) => {
+    const afterDecrease = await page.evaluate((id: string) => {
       // @ts-expect-error - Foundry runtime global
       const actor = globalThis.game?.actors?.get(id);
       return (actor?.system as { skills: { athletics: { base: number } } })?.skills?.athletics?.base ?? 0;
     }, agentId);
-
-    expect(after).toBeLessThanOrEqual(3);
+    expect(afterDecrease).toBeLessThanOrEqual(3);
 
     await page.screenshot({
       path: "test-results/e2e-screenshots/agent-03-skill-decrease.png",

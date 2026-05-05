@@ -245,6 +245,24 @@ const state = await page.evaluate(() => ({
 - Browser console attached on failure (use `fixtures.ts` `test`)
 - `waitForFunction + getBoundingClientRect` instead of bare `waitForSelector` for sheet elements
 
+## Test Granularity
+
+**One actor per feature area, not one actor per button click.**
+
+If multiple actions operate on the same actor type and their state changes don't conflict, they belong in one test with one actor setup.
+
+A `beforeEach` that creates an actor for a single `test()` block containing one click is a code smell. Reviewers should flag it.
+
+**Acceptable reasons to use a dedicated actor per test:**
+- The test requires specific pre-state that conflicts with adjacent tests
+- The action opens a modal/dialog whose dismissal would add fragility to subsequent steps
+
+**Combining actions is valid when:**
+- Post-state of step N is a valid pre-state for step N+1 (e.g. advance day → regress day)
+- The actions operate on entirely independent fields (e.g. `skills.academics` and `skills.athletics`)
+
+**Pre-pr-review P2 finding:** a new test suite where each test has its own actor lifecycle but the actions could cleanly share one actor.
+
 ## Local Validation Before Push
 
 **HARD REQUIREMENT — GitHub Actions minutes are limited.**

@@ -32,36 +32,34 @@ test.describe("FranchiseSheet — roll actions", () => {
     await deleteActor(page, franchiseId);
   });
 
-  test("bankRoll — produces a chat message", async ({ page }) => {
+  test("bankRoll + clientRoll — each produces a chat message", async ({ page }) => {
     const sheet = await openFranchiseSheet(page, franchiseId);
-    const before = await getChatMessageCount(page);
 
+    // Bank roll
+    const beforeBank = await getChatMessageCount(page);
     await sheet.clickBankRoll();
-    await waitForNewChatMessage(page, before);
+    await waitForNewChatMessage(page, beforeBank);
 
     await page.screenshot({
       path: "test-results/e2e-screenshots/franchise-01-bank-roll.png",
       timeout: 5000,
     }).catch(() => {});
 
-    const after = await getChatMessageCount(page);
-    expect(after).toBeGreaterThanOrEqual(before);
-  });
+    const afterBank = await getChatMessageCount(page);
+    expect(afterBank).toBeGreaterThanOrEqual(beforeBank);
 
-  test("clientRoll — produces a chat message", async ({ page }) => {
-    const sheet = await openFranchiseSheet(page, franchiseId);
-    const before = await getChatMessageCount(page);
-
+    // Client roll (bank dice still ≥ 4 after one roll; assertion uses cumulative count)
+    const beforeClient = afterBank;
     await sheet.clickClientRoll();
-    await waitForNewChatMessage(page, before);
+    await waitForNewChatMessage(page, beforeClient);
 
     await page.screenshot({
       path: "test-results/e2e-screenshots/franchise-02-client-roll.png",
       timeout: 5000,
     }).catch(() => {});
 
-    const after = await getChatMessageCount(page);
-    expect(after).toBeGreaterThanOrEqual(before);
+    const afterClient = await getChatMessageCount(page);
+    expect(afterClient).toBeGreaterThanOrEqual(beforeClient);
   });
 });
 
@@ -125,10 +123,17 @@ test.describe("FranchiseSheet — day controls", () => {
     await deleteActor(page, franchiseId);
   });
 
-  test("advanceDay — currentDay setting increments", async ({ page }) => {
-    const sheet = await openFranchiseSheet(page, franchiseId);
-    const before = await sheet.getCurrentDaySetting();
+  test("advanceDay + regressDay — currentDay increments then decrements", async ({ page }) => {
+    // Start at a known value so regress doesn't hit the floor
+    await page.evaluate(async () => {
+      // @ts-expect-error - Foundry runtime global
+      await globalThis.game?.settings?.set("inspectres", "currentDay", 5);
+    });
 
+    const sheet = await openFranchiseSheet(page, franchiseId);
+    const initial = await sheet.getCurrentDaySetting();
+
+    // Advance
     await sheet.clickAdvanceDay();
     await page.waitForFunction(
       (prev: number) => {
@@ -139,29 +144,19 @@ test.describe("FranchiseSheet — day controls", () => {
           return false;
         }
       },
-      before,
+      initial,
       { timeout: ELEMENT_WAIT_TIMEOUT },
     ).catch(() => {});
 
-    const after = await sheet.getCurrentDaySetting();
-    expect(after).toBe(before + 1);
+    const afterAdvance = await sheet.getCurrentDaySetting();
+    expect(afterAdvance).toBe(initial + 1);
 
     await page.screenshot({
       path: "test-results/e2e-screenshots/franchise-04-advance-day.png",
       timeout: 5000,
     }).catch(() => {});
-  });
 
-  test("regressDay — currentDay setting decrements", async ({ page }) => {
-    // Set day to 5 first so we can decrement
-    await page.evaluate(async () => {
-      // @ts-expect-error - Foundry runtime global
-      await globalThis.game?.settings?.set("inspectres", "currentDay", 5);
-    });
-
-    const sheet = await openFranchiseSheet(page, franchiseId);
-    const before = await sheet.getCurrentDaySetting();
-
+    // Regress — post-state of advance (day N+1) is valid pre-state for regress → day N
     await sheet.clickRegressDay();
     await page.waitForFunction(
       (prev: number) => {
@@ -172,12 +167,12 @@ test.describe("FranchiseSheet — day controls", () => {
           return false;
         }
       },
-      before,
+      afterAdvance,
       { timeout: ELEMENT_WAIT_TIMEOUT },
     ).catch(() => {});
 
-    const after = await sheet.getCurrentDaySetting();
-    expect(after).toBe(before - 1);
+    const afterRegress = await sheet.getCurrentDaySetting();
+    expect(afterRegress).toBe(initial);
 
     await page.screenshot({
       path: "test-results/e2e-screenshots/franchise-05-regress-day.png",
