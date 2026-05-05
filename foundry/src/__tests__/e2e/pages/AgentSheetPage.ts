@@ -123,15 +123,39 @@ export class AgentSheetPage {
   }
 
   /**
-   * Click a selector, racing against a /join redirect that v14 can trigger on
-   * any action button click. Calls rejoinIfRedirected to restore the session.
+   * Click a selector, guarding against the /join redirect that v14 (and
+   * occasionally v13) triggers on action button clicks. If a redirect fires,
+   * rejoin the session, re-render the sheet, and retry the click once so the
+   * action actually executes rather than being silently swallowed.
    */
   private async safeClick(selector: string): Promise<void> {
-    await Promise.race([
-      this.page.click(selector),
-      this.page.waitForURL(/\/join/, { timeout: 5_000 }),
-    ]).catch(() => {});
+    const wasRedirected = await this.clickWithRedirectGuard(selector);
+    if (!wasRedirected) return;
+
+    await this.rerenderSheet();
+    // Retry once — a second redirect here would be a real environment problem.
+    await this.page.click(selector).catch(() => {});
+  }
+
+  /** Race click vs /join redirect; return true if redirect fired. */
+  private async clickWithRedirectGuard(selector: string): Promise<boolean> {
+    const result = await Promise.race([
+      this.page.click(selector).then(() => false as const),
+      this.page.waitForURL(/\/join/, { timeout: 5_000 }).then(() => true as const),
+    ]).catch(() => false as const);
     await rejoinIfRedirected(this.page);
+    return result;
+  }
+
+  /** Re-render this actor's sheet after a rejoin so the DOM is valid again. */
+  private async rerenderSheet(): Promise<void> {
+    const id = this.actorId;
+    await this.page.evaluate(async (actorId: string) => {
+      // @ts-expect-error - Foundry runtime global
+      const actor = globalThis.game?.actors?.get(actorId);
+      if (actor) await actor.sheet.render(true);
+    }, id).catch(() => {});
+    await this.waitForVisible().catch(() => {});
   }
 
   /** Get the raw system data for this actor from the Foundry runtime. */

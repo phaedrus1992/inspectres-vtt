@@ -266,6 +266,28 @@ Actions belong in the same test when:
 
 **When adding a test, ask:** can this step chain onto an existing test in this describe? If the fields are independent and state flows cleanly, it must.
 
+## Test Retries Are a Code Smell
+
+A test that passes only on retry is a broken test. Treat it the same as a test that always fails.
+
+**Rule: a retry is not a fix.** Retries mask timing problems, race conditions, and missing waits. They add wall-clock time to every CI run and erode confidence in the suite. A test that retried once in 100 runs is still broken — it revealed a real gap.
+
+**When a test flakes:**
+1. Reproduce locally — add a screenshot or DOM snapshot at the point of failure to see what was actually in the DOM
+2. Identify the root cause: missing `waitForFunction`, ApplicationV2 re-render race, stale element reference, timing assumption
+3. Fix the wait or the assertion — not the retry count
+
+**Never increase `retries` in `playwright.config.ts` to silence a flaky test.** The correct retries value is 0 in development; if CI uses 1 as a safety net, a test that hits it must be treated as a failure and fixed before merge.
+
+**Common root causes and their fixes:**
+
+| Symptom | Root cause | Fix |
+|---------|-----------|-----|
+| Element found then lost | ApplicationV2 re-render detaches DOM | Use `waitForFunction + getBoundingClientRect` instead of `waitForSelector` |
+| Assert fires before update | Actor update is async, no wait | Add `waitForActorFieldChanged` before asserting |
+| Dialog click fails intermittently | Dialog not fully rendered when clicked | `waitForFunction` checking `getBoundingClientRect` before clicking |
+| Second action fails after first | Sheet re-rendered between steps | Re-query elements after any actor update |
+
 ## Local Validation Before Push
 
 **HARD REQUIREMENT — GitHub Actions minutes are limited.**

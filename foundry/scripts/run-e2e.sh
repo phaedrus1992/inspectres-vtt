@@ -14,10 +14,12 @@
 # config provided via docker/secrets/config.json (already required for local).
 #
 # Usage:
-#   scripts/run-e2e.sh                 # full run, fresh data
-#   scripts/run-e2e.sh -- --grep foo   # forward args to playwright
-#   KEEP_DATA=1 scripts/run-e2e.sh     # skip data wipe (faster local iteration)
-#   KEEP_RUNNING=1 scripts/run-e2e.sh  # leave container running on exit (debug)
+#   scripts/run-e2e.sh                            # full run, fresh data
+#   scripts/run-e2e.sh -- --grep "test name"      # filter by test name
+#   scripts/run-e2e.sh -- agent-sheet.test.ts     # run one file
+#   scripts/run-e2e.sh -- agent-sheet franchise   # run multiple files (substring match)
+#   KEEP_DATA=1 scripts/run-e2e.sh                # skip data wipe (faster iteration)
+#   KEEP_RUNNING=1 scripts/run-e2e.sh             # leave container running on exit
 
 set -euo pipefail
 
