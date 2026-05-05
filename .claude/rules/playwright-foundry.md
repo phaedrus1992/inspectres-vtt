@@ -247,21 +247,24 @@ const state = await page.evaluate(() => ({
 
 ## Test Granularity
 
-**One actor per feature area, not one actor per button click.**
+**Goal: minimum number of individual `test()` blocks.** Each actor create/delete cycle costs ~5s. Every extra `test()` within a `describe` that shares the same actor type multiplies wall-clock time.
 
-If multiple actions operate on the same actor type and their state changes don't conflict, they belong in one test with one actor setup.
+**Rule: one `test()` per `describe` block unless there is a concrete state conflict.**
 
-A `beforeEach` that creates an actor for a single `test()` block containing one click is a code smell. Reviewers should flag it.
-
-**Acceptable reasons to use a dedicated actor per test:**
-- The test requires specific pre-state that conflicts with adjacent tests
-- The action opens a modal/dialog whose dismissal would add fragility to subsequent steps
-
-**Combining actions is valid when:**
+Actions belong in the same test when:
 - Post-state of step N is a valid pre-state for step N+1 (e.g. advance day → regress day)
-- The actions operate on entirely independent fields (e.g. `skills.academics` and `skills.athletics`)
+- Actions operate on independent fields (e.g. `skills.academics` and `skills.athletics`, `bank` and `missionGoal`)
+- An action opens a dialog that can be dismissed without affecting subsequent steps
+
+**Only split into separate tests when:**
+- The required pre-state for one test directly conflicts with another (e.g. `bank:5` vs `bank:0`)
+- An action opens a dialog whose dismissal is unreliable and would make subsequent steps flaky
+
+**Code smell — flag in review:** a `beforeEach` that creates an actor for a `describe` containing more than one `test()`. Ask: can these be sequenced into one test?
 
 **Pre-pr-review P2 finding:** a new test suite where each test has its own actor lifecycle but the actions could cleanly share one actor.
+
+**When adding a test, ask:** can this step chain onto an existing test in this describe? If the fields are independent and state flows cleanly, it must.
 
 ## Local Validation Before Push
 

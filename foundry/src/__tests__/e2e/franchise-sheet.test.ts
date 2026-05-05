@@ -3,6 +3,12 @@
  *
  * Tests the FranchiseSheet action surface, day controls, debt mode, and form inputs.
  * Requires Docker Foundry instance (npm run test:e2e).
+ *
+ * Actor groupings:
+ * - Roll actions + mission tracker: bank:5 prereq; openMissionTracker needs no bank
+ * - Day controls: currentDay setting; no actor data dependency
+ * - Debt mode: needs bank:0, debtMode:false — conflicts with roll actor's bank:5
+ * - Form inputs: independent fields (bank, description, missionGoal) — one actor
  */
 import { test, expect, ELEMENT_WAIT_TIMEOUT } from "./fixtures.js";
 import {
@@ -15,12 +21,11 @@ import {
   waitForActorFieldEquals,
 } from "./pages/index.js";
 
-test.describe("FranchiseSheet — roll actions", () => {
+test.describe("FranchiseSheet — roll actions and mission tracker", () => {
   let franchiseId: string;
 
   test.beforeEach(async ({ page }) => {
     franchiseId = await createActor(page, "franchise", `E2E-franchise-${Date.now()}`);
-    // Give the franchise some bank dice so rolls aren't blocked
     await page.evaluate(async (id: string) => {
       // @ts-expect-error - Foundry runtime global
       const actor = globalThis.game?.actors?.get(id);
@@ -32,7 +37,9 @@ test.describe("FranchiseSheet — roll actions", () => {
     await deleteActor(page, franchiseId);
   });
 
-  test("bankRoll + clientRoll — each produces a chat message", async ({ page }) => {
+  // bankRoll, clientRoll, and openMissionTracker all operate independently:
+  // clientRoll does not consume bank dice; mission tracker is pure UI state.
+  test("bankRoll + clientRoll produce chat messages; mission tracker opens", async ({ page }) => {
     const sheet = await openFranchiseSheet(page, franchiseId);
 
     // Bank roll
@@ -48,7 +55,7 @@ test.describe("FranchiseSheet — roll actions", () => {
     const afterBank = await getChatMessageCount(page);
     expect(afterBank).toBeGreaterThanOrEqual(beforeBank);
 
-    // Client roll (bank dice still ≥ 4 after one roll; assertion uses cumulative count)
+    // Client roll (independent of bank dice consumption)
     const beforeClient = afterBank;
     await sheet.clickClientRoll();
     await waitForNewChatMessage(page, beforeClient);
@@ -60,22 +67,8 @@ test.describe("FranchiseSheet — roll actions", () => {
 
     const afterClient = await getChatMessageCount(page);
     expect(afterClient).toBeGreaterThanOrEqual(beforeClient);
-  });
-});
 
-test.describe("FranchiseSheet — mission tracker", () => {
-  let franchiseId: string;
-
-  test.beforeEach(async ({ page }) => {
-    franchiseId = await createActor(page, "franchise", `E2E-franchise-mission-${Date.now()}`);
-  });
-
-  test.afterEach(async ({ page }) => {
-    await deleteActor(page, franchiseId);
-  });
-
-  test("openMissionTracker — DialogV2 opens", async ({ page }) => {
-    const sheet = await openFranchiseSheet(page, franchiseId);
+    // Mission tracker (no bank dependency; opens on same sheet instance)
     await sheet.clickOpenMissionTracker();
     await page.waitForFunction(
       () =>
@@ -91,8 +84,6 @@ test.describe("FranchiseSheet — mission tracker", () => {
       timeout: 5000,
     }).catch(() => {});
 
-    // MissionTrackerApp uses id="inspectres-mission-tracker" and
-    // classes "inspectres inspectres-mission-tracker-window"
     const trackerOpen = await page.evaluate(() => {
       return (
         document.querySelector("#inspectres-mission-tracker") !== null ||
@@ -102,7 +93,6 @@ test.describe("FranchiseSheet — mission tracker", () => {
     });
     expect(trackerOpen).toBe(true);
 
-    // Close any open dialogs
     await page.keyboard.press("Escape").catch(() => {});
     await page.waitForFunction(
       () => document.querySelector("dialog[open]") === null,
@@ -123,8 +113,9 @@ test.describe("FranchiseSheet — day controls", () => {
     await deleteActor(page, franchiseId);
   });
 
+  // Post-state of advance (day N+1) is valid pre-state for regress → day N.
   test("advanceDay + regressDay — currentDay increments then decrements", async ({ page }) => {
-    // Start at a known value so regress doesn't hit the floor
+    // Start at a known value so regress never hits the floor
     await page.evaluate(async () => {
       // @ts-expect-error - Foundry runtime global
       await globalThis.game?.settings?.set("inspectres", "currentDay", 5);
@@ -133,7 +124,6 @@ test.describe("FranchiseSheet — day controls", () => {
     const sheet = await openFranchiseSheet(page, franchiseId);
     const initial = await sheet.getCurrentDaySetting();
 
-    // Advance
     await sheet.clickAdvanceDay();
     await page.waitForFunction(
       (prev: number) => {
@@ -156,7 +146,6 @@ test.describe("FranchiseSheet — day controls", () => {
       timeout: 5000,
     }).catch(() => {});
 
-    // Regress — post-state of advance (day N+1) is valid pre-state for regress → day N
     await sheet.clickRegressDay();
     await page.waitForFunction(
       (prev: number) => {
@@ -186,7 +175,7 @@ test.describe("FranchiseSheet — debt mode", () => {
 
   test.beforeEach(async ({ page }) => {
     franchiseId = await createActor(page, "franchise", `E2E-franchise-debt-${Date.now()}`);
-    // Set bank to negative to enable debt mode toggle
+    // bank:0 + debtMode:false required; conflicts with roll tests' bank:5 setup
     await page.evaluate(async (id: string) => {
       // @ts-expect-error - Foundry runtime global
       const actor = globalThis.game?.actors?.get(id);
@@ -200,7 +189,6 @@ test.describe("FranchiseSheet — debt mode", () => {
 
   test("toggleDebtMode — debtMode flag changes", async ({ page }) => {
     const sheet = await openFranchiseSheet(page, franchiseId);
-    // toggleDebtMode button is in the notes tab under the Debt Mode section
     await sheet.openTab("notes");
 
     const before = await page.evaluate((id: string) => {
@@ -238,9 +226,12 @@ test.describe("FranchiseSheet — form-bound inputs", () => {
     await deleteActor(page, franchiseId);
   });
 
-  test("bank input — value persists via actor.update", async ({ page }) => {
-    await openFranchiseSheet(page, franchiseId);
+  // bank, description, and missionGoal are independent fields; filling each in
+  // sequence on the same actor produces no state conflict.
+  test("bank, description, and missionGoal inputs persist via actor.update", async ({ page }) => {
+    const sheet = await openFranchiseSheet(page, franchiseId);
 
+    // --- bank input ---
     const bankInput = page.locator(
       `.inspectres[id*="${franchiseId}"] input[name="system.bank"]`,
     ).first();
@@ -255,17 +246,14 @@ test.describe("FranchiseSheet — form-bound inputs", () => {
       const actor = globalThis.game?.actors?.get(id);
       return (actor?.system as { bank: number })?.bank ?? 0;
     }, franchiseId);
-
     expect(bankValue).toBe(7);
 
     await page.screenshot({
       path: "test-results/e2e-screenshots/franchise-07-bank-input.png",
       timeout: 5000,
     }).catch(() => {});
-  });
 
-  test("description textarea — round-trip persistence", async ({ page }) => {
-    const sheet = await openFranchiseSheet(page, franchiseId);
+    // --- description textarea (notes tab) ---
     await sheet.openTab("notes");
 
     const textarea = page.locator(
@@ -283,17 +271,15 @@ test.describe("FranchiseSheet — form-bound inputs", () => {
       const actor = globalThis.game?.actors?.get(id);
       return (actor?.system as { description: string })?.description ?? "";
     }, franchiseId);
-
     expect(savedDescription).toBe(testText);
 
     await page.screenshot({
       path: "test-results/e2e-screenshots/franchise-08-description.png",
       timeout: 5000,
     }).catch(() => {});
-  });
 
-  test("missionGoal input — value persists", async ({ page }) => {
-    await openFranchiseSheet(page, franchiseId);
+    // --- missionGoal input (back to stats tab) ---
+    await sheet.openTab("stats");
 
     const missionGoalInput = page.locator(
       `.inspectres[id*="${franchiseId}"] input[name="system.missionGoal"]`,
@@ -309,7 +295,6 @@ test.describe("FranchiseSheet — form-bound inputs", () => {
       const actor = globalThis.game?.actors?.get(id);
       return (actor?.system as { missionGoal: number })?.missionGoal ?? 0;
     }, franchiseId);
-
     expect(missionGoalValue).toBe(10);
 
     await page.screenshot({

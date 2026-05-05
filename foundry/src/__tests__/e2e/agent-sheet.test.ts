@@ -16,19 +16,24 @@ import {
 
 const SKILL_NAMES = ["academics", "athletics", "technology", "contact"] as const;
 
-test.describe("AgentSheet — action handlers", () => {
+// Conditional UI paths need specific pre-state that conflicts with the default
+// actor setup (isDead, daysOutOfAction, stress+penalty), so they use their own
+// actor lifecycle. Everything else (action handlers + stats/notes tab content)
+// shares one actor and one test to eliminate redundant create/delete cycles.
+
+test.describe("AgentSheet — actions, stats, and notes", () => {
   let agentId: string;
 
   test.beforeEach(async ({ page }) => {
     agentId = await createActor(page, "agent", `E2E-agent-${Date.now()}`);
-    // Set skills to non-zero so roll buttons are active
+    // All four skills at 2 so roll buttons are active; athletics at 3 for decrease room
     await page.evaluate(async (id: string) => {
       // @ts-expect-error - Foundry runtime global
       const actor = globalThis.game?.actors?.get(id);
       if (!actor) return;
       await actor.update({
         "system.skills.academics.base": 2,
-        "system.skills.athletics.base": 2,
+        "system.skills.athletics.base": 3,
         "system.skills.technology.base": 2,
         "system.skills.contact.base": 2,
       });
@@ -39,13 +44,13 @@ test.describe("AgentSheet — action handlers", () => {
     await deleteActor(page, agentId);
   });
 
-  test("skillRoll — clicking roll button produces a chat message", async ({ page }) => {
+  test("skill actions, roll, visibility, and tab content", async ({ page }) => {
     const sheet = await openAgentSheet(page, agentId);
-    const beforeCount = await getChatMessageCount(page);
 
+    // --- skillRoll: produces a chat message ---
+    const beforeRoll = await getChatMessageCount(page);
     await sheet.clickSkillRoll("academics");
 
-    // Wait for dialog to appear (DialogV2 renders as <dialog> element)
     const dialogVisible = await page.waitForFunction(
       () => {
         const dlg = document.querySelector<HTMLDialogElement>("dialog");
@@ -58,11 +63,10 @@ test.describe("AgentSheet — action handlers", () => {
     ).then(() => true).catch(() => false);
 
     if (dialogVisible) {
-      // Use Playwright's native click so SubmitEvent has the correct submitter
       await page.click('dialog button[data-action="roll"]').catch(() =>
         page.click('dialog button[type="submit"]:not([data-action="cancel"])').catch(() => {}),
       );
-      await waitForNewChatMessage(page, beforeCount);
+      await waitForNewChatMessage(page, beforeRoll);
     }
 
     await page.screenshot({
@@ -70,21 +74,10 @@ test.describe("AgentSheet — action handlers", () => {
       timeout: 5000,
     }).catch(() => {});
 
-    const afterCount = await getChatMessageCount(page);
-    expect(afterCount).toBeGreaterThan(beforeCount);
-  });
+    const afterRoll = await getChatMessageCount(page);
+    expect(afterRoll).toBeGreaterThan(beforeRoll);
 
-  test("skillIncrease + skillDecrease — steppers update independent skill fields", async ({ page }) => {
-    // Set athletics to 3 so there's room to decrease
-    await page.evaluate(async (id: string) => {
-      // @ts-expect-error - Foundry runtime global
-      const actor = globalThis.game?.actors?.get(id);
-      if (actor) await actor.update({ "system.skills.athletics.base": 3 });
-    }, agentId);
-
-    const sheet = await openAgentSheet(page, agentId);
-
-    // Increase academics
+    // --- skillIncrease + skillDecrease: independent fields, no conflict ---
     const beforeIncrease = await page.evaluate((id: string) => {
       // @ts-expect-error - Foundry runtime global
       const actor = globalThis.game?.actors?.get(id);
@@ -106,7 +99,7 @@ test.describe("AgentSheet — action handlers", () => {
       timeout: 5000,
     }).catch(() => {});
 
-    // Decrease athletics (independent field — no conflict with academics increase)
+    // athletics.base starts at 3; decrease operates on an independent field
     await sheet.clickSkillDecrease("athletics");
     await waitForActorFieldChanged(page, agentId, "skills.athletics.base", 3);
 
@@ -121,39 +114,8 @@ test.describe("AgentSheet — action handlers", () => {
       path: "test-results/e2e-screenshots/agent-03-skill-decrease.png",
       timeout: 5000,
     }).catch(() => {});
-  });
 
-  test("addCharacteristic — list grows by one", async ({ page }) => {
-    const sheet = await openAgentSheet(page, agentId);
-    // Add Characteristic button is in the notes tab
-    await sheet.openTab("notes");
-
-    const before = await page.evaluate((id: string) => {
-      // @ts-expect-error - Foundry runtime global
-      const actor = globalThis.game?.actors?.get(id);
-      return ((actor?.system as { characteristics: unknown[] })?.characteristics ?? []).length;
-    }, agentId);
-
-    await sheet.clickAddCharacteristic();
-    await waitForActorFieldChanged(page, agentId, "characteristics.length", before);
-
-    const after = await page.evaluate((id: string) => {
-      // @ts-expect-error - Foundry runtime global
-      const actor = globalThis.game?.actors?.get(id);
-      return ((actor?.system as { characteristics: unknown[] })?.characteristics ?? []).length;
-    }, agentId);
-
-    expect(after).toBe(before + 1);
-
-    await page.screenshot({
-      path: "test-results/e2e-screenshots/agent-04-add-characteristic.png",
-      timeout: 5000,
-    }).catch(() => {});
-  });
-
-  test("stressRoll button — is visible on the sheet", async ({ page }) => {
-    await openAgentSheet(page, agentId);
-
+    // --- stressRoll button: visible on stats tab ---
     await page.waitForFunction(
       (id: string) => {
         const btn = document.querySelector(`.inspectres[id*="${id}"] [data-action="stressRoll"]`);
@@ -165,36 +127,20 @@ test.describe("AgentSheet — action handlers", () => {
       { timeout: ELEMENT_WAIT_TIMEOUT },
     );
 
-    const visible = await page.evaluate((id: string) => {
+    const stressRollVisible = await page.evaluate((id: string) => {
       const btn = document.querySelector(`.inspectres[id*="${id}"] [data-action="stressRoll"]`);
       if (!btn) return false;
       const rect = (btn as HTMLElement).getBoundingClientRect();
       return rect.width > 0 && rect.height > 0;
     }, agentId);
-
-    expect(visible).toBe(true);
+    expect(stressRollVisible).toBe(true);
 
     await page.screenshot({
       path: "test-results/e2e-screenshots/agent-05-stress-roll-visible.png",
       timeout: 5000,
     }).catch(() => {});
-  });
-});
 
-test.describe("AgentSheet — stats tab content", () => {
-  let agentId: string;
-
-  test.beforeEach(async ({ page }) => {
-    agentId = await createActor(page, "agent", `E2E-agent-stats-${Date.now()}`);
-  });
-
-  test.afterEach(async ({ page }) => {
-    await deleteActor(page, agentId);
-  });
-
-  test("stats tab renders all four skill rows", async ({ page }) => {
-    await openAgentSheet(page, agentId);
-
+    // --- stats tab: all four skill roll buttons present ---
     for (const skill of SKILL_NAMES) {
       const rollBtnVisible = await page.evaluate(
         (args: { id: string; skill: string }) => {
@@ -214,14 +160,16 @@ test.describe("AgentSheet — stats tab content", () => {
       path: "test-results/e2e-screenshots/agent-06-stats-tab.png",
       timeout: 5000,
     }).catch(() => {});
-  });
 
-  test("notes tab add-characteristic button is visible after switching tabs", async ({ page }) => {
-    const sheet = await openAgentSheet(page, agentId);
+    // --- addCharacteristic + notes tab button: list grows, button visible ---
     await sheet.openTab("notes");
 
-    // Agent notes tab has characteristics list with input[type="text"] rows,
-    // not a textarea. Check for the "Add Characteristic" button instead.
+    const beforeChar = await page.evaluate((id: string) => {
+      // @ts-expect-error - Foundry runtime global
+      const actor = globalThis.game?.actors?.get(id);
+      return ((actor?.system as { characteristics: unknown[] })?.characteristics ?? []).length;
+    }, agentId);
+
     await page.waitForFunction(
       (id: string) => {
         const el = document.querySelector(`.inspectres[id*="${id}"] [data-action="addCharacteristic"]`);
@@ -233,14 +181,28 @@ test.describe("AgentSheet — stats tab content", () => {
       { timeout: ELEMENT_WAIT_TIMEOUT },
     );
 
-    const btnVisible = await page.evaluate((id: string) => {
+    const addBtnVisible = await page.evaluate((id: string) => {
       const btn = document.querySelector(`.inspectres[id*="${id}"] [data-action="addCharacteristic"]`);
       if (!btn) return false;
       const rect = (btn as HTMLElement).getBoundingClientRect();
       return rect.width > 0 && rect.height > 0;
     }, agentId);
+    expect(addBtnVisible).toBe(true);
 
-    expect(btnVisible).toBe(true);
+    await sheet.clickAddCharacteristic();
+    await waitForActorFieldChanged(page, agentId, "characteristics.length", beforeChar);
+
+    const afterChar = await page.evaluate((id: string) => {
+      // @ts-expect-error - Foundry runtime global
+      const actor = globalThis.game?.actors?.get(id);
+      return ((actor?.system as { characteristics: unknown[] })?.characteristics ?? []).length;
+    }, agentId);
+    expect(afterChar).toBe(beforeChar + 1);
+
+    await page.screenshot({
+      path: "test-results/e2e-screenshots/agent-04-add-characteristic.png",
+      timeout: 5000,
+    }).catch(() => {});
 
     await page.screenshot({
       path: "test-results/e2e-screenshots/agent-07-notes-tab.png",
@@ -260,44 +222,19 @@ test.describe("AgentSheet — conditional UI paths", () => {
     await deleteActor(page, agentId);
   });
 
-  test("recovery banner is visible when agent is recovering", async ({ page }) => {
-    // Set recovery state
+  // recovery banner and penalty line operate on independent system fields
+  // (isDead/daysOutOfAction/recoveryStartedAt vs stress/skills.academics.penalty),
+  // so both states can be applied to a single actor in sequence.
+  test("recovery banner visible + skill penalty line visible", async ({ page }) => {
+    // Set all conditional fields at once — no conflict between them
     await page.evaluate(async (id: string) => {
       // @ts-expect-error - Foundry runtime global
       const actor = globalThis.game?.actors?.get(id);
       if (!actor) return;
-      // Set daysOutOfAction > 0 and isDead=false to enter "recovering" state
       await actor.update({
         "system.isDead": false,
         "system.daysOutOfAction": 3,
         "system.recoveryStartedAt": 1,
-      });
-    }, agentId);
-
-    await openAgentSheet(page, agentId);
-
-    const bannerVisible = await page.evaluate((id: string) => {
-      const banner = document.querySelector(`.inspectres[id*="${id}"] .recovery-banner`);
-      if (!banner) return false;
-      const rect = (banner as HTMLElement).getBoundingClientRect();
-      return rect.width > 0 && rect.height > 0;
-    }, agentId);
-
-    expect(bannerVisible).toBe(true);
-
-    await page.screenshot({
-      path: "test-results/e2e-screenshots/agent-08-recovery-banner.png",
-      timeout: 5000,
-    }).catch(() => {});
-  });
-
-  test("skill penalty line appears when stress > 0 and penalty set", async ({ page }) => {
-    // Set skill penalty
-    await page.evaluate(async (id: string) => {
-      // @ts-expect-error - Foundry runtime global
-      const actor = globalThis.game?.actors?.get(id);
-      if (!actor) return;
-      await actor.update({
         "system.stress": 2,
         "system.skills.academics.base": 3,
         "system.skills.academics.penalty": 1,
@@ -306,13 +243,28 @@ test.describe("AgentSheet — conditional UI paths", () => {
 
     await openAgentSheet(page, agentId);
 
-    // Re-render sheet to reflect updated data
+    // Force re-render so updated fields are reflected in the DOM
     await page.evaluate(async (id: string) => {
       // @ts-expect-error - Foundry runtime global
       const actor = globalThis.game?.actors?.get(id);
       if (actor) await actor.sheet.render(true);
     }, agentId);
 
+    // --- recovery banner ---
+    const bannerVisible = await page.evaluate((id: string) => {
+      const banner = document.querySelector(`.inspectres[id*="${id}"] .recovery-banner`);
+      if (!banner) return false;
+      const rect = (banner as HTMLElement).getBoundingClientRect();
+      return rect.width > 0 && rect.height > 0;
+    }, agentId);
+    expect(bannerVisible).toBe(true);
+
+    await page.screenshot({
+      path: "test-results/e2e-screenshots/agent-08-recovery-banner.png",
+      timeout: 5000,
+    }).catch(() => {});
+
+    // --- skill penalty line ---
     await page.waitForFunction(
       (id: string) => {
         const el = document.querySelector<HTMLElement>(`.inspectres[id*="${id}"] .skill-penalty-line`);
@@ -330,7 +282,6 @@ test.describe("AgentSheet — conditional UI paths", () => {
       const rect = el.getBoundingClientRect();
       return rect.width > 0 && rect.height > 0;
     }, agentId);
-
     expect(penaltyLineExists).toBe(true);
 
     await page.screenshot({
