@@ -1,4 +1,5 @@
 import type { Page } from "@playwright/test";
+import { rejoinIfRedirected } from "./helpers.js";
 
 const SHEET_WAIT_TIMEOUT = 15_000;
 
@@ -52,21 +53,21 @@ export class AgentSheetPage {
 
   /** Click the roll button for a named skill. */
   async clickSkillRoll(skill: string): Promise<void> {
-    await this.page.click(
+    await this.safeClick(
       `${this.sheetSelector()} [data-action="skillRoll"][data-skill="${skill}"]`,
     );
   }
 
   /** Click the increase stepper for a named skill. */
   async clickSkillIncrease(skill: string): Promise<void> {
-    await this.page.click(
+    await this.safeClick(
       `${this.sheetSelector()} [data-action="skillIncrease"][data-skill="${skill}"]`,
     );
   }
 
   /** Click the decrease stepper for a named skill. */
   async clickSkillDecrease(skill: string): Promise<void> {
-    await this.page.click(
+    await this.safeClick(
       `${this.sheetSelector()} [data-action="skillDecrease"][data-skill="${skill}"]`,
     );
   }
@@ -99,30 +100,38 @@ export class AgentSheetPage {
 
   /** Click the stress roll button. */
   async clickStressRoll(): Promise<void> {
-    await this.page.click(
-      `${this.sheetSelector()} [data-action="stressRoll"]`,
-    );
+    await this.safeClick(`${this.sheetSelector()} [data-action="stressRoll"]`);
   }
 
   /** Click the toggle cool button for a pip index. */
   async clickToggleCool(pipIndex: number): Promise<void> {
-    await this.page.click(
+    await this.safeClick(
       `${this.sheetSelector()} [data-action="toggleCool"][data-index="${pipIndex}"]`,
     );
   }
 
   /** Click the add characteristic button. */
   async clickAddCharacteristic(): Promise<void> {
-    await this.page.click(
-      `${this.sheetSelector()} [data-action="addCharacteristic"]`,
-    );
+    await this.safeClick(`${this.sheetSelector()} [data-action="addCharacteristic"]`);
   }
 
   /** Click the remove characteristic button for a given index. */
   async clickRemoveCharacteristic(index: number): Promise<void> {
-    await this.page.click(
+    await this.safeClick(
       `${this.sheetSelector()} [data-action="removeCharacteristic"][data-index="${index}"]`,
     );
+  }
+
+  /**
+   * Click a selector, racing against a /join redirect that v14 can trigger on
+   * any action button click. Calls rejoinIfRedirected to restore the session.
+   */
+  private async safeClick(selector: string): Promise<void> {
+    await Promise.race([
+      this.page.click(selector),
+      this.page.waitForURL(/\/join/, { timeout: 5_000 }),
+    ]).catch(() => {});
+    await rejoinIfRedirected(this.page);
   }
 
   /** Get the raw system data for this actor from the Foundry runtime. */
