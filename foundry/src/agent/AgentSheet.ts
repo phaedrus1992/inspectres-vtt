@@ -55,18 +55,18 @@ async function buildStressRollDialog(agent: Actor): Promise<void> {
     window: { title: i18n?.localize("INSPECTRES.StressRoll") ?? "Stress Roll" },
     rejectClose: false,
     content: `
-      <form class="inspectres-roll-dialog">
+      <div class="inspectres-roll-dialog">
         <label>${stressDiceLabel}: <input type="number" name="stressDice" min="1" max="5" value="1"></label>
         ${maxCool > 0 ? `<label>${coolIgnoreLabel}: <input type="number" name="coolIgnore" min="0" max="${maxCool}" value="0"></label>` : ""}
-      </form>
+      </div>
     `,
     buttons: [
       {
         action: "roll",
         label: i18n?.localize("INSPECTRES.DialogRoll") ?? "Roll",
         default: true,
-        callback: (_event: Event, _button: HTMLButtonElement, dialog: HTMLDialogElement) => {
-          const form = dialog.querySelector("form") as HTMLFormElement | null;
+        callback: (_event: Event, _button: HTMLButtonElement, dialog: foundry.applications.api.DialogV2) => {
+          const form = dialog.element.querySelector("form") as HTMLFormElement | null;
           if (!form) {
             console.error("buildStressRollDialog: form element not found in dialog");
             return null;
@@ -129,11 +129,12 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     const currentDay = getCurrentDay();
     const recoveryStatus = computeRecoveryStatus(system, currentDay);
     const bannerText = getRecoveryBannerText(recoveryStatus);
-    // deepClone converts the TypeDataModel instance to a plain object for Handlebars
-    // rendering. Foundry V13's #each helper calls Object.entries() on nested values;
-    // DataModel instances aren't plain-object-iterable in all cases.
-    const systemPlain = foundry.utils.deepClone(system);
-    return { ...base, system: systemPlain, recoveryStatus, bannerText };
+    // toObject() serializes the TypeDataModel tree to plain POJOs. deepClone() copies the
+    // DataModel proxy graph but nested SchemaField instances remain non-enumerable DataModel
+    // objects that Handlebars's #each (Object.entries) cannot iterate — causing
+    // "Cannot convert undefined or null to object" at render time.
+    const systemPlain = (this.actor.system as unknown as { toObject(): unknown }).toObject();
+    return { ...base, actor: this.actor, system: systemPlain, recoveryStatus, bannerText };
   }
 
   override async _onRender(context: Record<string, unknown>, options: foundry.applications.api.ApplicationV2Options): Promise<void> {
@@ -488,17 +489,17 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
       window: { title: i18n?.localize("INSPECTRES.EmergencyRecovery") ?? "Emergency Recovery" },
       rejectClose: false,
       content: `
-        <form class="inspectres-recovery-dialog">
+        <div class="inspectres-recovery-dialog">
           <label>${i18n?.localize("INSPECTRES.DaysOutOfAction") ?? "Days out of action"}: <input type="number" name="days" min="1" max="10" value="2"></label>
-        </form>
+        </div>
       `,
       buttons: [
         {
           action: "set",
           label: i18n?.localize("INSPECTRES.DialogSet") ?? "Set",
           default: true,
-          callback: (_event: Event, _button: HTMLButtonElement, dialog: HTMLDialogElement) => {
-            const form = dialog.querySelector("form") as HTMLFormElement | null;
+          callback: (_event: Event, _button: HTMLButtonElement, dialog: foundry.applications.api.DialogV2) => {
+            const form = dialog.element.querySelector("form") as HTMLFormElement | null;
             if (!form) return null;
             const days = Math.max(1, Math.min(10, Number(new FormData(form).get("days") ?? 2)));
             return { days: Number.isNaN(days) ? 2 : days };
@@ -581,17 +582,17 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
       window: { title: i18n?.localize("INSPECTRES.RestoreSkill") ?? "Restore Skill" },
       rejectClose: false,
       content: `
-        <form class="inspectres-restore-skill-dialog">
+        <div class="inspectres-restore-skill-dialog">
           <label>${i18n?.localize("INSPECTRES.DialogRestoreSkillLabel") ?? "Cool to spend (1 Cool = +1 skill)"}: <input type="number" name="cool" min="1" max="${maxCool}" value="1"></label>
-        </form>
+        </div>
       `,
       buttons: [
         {
           action: "restore",
           label: i18n?.localize("INSPECTRES.DialogRestore") ?? "Restore",
           default: true,
-          callback: (_event: Event, _button: HTMLButtonElement, dialog: HTMLDialogElement) => {
-            const form = dialog.querySelector("form") as HTMLFormElement | null;
+          callback: (_event: Event, _button: HTMLButtonElement, dialog: foundry.applications.api.DialogV2) => {
+            const form = dialog.element.querySelector("form") as HTMLFormElement | null;
             if (!form) return null;
             const cool = Math.max(1, Math.min(maxCool, Number(new FormData(form).get("cool") ?? 1)));
             return { cool: Number.isNaN(cool) ? 1 : cool };

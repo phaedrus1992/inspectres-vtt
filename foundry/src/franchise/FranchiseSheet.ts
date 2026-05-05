@@ -47,11 +47,11 @@ export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicati
     const isGm = game.user?.isGM ?? false;
     const missionComplete = system.missionGoal > 0 && system.missionPool >= system.missionGoal;
     const currentDay = getCurrentDaySetting();
-    // deepClone converts the TypeDataModel instance to a plain object for Handlebars
-    // rendering. Foundry V13's #each helper calls Object.entries() on nested values;
-    // DataModel instances aren't plain-object-iterable in all cases.
-    const systemPlain = foundry.utils.deepClone(system);
-    return { ...base, system: systemPlain, isGm, missionComplete, currentDay };
+    // toObject() serializes the TypeDataModel tree to plain POJOs. deepClone() leaves
+    // nested SchemaField instances as non-enumerable DataModel objects that Handlebars
+    // #each (Object.entries) cannot iterate.
+    const systemPlain = (this.actor.system as unknown as { toObject(): unknown }).toObject();
+    return { ...base, actor: this.actor, system: systemPlain, isGm, missionComplete, currentDay };
   }
 
   static async onBankRoll(this: FranchiseSheet, _event: Event, _target: HTMLElement): Promise<void> {
@@ -264,12 +264,10 @@ export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicati
       const result = await foundry.applications.api.DialogV2.wait({
         window: { title: opts.title },
         content: `
-          <form>
-            <div class="form-group">
-              <label for="${opts.fieldName}">${opts.label}</label>
-              <input type="number" name="${opts.fieldName}" id="${opts.fieldName}" min="0" value="0" required />
-            </div>
-          </form>
+          <div class="form-group">
+            <label for="${opts.fieldName}">${opts.label}</label>
+            <input type="number" name="${opts.fieldName}" id="${opts.fieldName}" min="0" value="0" required />
+          </div>
         `,
         buttons: [
           {
@@ -277,7 +275,7 @@ export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicati
             label: opts.confirmLabel,
             default: true,
             callback: (_event, _button, dialog) => {
-              const form = dialog.querySelector("form");
+              const form = dialog.element.querySelector("form");
               return Math.max(0, Number(new FormData(form ?? undefined).get(opts.fieldName) ?? 0));
             },
           },

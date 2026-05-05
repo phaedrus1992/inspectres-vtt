@@ -42,7 +42,15 @@ export function registerHandlebarsHelpers(): void {
   });
 
   // Localization with placeholder substitution (#75)
-  Handlebars.registerHelper("inspectres-format", (key: string, data: Record<string, string | number>) => {
+  // Handlebars always passes its options object as the LAST positional argument.
+  // When called as {{inspectres-format "KEY" (hash foo=bar)}}, the hash is NOT passed
+  // as a normal positional arg — it's attached to options.hash. The arg list is:
+  //   [0] key (string), [1] optionsObject (has .hash with the values)
+  // Using rest params to capture all args; options is always the last one.
+  Handlebars.registerHelper("inspectres-format", function inspectresFormat(...args: unknown[]) {
+    const key = args[0] as string;
+    const options = args[args.length - 1] as { hash?: Record<string, unknown> };
+    const data = options.hash ?? {};
     const stringData: Record<string, string> = {};
     for (const [k, v] of Object.entries(data)) {
       stringData[k] = String(v);

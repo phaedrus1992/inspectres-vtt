@@ -18,7 +18,7 @@ interface DialogConfig {
     callback?: (
       event: Event,
       button: HTMLButtonElement,
-      dialog: HTMLDialogElement,
+      dialog: foundry.applications.api.DialogV2,
     ) => Record<string, number> | null;
   }>;
   rejectClose?: boolean;
@@ -42,10 +42,10 @@ export async function buildDistributionConfig(opts: DistributionDialogOptions): 
     ?? `Assign ${missionPool} franchise dice among players.`;
 
   const content = `
-    <form class="inspectres-distribute-dialog">
+    <div class="inspectres-distribute-dialog">
       <p>${instruction}</p>
       ${playerInputs || "<p>No active players.</p>"}
-    </form>
+    </div>
   `;
 
   return {
@@ -57,8 +57,8 @@ export async function buildDistributionConfig(opts: DistributionDialogOptions): 
         action: "confirm",
         label: game.i18n?.localize("INSPECTRES.DistributeDialogConfirm") ?? "Confirm",
         default: true,
-        callback: (_event: Event, _button: HTMLButtonElement, dialog: HTMLDialogElement) => {
-          const form = dialog.querySelector("form") as HTMLFormElement | null;
+        callback: (_event: Event, _button: HTMLButtonElement, dialog: foundry.applications.api.DialogV2) => {
+          const form = dialog.element.querySelector("form") as HTMLFormElement | null;
           if (!form) return null;
           const data = new FormData(form);
           const distribution: Record<string, number> = {};

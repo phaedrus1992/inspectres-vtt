@@ -134,8 +134,8 @@ async function getPlayerPenaltyChoice(
         action: "select",
         label: game.i18n?.localize("INSPECTRES.DialogOK") ?? "OK",
         default: true,
-        callback: (_event: Event, _button: HTMLButtonElement, dialog: HTMLDialogElement) => {
-          const form = dialog.querySelector("form") as HTMLFormElement | null;
+        callback: (_event: Event, _button: HTMLButtonElement, dialog: foundry.applications.api.DialogV2) => {
+          const form = dialog.element.querySelector("form") as HTMLFormElement | null;
           if (!form) return null;
           const data = new FormData(form);
           const selectedSkill = data.get("selectedSkill");
@@ -533,7 +533,7 @@ async function buildSkillRollDialog(opts: SkillRollDialogOptions): Promise<Skill
     : "";
 
   const content = `
-    <form class="inspectres-roll-dialog">
+    <div class="inspectres-roll-dialog">
       ${zeroDiceWarning}
       <p><strong>${baseDiceLabel}:</strong> ${opts.effectiveDice}</p>
       ${requirementSection}
@@ -542,7 +542,7 @@ async function buildSkillRollDialog(opts: SkillRollDialogOptions): Promise<Skill
       ${opts.availableCool > 0 ? `<label>${coolLabel}: <input type="number" name="coolDice" min="0" max="${opts.availableCool}" value="0"></label>` : ""}
       ${talentLabel ? `<label><input type="checkbox" name="talentDie"> ${talentLabel}</label>` : ""}
       ${opts.canTakeFour ? `<label><input type="checkbox" name="takesFour"> ${takesFourLabel}</label>` : ""}
-    </form>
+    </div>
   `;
 
   const result = await foundry.applications.api.DialogV2.wait({
@@ -554,8 +554,8 @@ async function buildSkillRollDialog(opts: SkillRollDialogOptions): Promise<Skill
         action: "roll",
         label: i18n?.localize("INSPECTRES.DialogRoll") ?? "Roll",
         default: true,
-        callback: (_event: Event, _button: HTMLButtonElement, dialog: HTMLDialogElement) => {
-          const form = dialog.querySelector("form") as HTMLFormElement | null;
+        callback: (_event: Event, _button: HTMLButtonElement, dialog: foundry.applications.api.DialogV2) => {
+          const form = dialog.element.querySelector("form") as HTMLFormElement | null;
           if (!form) {
             console.error("buildSkillRollDialog: form element not found in dialog");
             return null;

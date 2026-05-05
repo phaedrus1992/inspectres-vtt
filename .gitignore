@@ -1,5 +1,6 @@
 /.claude/skill-improver.*
 /.semgrep-results/
+/.playwright-mcp/
 .tmp/
 .scannerwork/
 

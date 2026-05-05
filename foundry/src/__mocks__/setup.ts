@@ -172,7 +172,9 @@ class MockRoll {
   }
 }
 
-// Mock DialogV2 — V2 API: buttons array, callback receives (event, button, dialogElement)
+// Mock DialogV2 — V2 API: buttons array, callback receives (event, button, dialogApp)
+// The third argument is the DialogV2 app instance (not the <dialog> element).
+// Access DOM via dialog.element.querySelector().
 const MockDialogV2 = {
   async wait(config: {
     content: string;
@@ -184,18 +186,17 @@ const MockDialogV2 = {
       label: string;
       icon?: string;
       default?: boolean;
-      callback?: (event: Event, button: HTMLButtonElement, dialog: HTMLDialogElement) => unknown;
+      callback?: (event: Event, button: HTMLButtonElement, dialog: { element: HTMLElement }) => unknown;
     }>;
   }): Promise<unknown> {
     const defaultButton = config.buttons?.find((b) => b.default) ?? config.buttons?.[0];
     if (!defaultButton?.callback) return null;
-    // Provide a minimal HTMLDialogElement stub with a querySelector that finds a form
+    // Provide a minimal stub that mirrors the real DialogV2 API.
+    // The callback gets dialog.element.querySelector("form") to read FormData.
     const mockForm = document.createElement("form");
-    const mockDialog = document.createElement("dialog") as unknown as HTMLDialogElement;
-    mockDialog.appendChild(mockForm);
-    // stub querySelector on the dialog element
-    (mockDialog as unknown as { querySelector: (sel: string) => HTMLFormElement | null }).querySelector =
-      (sel: string) => (sel === "form" ? mockForm : null);
+    const mockElement = document.createElement("div");
+    mockElement.appendChild(mockForm);
+    const mockDialog = { element: mockElement };
     return defaultButton.callback(new Event("click"), document.createElement("button"), mockDialog);
   },
 };
