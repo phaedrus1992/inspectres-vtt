@@ -77,21 +77,20 @@ export class FranchiseSheetPage {
   }
 
   /**
-   * Click a selector, guarding against the /join redirect that v14 (and
-   * occasionally v13) triggers on action button clicks. If a redirect fires,
-   * rejoin the session, re-render the sheet, and retry the click once so the
-   * action actually executes rather than being silently swallowed.
+   * Click a selector, guarding against /join redirects. If a redirect fires,
+   * rejoin, wait for game.ready, re-render the sheet, then retry the click once
+   * (also guarded). A second redirect on retry is handled by rejoin only — no
+   * infinite retry loop.
    */
   private async safeClick(selector: string): Promise<void> {
     const wasRedirected = await this.clickWithRedirectGuard(selector);
     if (!wasRedirected) return;
 
     await this.rerenderSheet();
-    // Retry once — a second redirect here would be a real environment problem.
-    await this.page.click(selector).catch(() => {});
+    await this.clickWithRedirectGuard(selector);
   }
 
-  /** Race click vs /join redirect; return true if redirect fired. */
+  /** Race click vs /join redirect; rejoin if redirected; return true if redirect fired. */
   private async clickWithRedirectGuard(selector: string): Promise<boolean> {
     const result = await Promise.race([
       this.page.click(selector).then(() => false as const),
@@ -103,6 +102,15 @@ export class FranchiseSheetPage {
 
   /** Re-render this actor's sheet after a rejoin so the DOM is valid again. */
   private async rerenderSheet(): Promise<void> {
+    // Wait for game to be ready before trying to render — rejoin is async and
+    // game.actors may not be populated yet immediately after the redirect clears.
+    await this.page.waitForFunction(
+      // @ts-expect-error - Foundry runtime global
+      () => globalThis.game?.ready === true,
+      undefined,
+      { timeout: 15_000 },
+    ).catch(() => {});
+
     const id = this.actorId;
     await this.page.evaluate(async (actorId: string) => {
       // @ts-expect-error - Foundry runtime global
