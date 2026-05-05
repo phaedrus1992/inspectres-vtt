@@ -35,13 +35,13 @@ async function openRollDialog(skillName: string): Promise<DialogResult | null> {
   };
   const result = (await foundry.applications.api.DialogV2.wait({
     window: { title: `Roll ${skillName}` },
-    content: `<form><input type="number" name="diceCount" value="2"></form>`,
+    content: `<div><input type="number" name="diceCount" value="2"></div>`,
     buttons: [
       {
         action: "roll",
         label: "Roll",
-        callback: (_event: Event, _button: unknown, dialog: HTMLElement) => {
-          const form = dialog.querySelector("form") as HTMLFormElement;
+        callback: (_event: Event, _button: unknown, dialog: { element: HTMLElement }) => {
+          const form = dialog.element.querySelector("form") as HTMLFormElement;
           return Object.fromEntries(new FormData(form));
         },
       },

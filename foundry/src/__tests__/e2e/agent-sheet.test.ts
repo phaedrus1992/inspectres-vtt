@@ -42,18 +42,26 @@ test.describe("AgentSheet — action handlers", () => {
     const beforeCount = await getChatMessageCount(page);
 
     await sheet.clickSkillRoll("academics");
-    // Wait for roll dialog or direct roll
-    await page.waitForTimeout(1500);
 
-    // Dismiss dialog if one appeared (roll dialog waits for user input)
-    const dismissed = await page.evaluate(() => {
-      const btn = document.querySelector<HTMLButtonElement>(
-        'dialog button[data-action="roll"], dialog button[type="submit"]',
+    // Wait for dialog to appear (DialogV2 renders as <dialog> element)
+    const dialogVisible = await page.waitForFunction(
+      () => {
+        const dlg = document.querySelector<HTMLDialogElement>("dialog");
+        if (!dlg) return false;
+        const rect = dlg.getBoundingClientRect();
+        return rect.width > 0 && rect.height > 0;
+      },
+      undefined,
+      { timeout: 10_000 },
+    ).then(() => true).catch(() => false);
+
+    if (dialogVisible) {
+      // Use Playwright's native click so SubmitEvent has the correct submitter
+      await page.click('dialog button[data-action="roll"]').catch(() =>
+        page.click('dialog button[type="submit"]:not([data-action="cancel"])').catch(() => {}),
       );
-      if (btn) { btn.click(); return true; }
-      return false;
-    });
-    if (dismissed) await page.waitForTimeout(1000);
+      await page.waitForTimeout(1500);
+    }
 
     await page.screenshot({
       path: "test-results/e2e-screenshots/agent-01-skill-roll.png",
@@ -119,6 +127,8 @@ test.describe("AgentSheet — action handlers", () => {
 
   test("addCharacteristic — list grows by one", async ({ page }) => {
     const sheet = await openAgentSheet(page, agentId);
+    // Add Characteristic button is in the notes tab
+    await sheet.openTab("notes");
 
     const before = await page.evaluate((id: string) => {
       // @ts-expect-error - Foundry runtime global
@@ -127,7 +137,7 @@ test.describe("AgentSheet — action handlers", () => {
     }, agentId);
 
     await sheet.clickAddCharacteristic();
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(1000);
 
     const after = await page.evaluate((id: string) => {
       // @ts-expect-error - Foundry runtime global
@@ -208,15 +218,15 @@ test.describe("AgentSheet — stats tab content", () => {
     }).catch(() => {});
   });
 
-  test("notes tab textarea is visible after switching tabs", async ({ page }) => {
+  test("notes tab add-characteristic button is visible after switching tabs", async ({ page }) => {
     const sheet = await openAgentSheet(page, agentId);
     await sheet.openTab("notes");
 
-    // Use waitForFunction + getBoundingClientRect per playwright-foundry.md —
-    // waitForSelector races with ApplicationV2 re-renders that briefly detach elements.
+    // Agent notes tab has characteristics list with input[type="text"] rows,
+    // not a textarea. Check for the "Add Characteristic" button instead.
     await page.waitForFunction(
       (id: string) => {
-        const el = document.querySelector(`.inspectres[id*="${id}"] textarea`);
+        const el = document.querySelector(`.inspectres[id*="${id}"] [data-action="addCharacteristic"]`);
         if (!el) return false;
         const rect = (el as HTMLElement).getBoundingClientRect();
         return rect.width > 0 && rect.height > 0;
@@ -225,14 +235,14 @@ test.describe("AgentSheet — stats tab content", () => {
       { timeout: ELEMENT_WAIT_TIMEOUT },
     );
 
-    const textareaVisible = await page.evaluate((id: string) => {
-      const ta = document.querySelector(`.inspectres[id*="${id}"] textarea`);
-      if (!ta) return false;
-      const rect = (ta as HTMLElement).getBoundingClientRect();
+    const btnVisible = await page.evaluate((id: string) => {
+      const btn = document.querySelector(`.inspectres[id*="${id}"] [data-action="addCharacteristic"]`);
+      if (!btn) return false;
+      const rect = (btn as HTMLElement).getBoundingClientRect();
       return rect.width > 0 && rect.height > 0;
     }, agentId);
 
-    expect(textareaVisible).toBe(true);
+    expect(btnVisible).toBe(true);
 
     await page.screenshot({
       path: "test-results/e2e-screenshots/agent-07-notes-tab.png",

@@ -247,17 +247,28 @@ const state = await page.evaluate(() => ({
 
 ## Local Validation Before Push
 
-**Always run the E2E suite locally before pushing when:**
-- Any E2E test file changed (`*.test.ts` in `e2e/`, `fixtures.ts`, `global-setup.ts`, `playwright.config.ts`)
-- E2E tests are currently failing on CI (fix locally, confirm green, then push)
-- You made any change that could affect browser session state, selectors, or Foundry init
+**HARD REQUIREMENT — GitHub Actions minutes are limited.**
+
+You MUST run E2E tests locally before pushing ANY change that touches:
+- `foundry/src/__tests__/e2e/**` (test files, page objects, fixtures, global-setup)
+- `foundry/playwright.config.ts`
+
+Never push E2E changes and rely on CI to catch failures. No exceptions.
 
 ```bash
-# Requires docker compose already running (docker/docker-compose.yml)
-npm run test:e2e
+# Full run (fresh Docker data — use before first push)
+cd foundry && bash scripts/run-e2e.sh
+
+# Fast iteration (skip data wipe, keep container running for reruns)
+cd foundry && KEEP_DATA=1 KEEP_RUNNING=1 bash scripts/run-e2e.sh
+
+# Run a single test by name
+cd foundry && bash scripts/run-e2e.sh -- --grep "test name here"
 ```
 
-CI is expensive and slow for E2E failures. Do not push and say "CI will validate" — run it locally first. This applies even for small refactors to test infrastructure; timing and selector issues only surface against a live Foundry instance.
+The script (`scripts/run-e2e.sh`) handles the full lifecycle: stop container → wipe data → build dist → start Docker → wait for Foundry → run Playwright → teardown. No manual Docker steps needed.
+
+Tests must pass locally before `git push`. If they fail, fix them first.
 
 ## Scratch Scripts
 

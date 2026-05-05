@@ -75,7 +75,7 @@ declare namespace foundry.applications.api {
     label: string;
     icon?: string;
     default?: boolean;
-    callback?: (event: Event, button: HTMLButtonElement, dialog: HTMLDialogElement) => unknown;
+    callback?: (event: Event, button: HTMLButtonElement, dialog: foundry.applications.api.DialogV2) => unknown;
   }
 
   /** Modal/modeless dialog built on ApplicationV2. */

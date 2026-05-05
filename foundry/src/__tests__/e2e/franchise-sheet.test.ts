@@ -83,11 +83,13 @@ test.describe("FranchiseSheet — mission tracker", () => {
       timeout: 5000,
     }).catch(() => {});
 
-    // Mission tracker dialog should be present (class or id-based selector)
+    // MissionTrackerApp uses id="inspectres-mission-tracker" and
+    // classes "inspectres inspectres-mission-tracker-window"
     const trackerOpen = await page.evaluate(() => {
       return (
-        document.querySelector(".mission-tracker") !== null ||
-        document.querySelector('[id*="MissionTracker"]') !== null
+        document.querySelector("#inspectres-mission-tracker") !== null ||
+        document.querySelector(".inspectres-mission-tracker-window") !== null ||
+        document.querySelector(".mission-tracker") !== null
       );
     });
     expect(trackerOpen).toBe(true);
@@ -167,6 +169,8 @@ test.describe("FranchiseSheet — debt mode", () => {
 
   test("toggleDebtMode — debtMode flag changes", async ({ page }) => {
     const sheet = await openFranchiseSheet(page, franchiseId);
+    // toggleDebtMode button is in the notes tab under the Debt Mode section
+    await sheet.openTab("notes");
 
     const before = await page.evaluate((id: string) => {
       // @ts-expect-error - Foundry runtime global
@@ -206,16 +210,14 @@ test.describe("FranchiseSheet — form-bound inputs", () => {
   test("bank input — value persists via actor.update", async ({ page }) => {
     await openFranchiseSheet(page, franchiseId);
 
-    // Fill the bank input
     const bankInput = page.locator(
       `.inspectres[id*="${franchiseId}"] input[name="system.bank"]`,
     ).first();
 
     await bankInput.waitFor({ state: "visible", timeout: ELEMENT_WAIT_TIMEOUT });
     await bankInput.fill("7");
-    // Trigger change (submitOnChange form)
     await bankInput.press("Tab");
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(1500);
 
     const bankValue = await page.evaluate((id: string) => {
       // @ts-expect-error - Foundry runtime global
@@ -243,7 +245,7 @@ test.describe("FranchiseSheet — form-bound inputs", () => {
     const testText = "E2E description test";
     await textarea.fill(testText);
     await textarea.press("Tab");
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(1500);
 
     const savedDescription = await page.evaluate((id: string) => {
       // @ts-expect-error - Foundry runtime global
@@ -269,7 +271,7 @@ test.describe("FranchiseSheet — form-bound inputs", () => {
     await missionGoalInput.waitFor({ state: "visible", timeout: ELEMENT_WAIT_TIMEOUT });
     await missionGoalInput.fill("10");
     await missionGoalInput.press("Tab");
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(1500);
 
     const missionGoalValue = await page.evaluate((id: string) => {
       // @ts-expect-error - Foundry runtime global

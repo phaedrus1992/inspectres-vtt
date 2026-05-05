@@ -40,7 +40,7 @@ export async function enterDebtMode(franchiseActor: Actor, attemptedSpend: numbe
   const borrowResult = await foundry.applications.api.DialogV2.wait({
     window: { title: game.i18n?.localize("INSPECTRES.DialogBankruptcyTitle") ?? "Franchise Bankrupt" },
     content: `
-      <form>
+      <div>
         <fieldset class="inspectres-bankruptcy-form">
           <legend>${game.i18n?.localize("INSPECTRES.BankruptcyNotice") ?? "Bank Empty"}</legend>
           <p class="notice">
@@ -53,7 +53,7 @@ export async function enterDebtMode(franchiseActor: Actor, attemptedSpend: numbe
             <input type="number" name="borrowAmount" id="borrowAmount" min="0" max="${MAX_LOAN_AMOUNT}" value="${Math.min(attemptedSpend, MAX_LOAN_AMOUNT)}" required />
           </div>
         </fieldset>
-      </form>
+      </div>
     `,
     buttons: [
       {
@@ -61,7 +61,7 @@ export async function enterDebtMode(franchiseActor: Actor, attemptedSpend: numbe
         label: game.i18n?.localize("INSPECTRES.ButtonBorrow") ?? "Borrow & Continue",
         default: true,
         callback: (_event, _button, dialog) => {
-          const form = dialog.querySelector("form") as HTMLFormElement | null;
+          const form = dialog.element.querySelector("form") as HTMLFormElement | null;
           if (!form) return null;
           const data = new FormData(form);
           const amount = Math.max(0, Math.min(MAX_LOAN_AMOUNT, Number(data.get("borrowAmount") ?? 0)));
