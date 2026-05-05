@@ -90,14 +90,19 @@ export class FranchiseSheetPage {
     await this.clickWithRedirectGuard(selector);
   }
 
-  /** Race click vs /join redirect; rejoin if redirected; return true if redirect fired. */
+  /** Click selector and detect /join redirects that fire async after the click. */
   private async clickWithRedirectGuard(selector: string): Promise<boolean> {
-    const result = await Promise.race([
-      this.page.click(selector).then(() => false as const),
-      this.page.waitForURL(/\/join/, { timeout: 5_000 }).then(() => true as const),
+    // Start watching before clicking — the redirect may fire shortly after the
+    // click resolves (Foundry processes the action server-side asynchronously).
+    const redirectWatcher = this.page.waitForURL(/\/join/, { timeout: 5_000 });
+    await this.page.click(selector).catch(() => {});
+    // After click resolves, keep watching up to 2 more seconds for async redirect.
+    const redirected = await Promise.race([
+      redirectWatcher.then(() => true as const),
+      new Promise<false>(resolve => { setTimeout(() => { resolve(false); }, 2_000); }),
     ]).catch(() => false as const);
     await rejoinIfRedirected(this.page);
-    return result;
+    return redirected;
   }
 
   /** Re-render this actor's sheet after a rejoin so the DOM is valid again. */
