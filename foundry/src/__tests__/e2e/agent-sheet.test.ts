@@ -10,6 +10,8 @@ import {
   deleteActor,
   openAgentSheet,
   getChatMessageCount,
+  waitForNewChatMessage,
+  waitForActorFieldChanged,
 } from "./pages/index.js";
 
 const SKILL_NAMES = ["academics", "athletics", "technology", "contact"] as const;
@@ -60,7 +62,7 @@ test.describe("AgentSheet — action handlers", () => {
       await page.click('dialog button[data-action="roll"]').catch(() =>
         page.click('dialog button[type="submit"]:not([data-action="cancel"])').catch(() => {}),
       );
-      await page.waitForTimeout(1500);
+      await waitForNewChatMessage(page, beforeCount);
     }
 
     await page.screenshot({
@@ -82,7 +84,7 @@ test.describe("AgentSheet — action handlers", () => {
     }, agentId);
 
     await sheet.clickSkillIncrease("academics");
-    await page.waitForTimeout(500);
+    await waitForActorFieldChanged(page, agentId, "skills.academics.base", before);
 
     const after = await page.evaluate((id: string) => {
       // @ts-expect-error - Foundry runtime global
@@ -109,7 +111,7 @@ test.describe("AgentSheet — action handlers", () => {
 
     const sheet = await openAgentSheet(page, agentId);
     await sheet.clickSkillDecrease("athletics");
-    await page.waitForTimeout(500);
+    await waitForActorFieldChanged(page, agentId, "skills.athletics.base", 3);
 
     const after = await page.evaluate((id: string) => {
       // @ts-expect-error - Foundry runtime global
@@ -137,7 +139,7 @@ test.describe("AgentSheet — action handlers", () => {
     }, agentId);
 
     await sheet.clickAddCharacteristic();
-    await page.waitForTimeout(1000);
+    await waitForActorFieldChanged(page, agentId, "characteristics.length", before);
 
     const after = await page.evaluate((id: string) => {
       // @ts-expect-error - Foundry runtime global
@@ -315,7 +317,16 @@ test.describe("AgentSheet — conditional UI paths", () => {
       if (actor) await actor.sheet.render(true);
     }, agentId);
 
-    await page.waitForTimeout(1000);
+    await page.waitForFunction(
+      (id: string) => {
+        const el = document.querySelector<HTMLElement>(`.inspectres[id*="${id}"] .skill-penalty-line`);
+        if (!el) return false;
+        const rect = el.getBoundingClientRect();
+        return rect.width > 0 && rect.height > 0;
+      },
+      agentId,
+      { timeout: ELEMENT_WAIT_TIMEOUT },
+    ).catch(() => {});
 
     const penaltyLineExists = await page.evaluate((id: string) => {
       const el = document.querySelector<HTMLElement>(`.inspectres[id*="${id}"] .skill-penalty-line`);

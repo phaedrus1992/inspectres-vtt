@@ -10,6 +10,9 @@ import {
   deleteActor,
   getChatMessageCount,
   openFranchiseSheet,
+  waitForNewChatMessage,
+  waitForActorFieldChanged,
+  waitForActorFieldEquals,
 } from "./pages/index.js";
 
 test.describe("FranchiseSheet — roll actions", () => {
@@ -34,7 +37,7 @@ test.describe("FranchiseSheet — roll actions", () => {
     const before = await getChatMessageCount(page);
 
     await sheet.clickBankRoll();
-    await page.waitForTimeout(1500);
+    await waitForNewChatMessage(page, before);
 
     await page.screenshot({
       path: "test-results/e2e-screenshots/franchise-01-bank-roll.png",
@@ -50,7 +53,7 @@ test.describe("FranchiseSheet — roll actions", () => {
     const before = await getChatMessageCount(page);
 
     await sheet.clickClientRoll();
-    await page.waitForTimeout(1500);
+    await waitForNewChatMessage(page, before);
 
     await page.screenshot({
       path: "test-results/e2e-screenshots/franchise-02-client-roll.png",
@@ -76,7 +79,14 @@ test.describe("FranchiseSheet — mission tracker", () => {
   test("openMissionTracker — DialogV2 opens", async ({ page }) => {
     const sheet = await openFranchiseSheet(page, franchiseId);
     await sheet.clickOpenMissionTracker();
-    await page.waitForTimeout(1000);
+    await page.waitForFunction(
+      () =>
+        document.querySelector("#inspectres-mission-tracker") !== null ||
+        document.querySelector(".inspectres-mission-tracker-window") !== null ||
+        document.querySelector(".mission-tracker") !== null,
+      undefined,
+      { timeout: ELEMENT_WAIT_TIMEOUT },
+    ).catch(() => {});
 
     await page.screenshot({
       path: "test-results/e2e-screenshots/franchise-03-mission-tracker.png",
@@ -96,7 +106,11 @@ test.describe("FranchiseSheet — mission tracker", () => {
 
     // Close any open dialogs
     await page.keyboard.press("Escape").catch(() => {});
-    await page.waitForTimeout(300);
+    await page.waitForFunction(
+      () => document.querySelector("dialog[open]") === null,
+      undefined,
+      { timeout: 5_000 },
+    ).catch(() => {});
   });
 });
 
@@ -116,7 +130,18 @@ test.describe("FranchiseSheet — day controls", () => {
     const before = await sheet.getCurrentDaySetting();
 
     await sheet.clickAdvanceDay();
-    await page.waitForTimeout(500);
+    await page.waitForFunction(
+      (prev: number) => {
+        try {
+          // @ts-expect-error - Foundry runtime global
+          return ((globalThis.game?.settings?.get("inspectres", "currentDay") as number) ?? 1) !== prev;
+        } catch {
+          return false;
+        }
+      },
+      before,
+      { timeout: ELEMENT_WAIT_TIMEOUT },
+    ).catch(() => {});
 
     const after = await sheet.getCurrentDaySetting();
     expect(after).toBe(before + 1);
@@ -138,7 +163,18 @@ test.describe("FranchiseSheet — day controls", () => {
     const before = await sheet.getCurrentDaySetting();
 
     await sheet.clickRegressDay();
-    await page.waitForTimeout(500);
+    await page.waitForFunction(
+      (prev: number) => {
+        try {
+          // @ts-expect-error - Foundry runtime global
+          return ((globalThis.game?.settings?.get("inspectres", "currentDay") as number) ?? 1) !== prev;
+        } catch {
+          return false;
+        }
+      },
+      before,
+      { timeout: ELEMENT_WAIT_TIMEOUT },
+    ).catch(() => {});
 
     const after = await sheet.getCurrentDaySetting();
     expect(after).toBe(before - 1);
@@ -179,7 +215,7 @@ test.describe("FranchiseSheet — debt mode", () => {
     }, franchiseId);
 
     await sheet.clickToggleDebtMode();
-    await page.waitForTimeout(500);
+    await waitForActorFieldChanged(page, franchiseId, "debtMode", before);
 
     const after = await page.evaluate((id: string) => {
       // @ts-expect-error - Foundry runtime global
@@ -217,7 +253,7 @@ test.describe("FranchiseSheet — form-bound inputs", () => {
     await bankInput.waitFor({ state: "visible", timeout: ELEMENT_WAIT_TIMEOUT });
     await bankInput.fill("7");
     await bankInput.press("Tab");
-    await page.waitForTimeout(1500);
+    await waitForActorFieldEquals(page, franchiseId, "bank", 7);
 
     const bankValue = await page.evaluate((id: string) => {
       // @ts-expect-error - Foundry runtime global
@@ -245,7 +281,7 @@ test.describe("FranchiseSheet — form-bound inputs", () => {
     const testText = "E2E description test";
     await textarea.fill(testText);
     await textarea.press("Tab");
-    await page.waitForTimeout(1500);
+    await waitForActorFieldEquals(page, franchiseId, "description", testText);
 
     const savedDescription = await page.evaluate((id: string) => {
       // @ts-expect-error - Foundry runtime global
@@ -271,7 +307,7 @@ test.describe("FranchiseSheet — form-bound inputs", () => {
     await missionGoalInput.waitFor({ state: "visible", timeout: ELEMENT_WAIT_TIMEOUT });
     await missionGoalInput.fill("10");
     await missionGoalInput.press("Tab");
-    await page.waitForTimeout(1500);
+    await waitForActorFieldEquals(page, franchiseId, "missionGoal", 10);
 
     const missionGoalValue = await page.evaluate((id: string) => {
       // @ts-expect-error - Foundry runtime global

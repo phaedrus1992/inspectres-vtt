@@ -7,11 +7,20 @@
  */
 import { test, expect, ELEMENT_WAIT_TIMEOUT } from "./fixtures.js";
 import type { Page } from "@playwright/test";
-import { createActor, deleteActor, waitForSheet } from "./pages/index.js";
+import { createActor, deleteActor, waitForSheet, rejoinIfRedirected } from "./pages/index.js";
 
 async function openActorsDirectory(page: Page): Promise<void> {
   await page.click('[data-tab="actors"]').catch(() => {});
-  await page.waitForTimeout(500);
+  await page.waitForFunction(
+    () => {
+      const panel = document.querySelector('#actors');
+      if (!panel) return false;
+      const rect = (panel as HTMLElement).getBoundingClientRect();
+      return rect.width > 0 && rect.height > 0;
+    },
+    undefined,
+    { timeout: ELEMENT_WAIT_TIMEOUT },
+  ).catch(() => {});
 }
 
 test.describe("Actor lifecycle — no console errors", () => {
@@ -108,7 +117,12 @@ test.describe("Actor lifecycle — no console errors", () => {
 
       // Delete actor (sheet open)
       await deleteActor(page, actorId);
-      await page.waitForTimeout(500);
+      await page.waitForFunction(
+        // @ts-expect-error - Foundry runtime global
+        (id: string) => !globalThis.game?.actors?.get(id),
+        actorId,
+        { timeout: ELEMENT_WAIT_TIMEOUT },
+      ).catch(() => {});
 
       // Actor should no longer exist in game.actors
       const actorExists = await page.evaluate((id: string) => {
@@ -187,9 +201,14 @@ test.describe("Actor creation via Foundry UI flow", () => {
         { timeout: ELEMENT_WAIT_TIMEOUT },
       );
       await page.click('#actors .create-entry[data-action="createEntry"]').catch(() => {});
-      await page.waitForTimeout(1000);
 
-      // The create dialog opens — fill in name and type
+      // Wait for the dialog to appear (replaces fixed sleep).
+      await page.waitForFunction(
+        () => document.querySelector('dialog.application') !== null || document.querySelector('.dialog') !== null,
+        undefined,
+        { timeout: ELEMENT_WAIT_TIMEOUT },
+      ).catch(() => {});
+
       const dialogVisible = await page.evaluate(() => {
         return document.querySelector('dialog.application') !== null || document.querySelector('.dialog') !== null;
       });
@@ -216,28 +235,21 @@ test.describe("Actor creation via Foundry UI flow", () => {
             page.waitForURL(/\/(join|game)/, { timeout: 10_000 }),
           ]).catch(() => {});
         }
-        // If Foundry redirected to /join (v14 behaviour after dialog submit or session
-        // expiry mid-fill), re-join immediately so the session stays valid for teardown.
-        if (page.url().includes("/join")) {
-          const workerUsername = await page.evaluate(() => {
-            const opts = Array.from(
-              (document.querySelector('select[name="userid"]') as HTMLSelectElement | null)?.options ?? [],
-            );
-            return opts.find((o) => !o.disabled && o.value !== "")?.text ?? null;
-          });
-          if (workerUsername) {
-            await page.selectOption('select[name="userid"]', { label: workerUsername }).catch(() => {});
-            await page.click('button[type="submit"]:has-text("Join Game Session")').catch(() => {});
-            await page.waitForURL(/\/game/, { timeout: 30_000 }).catch(() => {});
-            await page.waitForFunction(
+        // If Foundry redirected to /join (v14 behaviour after dialog submit), re-join
+        // so the session stays valid for teardown's logOut call.
+        await rejoinIfRedirected(page);
+        if (!page.url().includes("/join")) {
+          // Wait for actor to appear in game.actors instead of a fixed sleep.
+          await page.waitForFunction(
+            (name: string) => {
               // @ts-expect-error - Foundry runtime global
-              () => globalThis.game?.ready === true,
-              undefined,
-              { timeout: 30_000 },
-            ).catch(() => {});
-          }
-        } else {
-          await page.waitForTimeout(1500);
+              return globalThis.game?.actors?.find(
+                (a: { name: string; type: string }) => a.name === name && a.type === "agent",
+              ) != null;
+            },
+            actorName,
+            { timeout: ELEMENT_WAIT_TIMEOUT },
+          ).catch(() => {});
         }
       }
 

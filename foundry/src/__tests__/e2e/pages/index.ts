@@ -8,4 +8,8 @@ export {
   assertNoConsoleErrors,
   waitForSheet,
   getChatMessageCount,
+  waitForNewChatMessage,
+  waitForActorFieldChanged,
+  waitForActorFieldEquals,
+  rejoinIfRedirected,
 } from "./helpers.js";

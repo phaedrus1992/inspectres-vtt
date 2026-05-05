@@ -84,8 +84,17 @@ export class AgentSheetPage {
       },
       { actorId: this.actorId, value },
     );
-    // Wait for re-render
-    await this.page.waitForTimeout(500);
+    // Wait for ApplicationV2 re-render to complete after the data update.
+    await this.page.waitForFunction(
+      (id: string) => {
+        const el = document.querySelector(`.inspectres[id*="${id}"]`);
+        if (!el) return false;
+        const rect = (el as HTMLElement).getBoundingClientRect();
+        return rect.width > 0 && rect.height > 0;
+      },
+      this.actorId,
+      { timeout: 10_000 },
+    ).catch(() => {});
   }
 
   /** Click the stress roll button. */
