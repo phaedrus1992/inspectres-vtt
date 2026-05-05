@@ -138,15 +138,18 @@ export class AgentSheetPage {
 
   /** Click selector and detect /join redirects that fire async after the click. */
   private async clickWithRedirectGuard(selector: string): Promise<boolean> {
-    // Start watching before clicking — the redirect may fire shortly after the
-    // click resolves (Foundry processes the action server-side asynchronously).
-    const redirectWatcher = this.page.waitForURL(/\/join/, { timeout: 5_000 });
     await this.page.click(selector).catch(() => {});
-    // After click resolves, keep watching up to 2 more seconds for async redirect.
-    const redirected = await Promise.race([
-      redirectWatcher.then(() => true as const),
-      new Promise<false>(resolve => { setTimeout(() => { resolve(false); }, 2_000); }),
-    ]).catch(() => false as const);
+    // Poll for /join for up to 2s after click — Foundry processes the action
+    // server-side and may redirect asynchronously after the click resolves.
+    // Polling avoids long-lived waitForURL promises that can outlive the test.
+    let redirected = false;
+    for (let i = 0; i < 8; i++) {
+      await new Promise<void>(resolve => { setTimeout(resolve, 250); });
+      if (this.page.url().includes("/join")) {
+        redirected = true;
+        break;
+      }
+    }
     await rejoinIfRedirected(this.page);
     return redirected;
   }
