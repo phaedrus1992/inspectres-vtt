@@ -5,6 +5,8 @@ import { FranchiseSheetPage } from "./FranchiseSheetPage.js";
 
 const SHEET_WAIT_TIMEOUT = 15_000;
 const REJOIN_TIMEOUT = 30_000;
+// Session expired mid-test means the slot is already free on the server — short wait.
+const REJOIN_OPTION_TIMEOUT = 5_000;
 
 /** Create a new actor in Foundry and return its ID. */
 export async function createActor(
@@ -206,7 +208,7 @@ export async function rejoinIfRedirected(page: Page, workerUsername: string): Pr
       return opt != null && !opt.disabled;
     },
     workerUsername,
-    { timeout: REJOIN_TIMEOUT },
+    { timeout: REJOIN_OPTION_TIMEOUT },
   ).catch(() => {});
 
   await page.selectOption('select[name="userid"]', { label: workerUsername }).catch(() => {});

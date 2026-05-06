@@ -26,9 +26,10 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: WORKER_COUNT,
   reporter: process.env["CI"] ? [["list"], ["html"]] : "html",
-  // 2 min per test: Foundry fixture setup (join + game.ready + sheet render) is ~30-60s
-  // in CI, leaving headroom for actual test assertions.
-  timeout: 120_000,
+  // 3 min per test: Foundry fixture setup (join + game.ready + sheet render) is ~30-60s
+  // in CI. Tests with multiple action clicks may trigger /join redirects mid-test
+  // (session expiry), each requiring a ~30s rejoin + re-render cycle.
+  timeout: 180_000,
   use: {
     baseURL: "http://localhost:30000",
     trace: "on-first-retry",
