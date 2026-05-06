@@ -32,8 +32,8 @@ export default defineConfig({
   timeout: 180_000,
   // Hard wall-clock cap on the full run. If the suite exceeds this, something is wrong
   // (flapping retries, hung test, pool contention) — fail fast, not burn CI minutes.
-  // CI cap matches the job-level timeout-minutes:15 in ci.yml.
-  globalTimeout: process.env["CI"] ? 15 * 60_000 : 10 * 60_000,
+  // CI cap is 20 min; job-level timeout-minutes:25 in ci.yml adds 5 min for container setup.
+  globalTimeout: process.env["CI"] ? 20 * 60_000 : 10 * 60_000,
   use: {
     baseURL: "http://localhost:30000",
     trace: "on-first-retry",
