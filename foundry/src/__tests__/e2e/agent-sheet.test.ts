@@ -12,6 +12,7 @@ import {
   getChatMessageCount,
   waitForNewChatMessage,
   waitForActorFieldChanged,
+  rejoinIfRedirected,
 } from "./pages/index.js";
 
 const SKILL_NAMES = ["academics", "athletics", "technology", "contact"] as const;
@@ -45,11 +46,12 @@ test.describe("AgentSheet — actions, stats, and notes", () => {
   });
 
   test("skill actions, roll, visibility, and tab content", async ({ page, workerUsername }) => {
-    const sheet = await openAgentSheet(page, agentId, workerUsername);
+    let sheet = await openAgentSheet(page, agentId, workerUsername);
 
     // --- skillRoll: produces a chat message ---
     const beforeRoll = await getChatMessageCount(page);
     await sheet.clickSkillRoll("academics");
+    await rejoinIfRedirected(page, workerUsername);
 
     const dialogVisible = await page.waitForFunction(
       () => {
@@ -59,13 +61,14 @@ test.describe("AgentSheet — actions, stats, and notes", () => {
         return rect.width > 0 && rect.height > 0;
       },
       undefined,
-      { timeout: 10_000 },
+      { timeout: 5_000 },
     ).then(() => true).catch(() => false);
 
     if (dialogVisible) {
       await page.click('dialog button[data-action="roll"]').catch(() =>
         page.click('dialog button[type="submit"]:not([data-action="cancel"])').catch(() => {}),
       );
+      await rejoinIfRedirected(page, workerUsername);
       await waitForNewChatMessage(page, beforeRoll);
     }
 
@@ -73,6 +76,9 @@ test.describe("AgentSheet — actions, stats, and notes", () => {
     expect(afterRoll).toBeGreaterThan(beforeRoll);
 
     // --- skillIncrease + skillDecrease: independent fields, no conflict ---
+    // Re-open sheet after any potential rejoin from the roll action.
+    sheet = await openAgentSheet(page, agentId, workerUsername);
+
     const beforeIncrease = await page.evaluate((id: string) => {
       // @ts-expect-error - Foundry runtime global
       const actor = globalThis.game?.actors?.get(id);
@@ -80,6 +86,7 @@ test.describe("AgentSheet — actions, stats, and notes", () => {
     }, agentId);
 
     await sheet.clickSkillIncrease("academics");
+    await rejoinIfRedirected(page, workerUsername);
     await waitForActorFieldChanged(page, agentId, "skills.academics.base", beforeIncrease);
 
     const afterIncrease = await page.evaluate((id: string) => {
@@ -91,6 +98,7 @@ test.describe("AgentSheet — actions, stats, and notes", () => {
 
     // athletics.base starts at 3; decrease operates on an independent field
     await sheet.clickSkillDecrease("athletics");
+    await rejoinIfRedirected(page, workerUsername);
     await waitForActorFieldChanged(page, agentId, "skills.athletics.base", 3);
 
     const afterDecrease = await page.evaluate((id: string) => {
@@ -99,6 +107,10 @@ test.describe("AgentSheet — actions, stats, and notes", () => {
       return (actor?.system as { skills: { athletics: { base: number } } })?.skills?.athletics?.base ?? 0;
     }, agentId);
     expect(afterDecrease).toBeLessThanOrEqual(3);
+
+    // Ensure we're back in the game after any redirects before checking UI.
+    await rejoinIfRedirected(page, workerUsername);
+    sheet = await openAgentSheet(page, agentId, workerUsername);
 
     // --- stressRoll button: visible on stats tab ---
     await page.waitForFunction(
@@ -165,6 +177,7 @@ test.describe("AgentSheet — actions, stats, and notes", () => {
     expect(addBtnVisible).toBe(true);
 
     await sheet.clickAddCharacteristic();
+    await rejoinIfRedirected(page, workerUsername);
     await waitForActorFieldChanged(page, agentId, "characteristics.length", beforeChar);
 
     const afterChar = await page.evaluate((id: string) => {
