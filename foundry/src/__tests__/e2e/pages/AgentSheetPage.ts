@@ -157,6 +157,10 @@ export class AgentSheetPage {
   }
 
   /** Re-render this actor's sheet after a rejoin so the DOM is valid again. */
+  async rerender(): Promise<void> {
+    return this.rerenderSheet();
+  }
+
   private async rerenderSheet(): Promise<void> {
     // Wait for game to be ready before trying to render — rejoin is async and
     // game.actors may not be populated yet immediately after the redirect clears.
