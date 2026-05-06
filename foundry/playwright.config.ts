@@ -26,14 +26,15 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: WORKER_COUNT,
   reporter: process.env["CI"] ? [["list"], ["html"]] : "html",
-  // 3 min per test: Foundry fixture setup (join + game.ready + sheet render) is ~30-60s
+  // 4 min per test: Foundry fixture setup (join + game.ready + sheet render) is ~30-60s
   // in CI. Tests with multiple action clicks may trigger /join redirects mid-test
-  // (session expiry), each requiring a ~30s rejoin + re-render cycle.
-  timeout: 180_000,
+  // (session expiry), each requiring a ~30s rejoin + re-render cycle. The consolidated
+  // agent-sheet test (9 actions, 9 screenshots) needs ~3 min in CI with 2 workers.
+  timeout: 240_000,
   // Hard wall-clock cap on the full run. If the suite exceeds this, something is wrong
   // (flapping retries, hung test, pool contention) — fail fast, not burn CI minutes.
-  // CI cap is 20 min; job-level timeout-minutes:25 in ci.yml adds 5 min for container setup.
-  globalTimeout: process.env["CI"] ? 20 * 60_000 : 10 * 60_000,
+  // CI cap is 22 min; job-level timeout-minutes:30 in ci.yml adds 8 min for container setup.
+  globalTimeout: process.env["CI"] ? 22 * 60_000 : 10 * 60_000,
   use: {
     baseURL: "http://localhost:30000",
     trace: "on-first-retry",
