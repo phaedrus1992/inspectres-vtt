@@ -1,3 +1,5 @@
+import { stopDialogSubmitPropagation } from "./dialog-utils.js";
+
 export interface PlayerInfo {
   id: string;
   name: string;
@@ -95,7 +97,7 @@ export async function buildDistributionConfig(opts: DistributionDialogOptions): 
 
 export async function promptDistribution(opts: DistributionDialogOptions): Promise<Record<string, number> | null> {
   const config = await buildDistributionConfig(opts);
-  const result = await foundry.applications.api.DialogV2.wait(config);
+  const result = await foundry.applications.api.DialogV2.wait({ ...config, render: stopDialogSubmitPropagation });
   if (result === null || result === undefined) return null;
   return result as Record<string, number>;
 }

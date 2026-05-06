@@ -6,6 +6,7 @@
 import { getActorSystem } from "../utils/system-cast.js";
 import { calculateHazardPay } from "./end-of-session-bonuses.js";
 import { type FranchiseData } from "./franchise-schema.js";
+import { stopDialogSubmitPropagation } from "../utils/dialog-utils.js";
 
 function extractErrorMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
@@ -84,6 +85,7 @@ export async function initiateBankruptcyRestart(franchiseActor: Actor): Promise<
 
   const confirmed = await foundry.applications.api.DialogV2.confirm({
     window: { title: game.i18n?.localize("INSPECTRES.DialogBankruptcyRestart") ?? "Franchise Bankruptcy Restart" },
+    render: stopDialogSubmitPropagation,
     content: `
       <p>${game.i18n?.localize("INSPECTRES.BankruptcyRestartWarning") ?? "Franchise is bankrupt. Restart requires:"}</p>
       <ul>

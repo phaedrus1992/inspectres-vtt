@@ -18,6 +18,7 @@ import { getCurrentDay } from "../agent/recovery-utils.js";
 import { type ItemRarity, isRollSufficient, checkDefect } from "../mission/requirements-checker.js";
 import { prepareSkillRollContext, type SkillRollContextInput } from "../agent/skill-roll-dialog.js";
 import { checkTechnologyRollRequirements } from "./skill-roll-executor.js";
+import { stopDialogSubmitPropagation } from "../utils/dialog-utils.js";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -116,18 +117,19 @@ async function getPlayerPenaltyChoice(
   }));
 
   const content = `
-    <form class="inspectres-penalty-dialog">
+    <div class="inspectres-penalty-dialog">
       <p><strong>${game.i18n?.localize("INSPECTRES.PenaltyDialogPrompt") ?? "Choose a skill to penalize"}</strong></p>
       <p>${game.i18n?.format("INSPECTRES.PenaltyDialogAmount", { amount: String(penaltyAmount) }) ?? `Penalty: -${penaltyAmount} die`}</p>
       ${skills.map((skill, idx) => `
         <label><input type="radio" name="selectedSkill" value="${skill.name}"${idx === 0 ? " checked" : ""}> ${game.i18n?.localize(`INSPECTRES.Skill.${skill.name}`) ?? skill.name} (${skill.rank})</label>
       `).join("")}
-    </form>
+    </div>
   `;
 
   const result = await foundry.applications.api.DialogV2.wait({
     window: { title: game.i18n?.localize("INSPECTRES.PenaltyDialogTitle") ?? "Stress Penalty" },
     rejectClose: false,
+    render: stopDialogSubmitPropagation,
     content,
     buttons: [
       {
@@ -548,6 +550,7 @@ async function buildSkillRollDialog(opts: SkillRollDialogOptions): Promise<Skill
   const result = await foundry.applications.api.DialogV2.wait({
     window: { title: `${i18n?.localize("INSPECTRES.SkillRoll") ?? "Skill Roll"}: ${opts.skillName}` },
     rejectClose: false,
+    render: stopDialogSubmitPropagation,
     content,
     buttons: [
       {

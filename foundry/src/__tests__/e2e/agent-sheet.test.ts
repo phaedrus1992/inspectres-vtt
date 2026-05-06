@@ -12,7 +12,6 @@ import {
   getChatMessageCount,
   waitForNewChatMessage,
   waitForActorFieldChanged,
-  rejoinIfRedirected,
 } from "./pages/index.js";
 
 const SKILL_NAMES = ["academics", "athletics", "technology", "contact"] as const;
@@ -67,10 +66,6 @@ test.describe("AgentSheet — actions, stats, and notes", () => {
       await page.click('dialog button[data-action="roll"]').catch(() =>
         page.click('dialog button[type="submit"]:not([data-action="cancel"])').catch(() => {}),
       );
-      // v14 redirects to /join after dialog submit. Rejoin then re-render the sheet —
-      // without the re-render, the DOM has no sheet element for subsequent interactions.
-      await rejoinIfRedirected(page, workerUsername);
-      await sheet.rerender();
       await waitForNewChatMessage(page, beforeRoll);
     }
 

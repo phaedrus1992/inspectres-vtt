@@ -9,6 +9,7 @@ import { enterDebtMode, attemptLoanRepayment } from "./bankruptcy-handler.js";
 import { emitMissionPoolUpdated } from "../mission/socket.js";
 import { getCurrentDaySetting, setCurrentDaySetting } from "../utils/settings-utils.js";
 import { applyEndOfSessionBonuses, initiateBankruptcyRestart } from "./vacation-automation.js";
+import { stopDialogSubmitPropagation } from "../utils/dialog-utils.js";
 
 // HandlebarsApplicationMixin provides _renderHTML/_replaceHTML required by ApplicationV2 for PARTS-based sheets
 export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.sheets.ActorSheetV2) {
@@ -163,6 +164,7 @@ export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicati
     const confirmed = await foundry.applications.api.DialogV2.confirm({
       window: { title: FranchiseSheet.localize("INSPECTRES.ConfirmVacationTitle", "Begin Vacation") },
       content: FranchiseSheet.localize("INSPECTRES.ConfirmVacationBody", "End mission and begin vacation? This will open the distribution dialog."),
+      render: stopDialogSubmitPropagation,
     });
 
     if (!confirmed) return;
@@ -263,6 +265,7 @@ export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicati
     try {
       const result = await foundry.applications.api.DialogV2.wait({
         window: { title: opts.title },
+        render: stopDialogSubmitPropagation,
         content: `
           <div class="form-group">
             <label for="${opts.fieldName}">${opts.label}</label>

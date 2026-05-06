@@ -87,6 +87,10 @@ declare namespace foundry.applications.api {
       rejectClose?: boolean;
       modal?: boolean;
       buttons?: DialogV2Button[];
+      /** Called each time the dialog renders. Use to attach extra listeners. */
+      render?: ((event: Event, dialog: foundry.applications.api.DialogV2) => void) | null;
+      /** Called when the dialog closes under any circumstances. */
+      close?: ((event: Event, dialog: foundry.applications.api.DialogV2) => unknown) | null;
     }): Promise<unknown>;
 
     static prompt(config: {
@@ -96,6 +100,8 @@ declare namespace foundry.applications.api {
       rejectClose?: boolean;
       modal?: boolean;
       buttons?: DialogV2Button[];
+      render?: ((event: Event, dialog: foundry.applications.api.DialogV2) => void) | null;
+      close?: ((event: Event, dialog: foundry.applications.api.DialogV2) => unknown) | null;
     }): Promise<unknown>;
 
     static confirm(config: {
@@ -103,6 +109,8 @@ declare namespace foundry.applications.api {
       window?: { title?: string };
       rejectClose?: boolean;
       modal?: boolean;
+      render?: ((event: Event, dialog: foundry.applications.api.DialogV2) => void) | null;
+      close?: ((event: Event, dialog: foundry.applications.api.DialogV2) => unknown) | null;
     }): Promise<boolean>;
   }
 

@@ -1,5 +1,4 @@
 import type { Page } from "@playwright/test";
-import { rejoinIfRedirected } from "./helpers.js";
 
 const SHEET_WAIT_TIMEOUT = 15_000;
 
@@ -55,21 +54,21 @@ export class AgentSheetPage {
 
   /** Click the roll button for a named skill. */
   async clickSkillRoll(skill: string): Promise<void> {
-    await this.safeClick(
+    await this.page.click(
       `${this.sheetSelector()} [data-action="skillRoll"][data-skill="${skill}"]`,
     );
   }
 
   /** Click the increase stepper for a named skill. */
   async clickSkillIncrease(skill: string): Promise<void> {
-    await this.safeClick(
+    await this.page.click(
       `${this.sheetSelector()} [data-action="skillIncrease"][data-skill="${skill}"]`,
     );
   }
 
   /** Click the decrease stepper for a named skill. */
   async clickSkillDecrease(skill: string): Promise<void> {
-    await this.safeClick(
+    await this.page.click(
       `${this.sheetSelector()} [data-action="skillDecrease"][data-skill="${skill}"]`,
     );
   }
@@ -102,68 +101,30 @@ export class AgentSheetPage {
 
   /** Click the stress roll button. */
   async clickStressRoll(): Promise<void> {
-    await this.safeClick(`${this.sheetSelector()} [data-action="stressRoll"]`);
+    await this.page.click(`${this.sheetSelector()} [data-action="stressRoll"]`);
   }
 
   /** Click the toggle cool button for a pip index. */
   async clickToggleCool(pipIndex: number): Promise<void> {
-    await this.safeClick(
+    await this.page.click(
       `${this.sheetSelector()} [data-action="toggleCool"][data-index="${pipIndex}"]`,
     );
   }
 
   /** Click the add characteristic button. */
   async clickAddCharacteristic(): Promise<void> {
-    await this.safeClick(`${this.sheetSelector()} [data-action="addCharacteristic"]`);
+    await this.page.click(`${this.sheetSelector()} [data-action="addCharacteristic"]`);
   }
 
   /** Click the remove characteristic button for a given index. */
   async clickRemoveCharacteristic(index: number): Promise<void> {
-    await this.safeClick(
+    await this.page.click(
       `${this.sheetSelector()} [data-action="removeCharacteristic"][data-index="${index}"]`,
     );
   }
 
-  /**
-   * Click a selector, guarding against /join redirects. If a redirect fires,
-   * rejoin, wait for game.ready, re-render the sheet, then retry the click once
-   * (also guarded). A second redirect on retry is handled by rejoin only — no
-   * infinite retry loop.
-   */
-  private async safeClick(selector: string): Promise<void> {
-    const wasRedirected = await this.clickWithRedirectGuard(selector);
-    if (!wasRedirected) return;
-
-    await this.rerenderSheet();
-    await this.clickWithRedirectGuard(selector);
-  }
-
-  /** Click selector and detect /join redirects that fire async after the click. */
-  private async clickWithRedirectGuard(selector: string): Promise<boolean> {
-    await this.page.click(selector).catch(() => {});
-    // Poll for /join for up to 2s after click — Foundry processes the action
-    // server-side and may redirect asynchronously after the click resolves.
-    // Polling avoids long-lived waitForURL promises that can outlive the test.
-    let redirected = false;
-    for (let i = 0; i < 8; i++) {
-      await new Promise<void>(resolve => { setTimeout(resolve, 250); });
-      if (this.page.url().includes("/join")) {
-        redirected = true;
-        break;
-      }
-    }
-    await rejoinIfRedirected(this.page, this.workerUsername);
-    return redirected;
-  }
-
-  /** Re-render this actor's sheet after a rejoin so the DOM is valid again. */
+  /** Re-render this actor's sheet (e.g. after a data update that doesn't auto-render). */
   async rerender(): Promise<void> {
-    return this.rerenderSheet();
-  }
-
-  private async rerenderSheet(): Promise<void> {
-    // Wait for game to be ready before trying to render — rejoin is async and
-    // game.actors may not be populated yet immediately after the redirect clears.
     await this.page.waitForFunction(
       // @ts-expect-error - Foundry runtime global
       () => globalThis.game?.ready === true,
