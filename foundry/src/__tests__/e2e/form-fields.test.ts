@@ -9,6 +9,7 @@
  */
 
 import { test, expect, ELEMENT_WAIT_TIMEOUT } from "./fixtures";
+import { rejoinIfRedirected } from "./pages/index.js";
 
 // ApplicationV2 re-renders briefly detach elements. waitForSelector on ".inspectres" can
 // time out even when the sheet is logically visible. Use waitForFunction + getBoundingClientRect
@@ -27,7 +28,7 @@ async function waitForSheet(page: import("@playwright/test").Page): Promise<void
 }
 
 test.describe("Form field rendering and input validation (E2E - Playwright)", () => {
-  test("form fields: visibility, styling, interaction, validation, and accessibility", async ({ page }) => {
+  test("form fields: visibility, styling, interaction, validation, and accessibility", async ({ page, workerUsername }) => {
     await waitForSheet(page);
 
     // --- visibility and basic styling ---
@@ -108,6 +109,29 @@ test.describe("Form field rendering and input validation (E2E - Playwright)", ()
 
     // --- textarea in notes tab ---
     await page.click(".inspectres [role='tab'][aria-controls='tab-notes']");
+    if (page.url().includes("/join")) {
+      await rejoinIfRedirected(page, workerUsername);
+      // Reopen the franchise sheet after rejoin — the redirect closed it.
+      await page.evaluate(async (username: string) => {
+        const actorName = `E2E Franchise ${username}`;
+        // @ts-expect-error - Foundry runtime global
+        const franchise = globalThis.game?.actors?.find(
+          (a: { type: string; name: string }) => a.type === "franchise" && a.name === actorName,
+        );
+        if (franchise) await franchise.sheet.render(true);
+      }, workerUsername);
+      await page.waitForFunction(
+        () => {
+          const el = document.querySelector(".inspectres");
+          if (!el) return false;
+          const rect = (el as HTMLElement).getBoundingClientRect();
+          return rect.width > 0 && rect.height > 0;
+        },
+        undefined,
+        { timeout: 15_000 },
+      );
+      await page.click(".inspectres [role='tab'][aria-controls='tab-notes']");
+    }
     await page.waitForSelector(".inspectres textarea", { timeout: ELEMENT_WAIT_TIMEOUT });
 
     const textarea = page.locator(".inspectres textarea").first();
