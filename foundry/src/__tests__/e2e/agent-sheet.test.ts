@@ -251,12 +251,17 @@ test.describe("AgentSheet — conditional UI paths", () => {
     }, agentId);
 
     // --- recovery banner ---
-    const bannerVisible = await page.evaluate((id: string) => {
-      const banner = document.querySelector(`.inspectres[id*="${id}"] .recovery-banner`);
-      if (!banner) return false;
-      const rect = (banner as HTMLElement).getBoundingClientRect();
-      return rect.width > 0 && rect.height > 0;
-    }, agentId);
+    // waitForFunction: render(true) above is async; poll until the banner appears.
+    const bannerVisible = await page.waitForFunction(
+      (id: string) => {
+        const banner = document.querySelector(`.inspectres[id*="${id}"] .recovery-banner`);
+        if (!banner) return false;
+        const rect = (banner as HTMLElement).getBoundingClientRect();
+        return rect.width > 0 && rect.height > 0;
+      },
+      agentId,
+      { timeout: ELEMENT_WAIT_TIMEOUT },
+    ).then(() => true).catch(() => false);
     expect(bannerVisible).toBe(true);
 
     await page.screenshot({

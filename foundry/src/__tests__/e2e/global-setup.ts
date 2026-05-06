@@ -79,7 +79,9 @@ export function poolUsername(slotIndex: number): string {
 export const POOL_USERNAMES: readonly string[] = Array.from({ length: POOL_SIZE }, (_, i) => poolUsername(i));
 
 async function declineUsageDataSharing(page: Page): Promise<void> {
-  const decline = await page.$('button[data-action="no"]');
+  // The consent dialog appears asynchronously after page load — wait briefly for it.
+  // If it doesn't appear within 3s, assume it was already dismissed (re-run case).
+  const decline = await page.waitForSelector('button[data-action="no"]', { timeout: 3_000 }).catch(() => null);
   if (decline) {
     await decline.click();
     await page.waitForURL((u) => !u.pathname.includes("/consent"), { timeout: 5_000 }).catch(() => {});
@@ -123,8 +125,18 @@ async function acceptLicenseIfPresent(page: Page): Promise<void> {
 }
 
 async function dismissTourOverlay(page: Page): Promise<void> {
-  // Foundry shows a guided tour overlay on first visit; ESC closes it.
-  await page.keyboard.press("Escape");
+  // Foundry shows a guided tour overlay on first visit. ESC closes it.
+  // Only press ESC if the overlay is actually present — avoids closing
+  // other dialogs (e.g. a stale consent dialog) on re-runs.
+  const overlay = await page.$(".tour-overlay");
+  if (overlay) {
+    await page.keyboard.press("Escape");
+    await page.waitForFunction(
+      () => !document.querySelector(".tour-overlay"),
+      undefined,
+      { timeout: 3_000 },
+    ).catch(() => {});
+  }
 }
 
 /**
