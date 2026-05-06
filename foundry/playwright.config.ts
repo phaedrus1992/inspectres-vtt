@@ -2,17 +2,17 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig, devices } from "@playwright/test";
-import { WORKER_COUNT, workerStorageStatePath } from "./src/__tests__/e2e/global-setup.js";
+import { WORKER_COUNT, POOL_SIZE, poolStorageStatePath } from "./src/__tests__/e2e/global-setup.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// Seed empty storage-state files for each worker so global-setup can overwrite them.
-// Playwright requires the storageState path to exist before the run when set statically,
-// but we set it dynamically in fixtures — these files exist only as a creation guard.
+// Seed empty storage-state files for each pool slot so global-setup can overwrite them.
+// These files exist only as creation guards — the pool fixture no longer reads them at
+// test time (it joins /join directly), but global-setup still writes them for reference.
 const storageTmpDir = path.resolve(__dirname, "./.tmp");
 fs.mkdirSync(storageTmpDir, { recursive: true });
-for (let i = 0; i < WORKER_COUNT; i++) {
-  const statePath = workerStorageStatePath(i);
+for (let i = 0; i < POOL_SIZE; i++) {
+  const statePath = poolStorageStatePath(i);
   if (!fs.existsSync(statePath)) {
     fs.writeFileSync(statePath, JSON.stringify({ cookies: [], origins: [] }));
   }
@@ -34,7 +34,7 @@ export default defineConfig({
     baseURL: "http://localhost:30000",
     trace: "on-first-retry",
     screenshot: "only-on-failure",
-    // storageState is set per-worker in fixtures.ts via the workerStorageState fixture.
+    // storageState is NOT set here — pool-based fixtures claim a free slot at runtime.
   },
 
   outputDir: "./test-results/e2e-screenshots",
