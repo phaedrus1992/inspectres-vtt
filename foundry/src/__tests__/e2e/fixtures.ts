@@ -99,7 +99,14 @@ async function openFranchiseSheet(page: Page, workerSlot: number): Promise<void>
  * browser-side errors (validation, render exceptions, hook failures) surface
  * directly in the test output instead of requiring a manual repro. See #428.
  */
-export const test = base.extend({
+export const test = base.extend<{ workerUsername: string }>({
+  // Expose the worker's Foundry username so tests can pass it to page objects
+  // that need to rejoin as the correct user on /join redirects.
+  // oxlint-disable-next-line no-empty-pattern
+  workerUsername: async ({}, use, testInfo) => {
+    await use(workerUsername(testInfo.workerIndex % WORKER_COUNT));
+  },
+
   // Override the context fixture to inject per-worker storage state.
   // Playwright creates one BrowserContext per test; by overriding `context` we can
   // seed it with the cookies captured for this worker's Foundry user in global-setup.

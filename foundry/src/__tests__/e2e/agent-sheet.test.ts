@@ -44,8 +44,8 @@ test.describe("AgentSheet — actions, stats, and notes", () => {
     await deleteActor(page, agentId);
   });
 
-  test("skill actions, roll, visibility, and tab content", async ({ page }) => {
-    const sheet = await openAgentSheet(page, agentId);
+  test("skill actions, roll, visibility, and tab content", async ({ page, workerUsername }) => {
+    const sheet = await openAgentSheet(page, agentId, workerUsername);
 
     // --- skillRoll: produces a chat message ---
     const beforeRoll = await getChatMessageCount(page);
@@ -225,7 +225,7 @@ test.describe("AgentSheet — conditional UI paths", () => {
   // recovery banner and penalty line operate on independent system fields
   // (isDead/daysOutOfAction/recoveryStartedAt vs stress/skills.academics.penalty),
   // so both states can be applied to a single actor in sequence.
-  test("recovery banner visible + skill penalty line visible", async ({ page }) => {
+  test("recovery banner visible + skill penalty line visible", async ({ page, workerUsername }) => {
     // Set all conditional fields at once — no conflict between them
     await page.evaluate(async (id: string) => {
       // @ts-expect-error - Foundry runtime global
@@ -241,7 +241,7 @@ test.describe("AgentSheet — conditional UI paths", () => {
       });
     }, agentId);
 
-    await openAgentSheet(page, agentId);
+    await openAgentSheet(page, agentId, workerUsername);
 
     // Force re-render so updated fields are reflected in the DOM
     await page.evaluate(async (id: string) => {

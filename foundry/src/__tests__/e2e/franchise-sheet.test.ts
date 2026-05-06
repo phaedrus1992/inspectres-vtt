@@ -39,8 +39,8 @@ test.describe("FranchiseSheet — roll actions and mission tracker", () => {
 
   // bankRoll, clientRoll, and openMissionTracker all operate independently:
   // clientRoll does not consume bank dice; mission tracker is pure UI state.
-  test("bankRoll + clientRoll produce chat messages; mission tracker opens", async ({ page }) => {
-    const sheet = await openFranchiseSheet(page, franchiseId);
+  test("bankRoll + clientRoll produce chat messages; mission tracker opens", async ({ page, workerUsername }) => {
+    const sheet = await openFranchiseSheet(page, franchiseId, workerUsername);
 
     // Bank roll
     const beforeBank = await getChatMessageCount(page);
@@ -114,14 +114,14 @@ test.describe("FranchiseSheet — day controls", () => {
   });
 
   // Post-state of advance (day N+1) is valid pre-state for regress → day N.
-  test("advanceDay + regressDay — currentDay increments then decrements", async ({ page }) => {
+  test("advanceDay + regressDay — currentDay increments then decrements", async ({ page, workerUsername }) => {
     // Start at a known value so regress never hits the floor
     await page.evaluate(async () => {
       // @ts-expect-error - Foundry runtime global
       await globalThis.game?.settings?.set("inspectres", "currentDay", 5);
     });
 
-    const sheet = await openFranchiseSheet(page, franchiseId);
+    const sheet = await openFranchiseSheet(page, franchiseId, workerUsername);
     const initial = await sheet.getCurrentDaySetting();
 
     await sheet.clickAdvanceDay();
@@ -187,8 +187,8 @@ test.describe("FranchiseSheet — debt mode", () => {
     await deleteActor(page, franchiseId);
   });
 
-  test("toggleDebtMode — debtMode flag changes", async ({ page }) => {
-    const sheet = await openFranchiseSheet(page, franchiseId);
+  test("toggleDebtMode — debtMode flag changes", async ({ page, workerUsername }) => {
+    const sheet = await openFranchiseSheet(page, franchiseId, workerUsername);
     await sheet.openTab("notes");
 
     const before = await page.evaluate((id: string) => {
@@ -228,8 +228,8 @@ test.describe("FranchiseSheet — form-bound inputs", () => {
 
   // bank, description, and missionGoal are independent fields; filling each in
   // sequence on the same actor produces no state conflict.
-  test("bank, description, and missionGoal inputs persist via actor.update", async ({ page }) => {
-    const sheet = await openFranchiseSheet(page, franchiseId);
+  test("bank, description, and missionGoal inputs persist via actor.update", async ({ page, workerUsername }) => {
+    const sheet = await openFranchiseSheet(page, franchiseId, workerUsername);
 
     // --- bank input ---
     const bankInput = page.locator(

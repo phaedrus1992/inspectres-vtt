@@ -6,10 +6,12 @@ const SHEET_WAIT_TIMEOUT = 15_000;
 export class AgentSheetPage {
   readonly page: Page;
   readonly actorId: string;
+  readonly workerUsername: string;
 
-  constructor(page: Page, actorId: string) {
+  constructor(page: Page, actorId: string, workerUsername: string) {
     this.page = page;
     this.actorId = actorId;
+    this.workerUsername = workerUsername;
   }
 
   /** Selector scoped to this actor's sheet element. */
@@ -150,7 +152,7 @@ export class AgentSheetPage {
         break;
       }
     }
-    await rejoinIfRedirected(this.page);
+    await rejoinIfRedirected(this.page, this.workerUsername);
     return redirected;
   }
 

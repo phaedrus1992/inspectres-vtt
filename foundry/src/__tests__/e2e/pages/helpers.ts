@@ -38,6 +38,7 @@ export async function deleteActor(page: Page, actorId: string): Promise<void> {
 export async function openAgentSheet(
   page: Page,
   actorId: string,
+  workerUsername: string,
 ): Promise<AgentSheetPage> {
   await page.evaluate(async (id: string) => {
     // @ts-expect-error - Foundry runtime global
@@ -46,7 +47,7 @@ export async function openAgentSheet(
     await actor.sheet.render(true);
   }, actorId);
 
-  const sheetPage = new AgentSheetPage(page, actorId);
+  const sheetPage = new AgentSheetPage(page, actorId, workerUsername);
   await sheetPage.waitForVisible();
   return sheetPage;
 }
@@ -55,6 +56,7 @@ export async function openAgentSheet(
 export async function openFranchiseSheet(
   page: Page,
   actorId: string,
+  workerUsername: string,
 ): Promise<FranchiseSheetPage> {
   await page.evaluate(async (id: string) => {
     // @ts-expect-error - Foundry runtime global
@@ -63,7 +65,7 @@ export async function openFranchiseSheet(
     await actor.sheet.render(true);
   }, actorId);
 
-  const sheetPage = new FranchiseSheetPage(page, actorId);
+  const sheetPage = new FranchiseSheetPage(page, actorId, workerUsername);
   await sheetPage.waitForVisible();
   return sheetPage;
 }
@@ -185,24 +187,29 @@ export async function waitForActorFieldEquals(
 
 /**
  * If the page has been redirected to /join (e.g. v14 dialog submit behaviour
- * or a mid-test session expiry), re-join the game using the first available
- * user slot so the session remains valid for fixture teardown's logOut call.
+ * or a mid-test session expiry), re-join the game as `workerUsername`.
+ *
+ * The username must match the worker's assigned user — using the first available
+ * user would log in as the wrong worker, causing fixture teardown to log out the
+ * wrong user and leaving the correct worker's session slot occupied for the next test.
  *
  * Call this after any action that might trigger a page-level redirect on v14.
  */
-export async function rejoinIfRedirected(page: Page): Promise<void> {
+export async function rejoinIfRedirected(page: Page, workerUsername: string): Promise<void> {
   if (!page.url().includes("/join")) return;
 
-  const username = await page.evaluate(() => {
-    const opts = Array.from(
-      (document.querySelector('select[name="userid"]') as HTMLSelectElement | null)?.options ?? [],
-    );
-    return opts.find((o) => !o.disabled && o.value !== "")?.text ?? null;
-  });
+  await page.waitForFunction(
+    (name: string) => {
+      const select = document.querySelector('select[name="userid"]') as HTMLSelectElement | null;
+      if (!select) return false;
+      const opt = Array.from(select.options).find((o) => o.text === name);
+      return opt != null && !opt.disabled;
+    },
+    workerUsername,
+    { timeout: REJOIN_TIMEOUT },
+  ).catch(() => {});
 
-  if (!username) return;
-
-  await page.selectOption('select[name="userid"]', { label: username }).catch(() => {});
+  await page.selectOption('select[name="userid"]', { label: workerUsername }).catch(() => {});
   await page.click('button[type="submit"]:has-text("Join Game Session")').catch(() => {});
   await page.waitForURL(/\/game/, { timeout: REJOIN_TIMEOUT }).catch(() => {});
   await page.waitForFunction(

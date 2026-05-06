@@ -6,10 +6,12 @@ const SHEET_WAIT_TIMEOUT = 15_000;
 export class FranchiseSheetPage {
   readonly page: Page;
   readonly actorId: string;
+  readonly workerUsername: string;
 
-  constructor(page: Page, actorId: string) {
+  constructor(page: Page, actorId: string, workerUsername: string) {
     this.page = page;
     this.actorId = actorId;
+    this.workerUsername = workerUsername;
   }
 
   sheetSelector(): string {
@@ -104,7 +106,7 @@ export class FranchiseSheetPage {
         break;
       }
     }
-    await rejoinIfRedirected(this.page);
+    await rejoinIfRedirected(this.page, this.workerUsername);
     return redirected;
   }
 
