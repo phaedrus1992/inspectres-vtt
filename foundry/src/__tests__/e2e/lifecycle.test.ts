@@ -180,7 +180,7 @@ test.describe("Actor lifecycle — no console errors", () => {
 });
 
 test.describe("Actor creation via Foundry UI flow", () => {
-  test("create agent via actors directory UI — no console errors", async ({ page }) => {
+  test("create agent via actors directory UI — no console errors", async ({ page, workerUsername }) => {
     // Dismiss any lingering notifications
     await page.evaluate(() => {
       for (const el of document.querySelectorAll(".notification.permanent")) {
@@ -237,7 +237,7 @@ test.describe("Actor creation via Foundry UI flow", () => {
         }
         // If Foundry redirected to /join (v14 behaviour after dialog submit), re-join
         // so the session stays valid for teardown's logOut call.
-        await rejoinIfRedirected(page);
+        await rejoinIfRedirected(page, workerUsername);
         if (!page.url().includes("/join")) {
           // Wait for actor to appear in game.actors instead of a fixed sleep.
           await page.waitForFunction(

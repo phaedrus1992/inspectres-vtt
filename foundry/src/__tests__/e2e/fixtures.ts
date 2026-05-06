@@ -2,7 +2,7 @@ import { test as base, type Page } from "@playwright/test";
 export { expect } from "@playwright/test";
 
 import { ConsoleBuffer } from "./console-capture";
-import { workerStorageStatePath, workerUsername, E2E_VIEWPORT, WORKER_COUNT } from "./global-setup.js";
+import { POOL_USERNAMES, E2E_VIEWPORT } from "./global-setup.js";
 
 const JOIN_TIMEOUT = 60_000;
 const READY_TIMEOUT = 60_000;
@@ -37,11 +37,11 @@ async function unpauseGame(page: Page): Promise<void> {
   });
 }
 
-async function openFranchiseSheet(page: Page, workerSlot: number): Promise<void> {
-  // Each worker opens its own franchise actor to avoid parallel render collisions.
-  // With fullyParallel, two workers hitting the same actor simultaneously can cause
-  // double-render or visibility conflicts in the shared Foundry session.
-  const actorName = `E2E Franchise ${workerSlot}`;
+async function openFranchiseSheet(page: Page, username: string): Promise<void> {
+  // Each pool slot opens its own franchise actor (keyed by username) to avoid
+  // parallel render collisions. With fullyParallel, two workers hitting the same
+  // actor simultaneously can cause double-render or visibility conflicts.
+  const actorName = `E2E Franchise ${username}`;
   const actorId = await page.evaluate(async (name: string) => {
     // @ts-expect-error - Foundry runtime globals
     const ActorCls = globalThis.CONFIG?.Actor?.documentClass ?? globalThis.Actor;
@@ -79,39 +79,67 @@ async function openFranchiseSheet(page: Page, workerSlot: number): Promise<void>
 }
 
 /**
+ * Claims a free pool slot by scanning the /join page for the first enabled pool user.
+ *
+ * Foundry's session-disable mechanism (option disabled on /join while a session is
+ * active) is the coordination signal — no application-level locks are needed. Pool
+ * users whose options are enabled are free; the first one found is claimed by returning
+ * its username for the caller to select and join.
+ *
+ * Returns the username of the claimed slot, or throws if JOIN_TIMEOUT elapses.
+ */
+async function claimPoolSlot(page: Page): Promise<string> {
+  const usernames = [...POOL_USERNAMES];
+  const claimed = await page.waitForFunction(
+    (names: string[]) => {
+      const select = document.querySelector('select[name="userid"]') as HTMLSelectElement | null;
+      if (!select) return null;
+      for (const name of names) {
+        const opt = Array.from(select.options).find((o) => o.text === name);
+        if (opt != null && !opt.disabled) return name;
+      }
+      return null;
+    },
+    usernames,
+    { timeout: JOIN_TIMEOUT },
+  );
+  const username = await claimed.jsonValue() as string | null;
+  if (!username) throw new Error("No free pool slot found — pool may be undersized");
+  return username;
+}
+
+/**
  * Per-test fixture that ensures `page` is in the Foundry game UI with a sheet open.
  *
- * Each Playwright worker authenticates as a distinct Foundry user (test-worker-N),
- * provisioned by global-setup.ts. This allows fullyParallel: true without session
- * conflicts — each worker has its own browser context and Foundry session.
+ * Tests claim a free pool slot from a set of pre-provisioned Foundry users
+ * (test-pool-0 … test-pool-N). A slot is "free" when its user option on the /join
+ * page is enabled — Foundry disables it while a session is active, which serves as
+ * the distributed coordination mechanism. Pool size = WORKER_COUNT * (MAX_RETRIES + 1),
+ * so there are always enough free slots even during CI retry runs.
  *
- * Foundry sessions don't survive across browser contexts, so the auto-launched world
- * places each fresh context on /join. This fixture:
- *   1. Creates a browser context seeded with the worker's Foundry session cookies.
+ * This fixture:
+ *   1. Navigates to /join and claims the first available pool user.
  *   2. Subscribes to browser console errors/warnings and uncaught page errors.
- *   3. Joins the game as the worker's assigned user (test-worker-N).
+ *   3. Joins the game as the claimed user.
  *   4. Waits for `game.ready`.
  *   5. Dismisses permanent startup notifications.
  *   6. Unpauses the game.
- *   7. Opens a franchise sheet so DOM elements expected by tests (tabs, inputs, etc.) exist.
+ *   7. Opens a franchise sheet so DOM elements expected by tests exist.
  *
  * On failure, the captured console log is attached to the Playwright report so
  * browser-side errors (validation, render exceptions, hook failures) surface
  * directly in the test output instead of requiring a manual repro. See #428.
  */
-export const test = base.extend({
-  // Override the context fixture to inject per-worker storage state.
-  // Playwright creates one BrowserContext per test; by overriding `context` we can
-  // seed it with the cookies captured for this worker's Foundry user in global-setup.
-  context: async ({ browser }, use, testInfo) => {
-    // Retry workers can get indices beyond WORKER_COUNT (Playwright spawns extra workers
-    // when retrying failed tests). Wrap to stay within provisioned users + storage files.
-    const workerSlot = testInfo.workerIndex % WORKER_COUNT;
-    const statePath = workerStorageStatePath(workerSlot);
-    const ctx = await browser.newContext({
-      storageState: statePath,
-      viewport: E2E_VIEWPORT,
-    });
+export const test = base.extend<{ workerUsername: string }>({
+  // Expose the claimed pool username so tests can pass it to page objects
+  // that need to rejoin as the correct user on /join redirects.
+  workerUsername: async ({ page }, use) => {
+    // page fixture runs first and stores the claimed username on the page object.
+    await use((page as unknown as Record<string, unknown>)["__poolUsername"] as string ?? "");
+  },
+
+  context: async ({ browser }, use) => {
+    const ctx = await browser.newContext({ viewport: E2E_VIEWPORT });
     await use(ctx);
     await ctx.close();
   },
@@ -129,27 +157,21 @@ export const test = base.extend({
     page.on("console", consoleHandler);
     page.on("pageerror", errorHandler);
 
-    await page.goto("/", { waitUntil: "domcontentloaded" });
+    // Navigate to /join to scan which pool slots are free.
+    // Pool users are created with no password, so no auth is needed — any test can
+    // navigate to /join and join as whichever pool user is currently free.
+    await page.goto("/join", { waitUntil: "domcontentloaded" });
 
-    if (page.url().includes("/join")) {
-      const username = workerUsername(testInfo.workerIndex % WORKER_COUNT);
-      // Foundry keeps user sessions active briefly after the context closes. Wait for
-      // the user option to become enabled before selecting it — the prior session from
-      // global-setup or a previous test may still hold the session slot server-side.
-      await page.waitForFunction(
-        (name: string) => {
-          const select = document.querySelector('select[name="userid"]') as HTMLSelectElement | null;
-          if (!select) return false;
-          const opt = Array.from(select.options).find((o) => o.text === name);
-          return opt != null && !opt.disabled;
-        },
-        username,
-        { timeout: JOIN_TIMEOUT },
-      );
-      await page.selectOption('select[name="userid"]', { label: username });
-      await page.click('button[type="submit"]:has-text("Join Game Session")');
-      await page.waitForURL(/\/game/, { timeout: JOIN_TIMEOUT });
-    }
+    // Claim the first free pool slot. Foundry disables the option while a session is
+    // active, so scanning for an enabled pool user option is the distributed lock.
+    const username = await claimPoolSlot(page);
+
+    // Store username on the page object for the workerUsername fixture to read.
+    (page as unknown as Record<string, unknown>)["__poolUsername"] = username;
+
+    await page.selectOption('select[name="userid"]', { label: username });
+    await page.click('button[type="submit"]:has-text("Join Game Session")');
+    await page.waitForURL(/\/game/, { timeout: JOIN_TIMEOUT });
 
     await page.waitForFunction(
       // @ts-expect-error - Foundry runtime global
@@ -160,29 +182,24 @@ export const test = base.extend({
 
     await dismissStartupNotifications(page);
     await unpauseGame(page);
-    await openFranchiseSheet(page, testInfo.workerIndex % WORKER_COUNT);
+    await openFranchiseSheet(page, username);
 
     await use(page);
 
     // Call game.logOut() to close the Foundry server-side session before the context
     // is destroyed. Without this, Foundry keeps the user marked as "in session" until
     // its internal timeout (~30-60s), which disables that user's option on the /join
-    // page for the next test — causing the "option being selected is not enabled" error.
+    // page for the next test.
     try {
       await page.evaluate(() => {
         // @ts-expect-error - Foundry runtime global
         if (typeof globalThis.game?.logOut === "function") globalThis.game.logOut();
       });
-      // Brief wait for the logout navigation to initiate.
       await page.waitForURL(/\/join/, { timeout: 3_000 }).catch(() => {});
     } catch {
       // Best-effort: if the page is already closed or Foundry isn't ready, ignore.
-      // The waitForFunction option-enabled guard in the next test is the safety net.
     }
 
-    // Explicit listener cleanup to prevent stale handlers on test retry.
-    // Playwright closes the BrowserContext between tests, but retained listeners
-    // can theoretically fire on reused page objects during retry scenarios.
     page.off("console", consoleHandler);
     page.off("pageerror", errorHandler);
 
@@ -193,13 +210,9 @@ export const test = base.extend({
           contentType: "text/plain",
         });
       } catch (err: unknown) {
-        // Don't let an attachment failure mask the actual test failure — that's
-        // the whole point of capturing the buffer. Log and move on so the
-        // original assertion error remains the reported result.
         const message = err instanceof Error ? err.message : String(err);
         console.warn(`Failed to attach browser-console.log: ${message}`);
       }
     }
   },
 });
-

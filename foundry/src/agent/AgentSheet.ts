@@ -14,6 +14,7 @@ import { computeRecoveryStatus, getCurrentDay } from "./recovery-utils.js";
 import { buildVacationDialog } from "./vacation-dialog.js";
 import { executeSkillRecovery } from "./skill-recovery.js";
 import { type FranchiseData } from "../franchise/franchise-schema.js";
+import { stopDialogSubmitPropagation } from "../utils/dialog-utils.js";
 
 function isSkillName(value: string | null): value is SkillName {
   return SKILL_NAMES.includes(value as SkillName);
@@ -54,6 +55,7 @@ async function buildStressRollDialog(agent: Actor): Promise<void> {
   const result = await foundry.applications.api.DialogV2.wait({
     window: { title: i18n?.localize("INSPECTRES.StressRoll") ?? "Stress Roll" },
     rejectClose: false,
+    render: stopDialogSubmitPropagation,
     content: `
       <div class="inspectres-roll-dialog">
         <label>${stressDiceLabel}: <input type="number" name="stressDice" min="1" max="5" value="1"></label>
@@ -488,6 +490,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     const result = await foundry.applications.api.DialogV2.wait({
       window: { title: i18n?.localize("INSPECTRES.EmergencyRecovery") ?? "Emergency Recovery" },
       rejectClose: false,
+      render: stopDialogSubmitPropagation,
       content: `
         <div class="inspectres-recovery-dialog">
           <label>${i18n?.localize("INSPECTRES.DaysOutOfAction") ?? "Days out of action"}: <input type="number" name="days" min="1" max="10" value="2"></label>
@@ -581,6 +584,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     const result = await foundry.applications.api.DialogV2.wait({
       window: { title: i18n?.localize("INSPECTRES.RestoreSkill") ?? "Restore Skill" },
       rejectClose: false,
+      render: stopDialogSubmitPropagation,
       content: `
         <div class="inspectres-restore-skill-dialog">
           <label>${i18n?.localize("INSPECTRES.DialogRestoreSkillLabel") ?? "Cool to spend (1 Cool = +1 skill)"}: <input type="number" name="cool" min="1" max="${maxCool}" value="1"></label>

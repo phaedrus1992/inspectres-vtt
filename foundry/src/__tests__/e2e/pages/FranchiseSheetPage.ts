@@ -1,15 +1,16 @@
 import type { Page } from "@playwright/test";
-import { rejoinIfRedirected } from "./helpers.js";
 
 const SHEET_WAIT_TIMEOUT = 15_000;
 
 export class FranchiseSheetPage {
   readonly page: Page;
   readonly actorId: string;
+  readonly workerUsername: string;
 
-  constructor(page: Page, actorId: string) {
+  constructor(page: Page, actorId: string, workerUsername: string) {
     this.page = page;
     this.actorId = actorId;
+    this.workerUsername = workerUsername;
   }
 
   sheetSelector(): string {
@@ -49,43 +50,31 @@ export class FranchiseSheetPage {
   }
 
   async clickBankRoll(): Promise<void> {
-    await this.safeClick(`${this.sheetSelector()} [data-action="bankRoll"]`);
+    await this.page.click(`${this.sheetSelector()} [data-action="bankRoll"]`);
   }
 
   async clickClientRoll(): Promise<void> {
-    await this.safeClick(`${this.sheetSelector()} [data-action="clientRoll"]`);
+    await this.page.click(`${this.sheetSelector()} [data-action="clientRoll"]`);
   }
 
   async clickOpenMissionTracker(): Promise<void> {
-    await this.safeClick(`${this.sheetSelector()} [data-action="openMissionTracker"]`);
+    await this.page.click(`${this.sheetSelector()} [data-action="openMissionTracker"]`);
   }
 
   async clickAdvanceDay(): Promise<void> {
-    await this.safeClick(`${this.sheetSelector()} [data-action="advanceDay"]`);
+    await this.page.click(`${this.sheetSelector()} [data-action="advanceDay"]`);
   }
 
   async clickRegressDay(): Promise<void> {
-    await this.safeClick(`${this.sheetSelector()} [data-action="regressDay"]`);
+    await this.page.click(`${this.sheetSelector()} [data-action="regressDay"]`);
   }
 
   async clickToggleDebtMode(): Promise<void> {
-    await this.safeClick(`${this.sheetSelector()} [data-action="toggleDebtMode"]`);
+    await this.page.click(`${this.sheetSelector()} [data-action="toggleDebtMode"]`);
   }
 
   async clickToggleCardsLocked(): Promise<void> {
-    await this.safeClick(`${this.sheetSelector()} [data-action="toggleCardsLocked"]`);
-  }
-
-  /**
-   * Click a selector, racing against a /join redirect that v14 can trigger on
-   * any action button click. Calls rejoinIfRedirected to restore the session.
-   */
-  private async safeClick(selector: string): Promise<void> {
-    await Promise.race([
-      this.page.click(selector),
-      this.page.waitForURL(/\/join/, { timeout: 5_000 }),
-    ]).catch(() => {});
-    await rejoinIfRedirected(this.page);
+    await this.page.click(`${this.sheetSelector()} [data-action="toggleCardsLocked"]`);
   }
 
   async getSystemData(): Promise<Record<string, unknown>> {

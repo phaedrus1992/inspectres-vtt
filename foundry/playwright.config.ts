@@ -2,17 +2,17 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig, devices } from "@playwright/test";
-import { WORKER_COUNT, workerStorageStatePath } from "./src/__tests__/e2e/global-setup.js";
+import { WORKER_COUNT, POOL_SIZE, poolStorageStatePath } from "./src/__tests__/e2e/global-setup.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// Seed empty storage-state files for each worker so global-setup can overwrite them.
-// Playwright requires the storageState path to exist before the run when set statically,
-// but we set it dynamically in fixtures — these files exist only as a creation guard.
+// Seed empty storage-state files for each pool slot so global-setup can overwrite them.
+// These files exist only as creation guards — the pool fixture no longer reads them at
+// test time (it joins /join directly), but global-setup still writes them for reference.
 const storageTmpDir = path.resolve(__dirname, "./.tmp");
 fs.mkdirSync(storageTmpDir, { recursive: true });
-for (let i = 0; i < WORKER_COUNT; i++) {
-  const statePath = workerStorageStatePath(i);
+for (let i = 0; i < POOL_SIZE; i++) {
+  const statePath = poolStorageStatePath(i);
   if (!fs.existsSync(statePath)) {
     fs.writeFileSync(statePath, JSON.stringify({ cookies: [], origins: [] }));
   }
@@ -26,14 +26,19 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: WORKER_COUNT,
   reporter: process.env["CI"] ? [["list"], ["html"]] : "html",
-  // 2 min per test: Foundry fixture setup (join + game.ready + sheet render) is ~30-60s
-  // in CI, leaving headroom for actual test assertions.
-  timeout: 120_000,
+  // 3 min per test: Foundry fixture setup (join + game.ready + sheet render) is ~30-60s
+  // in CI. Tests with multiple action clicks may trigger /join redirects mid-test
+  // (session expiry), each requiring a ~30s rejoin + re-render cycle.
+  timeout: 180_000,
+  // Hard wall-clock cap on the full run. If the suite exceeds this, something is wrong
+  // (flapping retries, hung test, pool contention) — fail fast, not burn CI minutes.
+  // CI cap matches the job-level timeout-minutes:15 in ci.yml.
+  globalTimeout: process.env["CI"] ? 15 * 60_000 : 10 * 60_000,
   use: {
     baseURL: "http://localhost:30000",
     trace: "on-first-retry",
     screenshot: "only-on-failure",
-    // storageState is set per-worker in fixtures.ts via the workerStorageState fixture.
+    // storageState is NOT set here — pool-based fixtures claim a free slot at runtime.
   },
 
   outputDir: "./test-results/e2e-screenshots",
