@@ -3,6 +3,7 @@
  * Per rules: Bank dice spent on vacation reduce stress by 1 per die, up to current stress
  */
 
+import { stopDialogSubmitPropagation } from "../utils/dialog-utils.js";
 
 export interface VacationOptions {
   agentStress: number;
@@ -39,7 +40,7 @@ export async function buildVacationDialog(options: VacationOptions): Promise<Vac
   const maxCoolRestorable = agentIsWeird ? franchiseBank - maxStressSpendable : 0;
 
   let formHtml = `
-    <form>
+    <div>
       <fieldset class="inspectres-vacation-form">
         <legend>${game.i18n?.localize("INSPECTRES.VacationBankSpending") ?? "Bank Dice Spending"}</legend>
         <p class="hint">
@@ -74,11 +75,12 @@ export async function buildVacationDialog(options: VacationOptions): Promise<Vac
 
   formHtml += `
       </fieldset>
-    </form>
+    </div>
   `;
 
   const result = await foundry.applications.api.DialogV2.wait({
     window: { title: game.i18n?.localize("INSPECTRES.DialogVacationTitle") ?? "Vacation" },
+    render: stopDialogSubmitPropagation,
     content: formHtml,
     buttons: [
       {

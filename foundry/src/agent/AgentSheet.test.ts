@@ -243,7 +243,7 @@ describe("AgentSheet", () => {
 
       const querySelectorAllSpy = vi.fn(() => [checkbox]);
       Object.defineProperty(sheet, "element", {
-        value: { querySelectorAll: querySelectorAllSpy },
+        value: { querySelectorAll: querySelectorAllSpy, dataset: {}, addEventListener: vi.fn() },
       });
 
       const updateSpy = vi.spyOn(sheet.actor, "update").mockResolvedValue(sheet.actor);
@@ -265,6 +265,8 @@ describe("AgentSheet", () => {
       Object.defineProperty(sheet, "element", {
         value: {
           querySelectorAll: vi.fn(() => [checkbox]),
+          dataset: {},
+          addEventListener: vi.fn(),
         },
       });
 
@@ -286,6 +288,8 @@ describe("AgentSheet", () => {
       Object.defineProperty(sheet, "element", {
         value: {
           querySelectorAll: vi.fn(() => [checkbox]),
+          dataset: {},
+          addEventListener: vi.fn(),
         },
       });
 
@@ -311,6 +315,8 @@ describe("AgentSheet", () => {
       Object.defineProperty(sheet, "element", {
         value: {
           querySelectorAll: vi.fn(() => [checkbox1, checkbox2]),
+          dataset: {},
+          addEventListener: vi.fn(),
         },
       });
 
@@ -332,9 +338,13 @@ describe("AgentSheet", () => {
       checkbox.className = "weird-checkbox";
       checkbox.type = "checkbox";
 
+      const mockDataset: Record<string, string> = {};
+      const addEventListenerSpy = vi.fn();
       Object.defineProperty(sheet, "element", {
         value: {
           querySelectorAll: vi.fn(() => [checkbox]),
+          dataset: mockDataset,
+          addEventListener: addEventListenerSpy,
         },
       });
 

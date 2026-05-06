@@ -147,29 +147,63 @@ Nest under system prefix. Use Foundry CSS vars (`--color-*`, `--font-*`), never 
 
 ## Dialogs
 
-Use `DialogV2` (V1 deprecated V13):
+Use `DialogV2` (V1 deprecated V13). **Always pass `render: stopDialogSubmitPropagation`** to prevent submit events from bubbling into the actor sheet's outer form (v14 bug: causes full-page navigation to `/join`).
+
 ```typescript
+import { stopDialogSubmitPropagation } from "../utils/dialog-utils.js";
+
 const confirmed = await foundry.applications.api.DialogV2.confirm({
   window: { title: game.i18n.localize("KEY") },
   content: `<p>Message</p>`,
+  render: stopDialogSubmitPropagation,
 });
 if (!confirmed) return;
 
 const result = await foundry.applications.api.DialogV2.wait({
   window: { title: game.i18n.localize("KEY") },
-  content: `<form><input type="number" name="count"></form>`,
+  render: stopDialogSubmitPropagation,
+  content: `
+    <div class="my-dialog">
+      <input type="number" name="count">
+    </div>
+  `,
   buttons: [
     {
       action: "roll",
       label: game.i18n.localize("KEY"),
       callback: (_event, _button, dialog) => {
-        const form = dialog.querySelector("form") as HTMLFormElement;
+        const form = dialog.element.querySelector("form") as HTMLFormElement;
         return Number(new FormData(form).get("count"));
       },
     },
   ],
 });
 if (!result) return;
+```
+
+**Content HTML rules:**
+- Never put a `<form>` in `content` — DialogV2 wraps content in its own `<form>`. Nested forms are invalid HTML and cause `formData` to be empty in the submit handler.
+- Use `<div>` as the outer wrapper for content.
+- For extra buttons inside content (not DialogV2 `buttons` array), use `type="button"` + `data-action` and pass an `actions` object to the dialog options.
+
+**Adding extra in-content click listeners:**
+```typescript
+await foundry.applications.api.DialogV2.wait({
+  content: '<button type="button" data-action="myAction">Click</button>',
+  actions: {
+    myAction: function(event, target) { /* `this` is the DialogV2 instance */ }
+  },
+  // ...
+});
+```
+
+**`rejectClose` behavior:** defaults to `false` in v13+. When `false`, closing the dialog without clicking a button returns `null` (no thrown error). Use `rejectClose: false` to handle cancellation gracefully.
+
+**`render` callback:** fires after every render. Use to attach extra event listeners:
+```typescript
+render: (_event, dialog) => {
+  // Add listeners to dialog.element here
+}
 ```
 
 ## GM Control Surfaces

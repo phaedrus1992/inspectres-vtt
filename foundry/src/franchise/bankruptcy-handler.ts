@@ -6,6 +6,7 @@
 
 import { getActorSystem } from "../utils/system-cast.js";
 import { type FranchiseData } from "./franchise-schema.js";
+import { stopDialogSubmitPropagation } from "../utils/dialog-utils.js";
 
 export const MAX_LOAN_AMOUNT = 10;
 export const LOAN_INTEREST_RATE = 1; // +1 die interest per repayment
@@ -39,6 +40,7 @@ export async function enterDebtMode(franchiseActor: Actor, attemptedSpend: numbe
 
   const borrowResult = await foundry.applications.api.DialogV2.wait({
     window: { title: game.i18n?.localize("INSPECTRES.DialogBankruptcyTitle") ?? "Franchise Bankrupt" },
+    render: stopDialogSubmitPropagation,
     content: `
       <div>
         <fieldset class="inspectres-bankruptcy-form">

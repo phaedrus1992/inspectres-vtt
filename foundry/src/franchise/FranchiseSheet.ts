@@ -9,6 +9,7 @@ import { enterDebtMode, attemptLoanRepayment } from "./bankruptcy-handler.js";
 import { emitMissionPoolUpdated } from "../mission/socket.js";
 import { getCurrentDaySetting, setCurrentDaySetting } from "../utils/settings-utils.js";
 import { applyEndOfSessionBonuses, initiateBankruptcyRestart } from "./vacation-automation.js";
+import { stopDialogSubmitPropagation } from "../utils/dialog-utils.js";
 
 // HandlebarsApplicationMixin provides _renderHTML/_replaceHTML required by ApplicationV2 for PARTS-based sheets
 export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.sheets.ActorSheetV2) {
@@ -39,6 +40,14 @@ export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicati
   override async _onRender(context: Record<string, unknown>, options: foundry.applications.api.ApplicationV2Options): Promise<void> {
     await super._onRender(context, options);
     activateTabs(this.element, "stats");
+    // Foundry v14 bug: ApplicationV2 form submit events are not preventDefault'd by the
+    // framework, causing the browser to treat them as real form submissions and navigate
+    // to /join. Guard against this on the outer sheet element; actor.update() still works
+    // because it is called directly (not via browser form submission).
+    if (!this.element.dataset["submitGuarded"]) {
+      this.element.dataset["submitGuarded"] = "1";
+      this.element.addEventListener("submit", (e: Event) => { e.preventDefault(); });
+    }
   }
 
   override async _prepareContext(_options: foundry.applications.api.ApplicationV2Options): Promise<Record<string, unknown>> {
@@ -163,6 +172,7 @@ export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicati
     const confirmed = await foundry.applications.api.DialogV2.confirm({
       window: { title: FranchiseSheet.localize("INSPECTRES.ConfirmVacationTitle", "Begin Vacation") },
       content: FranchiseSheet.localize("INSPECTRES.ConfirmVacationBody", "End mission and begin vacation? This will open the distribution dialog."),
+      render: stopDialogSubmitPropagation,
     });
 
     if (!confirmed) return;
@@ -263,6 +273,7 @@ export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicati
     try {
       const result = await foundry.applications.api.DialogV2.wait({
         window: { title: opts.title },
+        render: stopDialogSubmitPropagation,
         content: `
           <div class="form-group">
             <label for="${opts.fieldName}">${opts.label}</label>
