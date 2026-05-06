@@ -69,11 +69,6 @@ test.describe("AgentSheet — actions, stats, and notes", () => {
       await waitForNewChatMessage(page, beforeRoll);
     }
 
-    await page.screenshot({
-      path: "test-results/e2e-screenshots/agent-01-skill-roll.png",
-      timeout: 5000,
-    }).catch(() => {});
-
     const afterRoll = await getChatMessageCount(page);
     expect(afterRoll).toBeGreaterThan(beforeRoll);
 
@@ -94,11 +89,6 @@ test.describe("AgentSheet — actions, stats, and notes", () => {
     }, agentId);
     expect(afterIncrease).toBeGreaterThanOrEqual(beforeIncrease);
 
-    await page.screenshot({
-      path: "test-results/e2e-screenshots/agent-02-skill-increase.png",
-      timeout: 5000,
-    }).catch(() => {});
-
     // athletics.base starts at 3; decrease operates on an independent field
     await sheet.clickSkillDecrease("athletics");
     await waitForActorFieldChanged(page, agentId, "skills.athletics.base", 3);
@@ -109,11 +99,6 @@ test.describe("AgentSheet — actions, stats, and notes", () => {
       return (actor?.system as { skills: { athletics: { base: number } } })?.skills?.athletics?.base ?? 0;
     }, agentId);
     expect(afterDecrease).toBeLessThanOrEqual(3);
-
-    await page.screenshot({
-      path: "test-results/e2e-screenshots/agent-03-skill-decrease.png",
-      timeout: 5000,
-    }).catch(() => {});
 
     // --- stressRoll button: visible on stats tab ---
     await page.waitForFunction(
@@ -135,11 +120,6 @@ test.describe("AgentSheet — actions, stats, and notes", () => {
     }, agentId);
     expect(stressRollVisible).toBe(true);
 
-    await page.screenshot({
-      path: "test-results/e2e-screenshots/agent-05-stress-roll-visible.png",
-      timeout: 5000,
-    }).catch(() => {});
-
     // --- stats tab: all four skill roll buttons present ---
     for (const skill of SKILL_NAMES) {
       const rollBtnVisible = await page.evaluate(
@@ -155,11 +135,6 @@ test.describe("AgentSheet — actions, stats, and notes", () => {
       );
       expect(rollBtnVisible, `Roll button for ${skill} should be present`).toBe(true);
     }
-
-    await page.screenshot({
-      path: "test-results/e2e-screenshots/agent-06-stats-tab.png",
-      timeout: 5000,
-    }).catch(() => {});
 
     // --- addCharacteristic + notes tab button: list grows, button visible ---
     await sheet.openTab("notes");
@@ -198,16 +173,6 @@ test.describe("AgentSheet — actions, stats, and notes", () => {
       return ((actor?.system as { characteristics: unknown[] })?.characteristics ?? []).length;
     }, agentId);
     expect(afterChar).toBe(beforeChar + 1);
-
-    await page.screenshot({
-      path: "test-results/e2e-screenshots/agent-04-add-characteristic.png",
-      timeout: 5000,
-    }).catch(() => {});
-
-    await page.screenshot({
-      path: "test-results/e2e-screenshots/agent-07-notes-tab.png",
-      timeout: 5000,
-    }).catch(() => {});
   });
 });
 
@@ -264,11 +229,6 @@ test.describe("AgentSheet — conditional UI paths", () => {
     ).then(() => true).catch(() => false);
     expect(bannerVisible).toBe(true);
 
-    await page.screenshot({
-      path: "test-results/e2e-screenshots/agent-08-recovery-banner.png",
-      timeout: 5000,
-    }).catch(() => {});
-
     // --- skill penalty line ---
     await page.waitForFunction(
       (id: string) => {
@@ -288,10 +248,5 @@ test.describe("AgentSheet — conditional UI paths", () => {
       return rect.width > 0 && rect.height > 0;
     }, agentId);
     expect(penaltyLineExists).toBe(true);
-
-    await page.screenshot({
-      path: "test-results/e2e-screenshots/agent-09-penalty-line.png",
-      timeout: 5000,
-    }).catch(() => {});
   });
 });
