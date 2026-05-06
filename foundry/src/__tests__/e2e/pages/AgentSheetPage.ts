@@ -40,7 +40,9 @@ export class AgentSheetPage {
       `${this.sheetSelector()} [role="tab"][data-tab="${tabName}"]`,
     );
     // v14: tab click can bubble submit event to actor sheet form, causing /join redirect.
-    if (this.page.url().includes("/join")) {
+    // Wait briefly for a potential navigation before checking URL.
+    const redirected = await this.page.waitForURL(/\/join/, { timeout: 2_000 }).then(() => true).catch(() => false);
+    if (redirected) {
       await rejoinIfRedirected(this.page, this.workerUsername);
       const actorId = this.actorId;
       await this.page.evaluate(async (id: string) => {
