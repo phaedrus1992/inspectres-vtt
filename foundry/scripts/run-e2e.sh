@@ -50,7 +50,7 @@ log "stopping any running Foundry container"
 rm -rf "${DATA_DIR}/Config/options.json.lock"
 
 if [[ "${KEEP_DATA:-0}" != "1" ]]; then
-  log "wiping Foundry data (preserving Config/license.json)"
+  log "wiping Foundry data (preserving Config/license.json, container_cache/, foundry-data/)"
   if [[ -f "${DATA_DIR}/Config/license.json" ]]; then
     LICENSE_BACKUP="$(mktemp)"
     cp "${DATA_DIR}/Config/license.json" "$LICENSE_BACKUP"

@@ -21,4 +21,5 @@ services:
       CONTAINER_PRESERVE_CONFIG: "true"
     volumes:
       - ./data:/data
+      - ./foundry-data:/home/node/resources
       - ../foundry/dist:/data/Data/systems/inspectres
