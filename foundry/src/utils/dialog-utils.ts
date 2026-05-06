@@ -14,3 +14,4 @@ export function stopDialogSubmitPropagation(_event: Event, dialog: foundry.appli
   if (!form) return;
   form.addEventListener("submit", (e: Event) => { e.stopPropagation(); }, { once: false });
 }
+

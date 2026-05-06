@@ -144,6 +144,15 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
 
     activateTabs(this.element, "stats");
 
+    // Foundry v14 bug: ApplicationV2 form submit events are not preventDefault'd by the
+    // framework, causing the browser to treat them as real form submissions and navigate
+    // to /join. Guard against this on the outer sheet element; actor.update() still works
+    // because it is called directly (not via browser form submission).
+    if (!this.element.dataset["submitGuarded"]) {
+      this.element.dataset["submitGuarded"] = "1";
+      this.element.addEventListener("submit", (e: Event) => { e.preventDefault(); });
+    }
+
     if (!this.isEditable) return;
 
     const controller = getOrCreateListenerController(checkboxControllers, this);

@@ -1,17 +1,14 @@
 import type { Page } from "@playwright/test";
-import { rejoinIfRedirected } from "./helpers.js";
 
 const SHEET_WAIT_TIMEOUT = 15_000;
 
 export class FranchiseSheetPage {
   readonly page: Page;
   readonly actorId: string;
-  readonly workerUsername: string;
 
-  constructor(page: Page, actorId: string, workerUsername: string) {
+  constructor(page: Page, actorId: string) {
     this.page = page;
     this.actorId = actorId;
-    this.workerUsername = workerUsername;
   }
 
   sheetSelector(): string {
@@ -36,21 +33,6 @@ export class FranchiseSheetPage {
     await this.page.click(
       `${this.sheetSelector()} [role="tab"][data-tab="${tabName}"]`,
     );
-    // v14: tab click can bubble submit event to actor sheet form, causing /join redirect.
-    const redirected = await this.page.waitForURL(/\/join/, { timeout: 2_000 }).then(() => true).catch(() => false);
-    if (redirected) {
-      await rejoinIfRedirected(this.page, this.workerUsername);
-      const actorId = this.actorId;
-      await this.page.evaluate(async (id: string) => {
-        // @ts-expect-error - Foundry runtime global
-        const actor = globalThis.game?.actors?.get(id);
-        if (actor) await actor.sheet.render(true);
-      }, actorId);
-      await this.waitForVisible();
-      await this.page.click(
-        `${this.sheetSelector()} [role="tab"][data-tab="${tabName}"]`,
-      );
-    }
     await this.page.waitForFunction(
       (args: { actorId: string; tabName: string }) => {
         const panel = document.querySelector(

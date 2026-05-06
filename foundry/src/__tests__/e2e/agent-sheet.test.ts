@@ -12,7 +12,6 @@ import {
   getChatMessageCount,
   waitForNewChatMessage,
   waitForActorFieldChanged,
-  rejoinIfRedirected,
 } from "./pages/index.js";
 
 const SKILL_NAMES = ["academics", "athletics", "technology", "contact"] as const;
@@ -45,13 +44,12 @@ test.describe("AgentSheet — actions, stats, and notes", () => {
     await deleteActor(page, agentId);
   });
 
-  test("skill actions, roll, visibility, and tab content", async ({ page, workerUsername }) => {
-    let sheet = await openAgentSheet(page, agentId, workerUsername);
+  test("skill actions, roll, visibility, and tab content", async ({ page }) => {
+    let sheet = await openAgentSheet(page, agentId);
 
     // --- skillRoll: produces a chat message ---
     const beforeRoll = await getChatMessageCount(page);
     await sheet.clickSkillRoll("academics");
-    await rejoinIfRedirected(page, workerUsername);
 
     const dialogVisible = await page.waitForFunction(
       () => {
@@ -68,7 +66,6 @@ test.describe("AgentSheet — actions, stats, and notes", () => {
       await page.click('dialog button[data-action="roll"]').catch(() =>
         page.click('dialog button[type="submit"]:not([data-action="cancel"])').catch(() => {}),
       );
-      await rejoinIfRedirected(page, workerUsername);
       await waitForNewChatMessage(page, beforeRoll);
     }
 
@@ -76,8 +73,7 @@ test.describe("AgentSheet — actions, stats, and notes", () => {
     expect(afterRoll).toBeGreaterThan(beforeRoll);
 
     // --- skillIncrease + skillDecrease: independent fields, no conflict ---
-    // Re-open sheet after any potential rejoin from the roll action.
-    sheet = await openAgentSheet(page, agentId, workerUsername);
+    sheet = await openAgentSheet(page, agentId);
 
     const beforeIncrease = await page.evaluate((id: string) => {
       // @ts-expect-error - Foundry runtime global
@@ -86,7 +82,6 @@ test.describe("AgentSheet — actions, stats, and notes", () => {
     }, agentId);
 
     await sheet.clickSkillIncrease("academics");
-    await rejoinIfRedirected(page, workerUsername);
     await waitForActorFieldChanged(page, agentId, "skills.academics.base", beforeIncrease);
 
     const afterIncrease = await page.evaluate((id: string) => {
@@ -98,7 +93,6 @@ test.describe("AgentSheet — actions, stats, and notes", () => {
 
     // athletics.base starts at 3; decrease operates on an independent field
     await sheet.clickSkillDecrease("athletics");
-    await rejoinIfRedirected(page, workerUsername);
     await waitForActorFieldChanged(page, agentId, "skills.athletics.base", 3);
 
     const afterDecrease = await page.evaluate((id: string) => {
@@ -108,9 +102,7 @@ test.describe("AgentSheet — actions, stats, and notes", () => {
     }, agentId);
     expect(afterDecrease).toBeLessThanOrEqual(3);
 
-    // Ensure we're back in the game after any redirects before checking UI.
-    await rejoinIfRedirected(page, workerUsername);
-    sheet = await openAgentSheet(page, agentId, workerUsername);
+    sheet = await openAgentSheet(page, agentId);
 
     // --- stressRoll button: visible on stats tab ---
     await page.waitForFunction(
@@ -177,7 +169,6 @@ test.describe("AgentSheet — actions, stats, and notes", () => {
     expect(addBtnVisible).toBe(true);
 
     await sheet.clickAddCharacteristic();
-    await rejoinIfRedirected(page, workerUsername);
     await waitForActorFieldChanged(page, agentId, "characteristics.length", beforeChar);
 
     const afterChar = await page.evaluate((id: string) => {
@@ -203,7 +194,7 @@ test.describe("AgentSheet — conditional UI paths", () => {
   // recovery banner and penalty line operate on independent system fields
   // (isDead/daysOutOfAction/recoveryStartedAt vs stress/skills.academics.penalty),
   // so both states can be applied to a single actor in sequence.
-  test("recovery banner visible + skill penalty line visible", async ({ page, workerUsername }) => {
+  test("recovery banner visible + skill penalty line visible", async ({ page }) => {
     // Set all conditional fields at once — no conflict between them
     await page.evaluate(async (id: string) => {
       // @ts-expect-error - Foundry runtime global
@@ -219,7 +210,7 @@ test.describe("AgentSheet — conditional UI paths", () => {
       });
     }, agentId);
 
-    await openAgentSheet(page, agentId, workerUsername);
+    await openAgentSheet(page, agentId);
 
     // Force re-render so updated fields are reflected in the DOM
     await page.evaluate(async (id: string) => {

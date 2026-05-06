@@ -40,7 +40,6 @@ export async function deleteActor(page: Page, actorId: string): Promise<void> {
 export async function openAgentSheet(
   page: Page,
   actorId: string,
-  workerUsername: string,
 ): Promise<AgentSheetPage> {
   await page.evaluate(async (id: string) => {
     // @ts-expect-error - Foundry runtime global
@@ -49,7 +48,7 @@ export async function openAgentSheet(
     await actor.sheet.render(true);
   }, actorId);
 
-  const sheetPage = new AgentSheetPage(page, actorId, workerUsername);
+  const sheetPage = new AgentSheetPage(page, actorId);
   await sheetPage.waitForVisible();
   return sheetPage;
 }
@@ -58,7 +57,6 @@ export async function openAgentSheet(
 export async function openFranchiseSheet(
   page: Page,
   actorId: string,
-  workerUsername: string,
 ): Promise<FranchiseSheetPage> {
   await page.evaluate(async (id: string) => {
     // @ts-expect-error - Foundry runtime global
@@ -67,7 +65,7 @@ export async function openFranchiseSheet(
     await actor.sheet.render(true);
   }, actorId);
 
-  const sheetPage = new FranchiseSheetPage(page, actorId, workerUsername);
+  const sheetPage = new FranchiseSheetPage(page, actorId);
   await sheetPage.waitForVisible();
   return sheetPage;
 }
