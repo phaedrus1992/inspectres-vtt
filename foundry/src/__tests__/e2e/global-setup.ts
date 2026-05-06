@@ -126,15 +126,15 @@ async function acceptLicenseIfPresent(page: Page): Promise<void> {
 
 async function dismissTourOverlay(page: Page): Promise<void> {
   // Foundry shows a guided tour overlay on first visit. ESC closes it.
-  // Only press ESC if the overlay is actually present — avoids closing
-  // other dialogs (e.g. a stale consent dialog) on re-runs.
-  const overlay = await page.$(".tour-overlay");
+  // Wait briefly for the overlay to appear (it renders async after page load).
+  // If it doesn't appear in 5s, assume it was already dismissed or not shown.
+  const overlay = await page.waitForSelector(".tour-overlay", { timeout: 5_000 }).catch(() => null);
   if (overlay) {
     await page.keyboard.press("Escape");
     await page.waitForFunction(
       () => !document.querySelector(".tour-overlay"),
       undefined,
-      { timeout: 3_000 },
+      { timeout: 5_000 },
     ).catch(() => {});
   }
 }
@@ -164,6 +164,13 @@ async function createWorldIfNeeded(page: Page, majorVersion: number): Promise<vo
     WORLD_ID,
   );
   if (exists) return;
+
+  // Wait until no tour overlay intercepts pointer events before clicking.
+  await page.waitForFunction(
+    () => !document.querySelector(".tour-overlay"),
+    undefined,
+    { timeout: 10_000 },
+  ).catch(() => {});
 
   await page.click('button[data-action="worldCreate"]');
   // Wait for the create world dialog/page to be ready.
