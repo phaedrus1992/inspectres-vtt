@@ -15,11 +15,12 @@
  * Supports Foundry v13 (form-based dialog, hidden launch link) and v14
  * (standalone /create page, package gallery system selector, auto-launch on submit).
  *
- * Pool sizing: POOL_SIZE = WORKER_COUNT * (MAX_RETRIES + 1). With 2 workers and 2 CI
- * retries this gives 6 slots. At most 2 are active simultaneously; the extra 4 ensure
+ * Pool sizing: POOL_SIZE = WORKER_COUNT * (MAX_RETRIES + 1). Default 2 workers, 2 CI
+ * retries → 6 slots. At most WORKER_COUNT active simultaneously; the remaining ensure
  * a free slot is always available even when sessions from the previous test are still
  * clearing. Foundry's own session-disable mechanism (option disabled on /join) is the
  * coordination signal — no application-level locks needed.
+ * Override with PLAYWRIGHT_WORKERS env var to match available vCPUs (CI: 2, local: as desired).
  */
 
 import path from "node:path";
@@ -40,8 +41,8 @@ export const WORKER_COUNT = rawWorkers;
 
 /**
  * CI retry count — must match `retries` in playwright.config.ts.
- * Pool size = WORKER_COUNT * (MAX_RETRIES + 1) so a free slot is always available
- * even when sessions from the previous test cycle are still clearing in Foundry.
+ * Pool size = WORKER_COUNT * (MAX_RETRIES + 1). WORKER_COUNT defaults to 2
+ * (matching GitHub Actions free runner vCPU count); override with PLAYWRIGHT_WORKERS.
  */
 const MAX_RETRIES = 2;
 
@@ -81,7 +82,7 @@ async function declineUsageDataSharing(page: Page): Promise<void> {
   const decline = await page.$('button[data-action="no"]');
   if (decline) {
     await decline.click();
-    await page.waitForTimeout(500);
+    await page.waitForURL((u) => !u.pathname.includes("/consent"), { timeout: 5_000 }).catch(() => {});
   }
 }
 
@@ -119,13 +120,11 @@ async function acceptLicenseIfPresent(page: Page): Promise<void> {
   }
   await page.click('button[type="submit"]');
   await page.waitForURL((url) => !url.pathname.includes("/license"), { timeout: 30_000 });
-  await page.waitForTimeout(800);
 }
 
 async function dismissTourOverlay(page: Page): Promise<void> {
   // Foundry shows a guided tour overlay on first visit; ESC closes it.
   await page.keyboard.press("Escape");
-  await page.waitForTimeout(300);
 }
 
 /**
@@ -155,7 +154,12 @@ async function createWorldIfNeeded(page: Page, majorVersion: number): Promise<vo
   if (exists) return;
 
   await page.click('button[data-action="worldCreate"]');
-  await page.waitForTimeout(2000);
+  // Wait for the create world dialog/page to be ready.
+  await page.waitForFunction(
+    () => !!document.querySelector('input[name="title"], input[name="world-id"]'),
+    undefined,
+    { timeout: 15_000 },
+  );
 
   if (majorVersion >= 14) {
     await createWorldV14(page);
@@ -166,10 +170,8 @@ async function createWorldIfNeeded(page: Page, majorVersion: number): Promise<vo
 
 async function createWorldV13(page: Page): Promise<void> {
   await page.fill('input[name="title"]', WORLD_TITLE);
-  await page.waitForTimeout(200);
   await page.fill('input[name="id"]', WORLD_ID);
   await page.selectOption('select[name="system"]', SYSTEM_ID);
-  await page.waitForTimeout(200);
 
   // Submit via requestSubmit() — direct .click() races with TinyMCE blur events.
   const submitted = await page.evaluate(() => {
@@ -182,7 +184,12 @@ async function createWorldV13(page: Page): Promise<void> {
     return true;
   });
   if (!submitted) throw new Error("Could not submit Create World form (v13)");
-  await page.waitForTimeout(3000);
+  // Wait for the world to appear in the list.
+  await page.waitForFunction(
+    (id: string) => !!document.querySelector(`#worlds-list [data-package-id="${id}"]`),
+    WORLD_ID,
+    { timeout: 15_000 },
+  );
 
   const created = await page.evaluate(
     (id) => !!document.querySelector(`#worlds-list [data-package-id="${id}"]`),
@@ -193,9 +200,7 @@ async function createWorldV13(page: Page): Promise<void> {
 
 async function createWorldV14(page: Page): Promise<void> {
   await page.fill('input[name="title"]', WORLD_TITLE);
-  await page.waitForTimeout(200);
   await page.fill('input[name="world-id"]', WORLD_ID);
-  await page.waitForTimeout(200);
 
   // V14 hides the native <select name="system"> behind a clickable package gallery.
   // Clicking the system <li> sets the select value via Foundry's framework.
@@ -204,7 +209,6 @@ async function createWorldV14(page: Page): Promise<void> {
     throw new Error(`V14 system package li not found for ${SYSTEM_ID}`);
   }
   await systemPackage.click();
-  await page.waitForTimeout(300);
 
   // Submit the form. V14's submit button is a plain <button type="submit">Continue</button>.
   await page.click('button[type="submit"]:not([data-action="cancel"])');
@@ -213,7 +217,6 @@ async function createWorldV14(page: Page): Promise<void> {
   await page.waitForURL((u) => u.pathname.includes("/join") || u.pathname.includes("/players"), {
     timeout: 30_000,
   });
-  await page.waitForTimeout(1500);
 }
 
 const DEFAULT_JOIN_TIMEOUTS = { url: 30_000, ready: 60_000 };
@@ -301,7 +304,6 @@ async function launchAndJoin(page: Page, majorVersion: number): Promise<void> {
   await page.waitForURL((u) => u.pathname.includes("/join") || u.pathname.includes("/players"), {
     timeout: 60_000,
   });
-  await page.waitForTimeout(1500);
 
   // If we landed on /players, navigate to /join to reach the actual login form.
   if (!page.url().includes("/join")) {
@@ -356,9 +358,9 @@ async function globalSetup(): Promise<void> {
     browser = await chromium.launch({ headless: true });
     const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
 
-    // Probe current state.
+    // Probe current state. networkidle ensures Foundry's JS has run so game.version
+    // is readable before detectFoundryMajorVersion() is called.
     await page.goto(FOUNDRY_URL, { waitUntil: "networkidle" });
-    await page.waitForTimeout(800);
 
     let alreadyInGame = page.url().includes("/game");
 
