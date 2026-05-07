@@ -42,7 +42,7 @@ test.describe("DialogV2 and Modal Workflows (Issue #500)", () => {
       // Wait for dialog to appear (DialogV2 renders as <dialog> element)
       await page.waitForFunction(
         () => {
-          const dialog = document.querySelector("dialog:not([open='false'])") as HTMLDialogElement | null;
+          const dialog = document.querySelector("dialog[open]") as HTMLDialogElement | null;
           if (!dialog) return false;
           const rect = dialog.getBoundingClientRect();
           return rect.width > 0 && rect.height > 0;
@@ -51,23 +51,17 @@ test.describe("DialogV2 and Modal Workflows (Issue #500)", () => {
         { timeout: 10_000 },
       );
 
-      // Verify dialog is open and visible
-      const dialog = page.locator("dialog");
-      await expect(dialog).toHaveCount(1);
+      // Verify a dialog is open
+      const openDialog = page.locator("dialog[open]");
+      await expect(openDialog).toHaveCount(1);
 
-      // Find and click the confirm button in the dialog
-      const confirmBtn = page.locator('dialog button[data-action="roll"], dialog button:has-text("Roll")').first();
-      if ((await confirmBtn.count()) > 0) {
-        await confirmBtn.click();
-      } else {
-        // Fallback: click any primary button
-        const primaryBtn = page.locator("dialog button").first();
-        await primaryBtn.click();
-      }
+      // Click the roll button inside the open dialog
+      const confirmBtn = page.locator('dialog[open] button[data-action="roll"]').first();
+      await confirmBtn.click();
 
       // Wait for dialog to close
       await page.waitForFunction(
-        () => !document.querySelector("dialog:not([open='false'])"),
+        () => !document.querySelector("dialog[open]"),
         undefined,
         { timeout: 5_000},
       );
@@ -122,7 +116,7 @@ test.describe("DialogV2 and Modal Workflows (Issue #500)", () => {
         // Wait for dialog
         await page.waitForFunction(
           () => {
-            const dialog = document.querySelector("dialog:not([open='false'])");
+            const dialog = document.querySelector("dialog[open]");
             return dialog && dialog.getBoundingClientRect().height > 0;
           },
           undefined,
@@ -137,7 +131,7 @@ test.describe("DialogV2 and Modal Workflows (Issue #500)", () => {
 
         // Wait for dialog to close
         await page.waitForFunction(
-          () => !document.querySelector("dialog:not([open='false'])"),
+          () => !document.querySelector("dialog[open]"),
           undefined,
           { timeout: 5_000 },
         );
@@ -187,7 +181,7 @@ test.describe("DialogV2 and Modal Workflows (Issue #500)", () => {
         // Wait for dialog
         await page.waitForFunction(
           () => {
-            const dialog = document.querySelector("dialog:not([open='false'])");
+            const dialog = document.querySelector("dialog[open]");
             return dialog && dialog.getBoundingClientRect().height > 0;
           },
           undefined,
@@ -199,13 +193,13 @@ test.describe("DialogV2 and Modal Workflows (Issue #500)", () => {
 
         // Wait for dialog to close
         await page.waitForFunction(
-          () => !document.querySelector("dialog:not([open='false'])"),
+          () => !document.querySelector("dialog[open]"),
           undefined,
           { timeout: 5_000 },
         );
 
         // Verify dialog is closed
-        const dialogCount = await page.locator("dialog:not([open='false'])").count();
+        const dialogCount = await page.locator("dialog[open]").count();
         expect(dialogCount).toBe(0);
       }
 
