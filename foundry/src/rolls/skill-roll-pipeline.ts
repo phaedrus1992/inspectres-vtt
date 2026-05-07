@@ -1,3 +1,4 @@
+import { stopDialogSubmitPropagation } from "../utils/dialog-utils.js";
 import type { RollActor } from "./roll-executor.js";
 
 interface DialogResult {
@@ -36,6 +37,7 @@ async function openRollDialog(skillName: string): Promise<DialogResult | null> {
   const result = (await foundry.applications.api.DialogV2.wait({
     window: { title: `Roll ${skillName}` },
     content: `<div><input type="number" name="diceCount" value="2"></div>`,
+    render: stopDialogSubmitPropagation,
     buttons: [
       {
         action: "roll",
