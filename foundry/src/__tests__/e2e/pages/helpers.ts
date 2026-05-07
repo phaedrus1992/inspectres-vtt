@@ -8,6 +8,19 @@ const REJOIN_TIMEOUT = 30_000;
 // Session expired mid-test means the slot is already free on the server — short wait.
 const REJOIN_OPTION_TIMEOUT = 5_000;
 
+/**
+ * Wrap a caught `unknown` error as a new Error with diagnostic context, preserving
+ * the original via `cause`. Centralizes the `err instanceof Error ? err.message : String(err)`
+ * narrowing repeated across e2e helpers.
+ */
+export function wrapDiagnosticError(err: unknown, context: string): Error {
+  const msg = err instanceof Error ? err.message : String(err);
+  return new Error(
+    `${context}: ${msg}`,
+    { cause: err instanceof Error ? err : undefined },
+  );
+}
+
 /** Create a new actor in Foundry and return its ID. */
 export async function createActor(
   page: Page,
@@ -325,24 +338,54 @@ export async function getActorSystemField<T>(
 export async function rejoinIfRedirected(page: Page, workerUsername: string): Promise<void> {
   if (!page.url().includes("/join")) return;
 
-  await page.waitForFunction(
-    (name: string) => {
-      const select = document.querySelector('select[name="userid"]') as HTMLSelectElement | null;
-      if (!select) return false;
-      const opt = Array.from(select.options).find((o) => o.text === name);
-      return opt != null && !opt.disabled;
-    },
-    workerUsername,
-    { timeout: REJOIN_OPTION_TIMEOUT },
-  ).catch(() => {});
+  const rethrow = (step: string, err: unknown): never => {
+    throw wrapDiagnosticError(
+      err,
+      `rejoinIfRedirected failed at "${step}" for worker "${workerUsername}" at ${page.url()}`,
+    );
+  };
 
-  await page.selectOption('select[name="userid"]', { label: workerUsername }).catch(() => {});
-  await page.click('button[type="submit"]:has-text("Join Game Session")').catch(() => {});
-  await page.waitForURL(/\/game/, { timeout: REJOIN_TIMEOUT }).catch(() => {});
-  await page.waitForFunction(
-    // @ts-expect-error - Foundry runtime global
-    () => globalThis.game?.ready === true,
-    undefined,
-    { timeout: REJOIN_TIMEOUT },
-  ).catch(() => {});
+  try {
+    await page.waitForFunction(
+      (name: string) => {
+        const select = document.querySelector('select[name="userid"]') as HTMLSelectElement | null;
+        if (!select) return false;
+        const opt = Array.from(select.options).find((o) => o.text === name);
+        return opt != null && !opt.disabled;
+      },
+      workerUsername,
+      { timeout: REJOIN_OPTION_TIMEOUT },
+    );
+  } catch (err) {
+    rethrow("wait for userid option", err);
+  }
+
+  try {
+    await page.selectOption('select[name="userid"]', { label: workerUsername });
+  } catch (err) {
+    rethrow("select userid option", err);
+  }
+
+  try {
+    await page.click('button[type="submit"]:has-text("Join Game Session")');
+  } catch (err) {
+    rethrow("click Join Game Session", err);
+  }
+
+  try {
+    await page.waitForURL(/\/game/, { timeout: REJOIN_TIMEOUT });
+  } catch (err) {
+    rethrow("wait for /game URL", err);
+  }
+
+  try {
+    await page.waitForFunction(
+      // @ts-expect-error - Foundry runtime global
+      () => globalThis.game?.ready === true,
+      undefined,
+      { timeout: REJOIN_TIMEOUT },
+    );
+  } catch (err) {
+    rethrow("wait for game.ready", err);
+  }
 }

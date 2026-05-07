@@ -7,20 +7,31 @@
  */
 import { test, expect, ELEMENT_WAIT_TIMEOUT } from "./fixtures.js";
 import type { Page } from "@playwright/test";
-import { createActor, deleteActor, waitForSheet, rejoinIfRedirected } from "./pages/index.js";
+import { createActor, deleteActor, waitForSheet, rejoinIfRedirected, wrapDiagnosticError } from "./pages/index.js";
 
 async function openActorsDirectory(page: Page): Promise<void> {
-  await page.click('[data-tab="actors"]').catch(() => {});
-  await page.waitForFunction(
-    () => {
-      const panel = document.querySelector('#actors');
-      if (!panel) return false;
-      const rect = (panel as HTMLElement).getBoundingClientRect();
-      return rect.width > 0 && rect.height > 0;
-    },
-    undefined,
-    { timeout: ELEMENT_WAIT_TIMEOUT },
-  ).catch(() => {});
+  try {
+    await page.click('[data-tab="actors"]');
+  } catch (err) {
+    throw wrapDiagnosticError(err, "openActorsDirectory: failed to click actors tab");
+  }
+  try {
+    await page.waitForFunction(
+      () => {
+        const panel = document.querySelector('#actors');
+        if (!panel) return false;
+        const rect = (panel as HTMLElement).getBoundingClientRect();
+        return rect.width > 0 && rect.height > 0;
+      },
+      undefined,
+      { timeout: ELEMENT_WAIT_TIMEOUT },
+    );
+  } catch (err) {
+    throw wrapDiagnosticError(
+      err,
+      `openActorsDirectory: actors directory panel did not become visible within ${ELEMENT_WAIT_TIMEOUT}ms`,
+    );
+  }
 }
 
 test.describe("Actor lifecycle — no console errors", () => {

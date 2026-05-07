@@ -14,4 +14,5 @@ export {
   waitForElementVisible,
   getActorSystemField,
   rejoinIfRedirected,
+  wrapDiagnosticError,
 } from "./helpers.js";
