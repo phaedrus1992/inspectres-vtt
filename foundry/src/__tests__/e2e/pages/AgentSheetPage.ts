@@ -85,16 +85,24 @@ export class AgentSheetPage {
       { actorId: this.actorId, value },
     );
     // Wait for ApplicationV2 re-render to complete after the data update.
-    await this.page.waitForFunction(
-      (id: string) => {
-        const el = document.querySelector(`.inspectres[id*="${id}"]`);
-        if (!el) return false;
-        const rect = (el as HTMLElement).getBoundingClientRect();
-        return rect.width > 0 && rect.height > 0;
-      },
-      this.actorId,
-      { timeout: 10_000 },
-    ).catch(() => {});
+    try {
+      await this.page.waitForFunction(
+        (id: string) => {
+          const el = document.querySelector(`.inspectres[id*="${id}"]`);
+          if (!el) return false;
+          const rect = (el as HTMLElement).getBoundingClientRect();
+          return rect.width > 0 && rect.height > 0;
+        },
+        this.actorId,
+        { timeout: 10_000 },
+      );
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      throw new Error(
+        `setStress(${value}): sheet for actor ${this.actorId} did not re-render within 10s: ${msg}`,
+        { cause: err instanceof Error ? err : undefined },
+      );
+    }
   }
 
   /** Click the stress roll button. */
@@ -123,20 +131,45 @@ export class AgentSheetPage {
 
   /** Re-render this actor's sheet (e.g. after a data update that doesn't auto-render). */
   async rerender(): Promise<void> {
-    await this.page.waitForFunction(
-      // @ts-expect-error - Foundry runtime global
-      () => globalThis.game?.ready === true,
-      undefined,
-      { timeout: 15_000 },
-    ).catch(() => {});
+    try {
+      await this.page.waitForFunction(
+        // @ts-expect-error - Foundry runtime global
+        () => globalThis.game?.ready === true,
+        undefined,
+        { timeout: 15_000 },
+      );
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      throw new Error(
+        `rerender: game.ready did not become true within 15s: ${msg}`,
+        { cause: err instanceof Error ? err : undefined },
+      );
+    }
 
     const id = this.actorId;
-    await this.page.evaluate(async (actorId: string) => {
-      // @ts-expect-error - Foundry runtime global
-      const actor = globalThis.game?.actors?.get(actorId);
-      if (actor) await actor.sheet.render(true);
-    }, id).catch(() => {});
-    await this.waitForVisible().catch(() => {});
+    try {
+      await this.page.evaluate(async (actorId: string) => {
+        // @ts-expect-error - Foundry runtime global
+        const actor = globalThis.game?.actors?.get(actorId);
+        if (actor) await actor.sheet.render(true);
+      }, id);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      throw new Error(
+        `rerender: actor.sheet.render(true) failed for actor ${this.actorId}: ${msg}`,
+        { cause: err instanceof Error ? err : undefined },
+      );
+    }
+
+    try {
+      await this.waitForVisible();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      throw new Error(
+        `rerender: sheet for actor ${this.actorId} did not become visible after re-render: ${msg}`,
+        { cause: err instanceof Error ? err : undefined },
+      );
+    }
   }
 
   /** Get the raw system data for this actor from the Foundry runtime. */

@@ -195,6 +195,10 @@ export const test = base.extend<{ workerUsername: string }>({
         // @ts-expect-error - Foundry runtime global
         if (typeof globalThis.game?.logOut === "function") globalThis.game.logOut();
       });
+      // Best-effort: give Foundry up to 3s to redirect to /join post-logout. If it
+      // doesn't navigate (e.g. logOut was a no-op because the page is already
+      // closing), teardown still succeeds — we just lose the explicit redirect
+      // confirmation. Swallowing here is intentional and scoped to teardown only.
       await page.waitForURL(/\/join/, { timeout: 3_000 }).catch(() => {});
     } catch {
       // Best-effort: if the page is already closed or Foundry isn't ready, ignore.

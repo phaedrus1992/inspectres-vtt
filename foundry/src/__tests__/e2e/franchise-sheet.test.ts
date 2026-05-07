@@ -19,6 +19,7 @@ import {
   waitForNewChatMessage,
   waitForActorFieldChanged,
   waitForActorFieldEquals,
+  waitForElementVisible,
   getActorSystemField,
 } from "./pages/index.js";
 
@@ -71,14 +72,13 @@ test.describe("FranchiseSheet — roll actions and mission tracker", () => {
 
     // Mission tracker (no bank dependency; opens on same sheet instance)
     await sheet.clickOpenMissionTracker();
-    await page.waitForFunction(
-      () =>
-        document.querySelector("#inspectres-mission-tracker") !== null ||
-        document.querySelector(".inspectres-mission-tracker-window") !== null ||
-        document.querySelector(".mission-tracker") !== null,
-      undefined,
-      { timeout: ELEMENT_WAIT_TIMEOUT },
-    ).catch(() => {});
+    // Surface a real failure if the tracker doesn't open — the assertion below
+    // catches presence, but a thrown wait gives a much clearer error message.
+    await waitForElementVisible(
+      page,
+      "#inspectres-mission-tracker, .inspectres-mission-tracker-window, .mission-tracker",
+      ELEMENT_WAIT_TIMEOUT,
+    );
 
     await page.screenshot({
       path: "test-results/e2e-screenshots/franchise-03-mission-tracker.png",

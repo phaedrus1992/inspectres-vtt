@@ -10,17 +10,33 @@ import type { Page } from "@playwright/test";
 import { createActor, deleteActor, waitForSheet, rejoinIfRedirected } from "./pages/index.js";
 
 async function openActorsDirectory(page: Page): Promise<void> {
-  await page.click('[data-tab="actors"]').catch(() => {});
-  await page.waitForFunction(
-    () => {
-      const panel = document.querySelector('#actors');
-      if (!panel) return false;
-      const rect = (panel as HTMLElement).getBoundingClientRect();
-      return rect.width > 0 && rect.height > 0;
-    },
-    undefined,
-    { timeout: ELEMENT_WAIT_TIMEOUT },
-  ).catch(() => {});
+  try {
+    await page.click('[data-tab="actors"]');
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    throw new Error(
+      `openActorsDirectory: failed to click actors tab: ${msg}`,
+      { cause: err instanceof Error ? err : undefined },
+    );
+  }
+  try {
+    await page.waitForFunction(
+      () => {
+        const panel = document.querySelector('#actors');
+        if (!panel) return false;
+        const rect = (panel as HTMLElement).getBoundingClientRect();
+        return rect.width > 0 && rect.height > 0;
+      },
+      undefined,
+      { timeout: ELEMENT_WAIT_TIMEOUT },
+    );
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    throw new Error(
+      `openActorsDirectory: actors directory panel did not become visible within ${ELEMENT_WAIT_TIMEOUT}ms: ${msg}`,
+      { cause: err instanceof Error ? err : undefined },
+    );
+  }
 }
 
 test.describe("Actor lifecycle — no console errors", () => {

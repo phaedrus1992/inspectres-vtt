@@ -325,24 +325,55 @@ export async function getActorSystemField<T>(
 export async function rejoinIfRedirected(page: Page, workerUsername: string): Promise<void> {
   if (!page.url().includes("/join")) return;
 
-  await page.waitForFunction(
-    (name: string) => {
-      const select = document.querySelector('select[name="userid"]') as HTMLSelectElement | null;
-      if (!select) return false;
-      const opt = Array.from(select.options).find((o) => o.text === name);
-      return opt != null && !opt.disabled;
-    },
-    workerUsername,
-    { timeout: REJOIN_OPTION_TIMEOUT },
-  ).catch(() => {});
+  const rethrow = (step: string, err: unknown): never => {
+    const msg = err instanceof Error ? err.message : String(err);
+    throw new Error(
+      `rejoinIfRedirected failed at "${step}" for worker "${workerUsername}" at ${page.url()}: ${msg}`,
+      { cause: err instanceof Error ? err : undefined },
+    );
+  };
 
-  await page.selectOption('select[name="userid"]', { label: workerUsername }).catch(() => {});
-  await page.click('button[type="submit"]:has-text("Join Game Session")').catch(() => {});
-  await page.waitForURL(/\/game/, { timeout: REJOIN_TIMEOUT }).catch(() => {});
-  await page.waitForFunction(
-    // @ts-expect-error - Foundry runtime global
-    () => globalThis.game?.ready === true,
-    undefined,
-    { timeout: REJOIN_TIMEOUT },
-  ).catch(() => {});
+  try {
+    await page.waitForFunction(
+      (name: string) => {
+        const select = document.querySelector('select[name="userid"]') as HTMLSelectElement | null;
+        if (!select) return false;
+        const opt = Array.from(select.options).find((o) => o.text === name);
+        return opt != null && !opt.disabled;
+      },
+      workerUsername,
+      { timeout: REJOIN_OPTION_TIMEOUT },
+    );
+  } catch (err) {
+    rethrow("wait for userid option", err);
+  }
+
+  try {
+    await page.selectOption('select[name="userid"]', { label: workerUsername });
+  } catch (err) {
+    rethrow("select userid option", err);
+  }
+
+  try {
+    await page.click('button[type="submit"]:has-text("Join Game Session")');
+  } catch (err) {
+    rethrow("click Join Game Session", err);
+  }
+
+  try {
+    await page.waitForURL(/\/game/, { timeout: REJOIN_TIMEOUT });
+  } catch (err) {
+    rethrow("wait for /game URL", err);
+  }
+
+  try {
+    await page.waitForFunction(
+      // @ts-expect-error - Foundry runtime global
+      () => globalThis.game?.ready === true,
+      undefined,
+      { timeout: REJOIN_TIMEOUT },
+    );
+  } catch (err) {
+    rethrow("wait for game.ready", err);
+  }
 }
