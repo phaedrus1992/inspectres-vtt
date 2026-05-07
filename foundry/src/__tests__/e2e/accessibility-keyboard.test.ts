@@ -56,8 +56,8 @@ test.describe("Accessibility: Keyboard Navigation & ARIA (Issue #504)", () => {
         return el ? (el as HTMLElement).getAttribute("aria-label") || (el as HTMLElement).id : "";
       });
 
-      // Element should have focus (either aria-label, id, or just be changed)
-      expect(focusedAfterTab || "focused").toBeTruthy();
+      // Element should have focus (either aria-label, id, or be changed)
+      expect(focusedAfterTab).toBeTruthy();
 
       try {
         await page.screenshot({
@@ -111,7 +111,7 @@ test.describe("Accessibility: Keyboard Navigation & ARIA (Issue #504)", () => {
           },
           undefined,
           { timeout: 5_000 },
-        ).catch(() => {}); // Ignore if no dialog
+        );
 
         // Verify the input still exists and retains the value (form wasn't submitted and page navigated)
         const inputValue = await firstInput.inputValue();
