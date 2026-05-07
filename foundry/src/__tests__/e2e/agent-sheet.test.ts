@@ -75,6 +75,7 @@ test.describe("AgentSheet — actions, stats, and notes", () => {
           const fallbackMsg = fallbackError instanceof Error ? fallbackError.message : String(fallbackError);
           throw new Error(
             `Failed to click roll dialog button. Primary selector 'dialog button[data-action="roll"]' failed: ${primaryMsg}. Fallback selector 'dialog button[type="submit"]:not([data-action="cancel"])' also failed: ${fallbackMsg}. Check dialog structure for changes.`,
+            { cause: primaryError },
           );
         }
       }
@@ -105,21 +106,19 @@ test.describe("AgentSheet — actions, stats, and notes", () => {
     sheet = await openAgentSheet(page, agentId);
 
     // --- stressRoll button: visible on stats tab ---
-    const stressRollVisible = await waitForElementVisible(
+    await waitForElementVisible(
       page,
       `.inspectres[id*="${agentId}"] [data-action="stressRoll"]`,
       ELEMENT_WAIT_TIMEOUT,
     );
-    expect(stressRollVisible).toBe(true);
 
     // --- stats tab: all four skill roll buttons present ---
     for (const skill of SKILL_NAMES) {
-      const rollBtnVisible = await waitForElementVisible(
+      await waitForElementVisible(
         page,
         `.inspectres[id*="${agentId}"] [data-action="skillRoll"][data-skill="${skill}"]`,
         ELEMENT_WAIT_TIMEOUT,
       );
-      expect(rollBtnVisible, `Roll button for ${skill} should be present`).toBe(true);
     }
 
     // --- addCharacteristic + notes tab button: list grows, button visible ---
@@ -128,12 +127,11 @@ test.describe("AgentSheet — actions, stats, and notes", () => {
     const beforeCharArr = await getActorSystemField<unknown[]>(page, agentId, "characteristics", []);
     const beforeChar = beforeCharArr.length;
 
-    const addBtnVisible = await waitForElementVisible(
+    await waitForElementVisible(
       page,
       `.inspectres[id*="${agentId}"] [data-action="addCharacteristic"]`,
       ELEMENT_WAIT_TIMEOUT,
     );
-    expect(addBtnVisible).toBe(true);
 
     await sheet.clickAddCharacteristic();
     await waitForActorFieldChanged(page, agentId, "characteristics.length", beforeChar);
@@ -183,19 +181,17 @@ test.describe("AgentSheet — conditional UI paths", () => {
     }, agentId);
 
     // --- recovery banner ---
-    const bannerVisible = await waitForElementVisible(
+    await waitForElementVisible(
       page,
       `.inspectres[id*="${agentId}"] .recovery-banner`,
       ELEMENT_WAIT_TIMEOUT,
     );
-    expect(bannerVisible).toBe(true);
 
     // --- skill penalty line ---
-    const penaltyLineExists = await waitForElementVisible(
+    await waitForElementVisible(
       page,
       `.inspectres[id*="${agentId}"] .skill-penalty-line`,
       ELEMENT_WAIT_TIMEOUT,
     );
-    expect(penaltyLineExists).toBe(true);
   });
 });

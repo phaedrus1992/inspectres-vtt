@@ -234,14 +234,16 @@ export async function waitForActorFieldEquals(
 }
 
 /**
- * Poll until a sheet element is visible, returning the visibility state.
- * Combines the two-step visibility check pattern into a single helper.
+ * Poll until a sheet element is present and has non-zero size.
+ * Throws with diagnostic context (selector match state, computed display) on timeout
+ * so callers don't have to re-query the DOM to figure out why the wait failed.
  */
 export async function waitForElementVisible(
   page: Page,
   selector: string,
   timeout = SHEET_WAIT_TIMEOUT,
-): Promise<boolean> {
+): Promise<void> {
+  const startTime = Date.now();
   try {
     await page.waitForFunction(
       (sel: string) => {
@@ -253,9 +255,28 @@ export async function waitForElementVisible(
       selector,
       { timeout },
     );
-    return true;
-  } catch {
-    return false;
+  } catch (error) {
+    const elapsed = Date.now() - startTime;
+    const probe = await page.evaluate((sel: string) => {
+      const el = document.querySelector(sel);
+      if (!el) return { exists: false } as const;
+      const rect = (el as HTMLElement).getBoundingClientRect();
+      return {
+        exists: true,
+        tag: el.tagName,
+        classes: el.className,
+        width: rect.width,
+        height: rect.height,
+        display: window.getComputedStyle(el).display,
+      } as const;
+    }, selector);
+    const detail = probe.exists
+      ? `element found (${probe.tag}, classes="${probe.classes}") but has zero size (${probe.width}x${probe.height}, display="${probe.display}")`
+      : `selector matched no elements`;
+    throw new Error(
+      `waitForElementVisible timeout after ${elapsed}ms for selector "${selector}": ${detail}`,
+      { cause: error },
+    );
   }
 }
 
@@ -282,7 +303,9 @@ export async function getActorSystemField<T>(
         }
         value = (value as Record<string, unknown>)[part];
       }
-      return { found: value !== undefined && value !== null, value };
+      // Path traversed successfully — value may legitimately be null, false, "" or 0.
+      // Treat only `undefined` (key absent on system) as missing; null is a real stored value.
+      return { found: value !== undefined, value };
     },
     { id: actorId, path: fieldPath },
   );
