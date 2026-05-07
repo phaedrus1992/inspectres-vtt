@@ -46,18 +46,28 @@ test.describe("Accessibility: Keyboard Navigation & ARIA (Issue #504)", () => {
       // Verify at least some tabbable elements exist
       expect(tabbableElements.length).toBeGreaterThan(0);
 
-      // Focus the sheet and tab through
-      await page.locator(`${agent.sheetSelector()}`).first().focus();
+      // Focus the first tabbable element inside the sheet
+      const firstTabbable = page
+        .locator(`${agent.sheetSelector()} input, ${agent.sheetSelector()} button, ${agent.sheetSelector()} a, ${agent.sheetSelector()} [tabindex]:not([tabindex='-1'])`)
+        .first();
+      await firstTabbable.focus();
 
-      // Tab once and verify focus moved
-      await page.keyboard.press("Tab");
-      const focusedAfterTab = await page.evaluate(() => {
-        const el = document.activeElement;
-        return el ? (el as HTMLElement).getAttribute("aria-label") || (el as HTMLElement).id : "";
+      // Identify the focused element before Tab
+      const focusedBefore = await page.evaluate(() => {
+        const el = document.activeElement as HTMLElement | null;
+        return el ? `${el.tagName}#${el.id ?? ""}.${el.className ?? ""}[name=${el.getAttribute("name") ?? ""}]` : "none";
       });
 
-      // Element should have focus (either aria-label, id, or be changed)
-      expect(focusedAfterTab).toBeTruthy();
+      await page.keyboard.press("Tab");
+
+      // Identify the focused element after Tab
+      const focusedAfter = await page.evaluate(() => {
+        const el = document.activeElement as HTMLElement | null;
+        return el ? `${el.tagName}#${el.id ?? ""}.${el.className ?? ""}[name=${el.getAttribute("name") ?? ""}]` : "none";
+      });
+
+      // Tab should advance focus to a different element
+      expect(focusedAfter).not.toBe(focusedBefore);
 
       try {
         await page.screenshot({
