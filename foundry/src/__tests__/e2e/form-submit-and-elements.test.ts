@@ -28,21 +28,24 @@ test.describe("Custom form elements & form submit round-trip (Sprint #525)", () 
       await agent.waitForVisible();
 
       // Find stress meter element
-      const stressMeter = page.locator(
-        `${agent.sheetSelector()} stress-meter`,
-      );
+      const stressMeter = page.locator(agent.stressMeterSelector());
       await expect(stressMeter).toBeVisible();
 
       // Click stress meter pips to set stress=3
-      const pips = page.locator(
-        `${agent.sheetSelector()} stress-meter .pip`,
-      );
+      const pips = page.locator(agent.stressMeterPips());
       const pipCount = await pips.count();
       expect(pipCount).toBe(6); // Stress has 6 pips (0-6 scale)
 
       // Click third pip to set stress to 3
       await pips.nth(2).click();
-      await page.waitForTimeout(500); // Wait for change event
+      await page.waitForFunction(
+        () => {
+          const el = document.querySelector(`.inspectres[id*="${actorId}"]`);
+          return el && el.getBoundingClientRect().height > 0;
+        },
+        undefined,
+        { timeout: 10_000 },
+      );
 
       // Verify stress value persisted to actor.system
       const systemData = await agent.getSystemData();
@@ -57,7 +60,11 @@ test.describe("Custom form elements & form submit round-trip (Sprint #525)", () 
         }
       }, actorId);
 
-      await page.waitForTimeout(500);
+      await page.waitForFunction(
+        () => !document.querySelector(`.inspectres[id*="${actorId}"]`),
+        undefined,
+        { timeout: 10_000 },
+      );
 
       // Reopen sheet
       await page.evaluate(async (id: string) => {
@@ -69,21 +76,21 @@ test.describe("Custom form elements & form submit round-trip (Sprint #525)", () 
       await agent.waitForVisible();
 
       // Verify stress meter reflects persisted value
-      const stressMeterAfterReopen = page.locator(
-        `${agent.sheetSelector()} stress-meter`,
-      );
+      const stressMeterAfterReopen = page.locator(agent.stressMeterSelector());
       await expect(stressMeterAfterReopen).toBeVisible();
 
-      const filledPips = page.locator(
-        `${agent.sheetSelector()} stress-meter .pip.filled`,
-      );
+      const filledPips = page.locator(agent.filledPips());
       const filledCount = await filledPips.count();
       expect(filledCount).toBe(3);
 
-      await page.screenshot({
-        path: "test-results/e2e-screenshots/form-submit-01-stress-meter.png",
-        timeout: 5000,
-      }).catch(() => {});
+      try {
+        await page.screenshot({
+          path: "test-results/e2e-screenshots/form-submit-01-stress-meter.png",
+          timeout: 5000,
+        });
+      } catch (err) {
+        console.error(`Screenshot failed for form-submit-01: ${err instanceof Error ? err.message : String(err)}`);
+      }
     } finally {
       if (actorId) await deleteActor(page, actorId);
     }
@@ -107,32 +114,32 @@ test.describe("Custom form elements & form submit round-trip (Sprint #525)", () 
 
       await agent.waitForVisible();
 
-      // Find a text input field and fill it
-      const textInput = page.locator(
-        `${agent.sheetSelector()} input[type="text"]`,
-      ).first();
+      // Find a text input field and fill it (target the first visible form field)
+      const form = page.locator(`${agent.sheetSelector()} form`).first();
+      const textInput = form.locator('input[type="text"]').first();
       await expect(textInput).toBeVisible();
 
       const testValue = "E2E Test Value";
       await textInput.fill(testValue);
 
-      // Submit the form (click submit button or press Enter)
-      const form = page.locator(`${agent.sheetSelector()} form`).first();
-      await form.evaluate((f: HTMLElement) => {
-        const submitBtn = f.querySelector(
-          'button[type="submit"]',
-        ) as HTMLButtonElement | null;
-        if (submitBtn) {
-          submitBtn.click();
-        } else {
-          // If no explicit submit button, trigger submit event
-          (f as HTMLFormElement).dispatchEvent(
-            new Event("submit", { bubbles: true, cancelable: true }),
-          );
-        }
-      });
+      // Submit the form by clicking the submit button
+      const submitBtn = page.locator(`${agent.sheetSelector()} button[type="submit"]`).first();
+      if ((await submitBtn.count()) > 0) {
+        await submitBtn.click();
+      } else {
+        // Fallback: find and click any submit-like button
+        const anySubmitBtn = page.locator(`${agent.sheetSelector()} button`).first();
+        await anySubmitBtn.click();
+      }
 
-      await page.waitForTimeout(500);
+      await page.waitForFunction(
+        () => {
+          const el = document.querySelector(`.inspectres[id*="${actorId}"]`);
+          return el && el.getBoundingClientRect().height > 0;
+        },
+        undefined,
+        { timeout: 10_000 },
+      );
 
       // Close and reopen sheet
       await page.evaluate(async (id: string) => {
@@ -143,7 +150,11 @@ test.describe("Custom form elements & form submit round-trip (Sprint #525)", () 
         }
       }, actorId);
 
-      await page.waitForTimeout(500);
+      await page.waitForFunction(
+        () => !document.querySelector(`.inspectres[id*="${actorId}"]`),
+        undefined,
+        { timeout: 10_000 },
+      );
 
       await page.evaluate(async (id: string) => {
         // @ts-expect-error - Foundry runtime global
@@ -153,17 +164,20 @@ test.describe("Custom form elements & form submit round-trip (Sprint #525)", () 
 
       await agent.waitForVisible();
 
-      // Verify input value persisted
-      const textInputAfterReopen = page.locator(
-        `${agent.sheetSelector()} input[type="text"]`,
-      ).first();
+      // Verify input value persisted (re-query the same form field)
+      const formAfterReopen = page.locator(`${agent.sheetSelector()} form`).first();
+      const textInputAfterReopen = formAfterReopen.locator('input[type="text"]').first();
       const value = await textInputAfterReopen.inputValue();
       expect(value).toBe(testValue);
 
-      await page.screenshot({
-        path: "test-results/e2e-screenshots/form-submit-02-text-field.png",
-        timeout: 5000,
-      }).catch(() => {});
+      try {
+        await page.screenshot({
+          path: "test-results/e2e-screenshots/form-submit-02-text-field.png",
+          timeout: 5000,
+        });
+      } catch (err) {
+        console.error(`Screenshot failed for form-submit-02: ${err instanceof Error ? err.message : String(err)}`);
+      }
     } finally {
       if (actorId) await deleteActor(page, actorId);
     }
@@ -243,10 +257,14 @@ test.describe("Multi-actor sheet workflows (Issue #502)", () => {
       expect(sheet1StillVisible).toBe(true);
       expect(sheet2StillVisible).toBe(true);
 
-      await page.screenshot({
-        path: "test-results/e2e-screenshots/form-submit-03-multi-actor.png",
-        timeout: 5000,
-      }).catch(() => {});
+      try {
+        await page.screenshot({
+          path: "test-results/e2e-screenshots/form-submit-03-multi-actor.png",
+          timeout: 5000,
+        });
+      } catch (err) {
+        console.error(`Screenshot failed for form-submit-03: ${err instanceof Error ? err.message : String(err)}`);
+      }
     } finally {
       if (actorId1) await deleteActor(page, actorId1);
       if (actorId2) await deleteActor(page, actorId2);
@@ -260,6 +278,12 @@ test.describe("Error states and edge cases (Issue #503)", () => {
   }) => {
     const actorName = `E2E-error-state-${Date.now()}`;
     let actorId: string | null = null;
+    const consoleErrors: string[] = [];
+    const consoleHandler = (msg: { type: () => string; text: () => string }) => {
+      if (msg.type() === "error") {
+        consoleErrors.push(msg.text());
+      }
+    };
 
     try {
       actorId = await createActor(page, "agent", actorName);
@@ -273,22 +297,25 @@ test.describe("Error states and edge cases (Issue #503)", () => {
 
       await agent.waitForVisible();
 
-      // Collect any console errors during interaction
-      const consoleErrors: string[] = [];
-      page.on("console", (msg) => {
-        if (msg.type() === "error") {
-          consoleErrors.push(msg.text());
-        }
-      });
+      // Attach console error listener
+      page.on("console", consoleHandler);
 
       // Try filling a number input with non-numeric value
-      const numberInput = page.locator(
-        `${agent.sheetSelector()} input[type="number"]`,
-      ).first();
+      const numberForm = page.locator(`${agent.sheetSelector()} form`).first();
+      const numberInput = numberForm.locator('input[type="number"]').first();
       if ((await numberInput.count()) > 0) {
         await expect(numberInput).toBeVisible();
         await numberInput.fill("not-a-number");
-        await page.waitForTimeout(300);
+
+        // Wait for input change event propagation
+        await page.waitForFunction(
+          () => {
+            const el = document.querySelector(`.inspectres[id*="${actorId}"]`);
+            return el && el.getBoundingClientRect().height > 0;
+          },
+          undefined,
+          { timeout: 10_000 },
+        );
 
         // Sheet should still be visible (not crashed)
         await agent.waitForVisible();
@@ -303,11 +330,16 @@ test.describe("Error states and edge cases (Issue #503)", () => {
       );
       expect(criticalErrors).toHaveLength(0);
 
-      await page.screenshot({
-        path: "test-results/e2e-screenshots/form-submit-04-error-state.png",
-        timeout: 5000,
-      }).catch(() => {});
+      try {
+        await page.screenshot({
+          path: "test-results/e2e-screenshots/form-submit-04-error-state.png",
+          timeout: 5000,
+        });
+      } catch (err) {
+        console.error(`Screenshot failed for form-submit-04: ${err instanceof Error ? err.message : String(err)}`);
+      }
     } finally {
+      page.off("console", consoleHandler);
       if (actorId) await deleteActor(page, actorId);
     }
   });

@@ -17,6 +17,21 @@ export class AgentSheetPage {
     return `.inspectres[id*="${this.actorId}"]`;
   }
 
+  /** Selector for the stress meter element. */
+  stressMeterSelector(): string {
+    return `${this.sheetSelector()} stress-meter`;
+  }
+
+  /** Selector for all stress meter pips. */
+  stressMeterPips(): string {
+    return `${this.stressMeterSelector()} .pip`;
+  }
+
+  /** Selector for filled stress meter pips. */
+  filledPips(): string {
+    return `${this.stressMeterSelector()} .pip.filled`;
+  }
+
   /** Wait until the sheet is visible in the DOM. */
   async waitForVisible(): Promise<void> {
     const id = this.actorId;
