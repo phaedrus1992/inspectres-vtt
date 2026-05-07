@@ -7,17 +7,13 @@
  */
 import { test, expect, ELEMENT_WAIT_TIMEOUT } from "./fixtures.js";
 import type { Page } from "@playwright/test";
-import { createActor, deleteActor, waitForSheet, rejoinIfRedirected } from "./pages/index.js";
+import { createActor, deleteActor, waitForSheet, rejoinIfRedirected, wrapDiagnosticError } from "./pages/index.js";
 
 async function openActorsDirectory(page: Page): Promise<void> {
   try {
     await page.click('[data-tab="actors"]');
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    throw new Error(
-      `openActorsDirectory: failed to click actors tab: ${msg}`,
-      { cause: err instanceof Error ? err : undefined },
-    );
+    throw wrapDiagnosticError(err, "openActorsDirectory: failed to click actors tab");
   }
   try {
     await page.waitForFunction(
@@ -31,10 +27,9 @@ async function openActorsDirectory(page: Page): Promise<void> {
       { timeout: ELEMENT_WAIT_TIMEOUT },
     );
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    throw new Error(
-      `openActorsDirectory: actors directory panel did not become visible within ${ELEMENT_WAIT_TIMEOUT}ms: ${msg}`,
-      { cause: err instanceof Error ? err : undefined },
+    throw wrapDiagnosticError(
+      err,
+      `openActorsDirectory: actors directory panel did not become visible within ${ELEMENT_WAIT_TIMEOUT}ms`,
     );
   }
 }

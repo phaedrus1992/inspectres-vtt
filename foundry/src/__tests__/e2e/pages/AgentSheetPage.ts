@@ -1,4 +1,5 @@
 import type { Page } from "@playwright/test";
+import { wrapDiagnosticError } from "./helpers.js";
 
 const SHEET_WAIT_TIMEOUT = 15_000;
 
@@ -97,10 +98,9 @@ export class AgentSheetPage {
         { timeout: 10_000 },
       );
     } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      throw new Error(
-        `setStress(${value}): sheet for actor ${this.actorId} did not re-render within 10s: ${msg}`,
-        { cause: err instanceof Error ? err : undefined },
+      throw wrapDiagnosticError(
+        err,
+        `setStress(${value}): sheet for actor ${this.actorId} did not re-render within 10s`,
       );
     }
   }
@@ -139,11 +139,7 @@ export class AgentSheetPage {
         { timeout: 15_000 },
       );
     } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      throw new Error(
-        `rerender: game.ready did not become true within 15s: ${msg}`,
-        { cause: err instanceof Error ? err : undefined },
-      );
+      throw wrapDiagnosticError(err, "rerender: game.ready did not become true within 15s");
     }
 
     const id = this.actorId;
@@ -154,20 +150,18 @@ export class AgentSheetPage {
         if (actor) await actor.sheet.render(true);
       }, id);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      throw new Error(
-        `rerender: actor.sheet.render(true) failed for actor ${this.actorId}: ${msg}`,
-        { cause: err instanceof Error ? err : undefined },
+      throw wrapDiagnosticError(
+        err,
+        `rerender: actor.sheet.render(true) failed for actor ${this.actorId}`,
       );
     }
 
     try {
       await this.waitForVisible();
     } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      throw new Error(
-        `rerender: sheet for actor ${this.actorId} did not become visible after re-render: ${msg}`,
-        { cause: err instanceof Error ? err : undefined },
+      throw wrapDiagnosticError(
+        err,
+        `rerender: sheet for actor ${this.actorId} did not become visible after re-render`,
       );
     }
   }

@@ -8,6 +8,19 @@ const REJOIN_TIMEOUT = 30_000;
 // Session expired mid-test means the slot is already free on the server — short wait.
 const REJOIN_OPTION_TIMEOUT = 5_000;
 
+/**
+ * Wrap a caught `unknown` error as a new Error with diagnostic context, preserving
+ * the original via `cause`. Centralizes the `err instanceof Error ? err.message : String(err)`
+ * narrowing repeated across e2e helpers.
+ */
+export function wrapDiagnosticError(err: unknown, context: string): Error {
+  const msg = err instanceof Error ? err.message : String(err);
+  return new Error(
+    `${context}: ${msg}`,
+    { cause: err instanceof Error ? err : undefined },
+  );
+}
+
 /** Create a new actor in Foundry and return its ID. */
 export async function createActor(
   page: Page,
@@ -326,10 +339,9 @@ export async function rejoinIfRedirected(page: Page, workerUsername: string): Pr
   if (!page.url().includes("/join")) return;
 
   const rethrow = (step: string, err: unknown): never => {
-    const msg = err instanceof Error ? err.message : String(err);
-    throw new Error(
-      `rejoinIfRedirected failed at "${step}" for worker "${workerUsername}" at ${page.url()}: ${msg}`,
-      { cause: err instanceof Error ? err : undefined },
+    throw wrapDiagnosticError(
+      err,
+      `rejoinIfRedirected failed at "${step}" for worker "${workerUsername}" at ${page.url()}`,
     );
   };
 
