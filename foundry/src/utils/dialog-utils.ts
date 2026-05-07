@@ -10,8 +10,16 @@
  *   await DialogV2.wait({ ..., render: stopDialogSubmitPropagation });
  */
 export function stopDialogSubmitPropagation(_event: Event, dialog: foundry.applications.api.DialogV2): void {
-  const form = dialog.element.querySelector("form");
-  if (!form) return;
-  form.addEventListener("submit", (e: Event) => { e.stopPropagation(); }, { once: false });
+  // Guard the dialog element itself in capture phase: any submit event originating inside
+  // the <dialog> must not bubble OR trigger browser navigation. Attaching to the dialog
+  // element (not the inner form) handles cases where the form is rebuilt across re-renders.
+  const el = dialog.element as HTMLElement;
+  if (el.dataset["submitGuarded"] === "1") return;
+  el.dataset["submitGuarded"] = "1";
+  el.addEventListener("submit", (e: Event) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+  }, { capture: true });
 }
 
