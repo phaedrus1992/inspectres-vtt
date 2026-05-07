@@ -8,10 +8,7 @@ import { AgentSheetPage } from "./pages/AgentSheetPage.js";
 import { createActor, deleteActor } from "./pages/index.js";
 
 test.describe("DialogV2 and Modal Workflows (Issue #500)", () => {
-  // Skipped: dialog close-detection is reliable locally but flakes in CI — DialogV2
-  // close timing diverges from local under the headless container. Passes locally.
-  // Tracked for re-enable once close detection has a stable observable. See issue follow-up.
-  test.skip("roll dialog: open dialog, confirm roll, verify message posted", async ({ page }) => {
+  test("roll dialog: open dialog, confirm roll, verify message posted", async ({ page }) => {
     const actorName = `E2E-roll-dialog-${Date.now()}`;
     let actorId: string | null = null;
 
@@ -160,8 +157,7 @@ test.describe("DialogV2 and Modal Workflows (Issue #500)", () => {
     }
   });
 
-  // Skipped: same DialogV2 close-detection flake in CI (see roll-dialog test above).
-  test.skip("dialog escape key: closes dialog without action", async ({ page }) => {
+  test("dialog escape key: closes dialog without action", async ({ page }) => {
     const actorName = `E2E-escape-dialog-${Date.now()}`;
     let actorId: string | null = null;
 
