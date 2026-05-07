@@ -19,6 +19,7 @@ import {
   waitForNewChatMessage,
   waitForActorFieldChanged,
   waitForActorFieldEquals,
+  getActorSystemField,
 } from "./pages/index.js";
 
 test.describe("FranchiseSheet — roll actions and mission tracker", () => {
@@ -191,20 +192,12 @@ test.describe("FranchiseSheet — debt mode", () => {
     const sheet = await openFranchiseSheet(page, franchiseId);
     await sheet.openTab("notes");
 
-    const before = await page.evaluate((id: string) => {
-      // @ts-expect-error - Foundry runtime global
-      const actor = globalThis.game?.actors?.get(id);
-      return (actor?.system as { debtMode: boolean })?.debtMode ?? false;
-    }, franchiseId);
+    const before = await getActorSystemField<boolean>(page, franchiseId, "debtMode", false);
 
     await sheet.clickToggleDebtMode();
     await waitForActorFieldChanged(page, franchiseId, "debtMode", before);
 
-    const after = await page.evaluate((id: string) => {
-      // @ts-expect-error - Foundry runtime global
-      const actor = globalThis.game?.actors?.get(id);
-      return (actor?.system as { debtMode: boolean })?.debtMode ?? false;
-    }, franchiseId);
+    const after = await getActorSystemField<boolean>(page, franchiseId, "debtMode", false);
 
     expect(after).toBe(!before);
 
@@ -241,11 +234,7 @@ test.describe("FranchiseSheet — form-bound inputs", () => {
     await bankInput.press("Tab");
     await waitForActorFieldEquals(page, franchiseId, "bank", 7);
 
-    const bankValue = await page.evaluate((id: string) => {
-      // @ts-expect-error - Foundry runtime global
-      const actor = globalThis.game?.actors?.get(id);
-      return (actor?.system as { bank: number })?.bank ?? 0;
-    }, franchiseId);
+    const bankValue = await getActorSystemField<number>(page, franchiseId, "bank", 0);
     expect(bankValue).toBe(7);
 
     await page.screenshot({
@@ -266,11 +255,7 @@ test.describe("FranchiseSheet — form-bound inputs", () => {
     await textarea.press("Tab");
     await waitForActorFieldEquals(page, franchiseId, "description", testText);
 
-    const savedDescription = await page.evaluate((id: string) => {
-      // @ts-expect-error - Foundry runtime global
-      const actor = globalThis.game?.actors?.get(id);
-      return (actor?.system as { description: string })?.description ?? "";
-    }, franchiseId);
+    const savedDescription = await getActorSystemField<string>(page, franchiseId, "description", "");
     expect(savedDescription).toBe(testText);
 
     await page.screenshot({
@@ -290,11 +275,7 @@ test.describe("FranchiseSheet — form-bound inputs", () => {
     await missionGoalInput.press("Tab");
     await waitForActorFieldEquals(page, franchiseId, "missionGoal", 10);
 
-    const missionGoalValue = await page.evaluate((id: string) => {
-      // @ts-expect-error - Foundry runtime global
-      const actor = globalThis.game?.actors?.get(id);
-      return (actor?.system as { missionGoal: number })?.missionGoal ?? 0;
-    }, franchiseId);
+    const missionGoalValue = await getActorSystemField<number>(page, franchiseId, "missionGoal", 0);
     expect(missionGoalValue).toBe(10);
 
     await page.screenshot({

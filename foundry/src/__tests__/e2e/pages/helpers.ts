@@ -111,14 +111,24 @@ export async function waitForNewChatMessage(
   beforeCount: number,
   timeout = 15_000,
 ): Promise<void> {
-  await page.waitForFunction(
-    (count: number) => {
-      // @ts-expect-error - Foundry runtime global
-      return (globalThis.game?.messages?.size ?? 0) > count;
-    },
-    beforeCount,
-    { timeout },
-  ).catch(() => {});
+  const startTime = Date.now();
+  try {
+    await page.waitForFunction(
+      (count: number) => {
+        // @ts-expect-error - Foundry runtime global
+        return (globalThis.game?.messages?.size ?? 0) > count;
+      },
+      beforeCount,
+      { timeout },
+    );
+  } catch (error) {
+    const elapsed = Date.now() - startTime;
+    // @ts-expect-error - Foundry runtime global
+    const currentCount = (globalThis.game?.messages?.size ?? 0) as number;
+    throw new Error(
+      `waitForNewChatMessage timeout after ${elapsed}ms: expected message count > ${beforeCount}, got ${currentCount}`,
+    );
+  }
 }
 
 /**
@@ -135,22 +145,41 @@ export async function waitForActorFieldChanged(
   previousValue: unknown,
   timeout = 15_000,
 ): Promise<void> {
-  await page.waitForFunction(
-    (args: { id: string; path: string; prev: unknown }) => {
-      // @ts-expect-error - Foundry runtime global
-      const actor = globalThis.game?.actors?.get(args.id);
-      if (!actor) return false;
-      const parts = args.path.split(".");
-      let value: unknown = actor.system;
-      for (const part of parts) {
-        if (value == null || typeof value !== "object") return false;
-        value = (value as Record<string, unknown>)[part];
+  const startTime = Date.now();
+  try {
+    await page.waitForFunction(
+      (args: { id: string; path: string; prev: unknown }) => {
+        // @ts-expect-error - Foundry runtime global
+        const actor = globalThis.game?.actors?.get(args.id);
+        if (!actor) return false;
+        const parts = args.path.split(".");
+        let value: unknown = actor.system;
+        for (const part of parts) {
+          if (value == null || typeof value !== "object") return false;
+          value = (value as Record<string, unknown>)[part];
+        }
+        return value !== args.prev;
+      },
+      { id: actorId, path: fieldPath, prev: previousValue },
+      { timeout },
+    );
+  } catch (error) {
+    const elapsed = Date.now() - startTime;
+    // @ts-expect-error - Foundry runtime global
+    const actor = globalThis.game?.actors?.get(actorId);
+    const parts = fieldPath.split(".");
+    let currentValue: unknown = actor?.system;
+    for (const part of parts) {
+      if (currentValue == null || typeof currentValue !== "object") {
+        currentValue = undefined;
+        break;
       }
-      return value !== args.prev;
-    },
-    { id: actorId, path: fieldPath, prev: previousValue },
-    { timeout },
-  ).catch(() => {});
+      currentValue = (currentValue as Record<string, unknown>)[part];
+    }
+    throw new Error(
+      `waitForActorFieldChanged timeout after ${elapsed}ms on field "${fieldPath}": expected change from ${JSON.stringify(previousValue)}, current value is ${JSON.stringify(currentValue)}`,
+    );
+  }
 }
 
 /**
@@ -167,22 +196,97 @@ export async function waitForActorFieldEquals(
   expectedValue: unknown,
   timeout = 15_000,
 ): Promise<void> {
-  await page.waitForFunction(
-    (args: { id: string; path: string; expected: unknown }) => {
+  const startTime = Date.now();
+  try {
+    await page.waitForFunction(
+      (args: { id: string; path: string; expected: unknown }) => {
+        // @ts-expect-error - Foundry runtime global
+        const actor = globalThis.game?.actors?.get(args.id);
+        if (!actor) return false;
+        const parts = args.path.split(".");
+        let value: unknown = actor.system;
+        for (const part of parts) {
+          if (value == null || typeof value !== "object") return false;
+          value = (value as Record<string, unknown>)[part];
+        }
+        return value === args.expected;
+      },
+      { id: actorId, path: fieldPath, expected: expectedValue },
+      { timeout },
+    );
+  } catch (error) {
+    const elapsed = Date.now() - startTime;
+    // @ts-expect-error - Foundry runtime global
+    const actor = globalThis.game?.actors?.get(actorId);
+    const parts = fieldPath.split(".");
+    let currentValue: unknown = actor?.system;
+    for (const part of parts) {
+      if (currentValue == null || typeof currentValue !== "object") {
+        currentValue = undefined;
+        break;
+      }
+      currentValue = (currentValue as Record<string, unknown>)[part];
+    }
+    throw new Error(
+      `waitForActorFieldEquals timeout after ${elapsed}ms on field "${fieldPath}": expected ${JSON.stringify(expectedValue)}, got ${JSON.stringify(currentValue)}`,
+    );
+  }
+}
+
+/**
+ * Poll until a sheet element is visible, returning the visibility state.
+ * Combines the two-step visibility check pattern into a single helper.
+ */
+export async function waitForElementVisible(
+  page: Page,
+  selector: string,
+  timeout = SHEET_WAIT_TIMEOUT,
+): Promise<boolean> {
+  try {
+    await page.waitForFunction(
+      (sel: string) => {
+        const el = document.querySelector(sel);
+        if (!el) return false;
+        const rect = (el as HTMLElement).getBoundingClientRect();
+        return rect.width > 0 && rect.height > 0;
+      },
+      selector,
+      { timeout },
+    );
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Get a typed actor system field by dot-path.
+ * Simplifies the common pattern of accessing actor.system fields with fallback.
+ */
+export async function getActorSystemField<T>(
+  page: Page,
+  actorId: string,
+  fieldPath: string,
+  fallback: T,
+): Promise<T> {
+  const result = await page.evaluate(
+    (args: { id: string; path: string }) => {
       // @ts-expect-error - Foundry runtime global
       const actor = globalThis.game?.actors?.get(args.id);
-      if (!actor) return false;
+      if (!actor) return { found: false, value: undefined as unknown };
       const parts = args.path.split(".");
       let value: unknown = actor.system;
       for (const part of parts) {
-        if (value == null || typeof value !== "object") return false;
+        if (value == null || typeof value !== "object") {
+          return { found: false, value: undefined as unknown };
+        }
         value = (value as Record<string, unknown>)[part];
       }
-      return value === args.expected;
+      return { found: value !== undefined && value !== null, value };
     },
-    { id: actorId, path: fieldPath, expected: expectedValue },
-    { timeout },
-  ).catch(() => {});
+    { id: actorId, path: fieldPath },
+  );
+  return result.found ? (result.value as T) : fallback;
 }
 
 /**

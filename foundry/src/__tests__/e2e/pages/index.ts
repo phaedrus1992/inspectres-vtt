@@ -11,5 +11,7 @@ export {
   waitForNewChatMessage,
   waitForActorFieldChanged,
   waitForActorFieldEquals,
+  waitForElementVisible,
+  getActorSystemField,
   rejoinIfRedirected,
 } from "./helpers.js";
