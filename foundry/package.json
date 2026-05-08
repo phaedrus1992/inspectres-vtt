@@ -30,6 +30,7 @@
     "fvtt-types": "github:League-of-Foundry-Developers/foundry-vtt-types#main",
     "jsdom": "^29.0.2",
     "oxlint": "^0.7.0",
+    "slop-scan": "^0.3.0",
     "typescript": "^5.7.2",
     "vite": "^8.0.8",
     "vitest": "^4.1.4"

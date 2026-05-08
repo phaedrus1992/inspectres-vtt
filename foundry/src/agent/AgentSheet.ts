@@ -146,11 +146,25 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
 
     // Foundry v14 bug: ApplicationV2 form submit events are not preventDefault'd by the
     // framework, causing the browser to treat them as real form submissions and navigate
-    // to /join. Guard against this on the outer sheet element; actor.update() still works
-    // because it is called directly (not via browser form submission).
+    // to /join. Guard with capture phase so we run before any other handler can let it
+    // through. actor.update() still works because it is called directly, not via submit.
     if (!this.element.dataset["submitGuarded"]) {
       this.element.dataset["submitGuarded"] = "1";
-      this.element.addEventListener("submit", (e: Event) => { e.preventDefault(); });
+      this.element.addEventListener("submit", (e: Event) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }, { capture: true });
+      // Also intercept Enter inside inputs — pressing Enter in a single-input form
+      // implicitly submits. Block at keydown so submit never fires.
+      this.element.addEventListener("keydown", (e: KeyboardEvent) => {
+        if (e.key !== "Enter") return;
+        const t = e.target as HTMLElement | null;
+        if (t instanceof HTMLTextAreaElement) return;
+        if (t instanceof HTMLInputElement || t instanceof HTMLSelectElement) {
+          e.preventDefault();
+          (t as HTMLElement).blur();
+        }
+      }, { capture: true });
     }
 
     if (!this.isEditable) return;

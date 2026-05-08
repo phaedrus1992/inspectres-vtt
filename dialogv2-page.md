@@ -1,0 +1,557 @@
+- generic [ref=e4]:
+  - banner [ref=e5]:
+    - generic [ref=e7]:
+      - banner [ref=e9]:
+        - generic [ref=e16]: Foundry VTT Community Wiki
+      - banner [ref=e18]:
+        - generic [ref=e19]:
+          - generic [ref=e22]:
+            - generic [ref=e25]: 󰍉
+            - generic [ref=e26]:
+              - generic: Search...
+              - textbox "Search..." [ref=e27]
+          - link "Browse by Tags" [ref=e28] [cursor=pointer]:
+            - /url: /t
+            - generic [ref=e30]: 󰓻
+      - banner [ref=e32]:
+        - generic [ref=e33]:
+          - button "Language" [ref=e34] [cursor=pointer]:
+            - generic [ref=e36]: 󰖟
+          - separator [ref=e37]
+          - link "Login" [ref=e38] [cursor=pointer]:
+            - /url: /login
+            - generic [ref=e40]: 󰀉
+  - navigation [ref=e41]:
+    - generic [ref=e46]:
+      - separator [ref=e47]
+      - generic [ref=e48]:
+        - generic [ref=e49] [cursor=pointer]:
+          - generic [ref=e51]: 󰝰
+          - generic [ref=e52]: / sidebar.root
+        - generic [ref=e53] [cursor=pointer]:
+          - generic [ref=e55]: 󰝰
+          - generic [ref=e56]: Development
+        - generic [ref=e57] [cursor=pointer]:
+          - generic [ref=e59]: 󰝰
+          - generic [ref=e60]: API Documentation
+        - separator [ref=e61]
+        - link "API Documentation" [ref=e62] [cursor=pointer]:
+          - /url: /en/development/api
+          - generic [ref=e64]: 󰈚
+          - generic [ref=e65]: API Documentation
+        - generic [ref=e66]: Current Directory
+        - generic [ref=e67] [cursor=pointer]:
+          - generic [ref=e69]: 󰉋
+          - generic [ref=e70]: Document
+        - link "Application" [ref=e71] [cursor=pointer]:
+          - /url: /en/development/api/application
+          - generic [ref=e73]: 󰈚
+          - generic [ref=e74]: Application
+        - link "ApplicationV2" [ref=e75] [cursor=pointer]:
+          - /url: /en/development/api/applicationv2
+          - generic [ref=e77]: 󰈚
+          - generic [ref=e78]: ApplicationV2
+        - link "Audio" [ref=e79] [cursor=pointer]:
+          - /url: /en/development/api/audio
+          - generic [ref=e81]: 󰈚
+          - generic [ref=e82]: Audio
+        - link "Canvas" [ref=e83] [cursor=pointer]:
+          - /url: /en/development/api/canvas
+          - generic [ref=e85]: 󰈚
+          - generic [ref=e86]: Canvas
+        - link "Compendium Collection" [ref=e87] [cursor=pointer]:
+          - /url: /en/development/api/CompendiumCollection
+          - generic [ref=e89]: 󰈚
+          - generic [ref=e90]: Compendium Collection
+        - link "Data Model" [ref=e91] [cursor=pointer]:
+          - /url: /en/development/api/DataModel
+          - generic [ref=e93]: 󰈚
+          - generic [ref=e94]: Data Model
+        - link "Dialog" [ref=e95] [cursor=pointer]:
+          - /url: /en/development/api/dialog
+          - generic [ref=e97]: 󰈚
+          - generic [ref=e98]: Dialog
+        - link "DialogV2" [ref=e99] [cursor=pointer]:
+          - /url: /en/development/api/dialogv2
+          - generic [ref=e101]: 󰈚
+          - generic [ref=e102]: DialogV2
+        - link "Flags" [ref=e103] [cursor=pointer]:
+          - /url: /en/development/api/flags
+          - generic [ref=e105]: 󰈚
+          - generic [ref=e106]: Flags
+        - link "Game" [ref=e107] [cursor=pointer]:
+          - /url: /en/development/api/game
+          - generic [ref=e109]: 󰈚
+          - generic [ref=e110]: Game
+        - link "Helpers and Utils" [ref=e111] [cursor=pointer]:
+          - /url: /en/development/api/helpers
+          - generic [ref=e113]: 󰈚
+          - generic [ref=e114]: Helpers and Utils
+        - link "Hooks" [ref=e115] [cursor=pointer]:
+          - /url: /en/development/api/hooks
+          - generic [ref=e117]: 󰈚
+          - generic [ref=e118]: Hooks
+        - link "Localization" [ref=e119] [cursor=pointer]:
+          - /url: /en/development/api/localization
+          - generic [ref=e121]: 󰈚
+          - generic [ref=e122]: Localization
+        - link "Roll" [ref=e123] [cursor=pointer]:
+          - /url: /en/development/api/roll
+          - generic [ref=e125]: 󰈚
+          - generic [ref=e126]: Roll
+        - link "Settings" [ref=e127] [cursor=pointer]:
+          - /url: /en/development/api/settings
+          - generic [ref=e129]: 󰈚
+          - generic [ref=e130]: Settings
+        - link "Sockets" [ref=e131] [cursor=pointer]:
+          - /url: /en/development/api/sockets
+          - generic [ref=e133]: 󰈚
+          - generic [ref=e134]: Sockets
+        - link "Time and Calendar" [ref=e135] [cursor=pointer]:
+          - /url: /en/development/api/time
+          - generic [ref=e137]: 󰈚
+          - generic [ref=e138]: Time and Calendar
+  - text: 󰍜
+  - main [ref=e140]:
+    - generic [ref=e141]:
+      - list [ref=e144]:
+        - button "󰋜" [ref=e145] [cursor=pointer]
+        - listitem [ref=e146]: /
+        - link "development" [ref=e147] [cursor=pointer]:
+          - /url: /en/development
+          - generic [ref=e148]: development
+        - listitem [ref=e149]: /
+        - link "api" [ref=e150] [cursor=pointer]:
+          - /url: /en/development/api
+          - generic [ref=e151]: api
+        - listitem [ref=e152]: /
+        - link "dialogv2" [ref=e153] [cursor=pointer]:
+          - /url: /en/development/api/dialogv2
+          - generic [ref=e154]: dialogv2
+      - separator [ref=e155]
+      - generic [ref=e159]:
+        - generic [ref=e160]: DialogV2
+        - generic [ref=e161]: A lightweight Application that renders a dialog containing a form with arbitrary content, and some buttons.
+      - separator [ref=e162]
+      - generic [ref=e167]:
+        - paragraph [ref=e168]:
+          - img "Up to date as of v13" [ref=e169]
+        - paragraph [ref=e170]:
+          - text: The DialogV2 class, introduced in v12 alongside
+          - link "AppV2" [ref=e171] [cursor=pointer]:
+            - /url: /en/development/api/applicationv2
+          - text: ", is a responsive and modern way to present basic choices to users."
+        - paragraph [ref=e172]: Official documentation
+        - list [ref=e173]:
+          - listitem [ref=e174]:
+            - text: ▸
+            - link "DialogV2 󰏌" [ref=e175] [cursor=pointer]:
+              - /url: https://foundryvtt.com/api/classes/foundry.applications.api.DialogV2.html
+          - listitem [ref=e176]:
+            - text: ▸
+            - link "DialogV2Configuration 󰏌" [ref=e177] [cursor=pointer]:
+              - /url: https://foundryvtt.com/api/interfaces/foundry.DialogV2Configuration.html
+          - listitem [ref=e178]:
+            - text: ▸
+            - link "DialogV2Button 󰏌" [ref=e179] [cursor=pointer]:
+              - /url: https://foundryvtt.com/api/interfaces/foundry.DialogV2Button.html
+        - paragraph [ref=e180]:
+          - strong [ref=e181]: Legend
+        - generic [ref=e182]:
+          - code [ref=e184]: "DialogV2.confirm // `.` indicates static method or property DialogV2#render // `#` indicates instance method or property"
+          - button "Copy" [ref=e187] [cursor=pointer]
+        - heading "Overview" [level=2] [ref=e188]
+        - paragraph [ref=e189]: The DialogV2 class is a quick and easy way to render a simple application window with a handful of buttons. It is built upon AppV2, so it inherits the dynamic styling for both light and dark mode.
+        - paragraph [ref=e190]: "Use DialogV2 if:"
+        - list [ref=e191]:
+          - listitem [ref=e192]: ▸ You need the user to make a simple choice
+          - listitem [ref=e193]: ▸ You don't expect to re-render the application based on user actions
+          - listitem [ref=e194]: ▸ The application represents a pause in a workflow that should prevent other actions
+        - paragraph [ref=e195]:
+          - text: It's better to extend ApplicationV2 yourself, e.g. with
+          - code [ref=e196]: HandlebarsApplicationMixin
+          - text: ", if:"
+        - list [ref=e197]:
+          - listitem [ref=e198]: ▸ You expect to handle complex form data
+          - listitem [ref=e199]: ▸ You want your application to have tabs
+          - listitem [ref=e200]: ▸ There isn't a clear "I'm done here" state in your process
+          - listitem [ref=e201]: ▸ You need to re-render the application at some point
+        - paragraph [ref=e202]:
+          - text: The DialogV2 class can be accessed via
+          - code [ref=e203]: foundry.applications.api.DialogV2
+          - text: ", and the code can be found in"
+          - code [ref=e204]: yourFoundryInstallPath\resources\app\client-esm\applications\api\dialog.mjs
+        - heading "Key Concepts" [level=2] [ref=e205]
+        - paragraph [ref=e206]: Any usage of DialogV2 should keep the following in mind.
+        - heading "Options" [level=3] [ref=e207]
+        - paragraph [ref=e208]:
+          - text: DialogV2 inherits all the options from
+          - link "ApplicationConfiguration 󰏌" [ref=e209] [cursor=pointer]:
+            - /url: https://foundryvtt.com/api/interfaces/foundry.applications.types.ApplicationConfiguration.html
+          - text: ", which has the"
+          - code [ref=e210]: window
+          - text: property that includes a field for
+          - code [ref=e211]: title
+          - text: you should always set. You may also want to alter the the
+          - code [ref=e212]: classes
+          - text: array which can be helpful for specifying the styling of your dialogs.
+        - paragraph [ref=e213]:
+          - text: In addition, the options from
+          - link "DialogV2Configuration 󰏌" [ref=e214] [cursor=pointer]:
+            - /url: https://foundryvtt.com/api/interfaces/foundry.DialogV2Configuration.html
+          - text: are all important to implement;
+          - code [ref=e215]: buttons
+          - text: and
+          - code [ref=e216]: content
+          - text: especially are where you usually do the most work to configure the dialog. The only automatic
+          - link "localization" [ref=e217] [cursor=pointer]:
+            - /url: /en/development/api/localization
+          - text: for these properties is the
+          - code [ref=e218]: label
+          - text: of any button; use template strings and calls to
+          - code [ref=e219]: game.i18n.localize
+          - text: for defining your
+          - code [ref=e220]: content
+          - text: .
+        - paragraph [ref=e221]:
+          - text: One option in particular that should be used with care is
+          - code [ref=e222]: modal
+          - text: ", which causes the dialog to disable the rest of the Foundry UI while it is active. This can be good for simple pauses in a workflow, but any higher complexity dialog should avoid using this property."
+        - heading "Button Callbacks" [level=3] [ref=e223]
+        - paragraph [ref=e224]: API Reference
+        - list [ref=e225]:
+          - listitem [ref=e226]:
+            - text: ▸
+            - link "DialogV2Button 󰏌" [ref=e227] [cursor=pointer]:
+              - /url: https://foundryvtt.com/api/interfaces/foundry.DialogV2Button.html
+          - listitem [ref=e228]:
+            - text: ▸
+            - link "DialogV2ButtonCallback 󰏌" [ref=e229] [cursor=pointer]:
+              - /url: https://foundryvtt.com/api/types/foundry.DialogV2ButtonCallback.html
+        - paragraph [ref=e230]:
+          - text: The
+          - code [ref=e231]: callback
+          - text: property of a DialogV2Button determines the return of that button when using the provided static methods -
+          - code [ref=e232]: confirm
+          - text: ","
+          - code [ref=e233]: prompt
+          - text: ", and"
+          - code [ref=e234]: wait
+          - text: . If no callback is defined or the callback returns a nullish result (
+          - code [ref=e235]: "null"
+          - text: or
+          - code [ref=e236]: undefined
+          - text: ), it will return the value of the mandatory
+          - code [ref=e237]: action
+          - text: property (a string). If the callback returns a value, then that value is the return of the button.
+        - paragraph [ref=e238]:
+          - text: Frequently you may want to grab the value of an input in the dialog - to do so in the callback,
+          - code [ref=e239]: button.form.elements
+          - text: is a Record of all of the input elements with the key being the element's name. So to access an input with
+          - code [ref=e240]: name="foo"
+          - text: you could go
+          - code [ref=e241]: button.form.elements.foo.value
+          - text: . All dialogs wrap the
+          - code [ref=e242]: content
+          - text: provided in a form, that tag does not need to be provided in your html.
+        - paragraph [ref=e243]:
+          - text: This behavior can be modified by passing a function to the
+          - code [ref=e244]: submit
+          - text: property of the
+          - code [ref=e245]: options
+          - text: when constructing the dialog or by overriding the
+          - code [ref=e246]: _onSubmit
+          - text: method in an extension of the class.
+        - heading "API Interactions" [level=2] [ref=e247]
+        - paragraph [ref=e248]:
+          - text: There are a few basic ways of invoking DialogV2 that can simplify your code. These are all asynchronous operations. Also keep in mind that any strings should probably be template strings that make calls to
+          - code [ref=e249]: game.i18n.localize
+          - text: or
+          - code [ref=e250]: game.i18n.format
+          - text: as needed; the below examples use static strings for readability, but actual implementations should take advantage of Foundry's
+          - link "localization" [ref=e251] [cursor=pointer]:
+            - /url: /en/development/api/localization
+          - text: system.
+        - heading "confirm" [level=3] [ref=e252]
+        - paragraph [ref=e253]: API Reference
+        - list [ref=e254]:
+          - listitem [ref=e255]:
+            - text: ▸
+            - link "DialogV2.confirm 󰏌" [ref=e256] [cursor=pointer]:
+              - /url: https://foundryvtt.com/api/classes/foundry.applications.api.DialogV2.html#confirm
+        - paragraph [ref=e257]:
+          - text: The
+          - code [ref=e258]: confirm
+          - text: static method provides a simple way to get a yes/no response. Yes returns true, no returns false.
+        - generic [ref=e259]:
+          - code [ref=e261]: "const likesIceCream = await foundry.applications.api.DialogV2.confirm({ window: { title: \"Sweet Treat Check\" }, content: \"<p>Do you like ice cream?</p>\" })"
+          - button "Copy" [ref=e264] [cursor=pointer]
+        - paragraph [ref=e265]:
+          - text: If needed, the default behavior of the
+          - code [ref=e266]: "yes"
+          - text: and
+          - code [ref=e267]: "no"
+          - text: buttons can be overridden by providing properties matching their name in argument object, e.g.
+          - code [ref=e268]: "yes: { class: \"mymodule yes\"}"
+          - text: .
+        - heading "prompt" [level=3] [ref=e269]
+        - paragraph [ref=e270]: API Reference
+        - list [ref=e271]:
+          - listitem [ref=e272]:
+            - text: ▸
+            - link "DialogV2.prompt 󰏌" [ref=e273] [cursor=pointer]:
+              - /url: https://foundryvtt.com/api/classes/foundry.applications.api.DialogV2.html#prompt
+        - paragraph [ref=e274]:
+          - text: The
+          - code [ref=e275]: prompt
+          - text: static method gives the user a simple input that can be properly
+          - code [ref=e276]: await
+          - text: ed before proceeding.
+        - generic [ref=e277]:
+          - code [ref=e279]: "const proceed = await foundry.applications.api.DialogV2.prompt({ window: { title: \"Proceed\" }, content: \"<p>Do you wish to continue?</p>\" })"
+          - button "Copy" [ref=e282] [cursor=pointer]
+        - paragraph [ref=e283]:
+          - text: If needed, the default behavior of the
+          - code [ref=e284]: ok
+          - text: button can be overridden by providing properties matching their name in argument object, e.g.
+          - code [ref=e285]: "ok: { class: \"mymodule ok\"}"
+          - text: .
+        - heading "wait" [level=3] [ref=e286]
+        - paragraph [ref=e287]: API Reference
+        - list [ref=e288]:
+          - listitem [ref=e289]:
+            - text: ▸
+            - link "DialogV2.wait 󰏌" [ref=e290] [cursor=pointer]:
+              - /url: https://foundryvtt.com/api/classes/foundry.applications.api.DialogV2.html#wait
+        - paragraph [ref=e291]:
+          - text: The
+          - code [ref=e292]: wait
+          - text: static method is the most flexible of the three and covers a wide range of uses. While the prior two methods
+          - emphasis [ref=e293]: do
+          - text: accept additional buttons, the
+          - code [ref=e294]: wait
+          - text: method
+          - emphasis [ref=e295]: requires
+          - text: them.
+        - generic [ref=e296]:
+          - code [ref=e298]: "const method = await foundry.applications.api.DialogV2.wait({ window: { title: \"D20 Roll\" }, content: \"<p>Roll Method?</p>\", // This example does not use i18n strings for the button labels, // but they are automatically localized. buttons: [ { label: \"Advantage\", action: \"advantage\", }, { label: \"Standard\", action: \"standard\", }, { label: \"Disadvantage\", action: \"disadvantage\", } ] })"
+          - button "Copy" [ref=e301] [cursor=pointer]
+        - paragraph [ref=e302]:
+          - text: This sample dialog will return the value
+          - code [ref=e303]: advantage
+          - text: ","
+          - code [ref=e304]: standard
+          - text: ", or"
+          - code [ref=e305]: disadvantage
+          - text: to the
+          - code [ref=e306]: method
+          - text: constant - the values of each button's
+          - code [ref=e307]: action
+          - text: property. If you provide a
+          - code [ref=e308]: callback
+          - text: function, then the return of that function will be used in place of the
+          - code [ref=e309]: action
+          - text: .
+        - heading "input" [level=3] [ref=e310]
+        - paragraph [ref=e311]: API Reference
+        - list [ref=e312]:
+          - listitem [ref=e313]:
+            - text: ▸
+            - link "DialogV2.input 󰏌" [ref=e314] [cursor=pointer]:
+              - /url: https://foundryvtt.com/api/classes/foundry.applications.api.DialogV2.html#input
+        - paragraph [ref=e315]:
+          - text: A simple variant of
+          - code [ref=e316]: prompt
+          - text: that returns the form data by default. You can adjust the button's label or icon via the
+          - code [ref=e317]: ok
+          - text: property.
+        - generic [ref=e318]:
+          - code [ref=e320]:
+            - text: "const data = await foundry.applications.api.DialogV2.input({ window: { title: \"Favorite Color\" }, content:"
+            - generic [ref=e321]: "`<input type=\"text\" name=\"color\">`"
+            - text: ", ok: { label: \"Save\", icon: \"fa-solid fa-floppy-disk\", } }) // data.color will have the input value"
+          - button "Copy" [ref=e324] [cursor=pointer]
+        - paragraph [ref=e325]:
+          - text: When working with many inputs, this will give a flat object pairing all of the input
+          - code [ref=e326]: name
+          - text: properties with the values submitted. If you need to transform the object to a nested structure, the
+          - link "foundry.utils.expandObject 󰏌" [ref=e327] [cursor=pointer]:
+            - /url: https://foundryvtt.com/api/functions/foundry.utils.expandObject.html
+            - code [ref=e328]: foundry.utils.expandObject
+            - text: 󰏌
+          - text: function can help.
+        - heading "rejectClose" [level=3] [ref=e329]
+        - paragraph [ref=e330]:
+          - text: The
+          - code [ref=e331]: rejectClose
+          - text: property, by default
+          - code [ref=e332]: "true"
+          - text: in v12 and
+          - code [ref=e333]: "false"
+          - text: in v13, causes a dialog to throw an error if it is closed, halting all execution. If you would prefer to throw if the user closes the dialog, pass
+          - code [ref=e334]: "rejectClose: true"
+          - text: .
+        - heading "query" [level=3] [ref=e335]
+        - paragraph [ref=e336]: API Reference
+        - list [ref=e337]:
+          - listitem [ref=e338]:
+            - text: ▸
+            - link "DialogV2.query 󰏌" [ref=e339] [cursor=pointer]:
+              - /url: https://foundryvtt.com/api/classes/foundry.applications.api.DialogV2.html#query
+        - paragraph [ref=e340]:
+          - text: The most complex of the static methods is
+          - code [ref=e341]: query
+          - text: ", which is a way for one user to prompt another user with a dialog, with proper handling of the inter-client communication via sockets and promises."
+        - generic [ref=e342]:
+          - code [ref=e344]: "// Assuming you have some other way of designating the `user` // Asks permission to proceed const dialogOptions = { window: { title: \"Proceed\" }, content: \"<p>Do you wish to continue?</p>\" } const proceedA = await foundry.applications.api.DialogV2.query(user, \"confirm\", dialogOptions) // This is mostly equivalent to directly invoking User#query // with the exception of not having any way to specify the `timeout` option // which takes a number of milliseconds to wait before guaranteeing a return const proceedB = await user.query(\"dialog\", { type: \"confirm\", config: dialogOptions }, { timeout: 30 * 1000 });"
+          - button "Copy" [ref=e347] [cursor=pointer]
+        - paragraph [ref=e348]:
+          - text: A particularly powerful use is combining
+          - code [ref=e349]: DialogV2.query
+          - text: with the
+          - code [ref=e350]: "\"input\""
+          - text: type, which allows basically arbitrary data to be transferred between clients. This can be very useful for coordinating rolls and other similarly advanced info.
+        - heading "Specific Use Cases" [level=2] [ref=e351]
+        - paragraph [ref=e352]: Here are some common tips and tricks while working with DialogV2
+        - heading "Creating inputs with JS" [level=3] [ref=e353]
+        - paragraph [ref=e354]:
+          - text: By default, applications only return based on their buttons inputs. However, a common desire is taking simple inputs, such as situational bonuses for a dice roll or picking an option in a Select. The
+          - code [ref=e355]: foundry.applications.fields
+          - link "namespace 󰏌" [ref=e356] [cursor=pointer]:
+            - /url: https://foundryvtt.com/api/modules/foundry.applications.fields.html
+          - text: provides a number of functions to generate
+          - code [ref=e357]: input
+          - text: and
+          - code [ref=e358]: select
+          - text: elements that can be fed into your
+          - code [ref=e359]: content
+          - text: .
+        - generic [ref=e360]:
+          - code [ref=e362]:
+            - text: "const fields = foundry.applications.fields; const textInput = fields.createNumberInput({ name: 'foo', value: 'Starting Value' }); const textGroup = fields.createFormGroup({ input: textInput, label: \"My text input\", hint: \"Optional hint\" }); const selectInput = fields.createSelectInput({ options: [ { label: \"Option 1\", value: 'one' }, { label: \"Option 2\", value: 'two' } ], name: 'fizz' }) const selectGroup = fields.createFormGroup({ input: selectInput, label: \"My Select Input\", hint: \"Another Hint\" }) const content ="
+            - generic [ref=e363]:
+              - text: "`"
+              - generic [ref=e364]: "${textGroup.outerHTML}"
+              - generic [ref=e365]: "${selectGroup.outerHTML}"
+              - text: "`"
+          - button "Copy" [ref=e368] [cursor=pointer]
+        - paragraph [ref=e369]:
+          - text: Alternatively, if you are working with data models, the
+          - link "toInput 󰏌" [ref=e370] [cursor=pointer]:
+            - /url: https://foundryvtt.com/api/classes/foundry.data.fields.DataField.html#toInput
+            - code [ref=e371]: toInput
+            - text: 󰏌
+          - text: and
+          - link "toFormGroup 󰏌" [ref=e372] [cursor=pointer]:
+            - /url: https://foundryvtt.com/api/classes/foundry.data.fields.DataField.html#toFormGroup
+            - code [ref=e373]: toFormGroup
+            - text: 󰏌
+          - text: functions can help.
+        - generic [ref=e374]:
+          - code [ref=e376]: "const prop = 'foo.bar'; const field = doc.system.schema.getField(prop); // If the field doesn't have a `label` and `hint` property, // or you want to customize the label and hint, // you can pass them into the first parameter of the function. const group = field.toFormGroup({}, { value: foundry.utils.getProperty(doc.system, prop) }); const content = group.outerHTML;"
+          - button "Copy" [ref=e379] [cursor=pointer]
+        - paragraph [ref=e380]:
+          - text: However you construct it, that
+          - code [ref=e381]: content
+          - text: can then be passed into a DialogV2 static function.
+        - heading "Using renderTemplate to generate the content" [level=3] [ref=e382]:
+          - text: Using renderTemplate to generate the
+          - code [ref=e383]: content
+        - paragraph [ref=e384]:
+          - text: If you have a complex chunk of HTML you want to render that doesn't need re-rendering and can be handled as a dialog, outsourcing the HTML construction to handlebars can be an effective tactic. To do that, use the
+          - code [ref=e385]: renderTemplate(path, data)
+          - text: function which is globally available. The
+          - code [ref=e386]: path
+          - text: argument is a string representing a handlebars file on the server, while
+          - code [ref=e387]: data
+          - text: is an object of properties used to fill in the handlebars. This function is asynchronous to allow fetching the file from the server if it's not in the cache.
+        - generic [ref=e388]:
+          - code [ref=e390]: "const content = await renderTemplate('path/to/template.hbs', data) const response = await foundry.applications.api.DialogV2.prompt({ window: { title: \"Proceed\" }, content, modal: true })"
+          - button "Copy" [ref=e393] [cursor=pointer]
+        - heading "The render option" [level=3] [ref=e394]:
+          - text: The
+          - code [ref=e395]: render
+          - text: option
+        - paragraph [ref=e396]: API Reference
+        - list [ref=e397]:
+          - listitem [ref=e398]:
+            - text: ▸
+            - link "DialogV2RenderCallback 󰏌" [ref=e399] [cursor=pointer]:
+              - /url: https://foundryvtt.com/api/types/foundry.DialogV2RenderCallback.html
+        - paragraph [ref=e400]:
+          - text: When using
+          - code [ref=e401]: confirm
+          - text: ","
+          - code [ref=e402]: prompt
+          - text: ", or"
+          - code [ref=e403]: wait
+          - text: ", you can pass a function to the"
+          - code [ref=e404]: render
+          - text: property to trigger when the dialog finishes rendering. This can be useful for adding event listeners to the rendered HTML.
+        - heading "Adding actions" [level=3] [ref=e405]
+        - paragraph [ref=e406]: Sometimes a Dialog needs extra click listeners. This can be accomplished by leveraging the AppV2 actions framework.
+        - paragraph [ref=e407]:
+          - strong [ref=e408]: In the HTML
+          - text: ": Add a"
+          - code [ref=e409]: button
+          - text: element with
+          - code [ref=e410]: type="button"
+          - text: and
+          - code [ref=e411]: data-action
+          - text: ; other attributes such as the inner content are up to you.
+        - paragraph [ref=e412]:
+          - strong [ref=e413]: In the JS
+          - text: ": Pass an"
+          - code [ref=e414]: actions
+          - text: object with method callbacks matching the values of each
+          - code [ref=e415]: data-action
+          - text: you want to use. An important note here is that arrow methods will
+          - emphasis [ref=e416]: not
+          - text: get you
+          - code [ref=e417]: this
+          - text: as the Dialog reference; prefer anonymous functions or the like.
+        - generic [ref=e418]:
+          - code [ref=e420]:
+            - text: "const response = await foundry.applications.api.DialogV2.prompt({ window: { title: \"Proceed\" }, content: '<button type=\"button\" data-action=\"clickMe\">Click Me!</button>', actions: { clickMe: function ("
+            - generic [ref=e421]: event, target
+            - text: ") { console.log(this, event, target); } } })"
+          - button "Copy" [ref=e424] [cursor=pointer]
+        - heading "Extending DialogV2" [level=3] [ref=e425]
+        - paragraph [ref=e426]: One way to ensure common styling throughout your own use of DialogV2 is to have a consistent class you apply to it, such as the id for your package. You can extend DialogV2 and include information in the DEFAULT_OPTIONS that will then be used as additional defaults. You will then have to use this class instead of DialogV2, but that may be preferable to always invoking DialogV2's deeply nested namespace.
+        - generic [ref=e427]:
+          - code [ref=e429]:
+            - text: class MyPackageDialog extends
+            - generic [ref=e430]: foundry.applications.api.DialogV2
+            - text: "{ static DEFAULT_OPTIONS = { classes: [\"my-package\"] } }"
+          - button "Copy" [ref=e433] [cursor=pointer]
+        - heading "Troubleshooting" [level=2] [ref=e434]
+        - paragraph [ref=e435]: Here are some of the common problems when working with DialogV2
+        - heading "Asynchronicity" [level=3] [ref=e436]
+        - paragraph [ref=e437]:
+          - text: All three of the primary DialogV2 static methods are asynchronous, which means they return a Promise. Handling that promise requires the use of
+          - code [ref=e438]: then
+          - text: or
+          - code [ref=e439]: await
+          - text: . It also means that modules cannot use them in a
+          - code [ref=e440]: preCreate
+          - text: hook, which operates synchronously, but systems
+          - emphasis [ref=e441]: can
+          - text: use them in the
+          - code [ref=e442]: _preCreate
+          - text: method on Documents or TypeDataModel, as that function is asynchronous.
+        - heading "Re-rendering" [level=3] [ref=e443]
+        - paragraph [ref=e444]:
+          - text: DialogV2 does
+          - emphasis [ref=e445]: not
+          - text: support re-rendering. If you need to re-render your application, use
+          - link "ApplicationV2" [ref=e446] [cursor=pointer]:
+            - /url: /en/development/api/applicationv2
+          - text: instead.
+  - contentinfo [ref=e447]:
+    - generic [ref=e448]:
+      - text: Content is available under the Creative Commons Attribution-ShareAlike License, by Foundry VTT Community Wiki. |
+      - generic [ref=e449]:
+        - text: Powered by
+        - link "Wiki.js" [ref=e450] [cursor=pointer]:
+          - /url: https://wiki.js.org
+  - generic: 󰃨
