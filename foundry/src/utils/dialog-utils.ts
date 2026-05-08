@@ -10,12 +10,18 @@
  *   await DialogV2.wait({ ..., render: stopDialogSubmitPropagation });
  */
 export function stopDialogSubmitPropagation(_event: Event, dialog: foundry.applications.api.DialogV2): void {
-  // Guard the dialog element itself in capture phase: any submit event originating inside
-  // the <dialog> must not bubble OR trigger browser navigation. Attaching to the dialog
-  // element (not the inner form) handles cases where the form is rebuilt across re-renders.
   const el = dialog.element as HTMLElement;
+  // Force the inner form's method to "dialog" — this tells the browser not to navigate
+  // on submit (it just closes the <dialog> instead). This is the platform-native fix
+  // and works regardless of where the dialog sits in the DOM tree.
+  const innerForm = el.querySelector("form");
+  if (innerForm && innerForm.getAttribute("method") !== "dialog") {
+    innerForm.setAttribute("method", "dialog");
+  }
   if (el.dataset["submitGuarded"] === "1") return;
   el.dataset["submitGuarded"] = "1";
+  // Belt-and-suspenders: capture-phase guard on the dialog element so any submit
+  // bubbling up still gets preventDefault/stopPropagation before reaching ancestors.
   el.addEventListener("submit", (e: Event) => {
     e.preventDefault();
     e.stopPropagation();

@@ -63,7 +63,7 @@ test.describe("DialogV2 and Modal Workflows (Issue #500)", () => {
       await page.waitForFunction(
         () => !document.querySelector("dialog[open]"),
         undefined,
-        { timeout: 5_000},
+        { timeout: 5_000 },
       );
 
       // Verify a chat message was posted (check game.messages)
