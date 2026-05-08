@@ -48,6 +48,20 @@ test.describe("Form field rendering and input validation (E2E - Playwright)", ()
     const textInput = page.locator(".inspectres input[type='text']").first();
     await expect(textInput).toBeVisible();
 
+    // Wait for stable layout: ApplicationV2 re-renders can briefly detach inputs,
+    // and getComputedStyle on a detached/transitioning element returns empty strings.
+    // Poll until backgroundColor resolves to something non-empty.
+    await page.waitForFunction(
+      () => {
+        const el = document.querySelector<HTMLInputElement>(".inspectres input[type='text']");
+        if (!el || !el.isConnected) return false;
+        const bg = window.getComputedStyle(el).backgroundColor;
+        return bg !== "" && bg !== "rgba(0, 0, 0, 0)";
+      },
+      undefined,
+      { timeout: 10_000 },
+    );
+
     const borderStyle = await textInput.evaluate((el) => {
       const computed = window.getComputedStyle(el);
       return {

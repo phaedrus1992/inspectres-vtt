@@ -59,11 +59,12 @@ test.describe("DialogV2 and Modal Workflows (Issue #500)", () => {
       const confirmBtn = page.locator('dialog[open] button[data-action="roll"]').first();
       await confirmBtn.click();
 
-      // Wait for dialog to close
+      // Wait for dialog to close. Bumped to 15s: under CI load the action callback
+      // (FormData parse + roll evaluation + chat post) can take >5s before close.
       await page.waitForFunction(
         () => !document.querySelector("dialog[open]"),
         undefined,
-        { timeout: 5_000 },
+        { timeout: 15_000 },
       );
 
       // Verify a chat message was posted (check game.messages)

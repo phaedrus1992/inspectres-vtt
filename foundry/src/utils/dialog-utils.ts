@@ -11,17 +11,22 @@
  */
 export function stopDialogSubmitPropagation(_event: Event, dialog: foundry.applications.api.DialogV2): void {
   const el = dialog.element as HTMLElement;
-  // Force the inner form's method to "dialog" — this tells the browser not to navigate
-  // on submit (it just closes the <dialog> instead). This is the platform-native fix
-  // and works regardless of where the dialog sits in the DOM tree.
+  // Force the inner form's method to "dialog" — browser closes <dialog> on submit
+  // instead of navigating. Re-applied on every render in case DialogV2 rebuilds the form.
   const innerForm = el.querySelector("form");
   if (innerForm && innerForm.getAttribute("method") !== "dialog") {
     innerForm.setAttribute("method", "dialog");
   }
+  // Also demote any submit-typed buttons inside the dialog to plain buttons. DialogV2
+  // dispatches its action callbacks via click events directly — the type="submit" is
+  // unnecessary and causes a parallel submit event path that can race with action
+  // dispatch under load (observed flake on v14 CI: dialog stays open after click).
+  for (const btn of el.querySelectorAll('button[type="submit"]')) {
+    btn.setAttribute("type", "button");
+  }
   if (el.dataset["submitGuarded"] === "1") return;
   el.dataset["submitGuarded"] = "1";
-  // Belt-and-suspenders: capture-phase guard on the dialog element so any submit
-  // bubbling up still gets preventDefault/stopPropagation before reaching ancestors.
+  // Belt-and-suspenders: capture-phase guard so any submit that does fire is contained.
   el.addEventListener("submit", (e: Event) => {
     e.preventDefault();
     e.stopPropagation();
