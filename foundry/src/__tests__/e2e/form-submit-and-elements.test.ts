@@ -39,11 +39,11 @@ test.describe("Custom form elements & form submit round-trip (Sprint #525)", () 
       // Click third pip to set stress to 3
       await pips.nth(2).click();
       await page.waitForFunction(
-        () => {
-          const el = document.querySelector(`.inspectres[id*="${actorId}"]`);
+        (id: string) => {
+          const el = document.querySelector(`.inspectres[id*="${id}"]`);
           return el && el.getBoundingClientRect().height > 0;
         },
-        undefined,
+        actorId,
         { timeout: 10_000 },
       );
 
