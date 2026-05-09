@@ -61,8 +61,8 @@ test.describe("Custom form elements & form submit round-trip (Sprint #525)", () 
       }, actorId);
 
       await page.waitForFunction(
-        () => !document.querySelector(`.inspectres[id*="${actorId}"]`),
-        undefined,
+        (id: string) => !document.querySelector(`.inspectres[id*="${id}"]`),
+        actorId,
         { timeout: 10_000 },
       );
 
@@ -136,11 +136,11 @@ test.describe("Custom form elements & form submit round-trip (Sprint #525)", () 
       }
 
       await page.waitForFunction(
-        () => {
-          const el = document.querySelector(`.inspectres[id*="${actorId}"]`);
-          return el && el.getBoundingClientRect().height > 0;
+        (id: string) => {
+          const el = document.querySelector(`.inspectres[id*="${id}"]`);
+          return el !== null && el.getBoundingClientRect().height > 0;
         },
-        undefined,
+        actorId,
         { timeout: 10_000 },
       );
 
@@ -154,8 +154,8 @@ test.describe("Custom form elements & form submit round-trip (Sprint #525)", () 
       }, actorId);
 
       await page.waitForFunction(
-        () => !document.querySelector(`.inspectres[id*="${actorId}"]`),
-        undefined,
+        (id: string) => !document.querySelector(`.inspectres[id*="${id}"]`),
+        actorId,
         { timeout: 10_000 },
       );
 
@@ -312,11 +312,11 @@ test.describe("Error states and edge cases (Issue #503)", () => {
 
         // Wait for input change event propagation
         await page.waitForFunction(
-          () => {
-            const el = document.querySelector(`.inspectres[id*="${actorId}"]`);
-            return el && el.getBoundingClientRect().height > 0;
+          (id: string) => {
+            const el = document.querySelector(`.inspectres[id*="${id}"]`);
+            return el !== null && el.getBoundingClientRect().height > 0;
           },
-          undefined,
+          actorId,
           { timeout: 10_000 },
         );
 
