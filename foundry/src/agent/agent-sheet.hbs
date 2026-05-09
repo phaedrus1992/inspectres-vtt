@@ -165,9 +165,12 @@
         </section>
       {{/if}}
 
-      <!-- Stress Roll Section -->
+      <!-- Stress Section -->
       <section class="inspectres-section">
-        <h2>{{localize "INSPECTRES.StressRoll"}}</h2>
+        <h2>{{localize "INSPECTRES.Stress"}}</h2>
+        <div class="stress-control">
+          <stress-meter name="system.stress" value="{{system.stress}}" max="6"></stress-meter>
+        </div>
         <button type="button" class="inspectres-roll-button" data-action="stressRoll">
           {{localize "INSPECTRES.StressRoll"}}
         </button>

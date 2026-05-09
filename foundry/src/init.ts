@@ -15,6 +15,7 @@ import { onMissionSocketEvent } from "./mission/socket.js";
 import { handleActionError } from "./utils/ui-errors.js";
 import { autoClearRecoveredAgents } from "./agent/recovery-utils.js";
 import { validateAndFixCoolCap } from "./agent/agent-system-data.js";
+import { StressMeter } from "./forms/stress-meter.js";
 
 // Helper to re-render Mission Tracker with error handling
 function rerenderMissionTracker(context: string): void {
