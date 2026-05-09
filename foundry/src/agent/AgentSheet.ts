@@ -221,6 +221,26 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
         });
       }, { signal: controller.signal });
     }
+
+    // stress-meter: change event not covered by form.submitOnChange (custom element, not in form.elements)
+    for (const el of this.element.querySelectorAll("stress-meter")) {
+      el.addEventListener("change", (event: Event) => {
+        const target = event.currentTarget as unknown as { value?: number };
+        const value = Math.max(0, Math.min(6, target.value ?? 0));
+        const updateData = { "system.stress": value } as unknown as Parameters<typeof this.actor.update>[0];
+        void this.actor.update(updateData).catch((err: unknown) => {
+          const message = err instanceof Error ? err.message : String(err);
+          console.error("Failed to update stress for agent", {
+            actorId: this.actor.id,
+            actorName: this.actor.name,
+            stressValue: value,
+            error: err,
+            errorMessage: message,
+          });
+          handleActionError(err, "Failed to update stress", "INSPECTRES.ErrorUpdateFailed", "Could not update stress");
+        });
+      }, { signal: controller.signal });
+    }
   }
 
   static async onSkillRoll(this: AgentSheet, _event: Event, target: HTMLElement): Promise<void> {

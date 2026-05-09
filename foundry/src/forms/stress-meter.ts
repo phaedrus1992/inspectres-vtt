@@ -55,7 +55,11 @@ export class StressMeter extends HTMLElement {
 
   attributeChangedCallback(name: string, _oldValue: string | null, newValue: string | null): void {
     if (name === "value" && newValue !== null) {
-      this.#internalValue = Math.max(0, Math.min(6, Number(newValue)));
+      const parsed = Number(newValue);
+      if (!Number.isFinite(parsed)) {
+        throw new TypeError(`Invalid stress value: expected finite number, got ${newValue}`);
+      }
+      this.#internalValue = Math.max(0, Math.min(6, parsed));
       this.#refresh();
     }
   }
@@ -65,6 +69,9 @@ export class StressMeter extends HTMLElement {
   }
 
   set value(val: number) {
+    if (!Number.isFinite(val)) {
+      throw new TypeError(`Invalid stress value: expected finite number, got ${val}`);
+    }
     this.#internalValue = Math.max(0, Math.min(6, val));
     this.setAttribute("value", String(this.#internalValue));
     this.#refresh();
