@@ -15,7 +15,7 @@ import { onMissionSocketEvent } from "./mission/socket.js";
 import { handleActionError } from "./utils/ui-errors.js";
 import { autoClearRecoveredAgents } from "./agent/recovery-utils.js";
 import { validateAndFixCoolCap } from "./agent/agent-system-data.js";
-import { StressMeter } from "./forms/stress-meter.js";
+import "./forms/stress-meter.js";
 
 // Helper to re-render Mission Tracker with error handling
 function rerenderMissionTracker(context: string): void {
@@ -24,6 +24,17 @@ function rerenderMissionTracker(context: string): void {
     handleActionError(err, `Mission tracker re-render failed (${context})`, "INSPECTRES.ErrorMissionTrackerOpen", "Mission Tracker failed to update");
   });
 }
+
+// Foundry v14 bug: form submit events from ApplicationV2 sheets, DialogV2 dialogs, and
+// Enter-keypresses inside form inputs are not always preventDefault'd by the framework,
+// causing the browser to perform a real form submission and navigate to /join. Install a
+// document-level capture-phase guard at module load (before any sheet renders) so every
+// submit event is intercepted before the browser can act on it. actor.update() is unaffected
+// because it is invoked directly, not through form submit.
+document.addEventListener("submit", (e: Event) => {
+  e.preventDefault();
+  e.stopPropagation();
+}, { capture: true });
 
 Hooks.once("init", async function () {
   try {
