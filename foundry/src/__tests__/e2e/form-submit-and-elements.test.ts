@@ -96,10 +96,9 @@ test.describe("Custom form elements & form submit round-trip (Sprint #525)", () 
     }
   });
 
-  // Blocked by issue #527: agent sheet does not currently expose a submit
-  // button reachable in v14 without /join redirect; re-enable when the form
-  // submission path is wired through DialogV2 or a guarded handler.
-  test.skip("text form field: fill, submit form, verify persistence (Issue #501)", async ({
+  // Issue #527 fixed: form.submit() guard installed globally (init.ts) and per-sheet
+  // (AgentSheet.ts) prevents /join redirect. Test can now run without skipping.
+  test("text form field: fill, submit form, verify persistence (Issue #501)", async ({
     page,
   }) => {
     const actorName = `E2E-form-submit-${Date.now()}`;

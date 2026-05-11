@@ -357,12 +357,15 @@ async function provisionWorkerUsers(gmPage: Page): Promise<void> {
         | undefined;
       if (!UserCls) throw new Error("User class not available in Foundry globals (game.ready must be true before calling provisionWorkerUsers)");
 
-      for (const name of names) {
-        const existing = game?.users?.getName(name);
-        if (!existing) {
-          await UserCls.create({ name, role: gmRole, password: "" });
-        }
-      }
+      // Provision users in parallel — Foundry's user creation is thread-safe across contexts
+      await Promise.all(
+        names.map(async (name) => {
+          const existing = game?.users?.getName(name);
+          if (!existing) {
+            await UserCls.create({ name, role: gmRole, password: "" });
+          }
+        }),
+      );
     },
     [usernames, FOUNDRY_ROLE_GAMEMASTER] as [string[], number],
   );
