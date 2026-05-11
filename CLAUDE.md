@@ -261,6 +261,14 @@ gh issue list --state open --label "area-devtools"   # All dev tooling issues
 3. Merge via PR UI only
 4. When assigning work to subagents: if currently on main, create feature branch first; subagents will work on the current branch
 
+**PR closing references (REQUIRED for auto-close on merge):**
+```
+Closes #123
+Closes #124
+Closes #125
+```
+Each issue on its own line. GitHub auto-closes when PR merges. Never use comma-separated: `Closes #123, #124, #125` (doesn't auto-close).
+
 **Why:** Ensures all changes are reviewed, tested via CI, and have clean commit history.
 
 ## Recovery System (Death & Dismemberment)
