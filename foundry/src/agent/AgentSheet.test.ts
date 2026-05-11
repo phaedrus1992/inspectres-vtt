@@ -314,7 +314,10 @@ describe("AgentSheet", () => {
 
       Object.defineProperty(sheet, "element", {
         value: {
-          querySelectorAll: vi.fn(() => [checkbox1, checkbox2]),
+          querySelectorAll: vi.fn((selector: string) => {
+            if (selector === ".weird-checkbox") return [checkbox1, checkbox2];
+            return [];
+          }),
           dataset: {},
           addEventListener: vi.fn(),
         },
@@ -342,7 +345,10 @@ describe("AgentSheet", () => {
       const addEventListenerSpy = vi.fn();
       Object.defineProperty(sheet, "element", {
         value: {
-          querySelectorAll: vi.fn(() => [checkbox]),
+          querySelectorAll: vi.fn((selector: string) => {
+            if (selector === ".weird-checkbox") return [checkbox];
+            return [];
+          }),
           dataset: mockDataset,
           addEventListener: addEventListenerSpy,
         },

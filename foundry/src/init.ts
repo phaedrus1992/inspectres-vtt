@@ -15,6 +15,7 @@ import { onMissionSocketEvent } from "./mission/socket.js";
 import { handleActionError } from "./utils/ui-errors.js";
 import { autoClearRecoveredAgents } from "./agent/recovery-utils.js";
 import { validateAndFixCoolCap } from "./agent/agent-system-data.js";
+import "./forms/stress-meter.js";
 
 // Helper to re-render Mission Tracker with error handling
 function rerenderMissionTracker(context: string): void {
@@ -23,6 +24,34 @@ function rerenderMissionTracker(context: string): void {
     handleActionError(err, `Mission tracker re-render failed (${context})`, "INSPECTRES.ErrorMissionTrackerOpen", "Mission Tracker failed to update");
   });
 }
+
+// Foundry v13/v14 bug: form submit events from ApplicationV2 sheets, DialogV2 dialogs,
+// and Enter-keypresses inside form inputs are not always preventDefault'd by the framework,
+// causing the browser to perform a real form submission and navigate to /join. Install two
+// layers of protection at module load (before any sheet renders):
+//
+// 1. Document-level capture-phase listener intercepts submit *events* before they reach
+//    the browser's default action. Works for event-driven submissions (Enter key, click on
+//    type="submit" button).
+// 2. Override HTMLFormElement.prototype.submit() to no-op. Foundry v13's ApplicationV2 in
+//    some paths calls form.submit() programmatically — this does NOT dispatch a submit
+//    event, so the capture-phase listener never sees it. Overriding the method itself stops
+//    the navigation regardless of how it was triggered.
+//
+// actor.update() and all form-data extraction (new FormData(form)) are unaffected because
+// they don't call form.submit() — they read fields directly.
+document.addEventListener("submit", (e: Event) => {
+  e.preventDefault();
+  e.stopPropagation();
+}, { capture: true });
+
+const originalSubmit = HTMLFormElement.prototype.submit;
+HTMLFormElement.prototype.submit = function (this: HTMLFormElement): void {
+  // Swallow programmatic submits to prevent /join navigation. If a legitimate use case
+  // arises later (e.g. a real external form posting to a server), gate this on a data
+  // attribute like form.dataset.allowSubmit === "true".
+  void originalSubmit;
+};
 
 Hooks.once("init", async function () {
   try {
