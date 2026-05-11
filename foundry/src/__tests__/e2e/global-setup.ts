@@ -358,11 +358,21 @@ async function provisionWorkerUsers(gmPage: Page): Promise<void> {
       if (!UserCls) throw new Error("User class not available in Foundry globals (game.ready must be true before calling provisionWorkerUsers)");
 
       // Provision users in parallel — Foundry's user creation is thread-safe across contexts
+      // Wrap creation in try-catch to handle race: multiple tasks may check getName() before any creates
       await Promise.all(
         names.map(async (name) => {
           const existing = game?.users?.getName(name);
           if (!existing) {
-            await UserCls.create({ name, role: gmRole, password: "" });
+            try {
+              await UserCls.create({ name, role: gmRole, password: "" });
+            } catch (err) {
+              // Ignore if another task created this user first (race-safe)
+              if (err instanceof Error && err.message.includes("name")) {
+                console.warn(`User ${name} already exists (created by parallel task)`);
+              } else {
+                throw err;
+              }
+            }
           }
         }),
       );

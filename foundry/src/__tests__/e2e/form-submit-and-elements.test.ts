@@ -116,6 +116,13 @@ test.describe("Custom form elements & form submit round-trip (Sprint #525)", () 
 
       await agent.waitForVisible();
 
+      // Verify form.submit() guards are installed (prevent /join redirect)
+      const guardsInstalled = await page.evaluate(() => {
+        const form = document.querySelector(".inspectres form") as HTMLFormElement | null;
+        return form ? form.onsubmit !== null : false;
+      });
+      expect(guardsInstalled).toBe(true);
+
       // Find a text input field and fill it (target the first visible form field)
       const form = page.locator(`${agent.sheetSelector()} form`).first();
       const textInput = form.locator('input[type="text"]').first();
