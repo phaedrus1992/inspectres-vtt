@@ -4,8 +4,54 @@
  */
 
 import { test, expect } from "./fixtures";
+import type { Page } from "@playwright/test";
 import { AgentSheetPage } from "./pages/AgentSheetPage.js";
 import { createActor, deleteActor } from "./pages/index.js";
+
+/**
+ * Open actor sheet and wait for render.
+ * Eliminates boilerplate: page.evaluate + sheet.render + wait cycle.
+ */
+async function renderActorSheet(page: Page, actorId: string): Promise<void> {
+  await page.evaluate(async (id: string) => {
+    // @ts-expect-error - Foundry runtime global
+    const actor = globalThis.game?.actors?.get(id);
+    if (actor) await actor.sheet.render(true);
+  }, actorId);
+
+  await new AgentSheetPage(page, actorId).waitForVisible();
+}
+
+/**
+ * Wait for sheet DOM to stabilize (visible and rendered).
+ * Avoids repeated waitForFunction + getBoundingClientRect pattern.
+ */
+async function waitForSheetStable(page: Page, actorId: string): Promise<void> {
+  await page.waitForFunction(
+    (id: string) => {
+      const el = document.querySelector(`.inspectres[id*="${id}"]`);
+      return el && el.getBoundingClientRect().height > 0;
+    },
+    actorId,
+    { timeout: 10_000 },
+  );
+}
+
+/**
+ * Take optional screenshot with silent error handling.
+ */
+async function captureScreenshot(
+  page: Page,
+  path: string,
+): Promise<void> {
+  try {
+    await page.screenshot({ path, timeout: 5000 });
+  } catch (err) {
+    console.error(
+      `Screenshot failed: ${err instanceof Error ? err.message : String(err)}`,
+    );
+  }
+}
 
 test.describe("Validation errors and field constraints (Issue #503)", () => {
   test("required field empty: sheet does not crash, state reflects submission", async ({
@@ -16,15 +62,10 @@ test.describe("Validation errors and field constraints (Issue #503)", () => {
 
     try {
       actorId = await createActor(page, "agent", actorName);
+      if (!actorId) throw new Error("Failed to create test actor");
       const agent = new AgentSheetPage(page, actorId);
 
-      await page.evaluate(async (id: string) => {
-        // @ts-expect-error - Foundry runtime global
-        const actor = globalThis.game?.actors?.get(id);
-        if (actor) await actor.sheet.render(true);
-      }, actorId);
-
-      await agent.waitForVisible();
+      await renderActorSheet(page, actorId);
 
       // Clear the agent name field (if required, this tests empty validation)
       const nameInput = page.locator(`${agent.sheetSelector()} input[name="name"]`).first();
@@ -47,16 +88,10 @@ test.describe("Validation errors and field constraints (Issue #503)", () => {
       await nameInput.fill(originalName);
       await nameInput.blur();
 
-      try {
-        await page.screenshot({
-          path: "test-results/e2e-screenshots/error-states-01-required-field.png",
-          timeout: 5000,
-        });
-      } catch (err) {
-        console.error(
-          `Screenshot failed for error-states-01: ${err instanceof Error ? err.message : String(err)}`,
-        );
-      }
+      await captureScreenshot(
+        page,
+        "test-results/e2e-screenshots/error-states-01-required-field.png",
+      );
     } finally {
       if (actorId) await deleteActor(page, actorId);
     }
@@ -72,13 +107,7 @@ test.describe("Validation errors and field constraints (Issue #503)", () => {
       actorId = await createActor(page, "agent", actorName);
       const agent = new AgentSheetPage(page, actorId);
 
-      await page.evaluate(async (id: string) => {
-        // @ts-expect-error - Foundry runtime global
-        const actor = globalThis.game?.actors?.get(id);
-        if (actor) await actor.sheet.render(true);
-      }, actorId);
-
-      await agent.waitForVisible();
+      await renderActorSheet(page, actorId);
 
       // Set stress to maximum (6)
       await agent.setStress(6);
@@ -87,8 +116,15 @@ test.describe("Validation errors and field constraints (Issue #503)", () => {
       expect(systemData["stress"]).toBe(6);
 
       // Attempt to increase stress beyond max (via UI, should clamp)
-      const stressMeter = page.locator(agent.stressMeterSelector());
-      await expect(stressMeter).toBeVisible();
+      const stressMeterSelector = agent.stressMeterSelector();
+      await page.waitForFunction(
+        (selector: string) => {
+          const el = document.querySelector(selector);
+          return el && el.getBoundingClientRect().height > 0;
+        },
+        stressMeterSelector,
+        { timeout: 10_000 },
+      );
 
       // Click the 6th pip (already at max) to test clamping
       const pips = page.locator(agent.stressMeterPips());
@@ -96,15 +132,7 @@ test.describe("Validation errors and field constraints (Issue #503)", () => {
       expect(pipCount).toBe(6);
 
       await pips.nth(5).click(); // Click last pip (index 5 = stress 6)
-
-      await page.waitForFunction(
-        (id: string) => {
-          const el = document.querySelector(`.inspectres[id*="${id}"]`);
-          return el && el.getBoundingClientRect().height > 0;
-        },
-        actorId,
-        { timeout: 10_000 },
-      );
+      await waitForSheetStable(page, actorId);
 
       systemData = await agent.getSystemData();
       expect(systemData["stress"]).toBe(6); // Should stay at max, not exceed
@@ -114,32 +142,19 @@ test.describe("Validation errors and field constraints (Issue #503)", () => {
       let filledCount = await filledPips.count();
       expect(filledCount).toBe(6);
 
-      // Click first pip to reduce to 1, then 0
+      // Click pips from highest to lowest to reduce stress to 0
       for (let i = 6; i > 0; i--) {
-        await pips.nth(0).click();
-        await page.waitForFunction(
-          (id: string) => {
-            const el = document.querySelector(`.inspectres[id*="${id}"]`);
-            return el && el.getBoundingClientRect().height > 0;
-          },
-          actorId,
-          { timeout: 5_000 },
-        );
+        await pips.nth(i - 1).click();
+        await waitForSheetStable(page, actorId);
       }
 
       systemData = await agent.getSystemData();
       expect(systemData["stress"]).toBe(0); // Should clamp to min
 
-      try {
-        await page.screenshot({
-          path: "test-results/e2e-screenshots/error-states-02-stress-boundary.png",
-          timeout: 5000,
-        });
-      } catch (err) {
-        console.error(
-          `Screenshot failed for error-states-02: ${err instanceof Error ? err.message : String(err)}`,
-        );
-      }
+      await captureScreenshot(
+        page,
+        "test-results/e2e-screenshots/error-states-02-stress-boundary.png",
+      );
     } finally {
       if (actorId) await deleteActor(page, actorId);
     }
@@ -155,13 +170,7 @@ test.describe("Validation errors and field constraints (Issue #503)", () => {
       actorId = await createActor(page, "agent", actorName);
       const agent = new AgentSheetPage(page, actorId);
 
-      await page.evaluate(async (id: string) => {
-        // @ts-expect-error - Foundry runtime global
-        const actor = globalThis.game?.actors?.get(id);
-        if (actor) await actor.sheet.render(true);
-      }, actorId);
-
-      await agent.waitForVisible();
+      await renderActorSheet(page, actorId);
 
       // Find a textarea (notes or description field)
       const sheet = page.locator(agent.sheetSelector()).first();
@@ -177,14 +186,7 @@ test.describe("Validation errors and field constraints (Issue #503)", () => {
         // Trigger blur to persist
         await textarea.blur();
 
-        await page.waitForFunction(
-          (id: string) => {
-            const el = document.querySelector(`.inspectres[id*="${id}"]`);
-            return el && el.getBoundingClientRect().height > 0;
-          },
-          actorId,
-          { timeout: 10_000 },
-        );
+        await waitForSheetStable(page, actorId);
 
         // Verify no truncation (note: truncation depends on field definition)
         const systemData = await agent.getSystemData();
@@ -196,16 +198,10 @@ test.describe("Validation errors and field constraints (Issue #503)", () => {
         expect(value.length).toBeGreaterThan(500); // At least most of it persisted
       }
 
-      try {
-        await page.screenshot({
-          path: "test-results/e2e-screenshots/error-states-03-long-string.png",
-          timeout: 5000,
-        });
-      } catch (err) {
-        console.error(
-          `Screenshot failed for error-states-03: ${err instanceof Error ? err.message : String(err)}`,
-        );
-      }
+      await captureScreenshot(
+        page,
+        "test-results/e2e-screenshots/error-states-03-long-string.png",
+      );
     } finally {
       if (actorId) await deleteActor(page, actorId);
     }
@@ -238,14 +234,10 @@ test.describe("Recovery edge cases (Issue #503)", () => {
         actorId,
       );
 
-      // Open sheet
-      await page.evaluate(async (id: string) => {
-        // @ts-expect-error - Foundry runtime global
-        const actor = globalThis.game?.actors?.get(id);
-        if (actor) await actor.sheet.render(true);
-      }, actorId);
+      // Wait for actor.update to propagate to client
+      await waitForSheetStable(page, actorId);
 
-      await agent.waitForVisible();
+      await renderActorSheet(page, actorId);
 
       // Verify system state reflects dead
       let systemData = await agent.getSystemData();
@@ -258,15 +250,7 @@ test.describe("Recovery edge cases (Issue #503)", () => {
         const pips = page.locator(agent.stressMeterPips());
         if ((await pips.count()) > 0) {
           await pips.nth(2).click();
-
-          await page.waitForFunction(
-            (id: string) => {
-              const el = document.querySelector(`.inspectres[id*="${id}"]`);
-              return el && el.getBoundingClientRect().height > 0;
-            },
-            actorId,
-            { timeout: 10_000 },
-          );
+          await waitForSheetStable(page, actorId);
 
           systemData = await agent.getSystemData();
           // Behavior depends on implementation: stress might be locked or UI disabled
@@ -274,16 +258,10 @@ test.describe("Recovery edge cases (Issue #503)", () => {
         }
       }
 
-      try {
-        await page.screenshot({
-          path: "test-results/e2e-screenshots/error-states-04-recovery-dead.png",
-          timeout: 5000,
-        });
-      } catch (err) {
-        console.error(
-          `Screenshot failed for error-states-04: ${err instanceof Error ? err.message : String(err)}`,
-        );
-      }
+      await captureScreenshot(
+        page,
+        "test-results/e2e-screenshots/error-states-04-recovery-dead.png",
+      );
     } finally {
       if (actorId) await deleteActor(page, actorId);
     }
@@ -317,15 +295,10 @@ test.describe("Recovery edge cases (Issue #503)", () => {
         { id: actorId, today },
       );
 
+      await waitForSheetStable(page, actorId);
+
       const agent = new AgentSheetPage(page, actorId);
-
-      await page.evaluate(async (id: string) => {
-        // @ts-expect-error - Foundry runtime global
-        const actor = globalThis.game?.actors?.get(id);
-        if (actor) await actor.sheet.render(true);
-      }, actorId);
-
-      await agent.waitForVisible();
+      await renderActorSheet(page, actorId);
 
       // Verify recovery state is set
       let systemData = await agent.getSystemData();
@@ -335,16 +308,10 @@ test.describe("Recovery edge cases (Issue #503)", () => {
       // For now, just verify the recovery fields exist
       expect(systemData["daysOutOfAction"]).toBeDefined();
 
-      try {
-        await page.screenshot({
-          path: "test-results/e2e-screenshots/error-states-05-recovery-past.png",
-          timeout: 5000,
-        });
-      } catch (err) {
-        console.error(
-          `Screenshot failed for error-states-05: ${err instanceof Error ? err.message : String(err)}`,
-        );
-      }
+      await captureScreenshot(
+        page,
+        "test-results/e2e-screenshots/error-states-05-recovery-past.png",
+      );
     } finally {
       if (actorId) await deleteActor(page, actorId);
     }
@@ -366,57 +333,41 @@ test.describe("Console errors and silent failures (Issue #503)", () => {
       actorId = await createActor(page, "agent", actorName);
       const agent = new AgentSheetPage(page, actorId);
 
-      await page.evaluate(async (id: string) => {
-        // @ts-expect-error - Foundry runtime global
-        const actor = globalThis.game?.actors?.get(id);
-        if (actor) await actor.sheet.render(true);
-      }, actorId);
-
-      await agent.waitForVisible();
+      await renderActorSheet(page, actorId);
 
       // Attach console error listener
       page.on("console", consoleHandler);
 
-      // Try filling a number input with non-numeric value
-      const sheet = page.locator(agent.sheetSelector()).first();
-      const numberInput = sheet.locator('input[type="number"]').first();
-
-      if ((await numberInput.count()) > 0) {
-        await expect(numberInput).toBeVisible();
-        await numberInput.fill("not-a-number");
-        await numberInput.blur();
-
-        await page.waitForFunction(
-          (id: string) => {
-            const el = document.querySelector(`.inspectres[id*="${id}"]`);
-            return el !== null && el.getBoundingClientRect().height > 0;
-          },
-          actorId,
-          { timeout: 10_000 },
-        );
-      }
-
-      // Verify no critical errors occurred
-      const criticalErrors = consoleErrors.filter(
-        (e) =>
-          e.includes("TypeError") ||
-          e.includes("ReferenceError") ||
-          e.includes("Uncaught"),
-      );
-      expect(criticalErrors).toHaveLength(0);
-
       try {
-        await page.screenshot({
-          path: "test-results/e2e-screenshots/error-states-06-console-clean.png",
-          timeout: 5000,
-        });
-      } catch (err) {
-        console.error(
-          `Screenshot failed for error-states-06: ${err instanceof Error ? err.message : String(err)}`,
+        // Try filling a number input with non-numeric value
+        const sheet = page.locator(agent.sheetSelector()).first();
+        const numberInput = sheet.locator('input[type="number"]').first();
+
+        if ((await numberInput.count()) > 0) {
+          await expect(numberInput).toBeVisible();
+          await numberInput.fill("not-a-number");
+          await numberInput.blur();
+
+          await waitForSheetStable(page, actorId);
+        }
+
+        // Verify no critical errors occurred
+        const criticalErrors = consoleErrors.filter(
+          (e) =>
+            e.includes("TypeError") ||
+            e.includes("ReferenceError") ||
+            e.includes("Uncaught"),
         );
+        expect(criticalErrors).toHaveLength(0);
+
+        await captureScreenshot(
+          page,
+          "test-results/e2e-screenshots/error-states-06-console-clean.png",
+        );
+      } finally {
+        page.off("console", consoleHandler);
       }
     } finally {
-      page.off("console", consoleHandler);
       if (actorId) await deleteActor(page, actorId);
     }
   });
