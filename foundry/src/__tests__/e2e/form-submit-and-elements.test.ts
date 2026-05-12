@@ -96,10 +96,9 @@ test.describe("Custom form elements & form submit round-trip (Sprint #525)", () 
     }
   });
 
-  // Blocked by issue #527: agent sheet does not currently expose a submit
-  // button reachable in v14 without /join redirect; re-enable when the form
-  // submission path is wired through DialogV2 or a guarded handler.
-  test.skip("text form field: fill, submit form, verify persistence (Issue #501)", async ({
+  // Issue #527 fixed: form.submit() guard installed globally (init.ts) and per-sheet
+  // (AgentSheet.ts) prevents /join redirect. Test can now run without skipping.
+  test("text form field: fill, submit form, verify persistence (Issue #501)", async ({
     page,
   }) => {
     const actorName = `E2E-form-submit-${Date.now()}`;
@@ -118,22 +117,17 @@ test.describe("Custom form elements & form submit round-trip (Sprint #525)", () 
       await agent.waitForVisible();
 
       // Find a text input field and fill it (target the first visible form field)
-      const form = page.locator(`${agent.sheetSelector()} form`).first();
-      const textInput = form.locator('input[type="text"]').first();
+      // Note: ApplicationV2 renders the template content in a div, not a form element
+      const sheet = page.locator(agent.sheetSelector()).first();
+      const textInput = sheet.locator('input[type="text"]').first();
       await expect(textInput).toBeVisible();
 
       const testValue = "E2E Test Value";
       await textInput.fill(testValue);
 
-      // Submit the form by clicking the submit button
-      const submitBtn = page.locator(`${agent.sheetSelector()} button[type="submit"]`).first();
-      if ((await submitBtn.count()) > 0) {
-        await submitBtn.click();
-      } else {
-        // Fallback: find and click any submit-like button
-        const anySubmitBtn = page.locator(`${agent.sheetSelector()} button`).first();
-        await anySubmitBtn.click();
-      }
+      // Submit the form by pressing Enter in the input field
+      // (There is no explicit submit button in the sheet; form auto-submits via change listeners)
+      await textInput.press("Enter");
 
       await page.waitForFunction(
         (id: string) => {
@@ -168,8 +162,8 @@ test.describe("Custom form elements & form submit round-trip (Sprint #525)", () 
       await agent.waitForVisible();
 
       // Verify input value persisted (re-query the same form field)
-      const formAfterReopen = page.locator(`${agent.sheetSelector()} form`).first();
-      const textInputAfterReopen = formAfterReopen.locator('input[type="text"]').first();
+      const sheetAfterReopen = page.locator(agent.sheetSelector()).first();
+      const textInputAfterReopen = sheetAfterReopen.locator('input[type="text"]').first();
       const value = await textInputAfterReopen.inputValue();
       expect(value).toBe(testValue);
 
