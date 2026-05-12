@@ -110,15 +110,14 @@ test.describe("Accessibility: Keyboard Navigation & ARIA (Issue #504)", () => {
         // Clear and type a test value
         await firstInput.fill("test");
 
-        // Press Enter — should not navigate or submit a form that breaks the sheet
-        await page.keyboard.press("Enter");
+        // Press Enter directly on the input (scoped, not page-global). Page-global
+        // keyboard.press can race with input focus on Foundry 14 under CI load.
+        await firstInput.press("Enter");
 
-        // Verify we're still on /game and not redirected to /join (the actual a11y concern)
-        await page.waitForFunction(
-          () => !globalThis.location.pathname.endsWith("/join"),
-          undefined,
-          { timeout: 5_000 },
-        );
+        // Give the submit guard a moment to intercept the resulting submit event,
+        // then verify we did not navigate to /join. We don't need waitForFunction —
+        // we just need to confirm the URL state is stable after the press.
+        await page.waitForTimeout(500);
         expect(page.url()).not.toContain("/join");
       }
 
