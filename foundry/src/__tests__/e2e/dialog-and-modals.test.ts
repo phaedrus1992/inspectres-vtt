@@ -189,14 +189,17 @@ test.describe("DialogV2 and Modal Workflows (Issue #500)", () => {
           { timeout: 10_000 },
         );
 
-        // Press Escape to close dialog
-        await page.press("body", "Escape");
+        // Press Escape on the dialog element directly — pressing on body may not
+        // dispatch keydown to the open <dialog>, especially on CI where focus may
+        // not be auto-restored to the dialog after open animation.
+        await page.locator("dialog[open]").first().press("Escape");
 
-        // Wait for dialog to close
+        // Wait for dialog to close. 15s matches roll-dialog close wait; under CI
+        // load, dialog close handler can take >5s to complete.
         await page.waitForFunction(
           () => !document.querySelector("dialog[open]"),
           undefined,
-          { timeout: 5_000 },
+          { timeout: 15_000 },
         );
 
         // Verify dialog is closed

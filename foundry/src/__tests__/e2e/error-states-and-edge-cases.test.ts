@@ -270,7 +270,7 @@ test.describe("Recovery edge cases (Issue #503)", () => {
 
       const today = await page.evaluate(async () => {
         // @ts-expect-error - Foundry runtime global
-        return globalThis.game?.settings?.get("core", "currentDay") ?? 0;
+        return globalThis.game?.settings?.get("inspectres", "currentDay") ?? 0;
       });
 
       // Set recovery started 5 days ago with duration of 3 days (should be expired)
