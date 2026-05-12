@@ -30,7 +30,7 @@ import { chromium, type Browser, type Page } from "@playwright/test";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const TMP_DIR = path.resolve(__dirname, "../../../.tmp");
 
-const rawWorkers = Number(process.env["PLAYWRIGHT_WORKERS"] ?? "2");
+const rawWorkers = Number(process.env["PLAYWRIGHT_WORKERS"] ?? "4");
 if (!Number.isFinite(rawWorkers) || rawWorkers < 1) {
   throw new Error(
     `PLAYWRIGHT_WORKERS must be a positive integer, got: ${process.env["PLAYWRIGHT_WORKERS"]}`,
@@ -41,8 +41,8 @@ export const WORKER_COUNT = rawWorkers;
 
 /**
  * CI retry count — must match `retries` in playwright.config.ts.
- * Pool size = WORKER_COUNT * (MAX_RETRIES + 1). WORKER_COUNT defaults to 2
- * (matching GitHub Actions free runner vCPU count); override with PLAYWRIGHT_WORKERS.
+ * Pool size = WORKER_COUNT * (MAX_RETRIES + 1). WORKER_COUNT defaults to 4
+ * (GitHub Actions runners are 4 vCPU on Linux); override with PLAYWRIGHT_WORKERS.
  */
 const MAX_RETRIES = 2;
 

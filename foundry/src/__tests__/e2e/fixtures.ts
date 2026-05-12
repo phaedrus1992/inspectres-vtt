@@ -4,12 +4,14 @@ export { expect } from "@playwright/test";
 import { ConsoleBuffer } from "./console-capture";
 import { POOL_USERNAMES, E2E_VIEWPORT } from "./global-setup.js";
 
-const JOIN_TIMEOUT = 60_000;
+// Reduced from 60s: with form-submit guards in init.ts preventing /join redirects,
+// the join flow completes in <5s typically. 15s tolerates CI variance without
+// masking real init regressions.
+const JOIN_TIMEOUT = 15_000;
 const READY_TIMEOUT = 60_000;
-// Sheet render timeout raised: ApplicationV2 re-renders on parallel actor changes,
-// briefly detaching the element. The locator may resolve then disappear during a
-// re-render cycle. 30s gives enough headroom for the sheet to stabilize in CI.
-const SHEET_RENDER_TIMEOUT = 30_000;
+// Sheet render timeout: ApplicationV2 re-renders on parallel actor changes briefly
+// detach the element. 15s balances CI tolerance against fail-fast on real bugs.
+const SHEET_RENDER_TIMEOUT = 15_000;
 
 // Shared timeout for in-test element waits (selectors, locator counts, etc.).
 // 5s is too tight under CI load (especially v14 which has slower init) and
