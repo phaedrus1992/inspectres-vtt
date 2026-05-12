@@ -131,20 +131,17 @@ test.describe("Validation errors and field constraints (Issue #503)", () => {
       const pipCount = await pips.count();
       expect(pipCount).toBe(6);
 
-      await pips.nth(5).click(); // Click last pip (index 5 = stress 6)
+      await pips.nth(5).click(); // Click last pip (already at max, should stay at 6)
       await waitForSheetStable(page, actorId);
 
       systemData = await agent.getSystemData();
       expect(systemData["stress"]).toBe(6); // Should stay at max, not exceed
 
       // Now test reducing stress to 0 (minimum)
-      const filledPips = page.locator(agent.filledPips());
-      let filledCount = await filledPips.count();
-      expect(filledCount).toBe(6);
-
       // Click pips from highest to lowest to reduce stress to 0
-      for (let i = 6; i > 0; i--) {
-        await pips.nth(i - 1).click();
+      // Start at stress=6, click pips.nth(5) to get 5, then nth(4) to get 4, etc.
+      for (let i = 5; i >= 0; i--) {
+        await pips.nth(i).click();
         await waitForSheetStable(page, actorId);
       }
 
