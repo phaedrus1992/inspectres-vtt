@@ -53,7 +53,9 @@ test.describe("AgentSheet — actions, stats, and notes", () => {
     const beforeRoll = await getChatMessageCount(page);
     await sheet.clickSkillRoll("academics");
 
-    const dialogVisible = await page.waitForFunction(
+    // Wait up to 15s for the dialog: under CI load on Foundry 13, the dialog can take
+    // >5s to render after a skill-roll click (matches other dialog tests in this suite).
+    await page.waitForFunction(
       () => {
         const dlg = document.querySelector<HTMLDialogElement>("dialog");
         if (!dlg) return false;
@@ -61,10 +63,10 @@ test.describe("AgentSheet — actions, stats, and notes", () => {
         return rect.width > 0 && rect.height > 0;
       },
       undefined,
-      { timeout: 5_000 },
-    ).then(() => true).catch(() => false);
+      { timeout: 15_000 },
+    );
 
-    if (dialogVisible) {
+    {
       try {
         await page.click('dialog button[data-action="roll"]');
       } catch (primaryError) {
