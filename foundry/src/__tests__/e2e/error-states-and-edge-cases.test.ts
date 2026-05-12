@@ -228,10 +228,10 @@ test.describe("Recovery edge cases (Issue #503)", () => {
         actorId,
       );
 
-      // Wait for actor.update to propagate to client
-      await waitForSheetStable(page, actorId);
-
       await renderActorSheet(page, actorId);
+
+      // Wait for sheet to stabilize after render
+      await waitForSheetStable(page, actorId);
 
       // Verify system state reflects dead
       let systemData = await agent.getSystemData();
@@ -289,10 +289,11 @@ test.describe("Recovery edge cases (Issue #503)", () => {
         { id: actorId, today },
       );
 
-      await waitForSheetStable(page, actorId);
-
       const agent = new AgentSheetPage(page, actorId);
       await renderActorSheet(page, actorId);
+
+      // Wait for sheet to stabilize after render
+      await waitForSheetStable(page, actorId);
 
       // Verify recovery state is set
       let systemData = await agent.getSystemData();
