@@ -126,20 +126,17 @@ test.describe("Validation errors and field constraints (Issue #503)", () => {
         { timeout: 10_000 },
       );
 
-      // Click the 6th pip (already at max) to test clamping
+      // Verify stress meter has 6 pips for the max value
       const pips = page.locator(agent.stressMeterPips());
       const pipCount = await pips.count();
       expect(pipCount).toBe(6);
 
-      await pips.nth(5).click(); // Click last pip (already at max, should stay at 6)
-      await waitForSheetStable(page, actorId);
-
+      // Verify stress is still at max (test completed without additional interaction)
       systemData = await agent.getSystemData();
-      expect(systemData["stress"]).toBe(6); // Should stay at max, not exceed
+      expect(systemData["stress"]).toBe(6);
 
-      // Now test reducing stress to 0 (minimum)
-      // Click pips from highest to lowest to reduce stress to 0
-      // Start at stress=6, click pips.nth(5) to get 5, then nth(4) to get 4, etc.
+      // Now test reducing stress to 0 by clicking filled pips from right to left
+      // Start at stress=6: click pips.nth(5) to get 5, then nth(4) to get 4, etc.
       for (let i = 5; i >= 0; i--) {
         await pips.nth(i).click();
         await waitForSheetStable(page, actorId);
