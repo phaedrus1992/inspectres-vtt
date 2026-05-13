@@ -277,8 +277,41 @@ jobs:
           docker pull "$FOUNDRY_IMAGE_NAME"
           docker save "$FOUNDRY_IMAGE_NAME" -o /tmp/foundry-image.tar
 
+      - name: Pre-fetch Foundry release URL
+        id: foundry-url
+        env:
+          FOUNDRY_USERNAME: ${{ secrets.FOUNDRY_USERNAME }}
+          FOUNDRY_PASSWORD: ${{ secrets.FOUNDRY_PASSWORD }}
+          FOUNDRY_VERSION_LONG: ${{ matrix.foundry-version-long }}
+        run: |
+          # Three parallel foundry containers all authenticating to foundryvtt.com
+          # trip rate limiting (429 Too Many Requests). Fetch the presigned release
+          # URL once on the runner, pass via FOUNDRY_RELEASE_URL to all containers
+          # so they skip per-container auth entirely.
+          docker run --rm \
+            -e FOUNDRY_USERNAME \
+            -e FOUNDRY_PASSWORD \
+            -e FOUNDRY_VERSION="$FOUNDRY_VERSION_LONG" \
+            --entrypoint /bin/bash \
+            "$FOUNDRY_IMAGE_NAME" \
+            -c '
+              set -e
+              ./authenticate.js "$FOUNDRY_USERNAME" "$FOUNDRY_PASSWORD" /tmp/cookies.json >/dev/null
+              ./get_release_url.js --retry=2 /tmp/cookies.json "$FOUNDRY_VERSION" > /tmp/url.txt
+              cat /tmp/url.txt
+            ' > /tmp/release-url.txt
+          URL=$(cat /tmp/release-url.txt)
+          if [ -z "$URL" ]; then
+            echo "ERROR: empty release URL"
+            exit 1
+          fi
+          echo "Got release URL (first 80 chars): ${URL:0:80}..."
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+
       - name: Start Foundry containers
         working-directory: docker
+        env:
+          FOUNDRY_RELEASE_URL: ${{ steps.foundry-url.outputs.url }}
         run: docker compose -f docker-compose.ci.yml up -d
 
       - name: Wait for Foundry servers to be ready

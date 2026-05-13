@@ -11,6 +11,10 @@
 # route to the matching server via `baseURL = http://localhost:3000${workerIndex}`.
 # This eliminates the single-server bottleneck that capped CI at 2 workers.
 # See issue #546.
+#
+# FOUNDRY_RELEASE_URL is pre-fetched on the runner (CI workflow) and passed in
+# to skip per-container auth. Three parallel auths trip foundryvtt.com rate
+# limiting (429). The presigned URL itself doesn't require auth to use.
 
 x-foundry-common: &foundry-common
   image: ${FOUNDRY_IMAGE_NAME}
@@ -23,8 +27,7 @@ services:
     ports:
       - "30000:30000"
     environment:
-      FOUNDRY_USERNAME: "${FOUNDRY_USERNAME}"
-      FOUNDRY_PASSWORD: "${FOUNDRY_PASSWORD}"
+      FOUNDRY_RELEASE_URL: "${FOUNDRY_RELEASE_URL}"
       FOUNDRY_LICENSE_KEY: "${FOUNDRY_LICENSE_KEY}"
       FOUNDRY_HOSTNAME: foundry-0
       CONTAINER_PRESERVE_CONFIG: "true"
@@ -38,8 +41,7 @@ services:
     ports:
       - "30001:30000"
     environment:
-      FOUNDRY_USERNAME: "${FOUNDRY_USERNAME}"
-      FOUNDRY_PASSWORD: "${FOUNDRY_PASSWORD}"
+      FOUNDRY_RELEASE_URL: "${FOUNDRY_RELEASE_URL}"
       FOUNDRY_LICENSE_KEY: "${FOUNDRY_LICENSE_KEY}"
       FOUNDRY_HOSTNAME: foundry-1
       CONTAINER_PRESERVE_CONFIG: "true"
@@ -53,8 +55,7 @@ services:
     ports:
       - "30002:30000"
     environment:
-      FOUNDRY_USERNAME: "${FOUNDRY_USERNAME}"
-      FOUNDRY_PASSWORD: "${FOUNDRY_PASSWORD}"
+      FOUNDRY_RELEASE_URL: "${FOUNDRY_RELEASE_URL}"
       FOUNDRY_LICENSE_KEY: "${FOUNDRY_LICENSE_KEY}"
       FOUNDRY_HOSTNAME: foundry-2
       CONTAINER_PRESERVE_CONFIG: "true"
