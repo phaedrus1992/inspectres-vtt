@@ -41,8 +41,11 @@ export const WORKER_COUNT = rawWorkers;
 
 /**
  * CI retry count — must match `retries` in playwright.config.ts.
- * Pool size = WORKER_COUNT * (MAX_RETRIES + 1). WORKER_COUNT defaults to 2
- * (matching GitHub Actions free runner vCPU count); override with PLAYWRIGHT_WORKERS.
+ * Pool size = WORKER_COUNT * (MAX_RETRIES + 1). WORKER_COUNT defaults to 2.
+ * Worker count is bottlenecked by the single shared Foundry server: at 4 workers,
+ * sheet re-renders contend and exceed the helpers.ts 10s waitForFunction. Until
+ * #539 introduces per-worker session isolation (or per-worker Foundry containers),
+ * keep this at 2. Override with PLAYWRIGHT_WORKERS.
  */
 const MAX_RETRIES = 2;
 
