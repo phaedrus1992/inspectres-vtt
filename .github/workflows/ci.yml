@@ -277,28 +277,38 @@ jobs:
           docker pull "$FOUNDRY_IMAGE_NAME"
           docker save "$FOUNDRY_IMAGE_NAME" -o /tmp/foundry-image.tar
 
-      - name: Start Foundry container
+      - name: Start Foundry containers
         working-directory: docker
         run: docker compose -f docker-compose.ci.yml up -d
 
-      - name: Wait for Foundry to be ready
+      - name: Wait for Foundry servers to be ready
         working-directory: docker
         run: |
-          for i in $(seq 1 60); do
-            if curl -sf -o /dev/null http://localhost:30000; then
-              echo "Foundry is up after ${i}s"
-              exit 0
+          # Wait for all 3 foundry servers (ports 30000, 30001, 30002).
+          # Each worker gets a dedicated server (issue #546).
+          for port in 30000 30001 30002; do
+            ready=0
+            for i in $(seq 1 90); do
+              if curl -sf -o /dev/null "http://localhost:${port}"; then
+                echo "Foundry on port ${port} is up after ${i}s"
+                ready=1
+                break
+              fi
+              sleep 1
+            done
+            if [ "$ready" -ne 1 ]; then
+              echo "ERROR: Foundry on port ${port} did not start within 90s"
+              docker compose -f docker-compose.ci.yml logs --tail=80
+              exit 1
             fi
-            sleep 1
           done
-          echo "ERROR: Foundry did not start within 60s"
-          docker compose -f docker-compose.ci.yml logs --tail=80
-          exit 1
 
       - name: Run E2E tests
         working-directory: foundry
         env:
           SHARD_INDEX: ${{ matrix.shard }}
+          PLAYWRIGHT_WORKERS: "3"
+          FOUNDRY_SERVER_COUNT: "3"
         run: npm run test:e2e -- --shard="${SHARD_INDEX}/2"
 
       - name: Stop Foundry container

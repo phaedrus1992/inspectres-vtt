@@ -1,36 +1,30 @@
 /**
  * Global setup for Playwright tests
  *
- * Walks a fresh Foundry instance (no world, no EULA, no usage prompt) through:
+ * Provisions N independent Foundry servers, one per Playwright worker. Each server
+ * walks through the same flow:
  *   1. Decline usage data sharing dialog (if present)
  *   2. Dismiss tour overlay (ESC)
  *   3. Create test world (system: inspectres) — only if none exists
  *   4. Launch world (v13) or auto-launches on submit (v14)
  *   5. Join as Gamemaster (no password — fresh world)
  *   6. Wait until `game.ready === true`
- *   7. Provision POOL_SIZE test pool users (test-pool-0 … test-pool-N) via Foundry User API
- *   8. Save a separate storage-state file for each pool user
  *
  * Idempotent: if a world already exists and game is reachable, just verifies it.
  * Supports Foundry v13 (form-based dialog, hidden launch link) and v14
  * (standalone /create page, package gallery system selector, auto-launch on submit).
  *
- * Pool sizing: POOL_SIZE = WORKER_COUNT * (MAX_RETRIES + 1). Default 2 workers, 2 CI
- * retries → 6 slots. At most WORKER_COUNT active simultaneously; the remaining ensure
- * a free slot is always available even when sessions from the previous test are still
- * clearing. Foundry's own session-disable mechanism (option disabled on /join) is the
- * coordination signal — no application-level locks needed.
- * Override with PLAYWRIGHT_WORKERS env var to match available vCPUs (CI: 2, local: as desired).
+ * Server count: `FOUNDRY_SERVER_COUNT` env var (default 1 for local; CI sets it
+ * to match `PLAYWRIGHT_WORKERS`). Each worker gets a dedicated server on a
+ * dedicated port (30000, 30001, ...) — no /join coordination needed since
+ * the worker is the only user on its server. See issue #546.
  */
 
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { chromium, type Browser, type Page } from "@playwright/test";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const TMP_DIR = path.resolve(__dirname, "../../../.tmp");
-
-const rawWorkers = Number(process.env["PLAYWRIGHT_WORKERS"] ?? "2");
+// Default 1 worker / 1 server for local (matches local docker-compose.yml's
+// single foundry container). CI overrides both via env to run 3/3.
+const rawWorkers = Number(process.env["PLAYWRIGHT_WORKERS"] ?? "1");
 if (!Number.isFinite(rawWorkers) || rawWorkers < 1) {
   throw new Error(
     `PLAYWRIGHT_WORKERS must be a positive integer, got: ${process.env["PLAYWRIGHT_WORKERS"]}`,
@@ -39,51 +33,35 @@ if (!Number.isFinite(rawWorkers) || rawWorkers < 1) {
 /** Number of parallel Playwright workers. Imported by playwright.config.ts. */
 export const WORKER_COUNT = rawWorkers;
 
+const rawServerCount = Number(process.env["FOUNDRY_SERVER_COUNT"] ?? "1");
+if (!Number.isFinite(rawServerCount) || rawServerCount < 1) {
+  throw new Error(
+    `FOUNDRY_SERVER_COUNT must be a positive integer, got: ${process.env["FOUNDRY_SERVER_COUNT"]}`,
+  );
+}
 /**
- * CI retry count — must match `retries` in playwright.config.ts.
- * Pool size = WORKER_COUNT * (MAX_RETRIES + 1). WORKER_COUNT defaults to 2.
- * Worker count is bottlenecked by the single shared Foundry server: at 4 workers,
- * sheet re-renders contend and exceed the helpers.ts 10s waitForFunction. Until
- * #539 introduces per-worker session isolation (or per-worker Foundry containers),
- * keep this at 2. Override with PLAYWRIGHT_WORKERS.
+ * Number of independent Foundry containers to provision.
+ * Each worker routes to one server: worker N → http://localhost:${BASE_PORT + N}.
+ * Must be >= WORKER_COUNT (workers without a server can't run).
  */
-const MAX_RETRIES = 2;
+export const FOUNDRY_SERVER_COUNT = rawServerCount;
 
-/**
- * Total number of pool users provisioned in Foundry.
- * Each user gets its own storage-state file; fixtures claim any free slot at runtime.
- * Foundry's session-disable (option disabled on /join) is the coordination signal —
- * no application-level locks are needed.
- */
-export const POOL_SIZE = WORKER_COUNT * (MAX_RETRIES + 1);
+/** Base port for the first foundry server. Server N listens on BASE_PORT + N. */
+export const FOUNDRY_BASE_PORT = 30000;
 
 /** Viewport used for both storage-state capture and per-test contexts. */
 export const E2E_VIEWPORT = { width: 1920, height: 1080 } as const;
 
-/** Foundry role value for Gamemaster (CONST.USER_ROLES.GAMEMASTER in Foundry v13). */
-const FOUNDRY_ROLE_GAMEMASTER = 4;
-
-const FOUNDRY_URL = "http://localhost:30000";
 const WORLD_ID = "test-world";
 const WORLD_TITLE = "Test World";
 const SYSTEM_ID = "inspectres";
 
-/** Returns the storage-state path for a given pool slot index. */
-export function poolStorageStatePath(slotIndex: number): string {
-  return path.join(TMP_DIR, `playwright-storage-state-${slotIndex}.json`);
+/** Base URL for the foundry server matching the given worker index. */
+export function foundryUrlForWorker(workerIndex: number): string {
+  return `http://localhost:${FOUNDRY_BASE_PORT + workerIndex}`;
 }
-
-/** Username for a given pool slot index. */
-export function poolUsername(slotIndex: number): string {
-  return `test-pool-${slotIndex}`;
-}
-
-/** All pool usernames, for use in the /join slot-claim scan. */
-export const POOL_USERNAMES: readonly string[] = Array.from({ length: POOL_SIZE }, (_, i) => poolUsername(i));
 
 async function declineUsageDataSharing(page: Page): Promise<void> {
-  // The consent dialog appears asynchronously after page load — wait briefly for it.
-  // If it doesn't appear within 3s, assume it was already dismissed (re-run case).
   const decline = await page.waitForSelector('button[data-action="no"]', { timeout: 3_000 }).catch(() => null);
   if (decline) {
     await decline.click();
@@ -114,7 +92,6 @@ async function acceptLicenseIfPresent(page: Page): Promise<void> {
     );
   }
 
-  // EULA-only: tick the agree checkbox and submit.
   if (formInfo.hasEulaCheckbox) {
     await page.evaluate(() => {
       const cb = document.querySelector(
@@ -128,9 +105,6 @@ async function acceptLicenseIfPresent(page: Page): Promise<void> {
 }
 
 async function dismissTourOverlay(page: Page): Promise<void> {
-  // Foundry shows a guided tour overlay on first visit. ESC closes it.
-  // Wait briefly for the overlay to appear (it renders async after page load).
-  // If it doesn't appear in 5s, assume it was already dismissed or not shown.
   const overlay = await page.waitForSelector(".tour-overlay", { timeout: 5_000 }).catch(() => null);
   if (overlay) {
     await page.keyboard.press("Escape");
@@ -168,7 +142,6 @@ async function createWorldIfNeeded(page: Page, majorVersion: number): Promise<vo
   );
   if (exists) return;
 
-  // Wait until no tour overlay intercepts pointer events before clicking.
   await page.waitForFunction(
     () => !document.querySelector(".tour-overlay"),
     undefined,
@@ -176,7 +149,6 @@ async function createWorldIfNeeded(page: Page, majorVersion: number): Promise<vo
   ).catch(() => {});
 
   await page.click('button[data-action="worldCreate"]');
-  // Wait for the create world dialog/page to be ready.
   await page.waitForFunction(
     () => !!document.querySelector('input[name="title"], input[name="world-id"]'),
     undefined,
@@ -206,7 +178,6 @@ async function createWorldV13(page: Page): Promise<void> {
     return true;
   });
   if (!submitted) throw new Error("Could not submit Create World form (v13)");
-  // Wait for the world to appear in the list.
   await page.waitForFunction(
     (id: string) => !!document.querySelector(`#worlds-list [data-package-id="${id}"]`),
     WORLD_ID,
@@ -232,7 +203,6 @@ async function createWorldV14(page: Page): Promise<void> {
   }
   await systemPackage.click();
 
-  // Submit the form. V14's submit button is a plain <button type="submit">Continue</button>.
   await page.click('button[type="submit"]:not([data-action="cancel"])');
 
   // V14 auto-launches the world on submit and redirects to /join (the players page).
@@ -244,7 +214,6 @@ async function createWorldV14(page: Page): Promise<void> {
 const DEFAULT_JOIN_TIMEOUTS = { url: 30_000, ready: 60_000 };
 
 async function joinAsUser(page: Page, username: string, timeouts = DEFAULT_JOIN_TIMEOUTS): Promise<void> {
-  // Check for critical failure or error page
   const criticalFailure = await page.evaluate(() => {
     const text = document.body.textContent || '';
     if (text.includes('Critical Failure')) {
@@ -262,7 +231,6 @@ async function joinAsUser(page: Page, username: string, timeouts = DEFAULT_JOIN_
   await page.selectOption('select[name="userid"]', { label: username });
   await page.click('button[type="submit"]:has-text("Join Game Session")');
   await page.waitForURL(/\/game/, { timeout: timeouts.url });
-  // Wait for Foundry's init/ready hooks to complete.
   await page.waitForFunction(
     // @ts-expect-error - Foundry runtime global
     () => globalThis.game?.ready === true,
@@ -271,7 +239,7 @@ async function joinAsUser(page: Page, username: string, timeouts = DEFAULT_JOIN_
   );
 }
 
-async function launchAndJoin(page: Page, majorVersion: number): Promise<void> {
+async function launchAndJoin(page: Page, baseUrl: string, majorVersion: number): Promise<void> {
   console.log(`[launchAndJoin] v${majorVersion}, current URL: ${page.url()}`);
 
   // After createWorldV14, the page may already be on /join or /players because
@@ -279,7 +247,7 @@ async function launchAndJoin(page: Page, majorVersion: number): Promise<void> {
   const url = page.url();
   if (url.includes("/join") || url.includes("/players")) {
     console.log("[launchAndJoin] Auto-launch landed on", url, "→ navigating to /join");
-    await page.goto(`${FOUNDRY_URL}/join`, { waitUntil: "domcontentloaded" });
+    await page.goto(`${baseUrl}/join`, { waitUntil: "domcontentloaded" });
     await page.waitForSelector('select[name="userid"]', { timeout: 30_000 });
     await joinAsUser(page, "Gamemaster");
     return;
@@ -306,7 +274,6 @@ async function launchAndJoin(page: Page, majorVersion: number): Promise<void> {
 
   // v14 may show a "World Data Migration" dialog when the world's stored core
   // version is older than the current core. Confirm with "Begin Migration".
-  // Race: either the migration dialog appears OR navigation away from /setup.
   const migrationConfirmed = await Promise.race([
     page
       .waitForSelector('dialog.application.dialog button[data-action="yes"]', { timeout: 5_000 })
@@ -330,74 +297,23 @@ async function launchAndJoin(page: Page, majorVersion: number): Promise<void> {
   // If we landed on /players, navigate to /join to reach the actual login form.
   if (!page.url().includes("/join")) {
     console.log(`[launchAndJoin] Landed on ${page.url()} → navigating to /join`);
-    await page.goto(`${FOUNDRY_URL}/join`, { waitUntil: "domcontentloaded" });
+    await page.goto(`${baseUrl}/join`, { waitUntil: "domcontentloaded" });
     await page.waitForSelector('select[name="userid"]', { timeout: 30_000 });
   }
   await joinAsUser(page, "Gamemaster");
 }
 
-/**
- * Provisions POOL_SIZE test pool users in Foundry via the Foundry User document API.
- *
- * Runs inside the Gamemaster browser context. Creates `test-pool-0 … test-pool-{N-1}`
- * users with GM role so each can access all actors and settings without ownership
- * restrictions. Existing users are reused (idempotent). Users are created with no
- * password so the /join fixture can join as any of them directly without credentials.
- *
- * No storage-state capture is needed: the fixture navigates to /join at test time,
- * scans for a free (option-enabled) pool user, and joins directly. Foundry's own
- * session-disable mechanism is the coordination signal.
- */
-async function provisionWorkerUsers(gmPage: Page): Promise<void> {
-  const usernames = Array.from({ length: POOL_SIZE }, (_, i) => poolUsername(i));
+async function provisionOneServer(browser: Browser, serverIndex: number): Promise<void> {
+  const baseUrl = foundryUrlForWorker(serverIndex);
+  console.log(`\n--- Provisioning server ${serverIndex} (${baseUrl}) ---`);
 
-  await gmPage.evaluate(
-    async ([names, gmRole]: [string[], number]) => {
-      const g = globalThis as Record<string, unknown>;
-      const game = g["game"] as { users?: { getName: (n: string) => unknown } } | undefined;
-      const UserCls = g["User"] as
-        | { create: (data: Record<string, unknown>) => Promise<void> }
-        | undefined;
-      if (!UserCls) throw new Error("User class not available in Foundry globals (game.ready must be true before calling provisionWorkerUsers)");
-
-      // Provision users in parallel — Foundry's user creation is thread-safe across contexts
-      // Wrap creation in try-catch to handle race: multiple tasks may check getName() before any creates
-      await Promise.all(
-        names.map(async (name) => {
-          const existing = game?.users?.getName(name);
-          if (!existing) {
-            try {
-              await UserCls.create({ name, role: gmRole, password: "" });
-            } catch (err) {
-              // Ignore if another task created this user first (race-safe)
-              if (err instanceof Error && err.message.includes("name")) {
-                console.warn(`User ${name} already exists (created by parallel task)`);
-              } else {
-                throw err;
-              }
-            }
-          }
-        }),
-      );
-    },
-    [usernames, FOUNDRY_ROLE_GAMEMASTER] as [string[], number],
-  );
-
-  console.log(`✓ Provisioned ${POOL_SIZE} pool user(s): ${usernames.join(", ")}`);
-}
-
-async function globalSetup(): Promise<void> {
-  console.log("\n=== Foundry E2E Test Setup ===");
-  let browser: Browser | undefined;
+  const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
   try {
-    browser = await chromium.launch({ headless: true });
-    const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
-
     // Probe current state. networkidle ensures Foundry's JS has run so game.version
     // is readable before detectFoundryMajorVersion() is called.
-    await page.goto(FOUNDRY_URL, { waitUntil: "networkidle" });
+    await page.goto(baseUrl, { waitUntil: "networkidle" });
 
-    let alreadyInGame = page.url().includes("/game");
+    const alreadyInGame = page.url().includes("/game");
 
     if (!alreadyInGame) {
       await acceptLicenseIfPresent(page);
@@ -406,23 +322,40 @@ async function globalSetup(): Promise<void> {
 
       if (page.url().includes("/setup")) {
         const majorVersion = await detectFoundryMajorVersion(page);
-        console.log(`[setup] Foundry major version: ${majorVersion}`);
+        console.log(`[setup ${serverIndex}] Foundry major version: ${majorVersion}`);
         await createWorldIfNeeded(page, majorVersion);
-        await launchAndJoin(page, majorVersion);
+        await launchAndJoin(page, baseUrl, majorVersion);
       } else if (page.url().includes("/join")) {
-        // World was launched previously; just join.
         await joinAsUser(page, "Gamemaster");
       } else {
-        throw new Error(`Unexpected starting URL: ${page.url()}`);
+        throw new Error(`[server ${serverIndex}] Unexpected starting URL: ${page.url()}`);
       }
-
     }
 
-    console.log(`✓ Foundry ready at ${page.url()}`);
+    console.log(`✓ Server ${serverIndex} ready at ${page.url()}`);
+  } finally {
+    await page.close();
+  }
+}
 
-    // Provision pool users in Foundry (no storage-state capture needed).
-    await provisionWorkerUsers(page);
+async function globalSetup(): Promise<void> {
+  console.log("\n=== Foundry E2E Test Setup ===");
+  console.log(`Provisioning ${FOUNDRY_SERVER_COUNT} server(s) for ${WORKER_COUNT} worker(s)`);
 
+  if (FOUNDRY_SERVER_COUNT < WORKER_COUNT) {
+    throw new Error(
+      `FOUNDRY_SERVER_COUNT (${FOUNDRY_SERVER_COUNT}) must be >= PLAYWRIGHT_WORKERS (${WORKER_COUNT}). ` +
+        `Each worker needs its own dedicated Foundry server.`,
+    );
+  }
+
+  let browser: Browser | undefined;
+  try {
+    browser = await chromium.launch({ headless: true });
+    // Provision servers in parallel — each is independent (own container, own /data).
+    await Promise.all(
+      Array.from({ length: FOUNDRY_SERVER_COUNT }, (_, i) => provisionOneServer(browser!, i)),
+    );
     console.log("=== Setup Complete ===\n");
   } finally {
     await browser?.close();
