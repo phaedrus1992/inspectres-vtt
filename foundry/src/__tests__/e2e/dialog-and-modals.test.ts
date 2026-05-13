@@ -4,6 +4,7 @@
  */
 
 import { test, expect } from "./fixtures";
+import { safeScreenshot } from "./helpers.js";
 import { AgentSheetPage } from "./pages/AgentSheetPage.js";
 import { createActor, deleteActor } from "./pages/index.js";
 
@@ -75,10 +76,7 @@ test.describe("DialogV2 and Modal Workflows (Issue #500)", () => {
       expect(messagePosted).toBe(true);
 
       try {
-        await page.screenshot({
-          path: "test-results/e2e-screenshots/dialog-01-roll-dialog.png",
-          timeout: 5000,
-        });
+        await safeScreenshot(page, "test-results/e2e-screenshots/dialog-01-roll-dialog.png");
       } catch (err) {
         console.error(`Screenshot failed for dialog-01: ${err instanceof Error ? err.message : String(err)}`);
       }
@@ -146,10 +144,7 @@ test.describe("DialogV2 and Modal Workflows (Issue #500)", () => {
       }
 
       try {
-        await page.screenshot({
-          path: "test-results/e2e-screenshots/dialog-02-confirm-cancel.png",
-          timeout: 5000,
-        });
+        await safeScreenshot(page, "test-results/e2e-screenshots/dialog-02-confirm-cancel.png");
       } catch (err) {
         console.error(`Screenshot failed for dialog-02: ${err instanceof Error ? err.message : String(err)}`);
       }
@@ -208,10 +203,7 @@ test.describe("DialogV2 and Modal Workflows (Issue #500)", () => {
       }
 
       try {
-        await page.screenshot({
-          path: "test-results/e2e-screenshots/dialog-03-escape-key.png",
-          timeout: 5000,
-        });
+        await safeScreenshot(page, "test-results/e2e-screenshots/dialog-03-escape-key.png");
       } catch (err) {
         console.error(`Screenshot failed for dialog-03: ${err instanceof Error ? err.message : String(err)}`);
       }

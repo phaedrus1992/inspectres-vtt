@@ -4,6 +4,7 @@
  */
 
 import { test, expect } from "./fixtures";
+import { safeScreenshot } from "./helpers.js";
 import { AgentSheetPage } from "./pages/AgentSheetPage.js";
 import { createActor, deleteActor } from "./pages/index.js";
 
@@ -84,10 +85,7 @@ test.describe("Custom form elements & form submit round-trip (Sprint #525)", () 
       expect(filledCount).toBe(3);
 
       try {
-        await page.screenshot({
-          path: "test-results/e2e-screenshots/form-submit-01-stress-meter.png",
-          timeout: 5000,
-        });
+        await safeScreenshot(page, "test-results/e2e-screenshots/form-submit-01-stress-meter.png");
       } catch (err) {
         console.error(`Screenshot failed for form-submit-01: ${err instanceof Error ? err.message : String(err)}`);
       }
@@ -168,10 +166,7 @@ test.describe("Custom form elements & form submit round-trip (Sprint #525)", () 
       expect(value).toBe(testValue);
 
       try {
-        await page.screenshot({
-          path: "test-results/e2e-screenshots/form-submit-02-text-field.png",
-          timeout: 5000,
-        });
+        await safeScreenshot(page, "test-results/e2e-screenshots/form-submit-02-text-field.png");
       } catch (err) {
         console.error(`Screenshot failed for form-submit-02: ${err instanceof Error ? err.message : String(err)}`);
       }
@@ -255,10 +250,7 @@ test.describe("Multi-actor sheet workflows (Issue #502)", () => {
       expect(sheet2StillVisible).toBe(true);
 
       try {
-        await page.screenshot({
-          path: "test-results/e2e-screenshots/form-submit-03-multi-actor.png",
-          timeout: 5000,
-        });
+        await safeScreenshot(page, "test-results/e2e-screenshots/form-submit-03-multi-actor.png");
       } catch (err) {
         console.error(`Screenshot failed for form-submit-03: ${err instanceof Error ? err.message : String(err)}`);
       }
@@ -328,10 +320,7 @@ test.describe("Error states and edge cases (Issue #503)", () => {
       expect(criticalErrors).toHaveLength(0);
 
       try {
-        await page.screenshot({
-          path: "test-results/e2e-screenshots/form-submit-04-error-state.png",
-          timeout: 5000,
-        });
+        await safeScreenshot(page, "test-results/e2e-screenshots/form-submit-04-error-state.png");
       } catch (err) {
         console.error(`Screenshot failed for form-submit-04: ${err instanceof Error ? err.message : String(err)}`);
       }

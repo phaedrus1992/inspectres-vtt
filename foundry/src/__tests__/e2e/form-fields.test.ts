@@ -9,6 +9,7 @@
  */
 
 import { test, expect, ELEMENT_WAIT_TIMEOUT } from "./fixtures";
+import { safeScreenshot } from "./helpers.js";
 import { rejoinIfRedirected } from "./pages/index.js";
 
 // ApplicationV2 re-renders briefly detach elements. waitForSelector on ".inspectres" can
@@ -42,7 +43,7 @@ test.describe("Form field rendering and input validation (E2E - Playwright)", ()
     expect(visStyle.display).not.toBe("none");
     expect(parseFloat(visStyle.opacity)).toBeGreaterThan(0);
 
-    await page.screenshot({ path: "test-results/e2e-screenshots/form-01-visibility.png", timeout: 5000 }).catch(() => {});
+    await safeScreenshot(page, "test-results/e2e-screenshots/form-01-visibility.png");
 
     // --- border and background styling ---
     const textInput = page.locator(".inspectres input[type='text']").first();
@@ -75,13 +76,13 @@ test.describe("Form field rendering and input validation (E2E - Playwright)", ()
     expect(borderStyle.borderWidth).not.toBe("0px");
     expect(borderStyle.backgroundColor).toBeTruthy();
 
-    await page.screenshot({ path: "test-results/e2e-screenshots/form-02-border.png", timeout: 5000 }).catch(() => {});
+    await safeScreenshot(page, "test-results/e2e-screenshots/form-02-border.png");
 
     // --- value handling ---
     await textInput.fill("test value");
     await expect(textInput).toHaveValue("test value");
 
-    await page.screenshot({ path: "test-results/e2e-screenshots/form-03-value.png", timeout: 5000 }).catch(() => {});
+    await safeScreenshot(page, "test-results/e2e-screenshots/form-03-value.png");
 
     // --- focus: clicking a field makes it focusable ---
     const bankInput = page.locator(".inspectres input[name='system.bank']").first();
@@ -103,7 +104,7 @@ test.describe("Form field rendering and input validation (E2E - Playwright)", ()
     });
     expect(isClickable || focusedInsideBank).toBe(true);
 
-    await page.screenshot({ path: "test-results/e2e-screenshots/form-04-focus.png", timeout: 5000 }).catch(() => {});
+    await safeScreenshot(page, "test-results/e2e-screenshots/form-04-focus.png");
 
     // --- required fields (skipped when none present) ---
     const requiredInputs = page.locator(".inspectres input[required]");
@@ -119,7 +120,7 @@ test.describe("Form field rendering and input validation (E2E - Playwright)", ()
       expect(attrs.required !== null || attrs.aria_required === "true").toBe(true);
     }
 
-    await page.screenshot({ path: "test-results/e2e-screenshots/form-05-required.png", timeout: 5000 }).catch(() => {});
+    await safeScreenshot(page, "test-results/e2e-screenshots/form-05-required.png");
 
     // --- textarea in notes tab ---
     await page.click(".inspectres [role='tab'][aria-controls='tab-notes']");
@@ -157,7 +158,7 @@ test.describe("Form field rendering and input validation (E2E - Playwright)", ()
     }));
     expect(textareaStyle.borderWidth).not.toBe("0px");
 
-    await page.screenshot({ path: "test-results/e2e-screenshots/form-06-textarea-select.png", timeout: 5000 }).catch(() => {});
+    await safeScreenshot(page, "test-results/e2e-screenshots/form-06-textarea-select.png");
 
     // --- ARIA labelling ---
     // Accept aria-label, aria-labelledby, title, label[for=id], wrapping <label>, or adjacent <label>
@@ -184,6 +185,6 @@ test.describe("Form field rendering and input validation (E2E - Playwright)", ()
     });
 
     expect(hasAnyLabelling).toBe(true);
-    await page.screenshot({ path: "test-results/e2e-screenshots/form-07-aria.png", timeout: 5000 }).catch(() => {});
+    await safeScreenshot(page, "test-results/e2e-screenshots/form-07-aria.png");
   });
 });

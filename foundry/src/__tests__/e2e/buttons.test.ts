@@ -9,17 +9,18 @@
  */
 
 import { test, expect, ELEMENT_WAIT_TIMEOUT } from "./fixtures";
+import { safeScreenshot } from "./helpers.js";
 
 test.describe("Button usability and interaction states (E2E - Playwright)", () => {
   test("buttons: load, visibility, hover, focus, disabled, contrast, and click", async ({ page }) => {
     // --- page loaded ---
     expect(page.url()).toContain("/game");
-    await page.screenshot({ path: "test-results/e2e-screenshots/buttons-01-loaded.png", timeout: 5000 }).catch(() => {});
+    await safeScreenshot(page, "test-results/e2e-screenshots/buttons-01-loaded.png");
 
     // --- visibility ---
     const sheetButton = page.locator(".inspectres button").first();
     await expect(sheetButton).toBeVisible();
-    await page.screenshot({ path: "test-results/e2e-screenshots/buttons-02-visibility.png", timeout: 5000 }).catch(() => {});
+    await safeScreenshot(page, "test-results/e2e-screenshots/buttons-02-visibility.png");
 
     // --- hover: button is interactive ---
     const button = page.locator(".inspectres button").first();
@@ -32,7 +33,7 @@ test.describe("Button usability and interaction states (E2E - Playwright)", () =
     expect(isInteractive).toBe(true);
 
     await button.hover();
-    await page.screenshot({ path: "test-results/e2e-screenshots/buttons-03-hover.png", timeout: 5000 }).catch(() => {});
+    await safeScreenshot(page, "test-results/e2e-screenshots/buttons-03-hover.png");
 
     // --- focus state ---
     const firstButton = page.locator("button").first();
@@ -52,7 +53,7 @@ test.describe("Button usability and interaction states (E2E - Playwright)", () =
 
     expect(focusResult.isFocused).toBe(true);
     expect(focusResult.outline !== "none" || focusResult.borderColor).toBeTruthy();
-    await page.screenshot({ path: "test-results/e2e-screenshots/buttons-04-focus.png", timeout: 5000 }).catch(() => {});
+    await safeScreenshot(page, "test-results/e2e-screenshots/buttons-04-focus.png");
 
     // --- disabled state ---
     await page.waitForFunction(
@@ -72,7 +73,7 @@ test.describe("Button usability and interaction states (E2E - Playwright)", () =
     });
 
     expect(disabledStyle.opacity < 1 || disabledStyle.cursor === "not-allowed").toBe(true);
-    await page.screenshot({ path: "test-results/e2e-screenshots/buttons-05-disabled.png", timeout: 5000 }).catch(() => {});
+    await safeScreenshot(page, "test-results/e2e-screenshots/buttons-05-disabled.png");
 
     // --- contrast and font size ---
     const anyButton = page.locator("button").first();
@@ -92,7 +93,7 @@ test.describe("Button usability and interaction states (E2E - Playwright)", () =
 
     expect(contrastResult.fontSize).toBeGreaterThanOrEqual(12);
     expect(contrastResult.background).not.toMatch(/rgba\(\d+,\s*\d+,\s*\d+,\s*0\)/);
-    await page.screenshot({ path: "test-results/e2e-screenshots/buttons-06-contrast.png", timeout: 5000 }).catch(() => {});
+    await safeScreenshot(page, "test-results/e2e-screenshots/buttons-06-contrast.png");
 
     // --- click interaction ---
     const clickTarget = page.locator("button").first();

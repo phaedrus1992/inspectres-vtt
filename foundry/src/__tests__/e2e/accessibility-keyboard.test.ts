@@ -4,6 +4,7 @@
  */
 
 import { test, expect } from "./fixtures";
+import { safeScreenshot } from "./helpers.js";
 import { AgentSheetPage } from "./pages/AgentSheetPage.js";
 import { createActor, deleteActor } from "./pages/index.js";
 
@@ -70,10 +71,7 @@ test.describe("Accessibility: Keyboard Navigation & ARIA (Issue #504)", () => {
       expect(focusedAfter).not.toBe(focusedBefore);
 
       try {
-        await page.screenshot({
-          path: "test-results/e2e-screenshots/a11y-01-keyboard-tab.png",
-          timeout: 5000,
-        });
+        await safeScreenshot(page, "test-results/e2e-screenshots/a11y-01-keyboard-tab.png");
       } catch (err) {
         console.error(`Screenshot failed for a11y-01: ${err instanceof Error ? err.message : String(err)}`);
       }
@@ -122,10 +120,7 @@ test.describe("Accessibility: Keyboard Navigation & ARIA (Issue #504)", () => {
       }
 
       try {
-        await page.screenshot({
-          path: "test-results/e2e-screenshots/a11y-02-keyboard-enter.png",
-          timeout: 5000,
-        });
+        await safeScreenshot(page, "test-results/e2e-screenshots/a11y-02-keyboard-enter.png");
       } catch (err) {
         console.error(`Screenshot failed for a11y-02: ${err instanceof Error ? err.message : String(err)}`);
       }
@@ -181,10 +176,7 @@ test.describe("Accessibility: Keyboard Navigation & ARIA (Issue #504)", () => {
       expect(interactiveCount).toBeGreaterThan(0);
 
       try {
-        await page.screenshot({
-          path: "test-results/e2e-screenshots/a11y-03-aria-labels.png",
-          timeout: 5000,
-        });
+        await safeScreenshot(page, "test-results/e2e-screenshots/a11y-03-aria-labels.png");
       } catch (err) {
         console.error(`Screenshot failed for a11y-03: ${err instanceof Error ? err.message : String(err)}`);
       }
@@ -227,10 +219,7 @@ test.describe("Accessibility: Keyboard Navigation & ARIA (Issue #504)", () => {
       expect(hasSemanticStructure).toBe(true);
 
       try {
-        await page.screenshot({
-          path: "test-results/e2e-screenshots/a11y-04-semantic-html.png",
-          timeout: 5000,
-        });
+        await safeScreenshot(page, "test-results/e2e-screenshots/a11y-04-semantic-html.png");
       } catch (err) {
         console.error(`Screenshot failed for a11y-04: ${err instanceof Error ? err.message : String(err)}`);
       }

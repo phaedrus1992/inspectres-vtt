@@ -6,6 +6,7 @@
  * Requires Docker Foundry instance (npm run test:e2e).
  */
 import { test, expect, ELEMENT_WAIT_TIMEOUT } from "./fixtures.js";
+import { safeScreenshot } from "./helpers.js";
 import type { Page } from "@playwright/test";
 import { createActor, deleteActor, waitForSheet, rejoinIfRedirected, wrapDiagnosticError } from "./pages/index.js";
 
@@ -52,10 +53,7 @@ test.describe("Actor lifecycle — no console errors", () => {
       }, actorId);
 
       await waitForSheet(page, actorId);
-      await page.screenshot({
-        path: "test-results/e2e-screenshots/lifecycle-01-agent-created.png",
-        timeout: 5000,
-      }).catch(() => {});
+      await safeScreenshot(page, "test-results/e2e-screenshots/lifecycle-01-agent-created.png");
 
       // Verify the sheet rendered with expected structure
       await page.waitForFunction(
@@ -91,10 +89,7 @@ test.describe("Actor lifecycle — no console errors", () => {
       }, actorId);
 
       await waitForSheet(page, actorId);
-      await page.screenshot({
-        path: "test-results/e2e-screenshots/lifecycle-02-franchise-created.png",
-        timeout: 5000,
-      }).catch(() => {});
+      await safeScreenshot(page, "test-results/e2e-screenshots/lifecycle-02-franchise-created.png");
 
       const sheetPresent = await page.evaluate((id: string) => {
         return document.querySelector(`.inspectres[id*="${id}"]`) !== null;
@@ -121,10 +116,7 @@ test.describe("Actor lifecycle — no console errors", () => {
       }, actorId);
       await waitForSheet(page, actorId);
 
-      await page.screenshot({
-        path: "test-results/e2e-screenshots/lifecycle-03-before-delete.png",
-        timeout: 5000,
-      }).catch(() => {});
+      await safeScreenshot(page, "test-results/e2e-screenshots/lifecycle-03-before-delete.png");
 
       // Delete actor (sheet open)
       await deleteActor(page, actorId);
@@ -178,10 +170,7 @@ test.describe("Actor lifecycle — no console errors", () => {
       );
       expect(bothExist).toBe(true);
 
-      await page.screenshot({
-        path: "test-results/e2e-screenshots/lifecycle-04-duplicated.png",
-        timeout: 5000,
-      }).catch(() => {});
+      await safeScreenshot(page, "test-results/e2e-screenshots/lifecycle-04-duplicated.png");
 
     } finally {
       if (originalId) await deleteActor(page, originalId);
@@ -275,10 +264,7 @@ test.describe("Actor creation via Foundry UI flow", () => {
 
       if (actorId) {
         await waitForSheet(page, actorId);
-        await page.screenshot({
-          path: "test-results/e2e-screenshots/lifecycle-05-ui-create.png",
-          timeout: 5000,
-        }).catch(() => {});
+        await safeScreenshot(page, "test-results/e2e-screenshots/lifecycle-05-ui-create.png");
       }
 
       // If we couldn't create via UI flow, that's a test infrastructure issue, not a failure
