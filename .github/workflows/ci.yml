@@ -130,14 +130,14 @@ jobs:
         run: |
           if [ '${{ github.event_name }}' = 'pull_request' ]; then
             # For PRs, always run
-            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "changed=true" >> "$GITHUB_OUTPUT"
           else
             # For pushes, check if docs or rules changed
-            CHANGED=$(git diff --name-only '${{ github.event.before }}' '${{ github.sha }}' | grep -E '^(docs/|\.claude/rules/documentation\.md)' | wc -l)
+            CHANGED=$(git diff --name-only '${{ github.event.before }}' '${{ github.sha }}' | grep -cE '^(docs/|\.claude/rules/documentation\.md)' || true)
             if [ "$CHANGED" -gt 0 ]; then
-              echo "changed=true" >> $GITHUB_OUTPUT
+              echo "changed=true" >> "$GITHUB_OUTPUT"
             else
-              echo "changed=false" >> $GITHUB_OUTPUT
+              echo "changed=false" >> "$GITHUB_OUTPUT"
             fi
           fi
 
