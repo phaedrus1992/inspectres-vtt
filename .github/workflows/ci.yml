@@ -193,34 +193,49 @@ jobs:
           path: /tmp/foundry-cache/foundryvtt-${{ matrix.foundry-version }}.zip
           key: foundry-zip-${{ matrix.image-sha }}-v2
 
-      - name: Authenticate and download Foundry release zip
+      - name: Run felddy entrypoint to download Foundry release zip
         if: steps.zip-cache.outputs.cache-hit != 'true'
         timeout-minutes: 5
         env:
           FOUNDRY_USERNAME: ${{ secrets.FOUNDRY_USERNAME }}
           FOUNDRY_PASSWORD: ${{ secrets.FOUNDRY_PASSWORD }}
+          FOUNDRY_LICENSE_KEY: ${{ secrets.FOUNDRY_LICENSE_KEY }}
           FOUNDRY_VERSION: ${{ matrix.foundry-version }}
         run: |
-          # Fetch the foundry zip once per version on a single runner. The e2e
-          # jobs then mount it via CONTAINER_CACHE into all 3 foundry containers,
-          # which install without any callback to foundryvtt.com. This avoids
-          # the 429 rate limiting that hits when 4+ parallel jobs auth at once.
-          # No retry: if foundryvtt.com 429s, fail fast — retries burn 10+ min.
+          # Use felddy's own entrypoint to fetch the release zip. It knows the
+          # right API format/headers; calling get_release_url.js directly with
+          # short or long version strings returns 404.
+          # Strategy: start a temp container with CONTAINER_CACHE set; it will
+          # auth, resolve URL, and write foundryvtt-${VERSION}.zip to the cache.
+          # Stop the container as soon as the zip appears.
           mkdir -p /tmp/foundry-cache
+          chmod 0777 /tmp/foundry-cache
           docker pull "$FOUNDRY_IMAGE_NAME"
-          docker run --rm \
+
+          docker run -d --name foundry-fetch \
             -e FOUNDRY_USERNAME \
             -e FOUNDRY_PASSWORD \
+            -e FOUNDRY_LICENSE_KEY \
             -e FOUNDRY_VERSION \
-            --entrypoint /bin/bash \
+            -e CONTAINER_CACHE=/cache \
+            -e CONTAINER_PRESERVE_CONFIG=true \
+            -u 0:0 \
             -v /tmp/foundry-cache:/cache \
-            "$FOUNDRY_IMAGE_NAME" \
-            -c '
-              set -e
-              ./authenticate.js "$FOUNDRY_USERNAME" "$FOUNDRY_PASSWORD" /tmp/cookies.json
-              URL=$(./get_release_url.js /tmp/cookies.json "$FOUNDRY_VERSION")
-              curl --fail --location --output "/cache/foundryvtt-${FOUNDRY_VERSION}.zip" "$URL"
-            '
+            "$FOUNDRY_IMAGE_NAME"
+
+          # Wait for zip to appear (max 4 min)
+          for i in $(seq 1 240); do
+            if [ -f "/tmp/foundry-cache/foundryvtt-${FOUNDRY_VERSION}.zip" ]; then
+              echo "Zip downloaded after ${i}s"
+              break
+            fi
+            sleep 1
+          done
+
+          docker logs foundry-fetch | tail -40 || true
+          docker stop foundry-fetch >/dev/null
+          docker rm foundry-fetch >/dev/null
+
           ls -la "/tmp/foundry-cache/foundryvtt-${FOUNDRY_VERSION}.zip"
 
       - name: Upload Foundry zip artifact
