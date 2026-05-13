@@ -56,9 +56,15 @@ const WORLD_ID = "test-world";
 const WORLD_TITLE = "Test World";
 const SYSTEM_ID = "inspectres";
 
-/** Base URL for the foundry server matching the given worker index. */
-export function foundryUrlForWorker(workerIndex: number): string {
-  return `http://localhost:${FOUNDRY_BASE_PORT + workerIndex}`;
+/**
+ * Base URL for the foundry server matching the given parallel slot index.
+ *
+ * Use Playwright's `testInfo.parallelIndex` (0..workers-1, stable across worker
+ * restarts), NOT `workerIndex` which increments every time a worker process
+ * restarts (e.g. on retry) and quickly exceeds the provisioned server count.
+ */
+export function foundryUrlForWorker(parallelIndex: number): string {
+  return `http://localhost:${FOUNDRY_BASE_PORT + parallelIndex}`;
 }
 
 async function declineUsageDataSharing(page: Page): Promise<void> {

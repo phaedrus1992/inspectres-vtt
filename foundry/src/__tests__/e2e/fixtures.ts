@@ -106,7 +106,7 @@ export const test = base.extend<{ workerUsername: string }>({
   context: async ({ browser }, use, testInfo) => {
     const ctx = await browser.newContext({
       viewport: E2E_VIEWPORT,
-      baseURL: foundryUrlForWorker(testInfo.workerIndex),
+      baseURL: foundryUrlForWorker(testInfo.parallelIndex),
     });
     await use(ctx);
     await ctx.close();
