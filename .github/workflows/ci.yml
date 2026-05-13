@@ -179,10 +179,8 @@ jobs:
         foundry-version: ["13", "14"]
         include:
           - foundry-version: "13"
-            foundry-version-long: "13.351.0"
             image-sha: sha256:41d518782f2fabbec887413c56da8ef8175c22fb5a75fde45382661443a8ae6b
           - foundry-version: "14"
-            foundry-version-long: "14.360.0"
             image-sha: sha256:383417dbf3c442a03dcca9a4813b47c7408addaf6d582b7d3b1ee4b65c24a245
       fail-fast: false
     env:
@@ -192,42 +190,44 @@ jobs:
         id: zip-cache
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684  # v4.2.3
         with:
-          path: /tmp/foundry-cache/foundryvtt-${{ matrix.foundry-version-long }}.zip
-          key: foundry-zip-${{ matrix.foundry-version-long }}-v1
+          path: /tmp/foundry-cache/foundryvtt-${{ matrix.foundry-version }}.zip
+          key: foundry-zip-${{ matrix.image-sha }}-v2
 
       - name: Authenticate and download Foundry release zip
         if: steps.zip-cache.outputs.cache-hit != 'true'
+        timeout-minutes: 5
         env:
           FOUNDRY_USERNAME: ${{ secrets.FOUNDRY_USERNAME }}
           FOUNDRY_PASSWORD: ${{ secrets.FOUNDRY_PASSWORD }}
-          FOUNDRY_VERSION_LONG: ${{ matrix.foundry-version-long }}
+          FOUNDRY_VERSION: ${{ matrix.foundry-version }}
         run: |
           # Fetch the foundry zip once per version on a single runner. The e2e
           # jobs then mount it via CONTAINER_CACHE into all 3 foundry containers,
           # which install without any callback to foundryvtt.com. This avoids
           # the 429 rate limiting that hits when 4+ parallel jobs auth at once.
+          # No retry: if foundryvtt.com 429s, fail fast — retries burn 10+ min.
           mkdir -p /tmp/foundry-cache
           docker pull "$FOUNDRY_IMAGE_NAME"
           docker run --rm \
             -e FOUNDRY_USERNAME \
             -e FOUNDRY_PASSWORD \
-            -e FOUNDRY_VERSION="$FOUNDRY_VERSION_LONG" \
+            -e FOUNDRY_VERSION \
             --entrypoint /bin/bash \
             -v /tmp/foundry-cache:/cache \
             "$FOUNDRY_IMAGE_NAME" \
             -c '
               set -e
               ./authenticate.js "$FOUNDRY_USERNAME" "$FOUNDRY_PASSWORD" /tmp/cookies.json
-              URL=$(./get_release_url.js --retry=3 /tmp/cookies.json "$FOUNDRY_VERSION")
+              URL=$(./get_release_url.js /tmp/cookies.json "$FOUNDRY_VERSION")
               curl --fail --location --output "/cache/foundryvtt-${FOUNDRY_VERSION}.zip" "$URL"
             '
-          ls -la "/tmp/foundry-cache/foundryvtt-${FOUNDRY_VERSION_LONG}.zip"
+          ls -la "/tmp/foundry-cache/foundryvtt-${FOUNDRY_VERSION}.zip"
 
       - name: Upload Foundry zip artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: foundry-zip-${{ matrix.foundry-version }}
-          path: /tmp/foundry-cache/foundryvtt-${{ matrix.foundry-version-long }}.zip
+          path: /tmp/foundry-cache/foundryvtt-${{ matrix.foundry-version }}.zip
           if-no-files-found: error
           retention-days: 1
 
@@ -252,17 +252,14 @@ jobs:
         shard: [1, 2]
         include:
           - foundry-version: "13"
-            foundry-version-long: "13.351.0"
             image-sha: sha256:41d518782f2fabbec887413c56da8ef8175c22fb5a75fde45382661443a8ae6b
           - foundry-version: "14"
-            foundry-version-long: "14.360.0"
             image-sha: sha256:383417dbf3c442a03dcca9a4813b47c7408addaf6d582b7d3b1ee4b65c24a245
       fail-fast: false
     env:
       FOUNDRY_LICENSE_KEY: ${{ secrets.FOUNDRY_LICENSE_KEY }}
       FOUNDRY_IMAGE_SHA: ${{ matrix.image-sha }}
       FOUNDRY_VERSION: ${{ matrix.foundry-version }}
-      FOUNDRY_VERSION_LONG: ${{ matrix.foundry-version-long }}
       # Computed once at job level so all docker/compose steps see the same value.
       FOUNDRY_IMAGE_NAME: ghcr.io/felddy/foundryvtt@${{ matrix.image-sha }}
     steps:
@@ -346,7 +343,7 @@ jobs:
 
       - name: Verify Foundry zip present
         run: |
-          ls -la "/tmp/foundry-cache/foundryvtt-${FOUNDRY_VERSION_LONG}.zip"
+          ls -la "/tmp/foundry-cache/foundryvtt-${FOUNDRY_VERSION}.zip"
 
       - name: Start Foundry containers
         working-directory: docker
