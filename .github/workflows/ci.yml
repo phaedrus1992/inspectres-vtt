@@ -178,15 +178,17 @@ jobs:
       contents: read
     strategy:
       matrix:
-        # Each shard runs in an isolated job with its own Foundry container.
-        # Sharding splits the test list in half, halving wall-clock per (version,shard) pair.
-        # Single Foundry server per shard sidesteps multi-worker contention (#539 deferred).
+        # Cross-product: each (foundry-version, shard) gets its own isolated job with
+        # a dedicated Foundry container. Sharding halves the test list per job, halving
+        # wall-clock per (version, shard) pair. Single Foundry server per shard sidesteps
+        # multi-worker contention (per-worker containers tracked in #546).
+        #
+        # `include` attaches image-sha + version-long to each foundry-version row.
+        # Foundry image tags use major.build.patch format (e.g. 13.351.0, 14.360.0).
+        # SHA pins below are reproducible; update both tag and SHA together when bumping.
+        foundry-version: ["13", "14"]
         shard: [1, 2]
         include:
-          # Foundry image tags use major.build.patch format (e.g. 13.351.0, 14.360.0).
-          # SHA pins below are reproducible; update both tag and SHA together when bumping.
-          # Note: GitHub Actions does not interpolate ${{ env.* }} in matrix values, so SHAs
-          # must be inline here.
           - foundry-version: "13"
             foundry-version-long: "13.351.0"
             image-sha: sha256:41d518782f2fabbec887413c56da8ef8175c22fb5a75fde45382661443a8ae6b
