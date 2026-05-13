@@ -4,11 +4,12 @@
 # Image pinned to SHA digest for reproducibility (both v13 and v14).
 # FOUNDRY_IMAGE_NAME set by CI workflow (with SHA already included).
 #
-# Three independent foundry servers on ports 30000-30002. Each has its own
+# Two independent foundry servers on ports 30000-30001. Each has its own
 # /data volume so worlds, users, and licenses are isolated. Playwright workers
 # route to the matching server via `baseURL = http://localhost:3000${workerIndex}`.
-# This eliminates the single-server bottleneck that capped CI at 2 workers.
-# See issue #546.
+# Two workers sit comfortably on the 4 vCPU GitHub-hosted runner; we tried 3 and
+# saw 6+ minute test runs (vs. 7-12s locally) from CPU oversubscription between
+# chromium workers + foundry containers + node fixtures. See issue #546.
 #
 # Foundry installation: a separate `fetch-foundry-zip` CI job downloads the
 # release zip once per version into /tmp/foundry-cache (uploaded as artifact,
@@ -54,18 +55,3 @@ services:
       - /tmp/foundry-cache:/cache
       - ../foundry/dist:/data/Data/systems/inspectres
 
-  foundry-2:
-    <<: *foundry-common
-    hostname: foundry-2
-    ports:
-      - "30002:30000"
-    environment:
-      FOUNDRY_LICENSE_KEY: "${FOUNDRY_LICENSE_KEY}"
-      FOUNDRY_VERSION: "${FOUNDRY_VERSION}"
-      FOUNDRY_HOSTNAME: foundry-2
-      CONTAINER_PRESERVE_CONFIG: "true"
-      CONTAINER_CACHE: /cache
-    volumes:
-      - ./data-2:/data
-      - /tmp/foundry-cache:/cache
-      - ../foundry/dist:/data/Data/systems/inspectres

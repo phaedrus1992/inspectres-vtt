@@ -369,9 +369,9 @@ jobs:
       - name: Wait for Foundry servers to be ready
         working-directory: docker
         run: |
-          # Wait for all 3 foundry servers (ports 30000, 30001, 30002).
+          # Wait for both foundry servers (ports 30000, 30001).
           # Each worker gets a dedicated server (issue #546).
-          for port in 30000 30001 30002; do
+          for port in 30000 30001; do
             ready=0
             for i in $(seq 1 90); do
               if curl -sf -o /dev/null "http://localhost:${port}"; then
@@ -392,8 +392,8 @@ jobs:
         working-directory: foundry
         env:
           SHARD_INDEX: ${{ matrix.shard }}
-          PLAYWRIGHT_WORKERS: "3"
-          FOUNDRY_SERVER_COUNT: "3"
+          PLAYWRIGHT_WORKERS: "2"
+          FOUNDRY_SERVER_COUNT: "2"
         run: npm run test:e2e -- --shard="${SHARD_INDEX}/2"
 
       - name: Stop Foundry container
