@@ -11,6 +11,7 @@
  * - Form inputs: independent fields (bank, description, missionGoal) — one actor
  */
 import { test, expect, ELEMENT_WAIT_TIMEOUT } from "./fixtures.js";
+import { safeScreenshot } from "./helpers.js";
 import {
   createActor,
   deleteActor,
@@ -49,10 +50,7 @@ test.describe("FranchiseSheet — roll actions and mission tracker", () => {
     await sheet.clickBankRoll();
     await waitForNewChatMessage(page, beforeBank);
 
-    await page.screenshot({
-      path: "test-results/e2e-screenshots/franchise-01-bank-roll.png",
-      timeout: 5000,
-    }).catch(() => {});
+    await safeScreenshot(page, "test-results/e2e-screenshots/franchise-01-bank-roll.png");
 
     const afterBank = await getChatMessageCount(page);
     expect(afterBank).toBeGreaterThanOrEqual(beforeBank);
@@ -62,10 +60,7 @@ test.describe("FranchiseSheet — roll actions and mission tracker", () => {
     await sheet.clickClientRoll();
     await waitForNewChatMessage(page, beforeClient);
 
-    await page.screenshot({
-      path: "test-results/e2e-screenshots/franchise-02-client-roll.png",
-      timeout: 5000,
-    }).catch(() => {});
+    await safeScreenshot(page, "test-results/e2e-screenshots/franchise-02-client-roll.png");
 
     const afterClient = await getChatMessageCount(page);
     expect(afterClient).toBeGreaterThanOrEqual(beforeClient);
@@ -80,10 +75,7 @@ test.describe("FranchiseSheet — roll actions and mission tracker", () => {
       ELEMENT_WAIT_TIMEOUT,
     );
 
-    await page.screenshot({
-      path: "test-results/e2e-screenshots/franchise-03-mission-tracker.png",
-      timeout: 5000,
-    }).catch(() => {});
+    await safeScreenshot(page, "test-results/e2e-screenshots/franchise-03-mission-tracker.png");
 
     const trackerOpen = await page.evaluate(() => {
       return (
@@ -142,10 +134,7 @@ test.describe("FranchiseSheet — day controls", () => {
     const afterAdvance = await sheet.getCurrentDaySetting();
     expect(afterAdvance).toBe(initial + 1);
 
-    await page.screenshot({
-      path: "test-results/e2e-screenshots/franchise-04-advance-day.png",
-      timeout: 5000,
-    }).catch(() => {});
+    await safeScreenshot(page, "test-results/e2e-screenshots/franchise-04-advance-day.png");
 
     await sheet.clickRegressDay();
     await page.waitForFunction(
@@ -164,10 +153,7 @@ test.describe("FranchiseSheet — day controls", () => {
     const afterRegress = await sheet.getCurrentDaySetting();
     expect(afterRegress).toBe(initial);
 
-    await page.screenshot({
-      path: "test-results/e2e-screenshots/franchise-05-regress-day.png",
-      timeout: 5000,
-    }).catch(() => {});
+    await safeScreenshot(page, "test-results/e2e-screenshots/franchise-05-regress-day.png");
   });
 });
 
@@ -201,10 +187,7 @@ test.describe("FranchiseSheet — debt mode", () => {
 
     expect(after).toBe(!before);
 
-    await page.screenshot({
-      path: "test-results/e2e-screenshots/franchise-06-debt-mode.png",
-      timeout: 5000,
-    }).catch(() => {});
+    await safeScreenshot(page, "test-results/e2e-screenshots/franchise-06-debt-mode.png");
   });
 });
 
@@ -237,10 +220,7 @@ test.describe("FranchiseSheet — form-bound inputs", () => {
     const bankValue = await getActorSystemField<number>(page, franchiseId, "bank", 0);
     expect(bankValue).toBe(7);
 
-    await page.screenshot({
-      path: "test-results/e2e-screenshots/franchise-07-bank-input.png",
-      timeout: 5000,
-    }).catch(() => {});
+    await safeScreenshot(page, "test-results/e2e-screenshots/franchise-07-bank-input.png");
 
     // --- description textarea (notes tab) ---
     await sheet.openTab("notes");
@@ -258,10 +238,7 @@ test.describe("FranchiseSheet — form-bound inputs", () => {
     const savedDescription = await getActorSystemField<string>(page, franchiseId, "description", "");
     expect(savedDescription).toBe(testText);
 
-    await page.screenshot({
-      path: "test-results/e2e-screenshots/franchise-08-description.png",
-      timeout: 5000,
-    }).catch(() => {});
+    await safeScreenshot(page, "test-results/e2e-screenshots/franchise-08-description.png");
 
     // --- missionGoal input (back to stats tab) ---
     await sheet.openTab("stats");
@@ -278,9 +255,6 @@ test.describe("FranchiseSheet — form-bound inputs", () => {
     const missionGoalValue = await getActorSystemField<number>(page, franchiseId, "missionGoal", 0);
     expect(missionGoalValue).toBe(10);
 
-    await page.screenshot({
-      path: "test-results/e2e-screenshots/franchise-09-mission-goal.png",
-      timeout: 5000,
-    }).catch(() => {});
+    await safeScreenshot(page, "test-results/e2e-screenshots/franchise-09-mission-goal.png");
   });
 });

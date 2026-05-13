@@ -1,22 +1,9 @@
-import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig, devices } from "@playwright/test";
-import { WORKER_COUNT, POOL_SIZE, poolStorageStatePath } from "./src/__tests__/e2e/global-setup.js";
+import { WORKER_COUNT } from "./src/__tests__/e2e/global-setup.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-// Seed empty storage-state files for each pool slot so global-setup can overwrite them.
-// These files exist only as creation guards — the pool fixture no longer reads them at
-// test time (it joins /join directly), but global-setup still writes them for reference.
-const storageTmpDir = path.resolve(__dirname, "./.tmp");
-fs.mkdirSync(storageTmpDir, { recursive: true });
-for (let i = 0; i < POOL_SIZE; i++) {
-  const statePath = poolStorageStatePath(i);
-  if (!fs.existsSync(statePath)) {
-    fs.writeFileSync(statePath, JSON.stringify({ cookies: [], origins: [] }));
-  }
-}
 
 export default defineConfig({
   testDir: "./src/__tests__/e2e",
@@ -38,10 +25,10 @@ export default defineConfig({
   // cutting off 3 tests still pending at the 35min mark even though prior tests all pass.
   globalTimeout: process.env["CI"] ? 40 * 60_000 : 12 * 60_000,
   use: {
-    baseURL: "http://localhost:30000",
+    // baseURL is set per-context in fixtures.ts based on testInfo.workerIndex,
+    // since each worker has its own dedicated Foundry server (issue #546).
     trace: "on-first-retry",
     screenshot: "only-on-failure",
-    // storageState is NOT set here — pool-based fixtures claim a free slot at runtime.
   },
 
   outputDir: "./test-results/e2e-screenshots",

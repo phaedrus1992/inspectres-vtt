@@ -4,6 +4,7 @@
  */
 
 import { test, expect } from "./fixtures";
+import { safeScreenshot } from "./helpers.js";
 import { AgentSheetPage } from "./pages/AgentSheetPage.js";
 import { createActor, deleteActor } from "./pages/index.js";
 
@@ -82,10 +83,7 @@ test.describe("Multi-Sheet Isolation (Issue #502)", () => {
       expect(sheet2StillVisible).toBe(true);
 
       try {
-        await page.screenshot({
-          path: "test-results/e2e-screenshots/multi-sheet-01-isolation.png",
-          timeout: 5000,
-        });
+        await safeScreenshot(page, "test-results/e2e-screenshots/multi-sheet-01-isolation.png");
       } catch (err) {
         console.error(`Screenshot failed for multi-sheet-01: ${err instanceof Error ? err.message : String(err)}`);
       }
@@ -162,10 +160,7 @@ test.describe("Multi-Sheet Isolation (Issue #502)", () => {
       expect(sheet2StillVisible).toBe(true);
 
       try {
-        await page.screenshot({
-          path: "test-results/e2e-screenshots/multi-sheet-02-close-isolation.png",
-          timeout: 5000,
-        });
+        await safeScreenshot(page, "test-results/e2e-screenshots/multi-sheet-02-close-isolation.png");
       } catch (err) {
         console.error(`Screenshot failed for multi-sheet-02: ${err instanceof Error ? err.message : String(err)}`);
       }

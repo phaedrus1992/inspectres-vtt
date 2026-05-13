@@ -1,25 +1,57 @@
 # Standalone CI compose — does not extend docker-compose.yml.
-# felddy/foundryvtt reads FOUNDRY_USERNAME, FOUNDRY_PASSWORD, and
-# FOUNDRY_LICENSE_KEY directly from the environment; no config.json needed.
 # Run as root (0:0) so the container can write to the GHA-checked-out dist/.
 #
 # Image pinned to SHA digest for reproducibility (both v13 and v14).
 # FOUNDRY_IMAGE_NAME set by CI workflow (with SHA already included).
+#
+# Two independent foundry servers on ports 30000-30001. Each has its own
+# /data volume so worlds, users, and licenses are isolated. Playwright workers
+# route to the matching server via `baseURL = http://localhost:3000${workerIndex}`.
+# Two workers sit comfortably on the 4 vCPU GitHub-hosted runner; we tried 3 and
+# saw 6+ minute test runs (vs. 7-12s locally) from CPU oversubscription between
+# chromium workers + foundry containers + node fixtures. See issue #546.
+#
+# Foundry installation: a separate `fetch-foundry-zip` CI job downloads the
+# release zip once per version into /tmp/foundry-cache (uploaded as artifact,
+# restored here). All 3 containers mount that directory as CONTAINER_CACHE.
+# With no FOUNDRY_USERNAME/PASSWORD/RELEASE_URL set, felddy skips network
+# auth entirely and installs from the cached zip. This avoids the 429 rate
+# limiting that hits when 4+ parallel CI jobs auth simultaneously.
+
+x-foundry-common: &foundry-common
+  image: ${FOUNDRY_IMAGE_NAME}
+  user: "0:0"
 
 services:
-  foundry:
-    image: ${FOUNDRY_IMAGE_NAME}
-    hostname: foundry
+  foundry-0:
+    <<: *foundry-common
+    hostname: foundry-0
     ports:
       - "30000:30000"
-    user: "0:0"
     environment:
-      FOUNDRY_USERNAME: "${FOUNDRY_USERNAME}"
-      FOUNDRY_PASSWORD: "${FOUNDRY_PASSWORD}"
       FOUNDRY_LICENSE_KEY: "${FOUNDRY_LICENSE_KEY}"
-      FOUNDRY_HOSTNAME: foundry
+      FOUNDRY_VERSION: "${FOUNDRY_VERSION}"
+      FOUNDRY_HOSTNAME: foundry-0
       CONTAINER_PRESERVE_CONFIG: "true"
+      CONTAINER_CACHE: /cache
     volumes:
-      - ./data:/data
-      - ./foundry-data:/home/node/resources
+      - ./data-0:/data
+      - /tmp/foundry-cache:/cache
       - ../foundry/dist:/data/Data/systems/inspectres
+
+  foundry-1:
+    <<: *foundry-common
+    hostname: foundry-1
+    ports:
+      - "30001:30000"
+    environment:
+      FOUNDRY_LICENSE_KEY: "${FOUNDRY_LICENSE_KEY}"
+      FOUNDRY_VERSION: "${FOUNDRY_VERSION}"
+      FOUNDRY_HOSTNAME: foundry-1
+      CONTAINER_PRESERVE_CONFIG: "true"
+      CONTAINER_CACHE: /cache
+    volumes:
+      - ./data-1:/data
+      - /tmp/foundry-cache:/cache
+      - ../foundry/dist:/data/Data/systems/inspectres
+

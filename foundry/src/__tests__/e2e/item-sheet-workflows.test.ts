@@ -4,6 +4,7 @@
  */
 
 import { test, expect } from "./fixtures";
+import { safeScreenshot } from "./helpers.js";
 import { createActor, deleteActor } from "./pages/index.js";
 
 test.describe("Item Sheet Workflows (Issue #498)", () => {
@@ -24,10 +25,7 @@ test.describe("Item Sheet Workflows (Issue #498)", () => {
     expect(sheetRegistered.itemExists).toBe(true);
 
     try {
-      await page.screenshot({
-        path: "test-results/e2e-screenshots/item-sheet-01-registration.png",
-        timeout: 5000,
-      });
+      await safeScreenshot(page, "test-results/e2e-screenshots/item-sheet-01-registration.png");
     } catch (err) {
       console.error(`Screenshot failed for item-sheet-01: ${err instanceof Error ? err.message : String(err)}`);
     }
@@ -53,10 +51,7 @@ test.describe("Item Sheet Workflows (Issue #498)", () => {
     expect(sheetsRegistered.itemDocClassExists).toBe(true);
 
     try {
-      await page.screenshot({
-        path: "test-results/e2e-screenshots/item-sheet-02-registration-check.png",
-        timeout: 5000,
-      });
+      await safeScreenshot(page, "test-results/e2e-screenshots/item-sheet-02-registration-check.png");
     } catch (err) {
       console.error(`Screenshot failed for item-sheet-02: ${err instanceof Error ? err.message : String(err)}`);
     }
@@ -80,10 +75,7 @@ test.describe("Item Sheet Workflows (Issue #498)", () => {
     expect(itemConfig.itemConstructor).toBe(true);
 
     try {
-      await page.screenshot({
-        path: "test-results/e2e-screenshots/item-sheet-03-doc-class.png",
-        timeout: 5000,
-      });
+      await safeScreenshot(page, "test-results/e2e-screenshots/item-sheet-03-doc-class.png");
     } catch (err) {
       console.error(`Screenshot failed for item-sheet-03: ${err instanceof Error ? err.message : String(err)}`);
     }
@@ -113,10 +105,7 @@ test.describe("Item Sheet Workflows (Issue #498)", () => {
       expect(itemsCollectionCheck.hasCreateMethod).toBe(true);
 
       try {
-        await page.screenshot({
-          path: "test-results/e2e-screenshots/item-sheet-04-collection-api.png",
-          timeout: 5000,
-        });
+        await safeScreenshot(page, "test-results/e2e-screenshots/item-sheet-04-collection-api.png");
       } catch (err) {
         console.error(`Screenshot failed for item-sheet-04: ${err instanceof Error ? err.message : String(err)}`);
       }

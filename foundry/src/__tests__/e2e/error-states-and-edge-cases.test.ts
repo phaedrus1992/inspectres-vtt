@@ -7,6 +7,7 @@ import { test, expect } from "./fixtures";
 import type { Page } from "@playwright/test";
 import { AgentSheetPage } from "./pages/AgentSheetPage.js";
 import { createActor, deleteActor } from "./pages/index.js";
+import { safeScreenshot } from "./helpers.js";
 
 /**
  * Open actor sheet and wait for render.
@@ -35,22 +36,6 @@ async function waitForSheetStable(page: Page, actorId: string): Promise<void> {
     actorId,
     { timeout: 10_000 },
   );
-}
-
-/**
- * Take optional screenshot with silent error handling.
- */
-async function captureScreenshot(
-  page: Page,
-  path: string,
-): Promise<void> {
-  try {
-    await page.screenshot({ path, timeout: 5000 });
-  } catch (err) {
-    console.error(
-      `Screenshot failed: ${err instanceof Error ? err.message : String(err)}`,
-    );
-  }
 }
 
 test.describe("Validation errors and field constraints (Issue #503)", () => {
@@ -88,7 +73,7 @@ test.describe("Validation errors and field constraints (Issue #503)", () => {
       await nameInput.fill(originalName);
       await nameInput.blur();
 
-      await captureScreenshot(
+      await safeScreenshot(
         page,
         "test-results/e2e-screenshots/error-states-01-required-field.png",
       );
@@ -145,7 +130,7 @@ test.describe("Validation errors and field constraints (Issue #503)", () => {
       systemData = await agent.getSystemData();
       expect(systemData["stress"]).toBe(0); // Should clamp to min
 
-      await captureScreenshot(
+      await safeScreenshot(
         page,
         "test-results/e2e-screenshots/error-states-02-stress-boundary.png",
       );
@@ -192,7 +177,7 @@ test.describe("Validation errors and field constraints (Issue #503)", () => {
         expect(value.length).toBeGreaterThan(500); // At least most of it persisted
       }
 
-      await captureScreenshot(
+      await safeScreenshot(
         page,
         "test-results/e2e-screenshots/error-states-03-long-string.png",
       );
@@ -252,7 +237,7 @@ test.describe("Recovery edge cases (Issue #503)", () => {
         }
       }
 
-      await captureScreenshot(
+      await safeScreenshot(
         page,
         "test-results/e2e-screenshots/error-states-04-recovery-dead.png",
       );
@@ -303,7 +288,7 @@ test.describe("Recovery edge cases (Issue #503)", () => {
       // For now, just verify the recovery fields exist
       expect(systemData["daysOutOfAction"]).toBeDefined();
 
-      await captureScreenshot(
+      await safeScreenshot(
         page,
         "test-results/e2e-screenshots/error-states-05-recovery-past.png",
       );
@@ -355,7 +340,7 @@ test.describe("Console errors and silent failures (Issue #503)", () => {
         );
         expect(criticalErrors).toHaveLength(0);
 
-        await captureScreenshot(
+        await safeScreenshot(
           page,
           "test-results/e2e-screenshots/error-states-06-console-clean.png",
         );

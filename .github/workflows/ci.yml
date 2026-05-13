@@ -130,14 +130,14 @@ jobs:
         run: |
           if [ '${{ github.event_name }}' = 'pull_request' ]; then
             # For PRs, always run
-            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "changed=true" >> "$GITHUB_OUTPUT"
           else
             # For pushes, check if docs or rules changed
-            CHANGED=$(git diff --name-only '${{ github.event.before }}' '${{ github.sha }}' | grep -E '^(docs/|\.claude/rules/documentation\.md)' | wc -l)
+            CHANGED=$(git diff --name-only '${{ github.event.before }}' '${{ github.sha }}' | grep -cE '^(docs/|\.claude/rules/documentation\.md)' || true)
             if [ "$CHANGED" -gt 0 ]; then
-              echo "changed=true" >> $GITHUB_OUTPUT
+              echo "changed=true" >> "$GITHUB_OUTPUT"
             else
-              echo "changed=false" >> $GITHUB_OUTPUT
+              echo "changed=false" >> "$GITHUB_OUTPUT"
             fi
           fi
 
@@ -169,10 +169,76 @@ jobs:
         working-directory: docs
         run: npm run build
 
+  fetch-foundry-zip:
+    name: Fetch Foundry zip (${{ matrix.foundry-version }})
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      matrix:
+        foundry-version: ["13", "14"]
+        include:
+          - foundry-version: "13"
+            foundry-build: "13.351"
+            image-sha: sha256:41d518782f2fabbec887413c56da8ef8175c22fb5a75fde45382661443a8ae6b
+          - foundry-version: "14"
+            foundry-build: "14.360"
+            image-sha: sha256:383417dbf3c442a03dcca9a4813b47c7408addaf6d582b7d3b1ee4b65c24a245
+      fail-fast: false
+    env:
+      FOUNDRY_IMAGE_NAME: ghcr.io/felddy/foundryvtt@${{ matrix.image-sha }}
+    steps:
+      - name: Cache Foundry release zip
+        id: zip-cache
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684  # v4.2.3
+        with:
+          path: /tmp/foundry-cache/foundryvtt-${{ matrix.foundry-build }}.zip
+          key: foundry-zip-${{ matrix.foundry-build }}-v1
+
+      - name: Authenticate and download Foundry release zip
+        if: steps.zip-cache.outputs.cache-hit != 'true'
+        timeout-minutes: 5
+        env:
+          FOUNDRY_USERNAME: ${{ secrets.FOUNDRY_USERNAME }}
+          FOUNDRY_PASSWORD: ${{ secrets.FOUNDRY_PASSWORD }}
+          FOUNDRY_VERSION: ${{ matrix.foundry-build }}
+        run: |
+          # Fetch the release zip once per major version on a single runner.
+          # E2E jobs mount it as CONTAINER_CACHE so all 3 containers install
+          # offline — no parallel auths to foundryvtt.com.
+          # FOUNDRY_VERSION must be "major.build" (e.g. 13.351), not "13" or
+          # "13.351.0" — both return 404 from foundryvtt.com.
+          # No retry: 429/404 sleeps 550s per attempt; fail fast instead.
+          mkdir -p /tmp/foundry-cache
+          chmod 0777 /tmp/foundry-cache
+          docker pull "$FOUNDRY_IMAGE_NAME"
+          docker run --rm -u 0:0 \
+            -e FOUNDRY_USERNAME \
+            -e FOUNDRY_PASSWORD \
+            -e FOUNDRY_VERSION \
+            --entrypoint /bin/bash \
+            -v /tmp/foundry-cache:/cache \
+            "$FOUNDRY_IMAGE_NAME" \
+            -c '
+              set -e
+              ./authenticate.js "$FOUNDRY_USERNAME" "$FOUNDRY_PASSWORD" /tmp/cookies.json
+              URL=$(./get_release_url.js /tmp/cookies.json "$FOUNDRY_VERSION")
+              curl --fail --silent --location --output "/cache/foundryvtt-${FOUNDRY_VERSION}.zip" "$URL"
+            '
+          ls -la "/tmp/foundry-cache/foundryvtt-${FOUNDRY_VERSION}.zip"
+
+      - name: Upload Foundry zip artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: foundry-zip-${{ matrix.foundry-version }}
+          path: /tmp/foundry-cache/foundryvtt-${{ matrix.foundry-build }}.zip
+          if-no-files-found: error
+          retention-days: 1
+
   e2e:
     name: E2E tests (Foundry ${{ matrix.foundry-version }}, shard ${{ matrix.shard }}/2)
     runs-on: ubuntu-latest
-    needs: [build, unit-test, typecheck]
+    needs: [build, unit-test, typecheck, fetch-foundry-zip]
     timeout-minutes: 30
     permissions:
       contents: read
@@ -190,18 +256,16 @@ jobs:
         shard: [1, 2]
         include:
           - foundry-version: "13"
-            foundry-version-long: "13.351.0"
+            foundry-build: "13.351"
             image-sha: sha256:41d518782f2fabbec887413c56da8ef8175c22fb5a75fde45382661443a8ae6b
           - foundry-version: "14"
-            foundry-version-long: "14.360.0"
+            foundry-build: "14.360"
             image-sha: sha256:383417dbf3c442a03dcca9a4813b47c7408addaf6d582b7d3b1ee4b65c24a245
       fail-fast: false
     env:
-      FOUNDRY_USERNAME: ${{ secrets.FOUNDRY_USERNAME }}
-      FOUNDRY_PASSWORD: ${{ secrets.FOUNDRY_PASSWORD }}
       FOUNDRY_LICENSE_KEY: ${{ secrets.FOUNDRY_LICENSE_KEY }}
       FOUNDRY_IMAGE_SHA: ${{ matrix.image-sha }}
-      FOUNDRY_VERSION: ${{ matrix.foundry-version }}
+      FOUNDRY_VERSION: ${{ matrix.foundry-build }}
       # Computed once at job level so all docker/compose steps see the same value.
       FOUNDRY_IMAGE_NAME: ghcr.io/felddy/foundryvtt@${{ matrix.image-sha }}
     steps:
@@ -227,26 +291,37 @@ jobs:
         working-directory: foundry
         run: npm ci
 
-      - name: Cache apt packages (Playwright fonts + X deps)
+      # Cache only the .deb files in a runner-owned dir.
+      # Caching /var/cache/apt/archives directly fails in the post step because
+      # it contains root-owned `lock` and `partial/` that tar can't read as the
+      # runner user (Permission denied → "Failed to save").
+      - name: Cache Playwright apt packages
         id: apt-cache
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684  # v4.2.3
         with:
-          path: /var/cache/apt/archives
-          key: apt-playwright-chromium-${{ runner.os }}-v1
+          path: ~/apt-cache
+          key: apt-playwright-chromium-${{ runner.os }}-v2
 
       - name: Install apt dependencies for Playwright
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends \
-            fonts-freefont-ttf \
-            fonts-ipafont-gothic \
-            fonts-tlwg-loma-otf \
-            fonts-unifont \
-            fonts-wqy-zenhei \
-            xfonts-cyrillic \
-            xfonts-encodings \
-            xfonts-scalable \
-            xfonts-utils
+          mkdir -p ~/apt-cache
+          if compgen -G "$HOME/apt-cache/*.deb" >/dev/null; then
+            sudo dpkg -i ~/apt-cache/*.deb || sudo apt-get install -fy
+          else
+            sudo apt-get update -qq
+            sudo apt-get install -y --no-install-recommends \
+              fonts-freefont-ttf \
+              fonts-ipafont-gothic \
+              fonts-tlwg-loma-otf \
+              fonts-unifont \
+              fonts-wqy-zenhei \
+              xfonts-cyrillic \
+              xfonts-encodings \
+              xfonts-scalable \
+              xfonts-utils
+            sudo cp /var/cache/apt/archives/*.deb ~/apt-cache/ || true
+            sudo chown -R "$USER:$USER" ~/apt-cache
+          fi
 
       - name: Cache Playwright browsers
         id: playwright-cache
@@ -277,28 +352,48 @@ jobs:
           docker pull "$FOUNDRY_IMAGE_NAME"
           docker save "$FOUNDRY_IMAGE_NAME" -o /tmp/foundry-image.tar
 
-      - name: Start Foundry container
+      - name: Download Foundry zip artifact
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e  # v4.2.1
+        with:
+          name: foundry-zip-${{ matrix.foundry-version }}
+          path: /tmp/foundry-cache
+
+      - name: Verify Foundry zip present
+        run: |
+          ls -la "/tmp/foundry-cache/foundryvtt-${FOUNDRY_VERSION}.zip"
+
+      - name: Start Foundry containers
         working-directory: docker
         run: docker compose -f docker-compose.ci.yml up -d
 
-      - name: Wait for Foundry to be ready
+      - name: Wait for Foundry servers to be ready
         working-directory: docker
         run: |
-          for i in $(seq 1 60); do
-            if curl -sf -o /dev/null http://localhost:30000; then
-              echo "Foundry is up after ${i}s"
-              exit 0
+          # Wait for both foundry servers (ports 30000, 30001).
+          # Each worker gets a dedicated server (issue #546).
+          for port in 30000 30001; do
+            ready=0
+            for i in $(seq 1 90); do
+              if curl -sf -o /dev/null "http://localhost:${port}"; then
+                echo "Foundry on port ${port} is up after ${i}s"
+                ready=1
+                break
+              fi
+              sleep 1
+            done
+            if [ "$ready" -ne 1 ]; then
+              echo "ERROR: Foundry on port ${port} did not start within 90s"
+              docker compose -f docker-compose.ci.yml logs --tail=80
+              exit 1
             fi
-            sleep 1
           done
-          echo "ERROR: Foundry did not start within 60s"
-          docker compose -f docker-compose.ci.yml logs --tail=80
-          exit 1
 
       - name: Run E2E tests
         working-directory: foundry
         env:
           SHARD_INDEX: ${{ matrix.shard }}
+          PLAYWRIGHT_WORKERS: "2"
+          FOUNDRY_SERVER_COUNT: "2"
         run: npm run test:e2e -- --shard="${SHARD_INDEX}/2"
 
       - name: Stop Foundry container
