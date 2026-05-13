@@ -179,8 +179,10 @@ jobs:
         foundry-version: ["13", "14"]
         include:
           - foundry-version: "13"
+            foundry-build: "13.351"
             image-sha: sha256:41d518782f2fabbec887413c56da8ef8175c22fb5a75fde45382661443a8ae6b
           - foundry-version: "14"
+            foundry-build: "14.360"
             image-sha: sha256:383417dbf3c442a03dcca9a4813b47c7408addaf6d582b7d3b1ee4b65c24a245
       fail-fast: false
     env:
@@ -190,59 +192,46 @@ jobs:
         id: zip-cache
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684  # v4.2.3
         with:
-          path: /tmp/foundry-cache/foundryvtt-${{ matrix.foundry-version }}.zip
-          key: foundry-zip-${{ matrix.image-sha }}-v2
+          path: /tmp/foundry-cache/foundryvtt-${{ matrix.foundry-build }}.zip
+          key: foundry-zip-${{ matrix.foundry-build }}-v1
 
-      - name: Run felddy entrypoint to download Foundry release zip
+      - name: Authenticate and download Foundry release zip
         if: steps.zip-cache.outputs.cache-hit != 'true'
         timeout-minutes: 5
         env:
           FOUNDRY_USERNAME: ${{ secrets.FOUNDRY_USERNAME }}
           FOUNDRY_PASSWORD: ${{ secrets.FOUNDRY_PASSWORD }}
-          FOUNDRY_LICENSE_KEY: ${{ secrets.FOUNDRY_LICENSE_KEY }}
-          FOUNDRY_VERSION: ${{ matrix.foundry-version }}
+          FOUNDRY_VERSION: ${{ matrix.foundry-build }}
         run: |
-          # Use felddy's own entrypoint to fetch the release zip. It knows the
-          # right API format/headers; calling get_release_url.js directly with
-          # short or long version strings returns 404.
-          # Strategy: start a temp container with CONTAINER_CACHE set; it will
-          # auth, resolve URL, and write foundryvtt-${VERSION}.zip to the cache.
-          # Stop the container as soon as the zip appears.
+          # Fetch the release zip once per major version on a single runner.
+          # E2E jobs mount it as CONTAINER_CACHE so all 3 containers install
+          # offline — no parallel auths to foundryvtt.com.
+          # FOUNDRY_VERSION must be "major.build" (e.g. 13.351), not "13" or
+          # "13.351.0" — both return 404 from foundryvtt.com.
+          # No retry: 429/404 sleeps 550s per attempt; fail fast instead.
           mkdir -p /tmp/foundry-cache
           chmod 0777 /tmp/foundry-cache
           docker pull "$FOUNDRY_IMAGE_NAME"
-
-          docker run -d --name foundry-fetch \
+          docker run --rm -u 0:0 \
             -e FOUNDRY_USERNAME \
             -e FOUNDRY_PASSWORD \
-            -e FOUNDRY_LICENSE_KEY \
             -e FOUNDRY_VERSION \
-            -e CONTAINER_CACHE=/cache \
-            -e CONTAINER_PRESERVE_CONFIG=true \
-            -u 0:0 \
+            --entrypoint /bin/bash \
             -v /tmp/foundry-cache:/cache \
-            "$FOUNDRY_IMAGE_NAME"
-
-          # Wait for zip to appear (max 4 min)
-          for i in $(seq 1 240); do
-            if [ -f "/tmp/foundry-cache/foundryvtt-${FOUNDRY_VERSION}.zip" ]; then
-              echo "Zip downloaded after ${i}s"
-              break
-            fi
-            sleep 1
-          done
-
-          docker logs foundry-fetch | tail -40 || true
-          docker stop foundry-fetch >/dev/null
-          docker rm foundry-fetch >/dev/null
-
+            "$FOUNDRY_IMAGE_NAME" \
+            -c '
+              set -e
+              ./authenticate.js "$FOUNDRY_USERNAME" "$FOUNDRY_PASSWORD" /tmp/cookies.json
+              URL=$(./get_release_url.js /tmp/cookies.json "$FOUNDRY_VERSION")
+              curl --fail --silent --location --output "/cache/foundryvtt-${FOUNDRY_VERSION}.zip" "$URL"
+            '
           ls -la "/tmp/foundry-cache/foundryvtt-${FOUNDRY_VERSION}.zip"
 
       - name: Upload Foundry zip artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: foundry-zip-${{ matrix.foundry-version }}
-          path: /tmp/foundry-cache/foundryvtt-${{ matrix.foundry-version }}.zip
+          path: /tmp/foundry-cache/foundryvtt-${{ matrix.foundry-build }}.zip
           if-no-files-found: error
           retention-days: 1
 
@@ -267,14 +256,16 @@ jobs:
         shard: [1, 2]
         include:
           - foundry-version: "13"
+            foundry-build: "13.351"
             image-sha: sha256:41d518782f2fabbec887413c56da8ef8175c22fb5a75fde45382661443a8ae6b
           - foundry-version: "14"
+            foundry-build: "14.360"
             image-sha: sha256:383417dbf3c442a03dcca9a4813b47c7408addaf6d582b7d3b1ee4b65c24a245
       fail-fast: false
     env:
       FOUNDRY_LICENSE_KEY: ${{ secrets.FOUNDRY_LICENSE_KEY }}
       FOUNDRY_IMAGE_SHA: ${{ matrix.image-sha }}
-      FOUNDRY_VERSION: ${{ matrix.foundry-version }}
+      FOUNDRY_VERSION: ${{ matrix.foundry-build }}
       # Computed once at job level so all docker/compose steps see the same value.
       FOUNDRY_IMAGE_NAME: ghcr.io/felddy/foundryvtt@${{ matrix.image-sha }}
     steps:
