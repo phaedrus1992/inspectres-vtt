@@ -1,6 +1,4 @@
 # Standalone CI compose — does not extend docker-compose.yml.
-# felddy/foundryvtt reads FOUNDRY_USERNAME, FOUNDRY_PASSWORD, and
-# FOUNDRY_LICENSE_KEY directly from the environment; no config.json needed.
 # Run as root (0:0) so the container can write to the GHA-checked-out dist/.
 #
 # Image pinned to SHA digest for reproducibility (both v13 and v14).
@@ -12,9 +10,12 @@
 # This eliminates the single-server bottleneck that capped CI at 2 workers.
 # See issue #546.
 #
-# FOUNDRY_RELEASE_URL is pre-fetched on the runner (CI workflow) and passed in
-# to skip per-container auth. Three parallel auths trip foundryvtt.com rate
-# limiting (429). The presigned URL itself doesn't require auth to use.
+# Foundry installation: a separate `fetch-foundry-zip` CI job downloads the
+# release zip once per version into /tmp/foundry-cache (uploaded as artifact,
+# restored here). All 3 containers mount that directory as CONTAINER_CACHE.
+# With no FOUNDRY_USERNAME/PASSWORD/RELEASE_URL set, felddy skips network
+# auth entirely and installs from the cached zip. This avoids the 429 rate
+# limiting that hits when 4+ parallel CI jobs auth simultaneously.
 
 x-foundry-common: &foundry-common
   image: ${FOUNDRY_IMAGE_NAME}
@@ -27,12 +28,14 @@ services:
     ports:
       - "30000:30000"
     environment:
-      FOUNDRY_RELEASE_URL: "${FOUNDRY_RELEASE_URL}"
       FOUNDRY_LICENSE_KEY: "${FOUNDRY_LICENSE_KEY}"
+      FOUNDRY_VERSION: "${FOUNDRY_VERSION_LONG}"
       FOUNDRY_HOSTNAME: foundry-0
       CONTAINER_PRESERVE_CONFIG: "true"
+      CONTAINER_CACHE: /cache
     volumes:
       - ./data-0:/data
+      - /tmp/foundry-cache:/cache:ro
       - ../foundry/dist:/data/Data/systems/inspectres
 
   foundry-1:
@@ -41,12 +44,14 @@ services:
     ports:
       - "30001:30000"
     environment:
-      FOUNDRY_RELEASE_URL: "${FOUNDRY_RELEASE_URL}"
       FOUNDRY_LICENSE_KEY: "${FOUNDRY_LICENSE_KEY}"
+      FOUNDRY_VERSION: "${FOUNDRY_VERSION_LONG}"
       FOUNDRY_HOSTNAME: foundry-1
       CONTAINER_PRESERVE_CONFIG: "true"
+      CONTAINER_CACHE: /cache
     volumes:
       - ./data-1:/data
+      - /tmp/foundry-cache:/cache:ro
       - ../foundry/dist:/data/Data/systems/inspectres
 
   foundry-2:
@@ -55,10 +60,12 @@ services:
     ports:
       - "30002:30000"
     environment:
-      FOUNDRY_RELEASE_URL: "${FOUNDRY_RELEASE_URL}"
       FOUNDRY_LICENSE_KEY: "${FOUNDRY_LICENSE_KEY}"
+      FOUNDRY_VERSION: "${FOUNDRY_VERSION_LONG}"
       FOUNDRY_HOSTNAME: foundry-2
       CONTAINER_PRESERVE_CONFIG: "true"
+      CONTAINER_CACHE: /cache
     volumes:
       - ./data-2:/data
+      - /tmp/foundry-cache:/cache:ro
       - ../foundry/dist:/data/Data/systems/inspectres
