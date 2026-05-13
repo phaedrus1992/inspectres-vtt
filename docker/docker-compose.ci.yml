@@ -35,7 +35,7 @@ services:
       CONTAINER_CACHE: /cache
     volumes:
       - ./data-0:/data
-      - /tmp/foundry-cache:/cache:ro
+      - /tmp/foundry-cache:/cache
       - ../foundry/dist:/data/Data/systems/inspectres
 
   foundry-1:
@@ -51,7 +51,7 @@ services:
       CONTAINER_CACHE: /cache
     volumes:
       - ./data-1:/data
-      - /tmp/foundry-cache:/cache:ro
+      - /tmp/foundry-cache:/cache
       - ../foundry/dist:/data/Data/systems/inspectres
 
   foundry-2:
@@ -67,5 +67,5 @@ services:
       CONTAINER_CACHE: /cache
     volumes:
       - ./data-2:/data
-      - /tmp/foundry-cache:/cache:ro
+      - /tmp/foundry-cache:/cache
       - ../foundry/dist:/data/Data/systems/inspectres
