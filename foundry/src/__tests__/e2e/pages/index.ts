@@ -15,4 +15,5 @@ export {
   getActorSystemField,
   rejoinIfRedirected,
   wrapDiagnosticError,
+  assertSheetAccessibility,
 } from "./helpers.js";

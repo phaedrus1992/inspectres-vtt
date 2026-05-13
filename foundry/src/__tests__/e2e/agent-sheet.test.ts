@@ -14,6 +14,7 @@ import {
   waitForActorFieldChanged,
   waitForElementVisible,
   getActorSystemField,
+  assertSheetAccessibility,
 } from "./pages/index.js";
 
 const SKILL_NAMES = ["academics", "athletics", "technology", "contact"] as const;
@@ -195,5 +196,25 @@ test.describe("AgentSheet — conditional UI paths", () => {
       `.inspectres[id*="${agentId}"] .skill-penalty-line`,
       ELEMENT_WAIT_TIMEOUT,
     );
+  });
+});
+
+test.describe("AgentSheet — accessibility", () => {
+  let agentId: string;
+
+  test.beforeEach(async ({ page }) => {
+    agentId = await createActor(page, "agent", `E2E-agent-a11y-${Date.now()}`);
+  });
+
+  test.afterEach(async ({ page }) => {
+    await deleteActor(page, agentId);
+  });
+
+  test("all tabs pass WCAG AA contrast", async ({ page }) => {
+    const sheet = await openAgentSheet(page, agentId);
+    for (const tab of ["stats", "notes"] as const) {
+      await sheet.openTab(tab);
+      await assertSheetAccessibility(page, agentId);
+    }
   });
 });

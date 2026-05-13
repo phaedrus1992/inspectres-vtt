@@ -22,6 +22,7 @@ import {
   waitForActorFieldEquals,
   waitForElementVisible,
   getActorSystemField,
+  assertSheetAccessibility,
 } from "./pages/index.js";
 
 test.describe("FranchiseSheet — roll actions and mission tracker", () => {
@@ -256,5 +257,25 @@ test.describe("FranchiseSheet — form-bound inputs", () => {
     expect(missionGoalValue).toBe(10);
 
     await safeScreenshot(page, "test-results/e2e-screenshots/franchise-09-mission-goal.png");
+  });
+});
+
+test.describe("FranchiseSheet — accessibility", () => {
+  let franchiseId: string;
+
+  test.beforeEach(async ({ page }) => {
+    franchiseId = await createActor(page, "franchise", `E2E-franchise-a11y-${Date.now()}`);
+  });
+
+  test.afterEach(async ({ page }) => {
+    await deleteActor(page, franchiseId);
+  });
+
+  test("all tabs pass WCAG AA contrast", async ({ page }) => {
+    const sheet = await openFranchiseSheet(page, franchiseId);
+    for (const tab of ["stats", "notes"] as const) {
+      await sheet.openTab(tab);
+      await assertSheetAccessibility(page, franchiseId);
+    }
   });
 });
