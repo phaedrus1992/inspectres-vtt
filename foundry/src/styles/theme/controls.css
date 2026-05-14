@@ -215,14 +215,70 @@
 }
 
 /* ─── CHECKBOX & RADIO ───────────────────────────────────────── */
+/* Native appearance is reset so Foundry V13's :checked ::before overlay
+   doesn't double-render with the native control glyph. We draw the box/dot
+   ourselves so both checked-state visuals come from one source. */
 
 .inspectres input[type="checkbox"],
 .inspectres input[type="radio"] {
+  appearance: none;
+  -webkit-appearance: none;
   width: 1em;
   height: 1em;
-  accent-color: var(--inspectres-green-dark);
+  margin: 0;
+  padding: 0;
+  background: var(--inspectres-white);
+  border: 1px solid var(--inspectres-gray-base);
   cursor: pointer;
   vertical-align: middle;
+  display: inline-grid;
+  place-content: center;
+  flex-shrink: 0;
+}
+
+.inspectres input[type="checkbox"] {
+  border-radius: 2px;
+}
+
+.inspectres input[type="radio"] {
+  border-radius: 50%;
+}
+
+.inspectres input[type="checkbox"]::before,
+.inspectres input[type="radio"]::before {
+  content: "";
+  transform: scale(0);
+  transition: transform 0.1s ease-in-out;
+}
+
+.inspectres input[type="checkbox"]::before {
+  width: 0.65em;
+  height: 0.65em;
+  background-color: var(--inspectres-green-dark);
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+}
+
+.inspectres input[type="radio"]::before {
+  width: 0.55em;
+  height: 0.55em;
+  border-radius: 50%;
+  background-color: var(--inspectres-green-dark);
+}
+
+.inspectres input[type="checkbox"]:checked,
+.inspectres input[type="radio"]:checked {
+  border-color: var(--inspectres-green-dark);
+}
+
+.inspectres input[type="checkbox"]:checked::before,
+.inspectres input[type="radio"]:checked::before {
+  transform: scale(1);
+}
+
+.inspectres input[type="checkbox"]:focus-visible,
+.inspectres input[type="radio"]:focus-visible {
+  outline: 2px solid var(--inspectres-green-dark);
+  outline-offset: 2px;
 }
 
 .inspectres input[type="checkbox"]:disabled,

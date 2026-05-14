@@ -150,6 +150,7 @@
       "Bad": "GM narrates your fate (or you may suggest something negative)",
       "Terrible": "GM gets to hose you with a dire situation"
     },
+    "Stress": "Stress",
     "StressRollResult": {
       "TooCool": "Too Cool for School",
       "Blase": "Blasé",
@@ -352,6 +353,7 @@
     "StartingInterviewInvestor": "Investor Interview",
     "StartingInterviewInvestorDesc": "Business-focused. Negotiate scope, payment, and deliverables. What's at stake financially?",
     "StartingInterviewMedia": "Media Interview",
+    "StartingInterviewMediaDesc": "Sensational, public-facing. The franchise treats the case like a story — frame the supernatural for an audience. Who's watching?",
     "StartingInterviewReference": "Reference: InSpectres Rulebook pp. 446–468"
   }
 }

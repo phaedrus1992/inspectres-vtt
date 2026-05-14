@@ -128,6 +128,7 @@ async function getPlayerPenaltyChoice(
 
   const result = await foundry.applications.api.DialogV2.wait({
     window: { title: game.i18n?.localize("INSPECTRES.PenaltyDialogTitle") ?? "Stress Penalty" },
+    classes: ["inspectres"],
     rejectClose: false,
     render: stopDialogSubmitPropagation,
     content,
@@ -147,6 +148,11 @@ async function getPlayerPenaltyChoice(
           if (!SKILL_NAMES.includes(selectedSkill as SkillName)) return null;
           return selectedSkill as SkillName;
         },
+      },
+      {
+        action: "cancel",
+        label: game.i18n?.localize("INSPECTRES.DialogCancel") ?? "Cancel",
+        callback: () => null,
       },
     ],
   });
