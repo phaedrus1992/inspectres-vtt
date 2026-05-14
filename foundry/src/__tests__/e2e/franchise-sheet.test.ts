@@ -108,7 +108,10 @@ test.describe("FranchiseSheet — day controls", () => {
   });
 
   // Post-state of advance (day N+1) is valid pre-state for regress → day N.
-  test("advanceDay + regressDay — currentDay increments then decrements", async ({ page }) => {
+  // Assert BOTH the underlying setting AND the rendered DOM. A test that only
+  // checks the setting passes when the button fires but the sheet never
+  // re-renders — the user sees no change while the test goes green.
+  test("advanceDay + regressDay — setting + DOM increment then decrement", async ({ page }) => {
     // Start at a known value so regress never hits the floor
     await page.evaluate(async () => {
       // @ts-expect-error - Foundry runtime global
@@ -117,42 +120,37 @@ test.describe("FranchiseSheet — day controls", () => {
 
     const sheet = await openFranchiseSheet(page, franchiseId);
     const initial = await sheet.getCurrentDaySetting();
+    expect(await sheet.getDisplayedDay()).toBe(initial);
 
     await sheet.clickAdvanceDay();
     await page.waitForFunction(
       (prev: number) => {
-        try {
-          // @ts-expect-error - Foundry runtime global
-          return ((globalThis.game?.settings?.get("inspectres", "currentDay") as number) ?? 1) !== prev;
-        } catch {
-          return false;
-        }
+        const el = document.querySelector('.application.sheet.inspectres.franchise .day-display');
+        const match = el?.textContent?.match(/(\d+)/);
+        return match?.[1] !== undefined && Number(match[1]) !== prev;
       },
       initial,
       { timeout: ELEMENT_WAIT_TIMEOUT },
-    ).catch(() => {});
+    );
 
-    const afterAdvance = await sheet.getCurrentDaySetting();
-    expect(afterAdvance).toBe(initial + 1);
+    expect(await sheet.getCurrentDaySetting()).toBe(initial + 1);
+    expect(await sheet.getDisplayedDay()).toBe(initial + 1);
 
     await safeScreenshot(page, "test-results/e2e-screenshots/franchise-04-advance-day.png");
 
     await sheet.clickRegressDay();
     await page.waitForFunction(
       (prev: number) => {
-        try {
-          // @ts-expect-error - Foundry runtime global
-          return ((globalThis.game?.settings?.get("inspectres", "currentDay") as number) ?? 1) !== prev;
-        } catch {
-          return false;
-        }
+        const el = document.querySelector('.application.sheet.inspectres.franchise .day-display');
+        const match = el?.textContent?.match(/(\d+)/);
+        return match?.[1] !== undefined && Number(match[1]) !== prev;
       },
-      afterAdvance,
+      initial + 1,
       { timeout: ELEMENT_WAIT_TIMEOUT },
-    ).catch(() => {});
+    );
 
-    const afterRegress = await sheet.getCurrentDaySetting();
-    expect(afterRegress).toBe(initial);
+    expect(await sheet.getCurrentDaySetting()).toBe(initial);
+    expect(await sheet.getDisplayedDay()).toBe(initial);
 
     await safeScreenshot(page, "test-results/e2e-screenshots/franchise-05-regress-day.png");
   });

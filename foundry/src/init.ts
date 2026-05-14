@@ -25,6 +25,23 @@ function rerenderMissionTracker(context: string): void {
   });
 }
 
+// Re-render any open sheets that display the current day. FranchiseSheet and
+// AgentSheet both read `currentDay` in `_prepareContext()` (franchise: day
+// counter; agent: recovery banner / days-remaining). A setting change doesn't
+// refresh the rendered DOM unless we force a re-render here.
+function rerenderDayDependentSheets(context: string): void {
+  // @ts-expect-error - fvtt-types doesn't fully type the actors collection iterator
+  const actors = (globalThis.game?.actors?.contents ?? []) as Array<{ type?: string; sheet?: { rendered?: boolean; render: (force?: boolean) => Promise<unknown> } }>;
+  for (const actor of actors) {
+    if (actor.type !== "franchise" && actor.type !== "agent") continue;
+    const sheet = actor.sheet;
+    if (!sheet?.rendered) continue;
+    void sheet.render(false).catch((err: unknown) => {
+      handleActionError(err, `${actor.type} sheet re-render failed (${context})`, "INSPECTRES.ErrorSheetRender", "Sheet failed to update");
+    });
+  }
+}
+
 // Foundry v13/v14 bug: form submit events from ApplicationV2 sheets, DialogV2 dialogs,
 // and Enter-keypresses inside form inputs are not always preventDefault'd by the framework,
 // causing the browser to perform a real form submission and navigate to /join. Install two
@@ -117,6 +134,8 @@ Hooks.once("init", async function () {
           }
           // Re-render mission tracker to show updated elapsed days
           rerenderMissionTracker("day change");
+          // Re-render any open franchise sheets so the displayed day matches
+          rerenderDayDependentSheets("day change");
         } catch (err: unknown) {
           const message = err instanceof Error ? err.message : String(err);
           console.error("[INSPECTRES] Auto-clear recovered agents failed:", { newDay, error: err, errorMessage: message });

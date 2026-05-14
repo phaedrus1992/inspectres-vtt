@@ -102,4 +102,19 @@ export class FranchiseSheetPage {
       }
     });
   }
+
+  /**
+   * Reads the day count rendered in the franchise sheet DOM.
+   * Verifying the visible UI catches binding/re-render bugs that
+   * `getCurrentDaySetting()` (data layer) would miss.
+   */
+  async getDisplayedDay(): Promise<number> {
+    return await this.page.evaluate((selector: string) => {
+      const el = document.querySelector(`${selector} .day-display`);
+      if (!el?.textContent) throw new Error("day-display not found in rendered sheet");
+      const match = el.textContent.match(/(\d+)/);
+      if (!match?.[1]) throw new Error(`day-display text malformed: ${el.textContent}`);
+      return Number(match[1]);
+    }, this.sheetSelector());
+  }
 }

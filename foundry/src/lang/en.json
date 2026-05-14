@@ -96,6 +96,7 @@
     "ErrorNoFranchise": "No franchise actor found in this world.",
     "ErrorTemplateLoad": "Failed to load system templates",
     "ErrorMissionTrackerOpen": "Failed to open Mission Tracker",
+    "ErrorSheetRender": "Failed to re-render sheet",
     "ErrorAutoRecoverFailed": "Failed to auto-clear recovered agents",
     "ErrorStressRollFailed": "Failed to apply stress roll to agent",
     "ErrorEnterDebtModeFailed": "Failed to enter debt mode",
