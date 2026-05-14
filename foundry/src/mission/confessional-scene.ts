@@ -1,3 +1,5 @@
+import { updateDocument } from "../utils/fvtt-boundary.js";
+
 export interface SceneTransitionResult {
   agentsMoved: string[];
   sceneId: string;
@@ -36,8 +38,7 @@ export async function transitionToConfessionalScene(
     for (const agent of agents) {
       const tokens = agent.getActiveTokens(true);
       for (const token of tokens) {
-        // fvtt-types UpdateInput doesn't include sceneId; using type assertion as Foundry API supports it
-        await token.update({ sceneId: scene.id, x: 400, y: 400 } as unknown as Parameters<typeof token.update>[0]);
+        await updateDocument(token, { sceneId: scene.id, x: 400, y: 400 });
         agentsMoved.push(agent.id);
       }
     }
@@ -65,8 +66,7 @@ export async function resetConfessionalScene(
   // Move agent tokens back to original scene
   const tokens = agent.getActiveTokens(true);
   for (const token of tokens) {
-    // fvtt-types UpdateInput doesn't include sceneId; using type assertion as Foundry API supports it
-    await token.update({ sceneId: originalSceneId } as unknown as Parameters<typeof token.update>[0]);
+    await updateDocument(token, { sceneId: originalSceneId });
   }
 
   return {

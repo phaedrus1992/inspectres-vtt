@@ -3,6 +3,7 @@
  */
 
 import { getActorSystem } from "../utils/system-cast.js";
+import { updateDocument } from "../utils/fvtt-boundary.js";
 import { type AgentCharacteristic } from "./agent-schema.js";
 import { executeSkillRoll, executeStressRoll, SKILL_NAMES, type SkillName } from "../rolls/roll-executor.js";
 import { agentSystemData } from "./agent-system-data.js";
@@ -188,9 +189,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
         //   const group = ...getFlag("inspectres", "group")...
         //   Prevent >1 weird per group
         // }
-        // fvtt-types expects full document data shape for actor.update; partial update path is safe at runtime
-        const updateData = { "system.isWeird": target.checked } as unknown as Parameters<typeof this.actor.update>[0];
-        void this.actor.update(updateData).catch((err: unknown) => {
+        void updateDocument(this.actor, { "system.isWeird": target.checked }).catch((err: unknown) => {
           const message = err instanceof Error ? err.message : String(err);
           console.error("Failed to toggle weird status for agent", {
             actorId: this.actor.id,
@@ -227,8 +226,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
       el.addEventListener("change", (event: Event) => {
         const target = event.currentTarget as unknown as { value?: number };
         const value = Math.max(0, Math.min(6, target.value ?? 0));
-        const updateData = { "system.stress": value } as unknown as Parameters<typeof this.actor.update>[0];
-        void this.actor.update(updateData).catch((err: unknown) => {
+        void updateDocument(this.actor, { "system.stress": value }).catch((err: unknown) => {
           const message = err instanceof Error ? err.message : String(err);
           console.error("Failed to update stress for agent", {
             actorId: this.actor.id,
@@ -314,9 +312,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     const delta = target.dataset["action"] === "skillIncrease" ? 1 : -1;
     const next = Math.min(4, Math.max(0, current + delta));
     if (next === current) return;
-    // fvtt-types expects full document data shape for actor.update; partial update path is safe at runtime
-    const updateData = { [`system.skills.${skillAttr}.base`]: next } as unknown as Parameters<typeof this.actor.update>[0];
-    void this.actor.update(updateData).catch((err: unknown) => {
+    void updateDocument(this.actor, { [`system.skills.${skillAttr}.base`]: next }).catch((err: unknown) => {
       handleActionError(err, "Failed to update skill", "INSPECTRES.ErrorUpdateFailed", "Failed to update actor data");
     });
   }
@@ -341,9 +337,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     }
     const currentCool = system.cool;
     const newCool = currentCool >= pipValue ? pipValue - 1 : pipValue;
-    // fvtt-types expects full document data shape for actor.update; partial update path is safe at runtime
-    const updateData = { "system.cool": newCool } as unknown as Parameters<typeof this.actor.update>[0];
-    void this.actor.update(updateData).catch((err: unknown) => {
+    void updateDocument(this.actor, { "system.cool": newCool }).catch((err: unknown) => {
       handleActionError(err, "Failed to set cool dice", "INSPECTRES.ErrorUpdateFailed", "Failed to update actor data");
     });
   }
@@ -357,9 +351,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
       return;
     }
     const characteristics = currentSystem.characteristics ?? [];
-    // fvtt-types expects full document data shape for actor.update; partial update path is safe at runtime
-    const updateData = { "system.characteristics": [...characteristics, { text: "", used: false }] } as unknown as Parameters<typeof this.actor.update>[0];
-    void this.actor.update(updateData).catch((err: unknown) => {
+    void updateDocument(this.actor, { "system.characteristics": [...characteristics, { text: "", used: false }] }).catch((err: unknown) => {
       handleActionError(err, "Failed to add characteristic", "INSPECTRES.ErrorAddCharacteristic", "Failed to add characteristic");
     });
   }
@@ -383,9 +375,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
       return;
     }
     const characteristics = currentSystem.characteristics ?? [];
-    // fvtt-types expects full document data shape for actor.update; partial update path is safe at runtime
-    const updateData = { "system.characteristics": characteristics.filter((_: AgentCharacteristic, i: number) => i !== idx) } as unknown as Parameters<typeof this.actor.update>[0];
-    void this.actor.update(updateData).catch((err: unknown) => {
+    void updateDocument(this.actor, { "system.characteristics": characteristics.filter((_: AgentCharacteristic, i: number) => i !== idx) }).catch((err: unknown) => {
       handleActionError(err, "Failed to remove characteristic", "INSPECTRES.ErrorRemoveCharacteristic", "Failed to remove characteristic");
     });
   }
@@ -405,8 +395,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
       current,
       type,
       callback: (path: string) => {
-        const updateData = { img: path } as unknown as Parameters<typeof this.actor.update>[0];
-        void this.actor.update(updateData).catch((err: unknown) => {
+        void updateDocument(this.actor, { img: path }).catch((err: unknown) => {
           handleActionError(err, "Failed to update portrait", "INSPECTRES.ErrorUpdateFailed", "Failed to update actor image");
         });
       },
@@ -445,13 +434,9 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     const newStress = Math.max(0, system.stress - result.stressReduction);
     const newCool = system.cool + (result.coolRestored ?? 0);
     const newBank = Math.max(0, franchiseSystem.bank - result.bankDiceSpent);
-    const agentUpdateData = { "system.stress": newStress, "system.cool": newCool } as unknown as Parameters<
-      typeof this.actor.update
-    >[0];
-    const franchiseUpdateData = { "system.bank": newBank } as unknown as Parameters<typeof franchise.update>[0];
     try {
-      await this.actor.update(agentUpdateData);
-      await franchise.update(franchiseUpdateData);
+      await updateDocument(this.actor, { "system.stress": newStress, "system.cool": newCool });
+      await updateDocument(franchise, { "system.bank": newBank });
       const coolMessage = (result.coolRestored ?? 0) > 0 ? `, restored ${result.coolRestored} Cool` : "";
       ui.notifications?.info(
         game.i18n?.localize("INSPECTRES.InfoVacationComplete") ??
@@ -513,12 +498,11 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
   static async onReviveAgent(this: AgentSheet, _event: Event, _target: HTMLElement): Promise<void> {
     if (!this.isEditable) return;
     try {
-      const updateData = {
+      await updateDocument(this.actor, {
         "system.isDead": false,
         "system.daysOutOfAction": 0,
         "system.recoveryStartedAt": 0,
-      } as unknown as Parameters<typeof this.actor.update>[0];
-      await this.actor.update(updateData);
+      });
       ui.notifications?.info(
         game.i18n?.format("INSPECTRES.InfoAgentRevived", { actor: this.actor.name }) ?? `${this.actor.name} has been revived`,
       );
@@ -560,12 +544,11 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     const currentDay = getCurrentDay();
 
     try {
-      const updateData = {
+      await updateDocument(this.actor, {
         "system.isDead": false,
         "system.daysOutOfAction": config.days,
         "system.recoveryStartedAt": currentDay,
-      } as unknown as Parameters<typeof this.actor.update>[0];
-      await this.actor.update(updateData);
+      });
       ui.notifications?.info(
         game.i18n?.format("INSPECTRES.InfoRecoveryStarted", { actor: this.actor.name, days: String(config.days) }) ?? `${this.actor.name} on emergency recovery for ${config.days} days`,
       );
@@ -592,10 +575,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
       }
       const daysNeeded = targetDay - system.recoveryStartedAt;
 
-      const updateData = {
-        "system.daysOutOfAction": daysNeeded,
-      } as unknown as Parameters<typeof this.actor.update>[0];
-      await this.actor.update(updateData);
+      await updateDocument(this.actor, { "system.daysOutOfAction": daysNeeded });
 
       ui.notifications?.info(
         game.i18n?.format("INSPECTRES.InfoRecoveryDayOverride", { actor: this.actor.name, day: String(targetDay) }) ?? `${this.actor.name} recovery adjusted to day ${targetDay}`,

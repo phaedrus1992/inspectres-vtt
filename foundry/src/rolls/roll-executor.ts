@@ -19,6 +19,7 @@ import { type ItemRarity, isRollSufficient, checkDefect } from "../mission/requi
 import { prepareSkillRollContext, type SkillRollContextInput } from "../agent/skill-roll-dialog.js";
 import { checkTechnologyRollRequirements } from "./skill-roll-executor.js";
 import { stopDialogSubmitPropagation } from "../utils/dialog-utils.js";
+import { updateDocument, createChatMessage } from "../utils/fvtt-boundary.js";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -73,9 +74,7 @@ function applySkillPenalty(
 }
 
 async function actorUpdate(actor: RollActor, data: Record<string, unknown>): Promise<void> {
-  // fvtt-types expects full document data shape for actor.update; partial dot-notation paths are safe at runtime
-  const updateData = data as unknown as Parameters<typeof actor.update>[0];
-  await actor.update(updateData);
+  await updateDocument(actor, data);
 }
 
 async function rollDice(count: number): Promise<{ roll: Roll; faces: number[] }> {
@@ -98,8 +97,7 @@ async function postChatCard(
   speaker: ReturnType<typeof ChatMessage.getSpeaker>,
   rolls: Roll[],
 ): Promise<void> {
-  // fvtt-types ChatMessage.create expects strict DocumentData; whisper/rolls fields are valid at runtime
-  await ChatMessage.create({ content, speaker, rolls } as unknown as Parameters<typeof ChatMessage.create>[0]);
+  await createChatMessage({ content, speaker, rolls });
 }
 
 // All valid skills for penalty selection — drives dialog rendering and validation.
@@ -459,7 +457,7 @@ export async function executeSkillRoll(
 
   // Only post ChatMessage if franchise is not in debt mode (#455)
   if (!franchiseSystem?.debtMode) {
-    await ChatMessage.create({
+    await createChatMessage({
       content,
       speaker,
       rolls: [mainRoll],
@@ -468,7 +466,7 @@ export async function executeSkillRoll(
           outcome: getOutcomeClassification(highestFace),
         },
       },
-    } as unknown as Parameters<typeof ChatMessage.create>[0]);
+    });
   }
 }
 
@@ -864,6 +862,5 @@ export async function executeClientRoll(franchise: RollActor): Promise<void> {
   });
   // Client roll results are GM prep — whisper to all GMs only
   const gmIds = (game.users?.filter((u) => u.isGM).map((u) => u.id).filter((id): id is string => id !== null)) ?? [];
-  // fvtt-types ChatMessage.create expects strict DocumentData; whisper/rolls fields are valid at runtime
-  await ChatMessage.create({ content, speaker, rolls, whisper: gmIds } as unknown as Parameters<typeof ChatMessage.create>[0]);
+  await createChatMessage({ content, speaker, rolls, whisper: gmIds });
 }

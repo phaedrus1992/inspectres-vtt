@@ -3,6 +3,7 @@ import { handleActionError } from "../utils/ui-errors.js";
 import { promptDistribution } from "../utils/distribution-dialog.js";
 import { emitMissionPoolUpdated } from "./socket.js";
 import { getCurrentDaySetting } from "../utils/settings-utils.js";
+import { updateDocument, createChatMessage } from "../utils/fvtt-boundary.js";
 
 // HandlebarsApplicationMixin provides _renderHTML/_replaceHTML required by ApplicationV2
 // for PARTS-based templates. Without it Foundry throws when render() is called.
@@ -114,8 +115,7 @@ export class MissionTrackerApp extends foundry.applications.api.HandlebarsApplic
     franchise: Actor,
     distribution: Record<string, number>,
   ): Promise<void> {
-    const updateData = { "system.missionPool": 0 } as unknown as Parameters<typeof franchise.update>[0];
-    await franchise.update(updateData);
+    await updateDocument(franchise, { "system.missionPool": 0 });
 
     try {
       emitMissionPoolUpdated(franchise.id ?? "");
@@ -134,7 +134,7 @@ export class MissionTrackerApp extends foundry.applications.api.HandlebarsApplic
     const baseMsg = game.i18n?.localize("INSPECTRES.MissionCompleteAnnounce") ?? "The mission is complete! Franchise dice have been distributed.";
     const listItems = lines.map((l) => `<li>${l}</li>`).join("");
     const content = `<p>${baseMsg}</p><ul>${listItems}</ul>`;
-    await ChatMessage.create({ content } as unknown as Parameters<typeof ChatMessage.create>[0]);
+    await createChatMessage({ content });
 
     if (MissionTrackerApp.instance === this) {
       void this.render().catch((err: unknown) => {
@@ -152,8 +152,7 @@ export class MissionTrackerApp extends foundry.applications.api.HandlebarsApplic
     const system = franchiseSystemData(franchise);
     // #268: Keep half of earned dice on premature job end, not zero
     const remaining = Math.floor(system.missionPool / 2);
-    const updateData = { "system.missionPool": remaining } as unknown as Parameters<typeof franchise.update>[0];
-    await franchise.update(updateData);
+    await updateDocument(franchise, { "system.missionPool": remaining });
 
     try {
       emitMissionPoolUpdated(franchise.id ?? "");
@@ -163,7 +162,7 @@ export class MissionTrackerApp extends foundry.applications.api.HandlebarsApplic
 
     const msg = game.i18n?.format("INSPECTRES.MissionEndedEarlyWithHalfDice", { remaining: String(remaining) })
       ?? `The mission ended early. Keeping ${remaining} franchise dice.`;
-    await ChatMessage.create({ content: `<p>${msg}</p>` } as unknown as Parameters<typeof ChatMessage.create>[0]);
+    await createChatMessage({ content: `<p>${msg}</p>` });
 
     if (MissionTrackerApp.instance === this) {
       void this.render().catch((err: unknown) => {

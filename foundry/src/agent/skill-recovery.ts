@@ -8,6 +8,7 @@ import { agentSystemData } from "./agent-system-data.js";
 import { computeRecoveryStatus, getCurrentDay } from "./recovery-utils.js";
 import type { SkillName } from "../rolls/roll-executor.js";
 import type { RollActor } from "../utils/system-cast.js";
+import { updateDocument } from "../utils/fvtt-boundary.js";
 
 export interface SkillRecoveryResult {
   readonly success: boolean;
@@ -72,13 +73,10 @@ export async function executeSkillRecovery(
   const newPenalty = Math.max(0, currentPenalty - coolSpent);
   const newCool = system.cool - coolSpent;
 
-  // Apply updates
-  const updateData = {
+  await updateDocument(agent, {
     [`system.skills.${skillName}.penalty`]: newPenalty,
     "system.cool": newCool,
-  } as unknown as Parameters<typeof agent.update>[0];
-
-  await agent.update(updateData);
+  });
 
   // Notify success
   const recovered = currentPenalty - newPenalty;
