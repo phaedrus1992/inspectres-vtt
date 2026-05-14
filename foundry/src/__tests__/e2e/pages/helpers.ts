@@ -408,6 +408,15 @@ export async function assertSheetAccessibility(
   page: Page,
   actorId: string,
 ): Promise<void> {
+  // Audit color-contrast at WCAG AA. The stable `color-contrast` rule checks
+  // visible text on all elements including buttons and form controls. (Its
+  // "skips form controls" caveat is narrow — it applies to placeholders and
+  // disabled state, not the resting text/background pairing we care about.)
+  // Real regressions surfaced by this configuration include the franchise
+  // header overlay bug (parent `.sheet-header` painted opaque white over the
+  // green `.inspectres-header` gradient) and contrast failures on theme
+  // buttons. We deliberately *don't* enable `color-contrast-enhanced` here —
+  // that's WCAG AAA and out of scope for AA-only coverage.
   const results = await new AxeBuilder({ page })
     .include(`.application[id*="${actorId}"]`)
     .withTags(["wcag2aa", "wcag21aa"])

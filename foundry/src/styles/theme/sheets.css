@@ -11,12 +11,6 @@
   border: 1px solid var(--inspectres-border-primary);
 }
 
-.inspectres .sheet-header {
-  background: var(--inspectres-white);
-  border-bottom: 1px solid var(--inspectres-border-primary);
-  padding: var(--inspectres-space-lg);
-}
-
 .inspectres .sheet-tabs {
   border-bottom: 1px solid var(--inspectres-border-primary);
   background: var(--inspectres-white);
