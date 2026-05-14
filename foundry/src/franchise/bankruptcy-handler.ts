@@ -7,6 +7,7 @@
 import { getActorSystem } from "../utils/system-cast.js";
 import { type FranchiseData } from "./franchise-schema.js";
 import { stopDialogSubmitPropagation } from "../utils/dialog-utils.js";
+import { updateDocument } from "../utils/fvtt-boundary.js";
 
 export const MAX_LOAN_AMOUNT = 10;
 export const LOAN_INTEREST_RATE = 1; // +1 die interest per repayment
@@ -80,14 +81,12 @@ export async function enterDebtMode(franchiseActor: Actor, attemptedSpend: numbe
 
   if (borrowResult === null) return false;
 
-  // Enter debt mode
-  const updateData = {
+  await updateDocument(franchiseActor, {
     "system.debtMode": true,
     "system.cardsLocked": true,
     "system.loanAmount": borrowResult,
     "system.bank": borrowResult,
-  } as unknown as Parameters<typeof franchiseActor.update>[0];
-  await franchiseActor.update(updateData);
+  });
 
   ui.notifications?.warn(
     game.i18n?.localize("INSPECTRES.NotifyDebtEntered") ?? `Franchise entered debt: borrowed ${String(borrowResult)} dice.`,
@@ -126,14 +125,12 @@ export async function attemptLoanRepayment(
   const franchiseTotal = earnedDiceThisMission - repaymentNeeded;
 
   if (franchiseTotal >= 0) {
-    // Debt cleared, Cards restored
-    const updateData = {
+    await updateDocument(franchiseActor, {
       "system.debtMode": false,
       "system.cardsLocked": false,
       "system.loanAmount": 0,
       "system.bank": franchiseTotal,
-    } as unknown as Parameters<typeof franchiseActor.update>[0];
-    await franchiseActor.update(updateData);
+    });
 
     ui.notifications?.info(
       game.i18n?.localize("INSPECTRES.NotifyDebtCleared") ??
@@ -143,13 +140,12 @@ export async function attemptLoanRepayment(
     return { success: true, debtCleared: true };
   } else {
     // Franchise ends mission with negative total after repayment: permanent bankruptcy
-    const updateData = {
+    await updateDocument(franchiseActor, {
       "system.debtMode": false,
       "system.cardsLocked": false,
       "system.loanAmount": 0,
       "system.bank": 0,
-    } as unknown as Parameters<typeof franchiseActor.update>[0];
-    await franchiseActor.update(updateData);
+    });
 
     ui.notifications?.error(
       game.i18n?.localize("INSPECTRES.NotifyFranchiseBankrupt") ??

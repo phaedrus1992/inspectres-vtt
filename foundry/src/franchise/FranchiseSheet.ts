@@ -10,6 +10,7 @@ import { emitMissionPoolUpdated } from "../mission/socket.js";
 import { getCurrentDaySetting, setCurrentDaySetting } from "../utils/settings-utils.js";
 import { applyEndOfSessionBonuses, initiateBankruptcyRestart } from "./vacation-automation.js";
 import { stopDialogSubmitPropagation } from "../utils/dialog-utils.js";
+import { updateDocument, createChatMessage } from "../utils/fvtt-boundary.js";
 
 // HandlebarsApplicationMixin provides _renderHTML/_replaceHTML required by ApplicationV2 for PARTS-based sheets
 export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.sheets.ActorSheetV2) {
@@ -202,8 +203,7 @@ export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicati
       return;
     }
 
-    const updateData = { "system.missionPool": 0, "system.missionGoal": 0, "system.missionStartDay": 0 } as unknown as Parameters<typeof this.actor.update>[0];
-    await this.actor.update(updateData);
+    await updateDocument(this.actor, { "system.missionPool": 0, "system.missionGoal": 0, "system.missionStartDay": 0 });
 
     emitMissionPoolUpdated(this.actor.id ?? "");
 
@@ -218,7 +218,7 @@ export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicati
     const baseMsg = game.i18n?.localize("INSPECTRES.MissionCompleteAnnounce") ?? "The mission is complete! Franchise dice have been distributed.";
     const listItems = lines.map((l) => `<li>${l}</li>`).join("");
     const content2 = `<p>${baseMsg}</p><ul>${listItems}</ul>`;
-    await ChatMessage.create({ content: content2 } as unknown as Parameters<typeof ChatMessage.create>[0]);
+    await createChatMessage({ content: content2 });
   }
 
   static async onApplyHazardPay(this: FranchiseSheet, _event: Event, _target: HTMLElement): Promise<void> {
@@ -259,8 +259,7 @@ export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicati
 
   private static async toggleFlag(this: FranchiseSheet, field: string, current: boolean): Promise<void> {
     if (!this.isEditable || !game.user?.isGM) return;
-    const updateData = { [field]: !current } as unknown as Parameters<typeof this.actor.update>[0];
-    await this.actor.update(updateData);
+    await updateDocument(this.actor, { [field]: !current });
   }
 
   private static async promptNumberInput(opts: {

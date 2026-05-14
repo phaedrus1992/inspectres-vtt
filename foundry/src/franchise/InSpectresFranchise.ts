@@ -7,6 +7,7 @@ import { getActorSystem } from "../utils/system-cast.js";
 import type { FranchiseData } from "./franchise-schema.js";
 import { getCurrentDaySetting } from "../utils/settings-utils.js";
 import { getDevLogger } from "../utils/dev-logger.js";
+import { updateDocument } from "../utils/fvtt-boundary.js";
 
 /**
  * Add franchise dice to an actor's mission pool
@@ -15,9 +16,7 @@ async function addToMissionPool(actor: Actor, amount: number): Promise<void> {
   try {
     const system = getActorSystem<{ missionPool: number }>(actor);
     const current = system.missionPool;
-    await actor.update({
-      "system.missionPool": current + amount,
-    } as Parameters<typeof actor.update>[0]);
+    await updateDocument(actor, { "system.missionPool": current + amount });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
     getDevLogger().error("franchise", "Failed to add to mission pool", { amount, error: message });
@@ -49,7 +48,7 @@ export class InSpectresFranchise extends Actor {
     if (system.missionGoal > 0) return; // Mission already started
 
     const currentDay = getCurrentDaySetting();
-    void this.update({ "system.missionStartDay": currentDay } as Parameters<typeof this.update>[0]).catch((err: unknown) => {
+    void updateDocument(this, { "system.missionStartDay": currentDay }).catch((err: unknown) => {
       const message = err instanceof Error ? err.message : String(err);
       getDevLogger().warn("franchise", "Failed to set mission start day", { currentDay, error: message });
     });

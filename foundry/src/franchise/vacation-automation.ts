@@ -7,6 +7,7 @@ import { getActorSystem } from "../utils/system-cast.js";
 import { calculateHazardPay } from "./end-of-session-bonuses.js";
 import { type FranchiseData } from "./franchise-schema.js";
 import { stopDialogSubmitPropagation } from "../utils/dialog-utils.js";
+import { updateDocument } from "../utils/fvtt-boundary.js";
 
 function extractErrorMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
@@ -61,9 +62,7 @@ export async function applyEndOfSessionBonuses(context: EndOfSessionContext): Pr
   // Update franchise bank
   if (banUpdate !== system.bank) {
     try {
-      // Type: Actor.update() uses dotted paths; cast matches Foundry API
-      const updateData = { "system.bank": banUpdate } as unknown as Parameters<typeof context.franchiseActor.update>[0];
-      await context.franchiseActor.update(updateData);
+      await updateDocument(context.franchiseActor, { "system.bank": banUpdate });
     } catch (err: unknown) {
       const message = extractErrorMessage(err);
       ui.notifications?.error(`Failed to apply hazard pay: ${message}`);
@@ -111,9 +110,7 @@ export async function initiateBankruptcyRestart(franchiseActor: Actor): Promise<
       const systemData = actor.system as Record<string, unknown>;
       if (systemData["cool"] !== undefined) {
         try {
-          // Type: Actor.update() uses dotted paths; cast matches Foundry API
-          const updateData = { "system.cool": 0 } as unknown as Parameters<typeof actor.update>[0];
-          await actor.update(updateData);
+          await updateDocument(actor, { "system.cool": 0 });
         } catch (err: unknown) {
           const message = extractErrorMessage(err);
           ui.notifications?.error(`Failed to wipe Cool from ${actor.name}: ${message}`);
@@ -125,16 +122,14 @@ export async function initiateBankruptcyRestart(franchiseActor: Actor): Promise<
 
   // Reset franchise
   try {
-    // Type: Actor.update() uses dotted paths; cast matches Foundry API
-    const resetData = {
+    await updateDocument(franchiseActor, {
       "system.bank": 0,
       "system.debtMode": false,
       "system.cardsLocked": false,
       "system.loanAmount": 0,
       "system.missionPool": 0,
       "system.missionGoal": 0,
-    } as unknown as Parameters<typeof franchiseActor.update>[0];
-    await franchiseActor.update(resetData);
+    });
   } catch (err: unknown) {
     const message = extractErrorMessage(err);
     ui.notifications?.error(`Failed to reset franchise: ${message}`);
