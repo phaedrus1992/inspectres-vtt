@@ -288,6 +288,38 @@ A test that passes only on retry is a broken test. Treat it the same as a test t
 | Dialog click fails intermittently | Dialog not fully rendered when clicked | `waitForFunction` checking `getBoundingClientRect` before clicking |
 | Second action fails after first | Sheet re-rendered between steps | Re-query elements after any actor update |
 
+## Accessibility Testing
+
+Every sheet E2E suite (agent, franchise, mission tracker, etc.) must include an `accessibility — all tabs pass WCAG AA contrast` test. The test opens the sheet, iterates each tab, and calls `assertSheetAccessibility(page, actorId)` after each tab switch.
+
+The helper lives in `pages/helpers.ts` and uses `@axe-core/playwright`:
+
+```typescript
+import AxeBuilder from "@axe-core/playwright";
+
+export async function assertSheetAccessibility(page: Page, actorId: string): Promise<void> {
+  const results = await new AxeBuilder({ page })
+    .include(`.application[id*="${actorId}"]`)
+    .withTags(["wcag2aa", "wcag21aa"])
+    .options({ runOnly: { type: "tag", values: ["color-contrast"] } })
+    .analyze();
+  if (results.violations.length > 0) {
+    const detail = results.violations
+      .flatMap((v) => v.nodes.map((n) => `  [${v.id}] ${n.html}\n    ${v.help}`))
+      .join("\n");
+    throw new Error(`Accessibility violations in sheet ${actorId}:\n${detail}`);
+  }
+}
+```
+
+**Scope: outer ApplicationV2 wrapper, not the inner `.inspectres` body.** Always `.include('.application[id*="${actorId}"]')`. The window chrome (title bar, header buttons, controls) is rendered by Foundry *outside* our `.inspectres` div. Most of our UI is ApplicationV2 (sheets, dialogs) and our theme restyles the entire window — so the audit must cover it. Scoping by `[id*="${actorId}"]` keeps the audit on this actor's window and excludes the sidebar/hotbar/notifications we don't own.
+
+**Tags:** `wcag2aa` + `wcag21aa` is the minimum. Adding `wcag2aaa` is fine for stricter coverage if the sheet currently passes.
+
+**Runs limited to `color-contrast`.** Other audits (landmark roles, form labels) generate noise from Foundry's chrome that bleeds through DOM relationships even when scoped. Color-contrast is the most user-visible accessibility failure and stays inside the included subtree.
+
+**pre-pr-review P1 finding:** any new sheet E2E suite that lacks an accessibility test block. Adding a new sheet means adding accessibility coverage in the same PR.
+
 ## Local Validation Before Push
 
 **HARD REQUIREMENT — GitHub Actions minutes are limited.**

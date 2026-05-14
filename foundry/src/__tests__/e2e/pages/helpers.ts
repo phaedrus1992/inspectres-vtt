@@ -1,3 +1,4 @@
+import AxeBuilder from "@axe-core/playwright";
 import type { Page } from "@playwright/test";
 import type { ConsoleBuffer } from "../console-capture.js";
 import { AgentSheetPage } from "./AgentSheetPage.js";
@@ -387,5 +388,36 @@ export async function rejoinIfRedirected(page: Page, workerUsername: string): Pr
     );
   } catch (err) {
     rethrow("wait for game.ready", err);
+  }
+}
+
+/**
+ * Run an axe-core WCAG AA color-contrast audit scoped to this sheet's
+ * ApplicationV2 window, including the window chrome (title bar, header buttons)
+ * that Foundry renders outside our `.inspectres` body.
+ *
+ * Scope: `.application[id*="${actorId}"]` matches the outer V2 wrapper whose id
+ * embeds the actor id. This catches violations in both our theme and any
+ * Foundry chrome we restyle via CSS variable overrides — which is the whole
+ * window-app for ApplicationV2 sheets. Auditing the full page would surface
+ * sidebar/hotbar/notification violations we don't own.
+ *
+ * Throws with a structured violation summary if any contrast issue is found.
+ */
+export async function assertSheetAccessibility(
+  page: Page,
+  actorId: string,
+): Promise<void> {
+  const results = await new AxeBuilder({ page })
+    .include(`.application[id*="${actorId}"]`)
+    .withTags(["wcag2aa", "wcag21aa"])
+    .options({ runOnly: { type: "tag", values: ["color-contrast"] } })
+    .analyze();
+
+  if (results.violations.length > 0) {
+    const detail = results.violations
+      .flatMap((v) => v.nodes.map((n) => `  [${v.id}] ${n.html}\n    ${v.help}`))
+      .join("\n");
+    throw new Error(`Accessibility violations in sheet ${actorId}:\n${detail}`);
   }
 }

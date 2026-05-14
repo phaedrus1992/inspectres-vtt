@@ -22,6 +22,7 @@
     "node": ">=22"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.11.3",
     "@foundryvtt/foundryvtt-cli": "^3.0.3",
     "@playwright/test": "^1.59.1",
     "@types/node": "^24.12.2",
