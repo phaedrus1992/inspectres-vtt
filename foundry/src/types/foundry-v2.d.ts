@@ -84,6 +84,7 @@ declare namespace foundry.applications.api {
       content: string;
       window?: { title?: string };
       position?: ApplicationV2Options["position"];
+      classes?: string[];
       rejectClose?: boolean;
       modal?: boolean;
       buttons?: DialogV2Button[];
@@ -97,6 +98,7 @@ declare namespace foundry.applications.api {
       content: string;
       window?: { title?: string };
       position?: ApplicationV2Options["position"];
+      classes?: string[];
       rejectClose?: boolean;
       modal?: boolean;
       buttons?: DialogV2Button[];
@@ -107,6 +109,7 @@ declare namespace foundry.applications.api {
     static confirm(config: {
       content: string;
       window?: { title?: string };
+      classes?: string[];
       rejectClose?: boolean;
       modal?: boolean;
       render?: ((event: Event, dialog: foundry.applications.api.DialogV2) => void) | null;
