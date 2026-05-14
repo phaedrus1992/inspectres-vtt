@@ -58,8 +58,9 @@ function findI18nReferences(): TranslationKey[] {
           }
         }
       }
-    } catch {
-      // Ignore read errors (binary files, permission issues)
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.warn(`[i18n-completeness] Failed to scan ${filePath}: ${message}`);
     }
   }
 
