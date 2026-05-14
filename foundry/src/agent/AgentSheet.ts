@@ -3,7 +3,7 @@
  */
 
 import { getActorSystem } from "../utils/system-cast.js";
-import { updateDocument } from "../utils/fvtt-boundary.js";
+import { updateDocument, createChatMessage } from "../utils/fvtt-boundary.js";
 import { type AgentCharacteristic } from "./agent-schema.js";
 import { executeSkillRoll, executeStressRoll, SKILL_NAMES, type SkillName } from "../rolls/roll-executor.js";
 import { agentSystemData } from "./agent-system-data.js";
@@ -476,13 +476,11 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
 
       // Deduct cool cost
       const newCool = system.cool - power.coolCost;
-      const updateData: Record<string, number> = {};
-      updateData["system.cool"] = newCool;
-      await this.actor.update(updateData);
+      await updateDocument(this.actor, { "system.cool": newCool });
 
       // Announce power activation in chat
       const flavor = game.i18n?.format("INSPECTRES.PowerActivated", { name: power.name, actor: this.actor.name }) ?? `${this.actor.name} activated ${power.name}`;
-      await ChatMessage.create({
+      await createChatMessage({
         content: `<p>${flavor}</p>`,
         speaker: ChatMessage.getSpeaker({ actor: this.actor }),
       });
