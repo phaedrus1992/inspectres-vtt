@@ -147,7 +147,17 @@ test.describe("Form field rendering and input validation (E2E - Playwright)", ()
       );
       await page.click(".inspectres [role='tab'][aria-controls='tab-notes']");
     }
-    await page.waitForSelector(".inspectres textarea", { timeout: ELEMENT_WAIT_TIMEOUT });
+    // Wait for textarea with getBoundingClientRect to tolerate ApplicationV2 re-renders
+    await page.waitForFunction(
+      () => {
+        const el = document.querySelector(".inspectres textarea");
+        if (!el) return false;
+        const rect = (el as HTMLElement).getBoundingClientRect();
+        return rect.width > 0 && rect.height > 0;
+      },
+      undefined,
+      { timeout: ELEMENT_WAIT_TIMEOUT },
+    );
 
     const textarea = page.locator(".inspectres textarea").first();
     await expect(textarea).toBeVisible();

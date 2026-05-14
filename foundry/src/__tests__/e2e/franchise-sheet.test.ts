@@ -10,6 +10,7 @@
  * - Debt mode: needs bank:0, debtMode:false — conflicts with roll actor's bank:5
  * - Form inputs: independent fields (bank, description, missionGoal) — one actor
  */
+import type { Page } from "@playwright/test";
 import { test, expect, ELEMENT_WAIT_TIMEOUT } from "./fixtures.js";
 import { safeScreenshot } from "./helpers.js";
 import {
@@ -25,16 +26,33 @@ import {
   assertSheetAccessibility,
 } from "./pages/index.js";
 
+/**
+ * Create franchise actor with optional system field updates.
+ */
+async function createFranchiseWithDefaults(
+  page: Page,
+  namePrefix: string,
+  updates?: Record<string, unknown>,
+): Promise<string> {
+  const id = await createActor(page, "franchise", `${namePrefix}-${Date.now()}`);
+  if (updates && Object.keys(updates).length > 0) {
+    await page.evaluate(
+      async (args: { id: string; updates: Record<string, unknown> }) => {
+        // @ts-expect-error - Foundry runtime global
+        const actor = globalThis.game?.actors?.get(args.id);
+        if (actor) await actor.update(args.updates);
+      },
+      { id, updates },
+    );
+  }
+  return id;
+}
+
 test.describe("FranchiseSheet — roll actions and mission tracker", () => {
   let franchiseId: string;
 
   test.beforeEach(async ({ page }) => {
-    franchiseId = await createActor(page, "franchise", `E2E-franchise-${Date.now()}`);
-    await page.evaluate(async (id: string) => {
-      // @ts-expect-error - Foundry runtime global
-      const actor = globalThis.game?.actors?.get(id);
-      if (actor) await actor.update({ "system.bank": 5 });
-    }, franchiseId);
+    franchiseId = await createFranchiseWithDefaults(page, "E2E-franchise", { "system.bank": 5 });
   });
 
   test.afterEach(async ({ page }) => {
@@ -100,7 +118,7 @@ test.describe("FranchiseSheet — day controls", () => {
   let franchiseId: string;
 
   test.beforeEach(async ({ page }) => {
-    franchiseId = await createActor(page, "franchise", `E2E-franchise-day-${Date.now()}`);
+    franchiseId = await createFranchiseWithDefaults(page, "E2E-franchise-day");
   });
 
   test.afterEach(async ({ page }) => {
@@ -160,13 +178,11 @@ test.describe("FranchiseSheet — debt mode", () => {
   let franchiseId: string;
 
   test.beforeEach(async ({ page }) => {
-    franchiseId = await createActor(page, "franchise", `E2E-franchise-debt-${Date.now()}`);
     // bank:0 + debtMode:false required; conflicts with roll tests' bank:5 setup
-    await page.evaluate(async (id: string) => {
-      // @ts-expect-error - Foundry runtime global
-      const actor = globalThis.game?.actors?.get(id);
-      if (actor) await actor.update({ "system.bank": 0, "system.debtMode": false });
-    }, franchiseId);
+    franchiseId = await createFranchiseWithDefaults(page, "E2E-franchise-debt", {
+      "system.bank": 0,
+      "system.debtMode": false,
+    });
   });
 
   test.afterEach(async ({ page }) => {
@@ -194,7 +210,7 @@ test.describe("FranchiseSheet — form-bound inputs", () => {
   let franchiseId: string;
 
   test.beforeEach(async ({ page }) => {
-    franchiseId = await createActor(page, "franchise", `E2E-franchise-form-${Date.now()}`);
+    franchiseId = await createFranchiseWithDefaults(page, "E2E-franchise-form");
   });
 
   test.afterEach(async ({ page }) => {
@@ -262,7 +278,7 @@ test.describe("FranchiseSheet — accessibility", () => {
   let franchiseId: string;
 
   test.beforeEach(async ({ page }) => {
-    franchiseId = await createActor(page, "franchise", `E2E-franchise-a11y-${Date.now()}`);
+    franchiseId = await createFranchiseWithDefaults(page, "E2E-franchise-a11y");
   });
 
   test.afterEach(async ({ page }) => {
