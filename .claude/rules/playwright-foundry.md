@@ -299,7 +299,7 @@ import AxeBuilder from "@axe-core/playwright";
 
 export async function assertSheetAccessibility(page: Page, actorId: string): Promise<void> {
   const results = await new AxeBuilder({ page })
-    .include(`.inspectres[id*="${actorId}"]`)
+    .include(`.application[id*="${actorId}"]`)
     .withTags(["wcag2aa", "wcag21aa"])
     .options({ runOnly: { type: "tag", values: ["color-contrast"] } })
     .analyze();
@@ -312,7 +312,7 @@ export async function assertSheetAccessibility(page: Page, actorId: string): Pro
 }
 ```
 
-**Scope is mandatory.** Always `.include('.inspectres[id*="${actorId}"]')` to bound the audit to our sheet. Auditing the full page surfaces violations in Foundry's own chrome (sidebar, hotbar, notifications) we don't own. The `[id*="..."]` substring match handles Foundry's id-prefixing convention (`t-Actor-<id>`).
+**Scope: outer ApplicationV2 wrapper, not the inner `.inspectres` body.** Always `.include('.application[id*="${actorId}"]')`. The window chrome (title bar, header buttons, controls) is rendered by Foundry *outside* our `.inspectres` div. Most of our UI is ApplicationV2 (sheets, dialogs) and our theme restyles the entire window — so the audit must cover it. Scoping by `[id*="${actorId}"]` keeps the audit on this actor's window and excludes the sidebar/hotbar/notifications we don't own.
 
 **Tags:** `wcag2aa` + `wcag21aa` is the minimum. Adding `wcag2aaa` is fine for stricter coverage if the sheet currently passes.
 

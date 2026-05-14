@@ -54,7 +54,9 @@ else
 
   # Foundry holds an exclusive lock while running; if a previous run was killed
   # uncleanly the lock remains and prevents the next container from starting.
-  rm -f "${DATA_DIR}/Config/options.json.lock"
+  # Depending on the Foundry version + filesystem, the lock can be either a
+  # regular file or a directory, so handle both with `rm -rf`.
+  rm -rf "${DATA_DIR}/Config/options.json.lock"
 fi
 
 if [[ "${KEEP_CONTAINER:-0}" != "1" && "${KEEP_DATA:-0}" != "1" ]]; then

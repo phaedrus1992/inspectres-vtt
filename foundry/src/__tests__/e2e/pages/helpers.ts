@@ -392,11 +392,15 @@ export async function rejoinIfRedirected(page: Page, workerUsername: string): Pr
 }
 
 /**
- * Run an axe-core WCAG AA color-contrast audit scoped to this sheet only.
+ * Run an axe-core WCAG AA color-contrast audit scoped to this sheet's
+ * ApplicationV2 window, including the window chrome (title bar, header buttons)
+ * that Foundry renders outside our `.inspectres` body.
  *
- * Scope is critical: `.include()` keeps the audit inside our sheet element, so
- * Foundry's own chrome (sidebar, hotbar, notifications) doesn't generate noise.
- * Auditing the full page would flag third-party UI we don't own.
+ * Scope: `.application[id*="${actorId}"]` matches the outer V2 wrapper whose id
+ * embeds the actor id. This catches violations in both our theme and any
+ * Foundry chrome we restyle via CSS variable overrides — which is the whole
+ * window-app for ApplicationV2 sheets. Auditing the full page would surface
+ * sidebar/hotbar/notification violations we don't own.
  *
  * Throws with a structured violation summary if any contrast issue is found.
  */
@@ -405,7 +409,7 @@ export async function assertSheetAccessibility(
   actorId: string,
 ): Promise<void> {
   const results = await new AxeBuilder({ page })
-    .include(`.inspectres[id*="${actorId}"]`)
+    .include(`.application[id*="${actorId}"]`)
     .withTags(["wcag2aa", "wcag21aa"])
     .options({ runOnly: { type: "tag", values: ["color-contrast"] } })
     .analyze();

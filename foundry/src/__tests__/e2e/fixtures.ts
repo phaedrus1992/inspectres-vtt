@@ -25,8 +25,15 @@ async function dismissStartupNotifications(page: Page): Promise<void> {
   // permanent <li class="notification"> elements with no close button — they
   // can only be removed via DOM. Don't press ESC: it toggles the game menu
   // and opens an overlay that intercepts subsequent clicks.
+  //
+  // Tour overlays (`.tour-overlay`) are suppressed in globalSetup by persisting
+  // tour completion to core.tourProgress. We still strip stragglers from the DOM
+  // here in case a re-render slipped one through.
   await page.evaluate(() => {
     for (const el of document.querySelectorAll(".notification.permanent")) {
+      el.remove();
+    }
+    for (const el of document.querySelectorAll(".tour-overlay, .tour")) {
       el.remove();
     }
   });

@@ -243,6 +243,49 @@ async function joinAsUser(page: Page, username: string, timeouts = DEFAULT_JOIN_
     undefined,
     { timeout: timeouts.ready },
   );
+
+  // Mark every registered tour as completed and persist to the user. On a fresh
+  // world Foundry auto-launches first-time tours (e.g. "welcome") which render
+  // a `.tour-overlay` that intercepts pointer events and breaks subsequent clicks
+  // mid-test. Persist completion to the per-user core.tourProgress setting so
+  // tours never auto-launch in per-test contexts.
+  //
+  // Wrapped in a 10s timeout: tour.complete() can occasionally hang waiting for
+  // its own DOM/render cycle. We don't need to await individual completions —
+  // setting tourProgress directly is enough to suppress future auto-launches.
+  await page.evaluate(async () => {
+    const TIMEOUT_MS = 10_000;
+    interface FoundryTour { id?: string; namespace?: string; exit?: () => void }
+    interface FoundryTours { active?: FoundryTour | null; values?: () => Iterable<FoundryTour> }
+    interface FoundrySettings { get: (n: string, k: string) => unknown; set: (n: string, k: string, v: unknown) => Promise<unknown> }
+    interface FoundryGame { tours?: FoundryTours; settings?: FoundrySettings }
+    const g = globalThis as { game?: FoundryGame };
+
+    const work = (async () => {
+      try { g.game?.tours?.active?.exit?.(); } catch { /* tour API may be absent */ }
+      const tours = g.game?.tours;
+      const progress: Record<string, string> = {};
+      if (tours?.values) {
+        for (const tour of tours.values()) {
+          const key = tour.namespace && tour.id ? `${tour.namespace}.${tour.id}` : tour.id;
+          if (key) progress[key] = "completed";
+        }
+      }
+      try {
+        if (g.game?.settings) {
+          await g.game.settings.set("core", "tourProgress", progress);
+        }
+      } catch { /* setting may not exist on older Foundry */ }
+      for (const el of document.querySelectorAll(".tour-overlay, .tour")) {
+        el.remove();
+      }
+    })();
+
+    await Promise.race([
+      work,
+      new Promise((resolve) => setTimeout(resolve, TIMEOUT_MS)),
+    ]);
+  });
 }
 
 async function launchAndJoin(page: Page, baseUrl: string, majorVersion: number): Promise<void> {

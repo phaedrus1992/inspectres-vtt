@@ -30,8 +30,12 @@ export class FranchiseSheetPage {
   }
 
   async openTab(tabName: string): Promise<void> {
+    // force: true bypasses overlay-intercept checks. Foundry first-time tours
+    // can re-render `.tour-overlay` between tab clicks; globalSetup marks them
+    // completed but this guards against re-launch races during the test.
     await this.page.click(
       `${this.sheetSelector()} [role="tab"][data-tab="${tabName}"]`,
+      { force: true },
     );
     await this.page.waitForFunction(
       (args: { actorId: string; tabName: string }) => {
