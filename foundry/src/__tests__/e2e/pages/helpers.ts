@@ -417,9 +417,12 @@ export async function assertSheetAccessibility(
   // green `.inspectres-header` gradient) and contrast failures on theme
   // buttons. We deliberately *don't* enable `color-contrast-enhanced` here —
   // that's WCAG AAA and out of scope for AA-only coverage.
+  // Include experimental tag so non-text contrast and other newer axe rules
+  // run as soon as they ship — we always prefer axe coverage over hand-rolled
+  // assertions because axe gets better over time and we don't.
   const results = await new AxeBuilder({ page })
     .include(`.application[id*="${actorId}"]`)
-    .withTags(["wcag2aa", "wcag21aa"])
+    .withTags(["wcag2aa", "wcag21aa", "wcag22aa", "experimental"])
     .options({ runOnly: { type: "tag", values: ["color-contrast"] } })
     .analyze();
 

@@ -228,7 +228,9 @@
   margin: 0;
   padding: 0;
   background: var(--inspectres-white);
-  border: 1px solid var(--inspectres-gray-base);
+  /* WCAG 1.4.11 Non-text Contrast: gray-400 (#666) vs white = 5.7:1; gray-base
+     (#9d9e9d) is only 2.7:1 and fails the 3:1 minimum. See issue #554. */
+  border: 1px solid var(--inspectres-gray-400);
   cursor: pointer;
   vertical-align: middle;
   display: inline-grid;
