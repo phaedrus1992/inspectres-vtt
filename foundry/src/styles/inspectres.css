@@ -93,9 +93,10 @@
   }
 
   /* Header h1/input rules need higher specificity than Foundry's default
-     window-content input styling. Compounding `&.inspectres-header` adds
-     one class to the selector chain (0,3,1 → 0,4,1) without changing
-     markup, letting us drop `!important` from theming rules. See issue #560. */
+     window-content input styling. Compounding `&.inspectres-header` doubles
+     the header class in the selector chain, bumping us comfortably past
+     Foundry's `.window-content input` (0,2,1) so we can drop `!important`
+     from theming rules. See issue #560. */
   &.inspectres-header h1 {
     margin: 0 0 0.2rem;
     font-size: 1rem;
