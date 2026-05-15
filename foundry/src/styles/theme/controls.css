@@ -208,6 +208,8 @@
 .inspectres select {
   cursor: pointer;
   appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
   background-image: var(--inspectres-select-arrow);
   background-repeat: no-repeat;
   background-position: right var(--inspectres-space-sm) center;
@@ -436,11 +438,13 @@
   background: var(--inspectres-border-primary);
   outline: none;
   -webkit-appearance: none;
+  -moz-appearance: none;
   appearance: none;
 }
 
 .inspectres input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
+  -moz-appearance: none;
   appearance: none;
   width: 16px;
   height: 16px;
