@@ -19,8 +19,15 @@ import { type ItemRarity, isRollSufficient, checkDefect } from "../mission/requi
 import { prepareSkillRollContext, type SkillRollContextInput } from "../agent/skill-roll-dialog.js";
 import { checkTechnologyRollRequirements } from "./skill-roll-executor.js";
 import { stopDialogSubmitPropagation } from "../utils/dialog-utils.js";
-import { updateDocument, createChatMessage } from "../utils/fvtt-boundary.js";
+import { createChatMessage } from "../utils/fvtt-boundary.js";
 import { getDevLogger } from "../utils/dev-logger.js";
+import {
+  isDieFace,
+  actorUpdate,
+  rollDice,
+  getOutcomeClassification,
+  postChatCard,
+} from "./roll-helpers.js";
 
 export {
   type SkillName,
@@ -33,16 +40,8 @@ import { type SkillName, type BankDieResolution, type BankResolutionSummary, typ
 
 
 // ---------------------------------------------------------------------------
-// Guards and helpers
+// Skill-specific helper
 // ---------------------------------------------------------------------------
-
-function isDieFace(n: number): n is DieFace {
-  return n >= 1 && n <= 6;
-}
-
-function extractFaces(roll: Roll): number[] {
-  return roll.dice.flatMap((t) => t.results).filter((r) => r.active !== false).map((r) => r.result);
-}
 
 function applySkillPenalty(
   updateData: Record<string, unknown>,
@@ -52,33 +51,6 @@ function applySkillPenalty(
 ): void {
   const currentPenalty = system.skills[targetSkill]?.penalty ?? 0;
   updateData[`system.skills.${targetSkill}.penalty`] = currentPenalty + penaltyAmount;
-}
-
-async function actorUpdate(actor: RollActor, data: Record<string, unknown>): Promise<void> {
-  await updateDocument(actor, data);
-}
-
-async function rollDice(count: number): Promise<{ roll: Roll; faces: number[] }> {
-  const roll = new Roll(`${count}d6`);
-  await roll.evaluate();
-  return { roll, faces: extractFaces(roll) };
-}
-
-function getOutcomeClassification(highestFace: number): "good" | "partial" | "bad" {
-  if (highestFace < 1 || highestFace > 6) {
-    throw new Error(`getOutcomeClassification: die face must be 1-6, got ${highestFace}`);
-  }
-  if (highestFace >= 5) return "good";
-  if (highestFace >= 3) return "partial";
-  return "bad";
-}
-
-async function postChatCard(
-  content: string,
-  speaker: ReturnType<typeof ChatMessage.getSpeaker>,
-  rolls: Roll[],
-): Promise<void> {
-  await createChatMessage({ content, speaker, rolls });
 }
 
 // All valid skills for penalty selection — drives dialog rendering and validation.
