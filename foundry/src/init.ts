@@ -13,6 +13,7 @@ import { registerHandlebarsHelpers } from "./utils/handlebars-helpers.js";
 import { MissionTrackerApp } from "./mission/MissionTrackerApp.js";
 import { onMissionSocketEvent } from "./mission/socket.js";
 import { handleActionError } from "./utils/ui-errors.js";
+import { getDevLogger } from "./utils/dev-logger.js";
 import { autoClearRecoveredAgents } from "./agent/recovery-utils.js";
 import { validateAndFixCoolCap } from "./agent/agent-system-data.js";
 import "./forms/stress-meter.js";
@@ -80,7 +81,7 @@ Hooks.once("init", async function () {
     ]);
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
-    console.error("Failed to load templates:", message);
+    getDevLogger().error("init", "Failed to load templates", { errorMessage: message });
     ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorTemplateLoad") ?? `Template load failed: ${message}`);
   }
 
@@ -120,14 +121,14 @@ Hooks.once("init", async function () {
     onChange: (newDay: unknown) => {
       if (typeof newDay !== "number") return;
       if (!Number.isInteger(newDay) || newDay < 1) {
-        console.warn("[INSPECTRES] Invalid currentDay value; ignoring:", { newDay });
+        getDevLogger().warn("init", "Invalid currentDay value; ignoring", { newDay });
         return;
       }
       void (async () => {
         try {
           const result = await autoClearRecoveredAgents(newDay);
           if (result.failed > 0) {
-            console.warn("[INSPECTRES] Some agents failed to auto-clear recovery:", result);
+            getDevLogger().warn("init", "Some agents failed to auto-clear recovery", { result });
             if (ui.notifications) {
               ui.notifications.warn(game.i18n?.localize("INSPECTRES.ErrorPartialRecoveryFailed") ?? "Some agents failed to clear recovery state");
             }
@@ -138,7 +139,7 @@ Hooks.once("init", async function () {
           rerenderDayDependentSheets("day change");
         } catch (err: unknown) {
           const message = err instanceof Error ? err.message : String(err);
-          console.error("[INSPECTRES] Auto-clear recovered agents failed:", { newDay, error: err, errorMessage: message });
+          getDevLogger().error("init", "Auto-clear recovered agents failed", { newDay, errorMessage: message });
           if (ui.notifications) {
             ui.notifications.error(game.i18n?.localize("INSPECTRES.ErrorAutoRecoverFailed") ?? "Auto-recovery update failed");
           }
@@ -186,14 +187,14 @@ Hooks.once("ready", function () {
             await actor.update(updates);
           } catch (err: unknown) {
             const message = err instanceof Error ? err.message : String(err);
-            console.warn(`[INSPECTRES] Failed to fix Cool cap for ${actor.name}:`, message);
+            getDevLogger().warn("init", "Failed to fix Cool cap", { actor: actor.name, errorMessage: message });
             failedAgents.push(actor.name ?? "Unknown Agent");
           }
         }
       }
       if (failedAgents.length > 0) {
         const names = failedAgents.join(", ");
-        console.warn(`[INSPECTRES] Cool cap enforcement incomplete for: ${names}`);
+        getDevLogger().warn("init", "Cool cap enforcement incomplete", { agents: names });
         ui.notifications?.warn(`Failed to verify Cool cap for: ${names}`);
       }
     })();

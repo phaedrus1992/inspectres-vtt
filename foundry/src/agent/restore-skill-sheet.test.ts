@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { AgentSheet } from "./AgentSheet.js";
 import { MockActorSheetV2 } from "../__mocks__/setup.js";
 import type { AgentData } from "./agent-schema.js";
+import { getDevLogger } from "../utils/dev-logger.js";
 
 // Type assertion: MockActorSheetV2 satisfies AgentSheet interface for testing action handlers.
 // The mock lacks Foundry ApplicationV2 properties unused in these tests, hence the minimal interface.
@@ -63,13 +64,14 @@ describe("AgentSheet.onRestoreSkill - Cool-to-skill recovery button", () => {
 
   it("logs error when skill attribute missing", async () => {
     const sheet = mockSheet as unknown as AgentSheet;
-    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const errorSpy = vi.spyOn(getDevLogger(), "error").mockImplementation(() => {});
 
     const target = document.createElement("button");
     // missing data-skill attribute
     await AgentSheet.onRestoreSkill.call(sheet, new Event("click"), target);
 
     expect(errorSpy).toHaveBeenCalledWith(
+      "agent-sheet",
       "onRestoreSkill: missing or invalid data-skill attribute",
       expect.any(Object),
     );

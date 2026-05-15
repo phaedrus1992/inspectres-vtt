@@ -5,10 +5,12 @@
 import { getActorSystem } from "../utils/system-cast.js";
 import { updateDocument, createChatMessage } from "../utils/fvtt-boundary.js";
 import { type AgentCharacteristic } from "./agent-schema.js";
-import { executeSkillRoll, executeStressRoll, SKILL_NAMES, type SkillName } from "../rolls/roll-executor.js";
+import { executeSkillRoll, SKILL_NAMES, type SkillName } from "../rolls/roll-executor.js";
+import { buildStressRollDialog } from "./stress-roll-dialog.js";
 import { agentSystemData } from "./agent-system-data.js";
 import { findFranchiseActor, franchiseSystemData } from "../franchise/franchise-utils.js";
 import { handleActionError } from "../utils/ui-errors.js";
+import { getDevLogger } from "../utils/dev-logger.js";
 import { activateTabs } from "../utils/sheet-tabs.js";
 import { getOrCreateListenerController } from "../utils/listener-cleanup.js";
 import { computeRecoveryStatus, getCurrentDay } from "./recovery-utils.js";
@@ -43,59 +45,6 @@ function getRecoveryBannerText(recoveryStatus: ReturnType<typeof computeRecovery
 
 // Store AbortController for each sheet instance to manage checkbox listeners
 const checkboxControllers = new WeakMap<AgentSheet, AbortController>();
-
-
-async function buildStressRollDialog(agent: Actor): Promise<void> {
-  const system = agentSystemData(agent);
-  const maxCool = system.cool;
-
-  const i18n = game.i18n;
-  const stressDiceLabel = i18n?.localize("INSPECTRES.DialogStressDice") ?? "Stress Dice (1–5)";
-  const coolIgnoreLabel = i18n?.format("INSPECTRES.DialogCoolIgnore", { max: String(maxCool) }) ?? `Cool dice to ignore lowest (0–${maxCool})`;
-
-  const result = await foundry.applications.api.DialogV2.wait({
-    window: { title: i18n?.localize("INSPECTRES.StressRoll") ?? "Stress Roll" },
-    rejectClose: false,
-    render: stopDialogSubmitPropagation,
-    content: `
-      <div class="inspectres-roll-dialog">
-        <label>${stressDiceLabel}: <input type="number" name="stressDice" min="1" max="5" value="1"></label>
-        ${maxCool > 0 ? `<label>${coolIgnoreLabel}: <input type="number" name="coolIgnore" min="0" max="${maxCool}" value="0"></label>` : ""}
-      </div>
-    `,
-    buttons: [
-      {
-        action: "roll",
-        label: i18n?.localize("INSPECTRES.DialogRoll") ?? "Roll",
-        default: true,
-        callback: (_event: Event, _button: HTMLButtonElement, dialog: foundry.applications.api.DialogV2) => {
-          const form = dialog.element.querySelector("form") as HTMLFormElement | null;
-          if (!form) {
-            console.error("buildStressRollDialog: form element not found in dialog");
-            return null;
-          }
-          const data = new FormData(form);
-          const stressDiceCount = Math.max(1, Math.min(5, Number(data.get("stressDice") ?? 1)));
-          const coolDiceUsed = Math.max(0, Math.min(maxCool, Number(data.get("coolIgnore") ?? 0)));
-          return {
-            stressDiceCount: Number.isNaN(stressDiceCount) ? 1 : stressDiceCount,
-            coolDiceUsed: Number.isNaN(coolDiceUsed) ? 0 : coolDiceUsed,
-          };
-        },
-      },
-      {
-        action: "cancel",
-        label: i18n?.localize("INSPECTRES.DialogCancel") ?? "Cancel",
-        callback: () => null,
-      },
-    ],
-  });
-
-  if (result === null || result === undefined) return;
-  const params = result as { stressDiceCount: number; coolDiceUsed: number };
-  const franchise = findFranchiseActor();
-  await executeStressRoll(agent, params, franchise);
-}
 
 // HandlebarsApplicationMixin provides _renderHTML/_replaceHTML required by ApplicationV2 for PARTS-based sheets
 export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.sheets.ActorSheetV2) {
@@ -190,13 +139,11 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
         //   Prevent >1 weird per group
         // }
         void updateDocument(this.actor, { "system.isWeird": target.checked }).catch((err: unknown) => {
-          const message = err instanceof Error ? err.message : String(err);
-          console.error("Failed to toggle weird status for agent", {
+          getDevLogger().error("agent-sheet", "Failed to toggle weird status for agent", {
             actorId: this.actor.id,
             actorName: this.actor.name,
             targetValue: target.checked,
-            error: err,
-            errorMessage: message,
+            error: err instanceof Error ? err.message : String(err),
           });
           handleActionError(err, "Failed to toggle weird status", "INSPECTRES.ErrorUpdateFailed", "Failed to update actor data");
         });
@@ -208,13 +155,11 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
       el.addEventListener("change", (event: Event) => {
         const target = event.target as HTMLInputElement;
         void AgentSheet.onOverrideRecoveryDay.call(this, event, target).catch((err: unknown) => {
-          const message = err instanceof Error ? err.message : String(err);
-          console.error("Failed to override recovery day for agent", {
+          getDevLogger().error("agent-sheet", "Failed to override recovery day for agent", {
             actorId: this.actor.id,
             actorName: this.actor.name,
             targetValue: target.value,
-            error: err,
-            errorMessage: message,
+            error: err instanceof Error ? err.message : String(err),
           });
           handleActionError(err, "Failed to override recovery day", "INSPECTRES.ErrorUpdateFailed", "Could not update recovery");
         });
@@ -227,13 +172,11 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
         const target = event.currentTarget as unknown as { value?: number };
         const value = Math.max(0, Math.min(6, target.value ?? 0));
         void updateDocument(this.actor, { "system.stress": value }).catch((err: unknown) => {
-          const message = err instanceof Error ? err.message : String(err);
-          console.error("Failed to update stress for agent", {
+          getDevLogger().error("agent-sheet", "Failed to update stress for agent", {
             actorId: this.actor.id,
             actorName: this.actor.name,
             stressValue: value,
-            error: err,
-            errorMessage: message,
+            error: err instanceof Error ? err.message : String(err),
           });
           handleActionError(err, "Failed to update stress", "INSPECTRES.ErrorUpdateFailed", "Could not update stress");
         });
@@ -244,7 +187,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
   static async onSkillRoll(this: AgentSheet, _event: Event, target: HTMLElement): Promise<void> {
     const skillAttr = target.dataset["skill"] ?? null;
     if (!isSkillName(skillAttr)) {
-      console.error("onSkillRoll: missing or invalid data-skill attribute", { skillAttr });
+      getDevLogger().error("agent-sheet", "onSkillRoll: missing or invalid data-skill attribute", { skillAttr });
       return;
     }
     const system = agentSystemData(this.actor);
@@ -294,7 +237,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     if (!this.isEditable) return;
     const skillAttr = target.dataset["skill"] ?? null;
     if (!isSkillName(skillAttr)) {
-      console.error("onSkillStep: missing or invalid data-skill attribute", { skillAttr });
+      getDevLogger().error("agent-sheet", "onSkillStep: missing or invalid data-skill attribute", { skillAttr });
       return;
     }
     const system = agentSystemData(this.actor);
@@ -305,7 +248,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     }
     const skillData = system.skills[skillAttr];
     if (!skillData) {
-      console.error("onSkillStep: skill data missing", { skillAttr, actorId: this.actor.id });
+      getDevLogger().error("agent-sheet", "onSkillStep: skill data missing", { skillAttr, actorId: this.actor.id });
       return;
     }
     const current = skillData.base;
@@ -321,12 +264,12 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     if (!this.isEditable) return;
     const valueStr = target.dataset["value"];
     if (valueStr == null) {
-      console.error("onToggleCool: missing data-value attribute");
+      getDevLogger().error("agent-sheet", "onToggleCool: missing data-value attribute");
       return;
     }
     const pipValue = Number(valueStr);
     if (Number.isNaN(pipValue) || pipValue < 1 || pipValue > 3) {
-      console.error("onToggleCool: invalid data-value", { valueStr });
+      getDevLogger().error("agent-sheet", "onToggleCool: invalid data-value", { valueStr });
       return;
     }
     const system = agentSystemData(this.actor);
@@ -360,12 +303,12 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     if (!this.isEditable) return;
     const idxStr = target.dataset["idx"] ?? null;
     if (idxStr == null) {
-      console.error("onRemoveCharacteristic: missing data-idx attribute");
+      getDevLogger().error("agent-sheet", "onRemoveCharacteristic: missing data-idx attribute");
       return;
     }
     const idx = Number(idxStr);
     if (Number.isNaN(idx) || idx < 0) {
-      console.error("onRemoveCharacteristic: invalid data-idx value", { idxStr });
+      getDevLogger().error("agent-sheet", "onRemoveCharacteristic: invalid data-idx value", { idxStr });
       return;
     }
     const currentSystem = agentSystemData(this.actor);
@@ -587,7 +530,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     if (!this.isEditable) return;
     const skillAttr = target.dataset["skill"] ?? null;
     if (!isSkillName(skillAttr)) {
-      console.error("onRestoreSkill: missing or invalid data-skill attribute", { skillAttr });
+      getDevLogger().error("agent-sheet", "onRestoreSkill: missing or invalid data-skill attribute", { skillAttr });
       return;
     }
     const system = agentSystemData(this.actor);
