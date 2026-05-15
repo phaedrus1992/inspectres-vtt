@@ -6,21 +6,32 @@ import type { SkillName } from "../rolls/roll-executor.js";
 
 // Test fixtures matching RollScene interface
 class TestToken {
-  sceneId: string;
-  x: number;
-  y: number;
+  readonly id: string;
+  readonly parent: { readonly id: string };
+  deleted: boolean;
 
   constructor(id: string, sceneId: string = "scene-original") {
-    this.sceneId = sceneId;
-    this.x = 0;
-    this.y = 0;
+    this.id = id;
+    this.parent = { id: sceneId };
+    this.deleted = false;
   }
 
-  async update(data: { sceneId?: string; x?: number; y?: number }): Promise<void> {
-    if (data.sceneId !== undefined) this.sceneId = data.sceneId;
-    if (data.x !== undefined) this.x = data.x;
-    if (data.y !== undefined) this.y = data.y;
+  toObject(): Record<string, unknown> {
+    return { _id: this.id };
   }
+
+  async delete(): Promise<void> {
+    this.deleted = true;
+  }
+}
+
+function makeFakeScene(id: string, name: string): RollScene {
+  return {
+    id,
+    name,
+    activate: async () => ({}) as Scene,
+    createEmbeddedDocuments: async (_type: string, _data: Record<string, unknown>[]) => [],
+  };
 }
 
 interface MissionContext {
@@ -76,11 +87,7 @@ describe("Collaboration Mechanics E2E", () => {
       // Create test token to track scene updates
       const testToken = new TestToken("token-1", "scene-original");
 
-      const mockScene: RollScene = {
-        id: "scene-confessional",
-        name: "Confessional",
-        activate: async () => ({} as Scene),
-      };
+      const mockScene = makeFakeScene("scene-confessional", "Confessional");
 
       const mockAgent = {
         id: "agent-1",
@@ -96,8 +103,9 @@ describe("Collaboration Mechanics E2E", () => {
 
     it("returns agent from confessional after use", async () => {
       // Mock Foundry global
+      const originalScene = makeFakeScene("scene-original", "Original");
       (globalThis as Record<string, unknown>)["game"] = {
-        scenes: { get: (id: string) => (id === "scene-original" ? {} : null) },
+        scenes: { get: (id: string) => (id === "scene-original" ? originalScene : null) },
       };
 
       const testToken = new TestToken("token-1", "scene-original");
@@ -116,8 +124,9 @@ describe("Collaboration Mechanics E2E", () => {
 
     it("handles complex mission with all three mechanics", async () => {
       // Mock Foundry global for confessional reset
+      const originalSceneForComplex = makeFakeScene("scene-original", "Original");
       (globalThis as Record<string, unknown>)["game"] = {
-        scenes: { get: (id: string) => (id === "scene-original" ? {} : null) },
+        scenes: { get: (id: string) => (id === "scene-original" ? originalSceneForComplex : null) },
       };
 
       const context: MissionContext = {
@@ -149,11 +158,7 @@ describe("Collaboration Mechanics E2E", () => {
       // Step 3: Transition to confessional
       const testToken = new TestToken("token-1", "scene-original");
 
-      const mockScene: RollScene = {
-        id: "scene-confessional",
-        name: "Confessional",
-        activate: async () => ({} as Scene),
-      };
+      const mockScene = makeFakeScene("scene-confessional", "Confessional");
       const mockAgent = {
         id: "agent-1",
         name: context.agentName,
