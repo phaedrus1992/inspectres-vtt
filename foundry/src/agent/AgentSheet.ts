@@ -5,7 +5,8 @@
 import { getActorSystem } from "../utils/system-cast.js";
 import { updateDocument, createChatMessage } from "../utils/fvtt-boundary.js";
 import { type AgentCharacteristic } from "./agent-schema.js";
-import { executeSkillRoll, executeStressRoll, SKILL_NAMES, type SkillName } from "../rolls/roll-executor.js";
+import { executeSkillRoll, SKILL_NAMES, type SkillName } from "../rolls/roll-executor.js";
+import { buildStressRollDialog } from "./stress-roll-dialog.js";
 import { agentSystemData } from "./agent-system-data.js";
 import { findFranchiseActor, franchiseSystemData } from "../franchise/franchise-utils.js";
 import { handleActionError } from "../utils/ui-errors.js";
@@ -44,59 +45,6 @@ function getRecoveryBannerText(recoveryStatus: ReturnType<typeof computeRecovery
 
 // Store AbortController for each sheet instance to manage checkbox listeners
 const checkboxControllers = new WeakMap<AgentSheet, AbortController>();
-
-
-async function buildStressRollDialog(agent: Actor): Promise<void> {
-  const system = agentSystemData(agent);
-  const maxCool = system.cool;
-
-  const i18n = game.i18n;
-  const stressDiceLabel = i18n?.localize("INSPECTRES.DialogStressDice") ?? "Stress Dice (1–5)";
-  const coolIgnoreLabel = i18n?.format("INSPECTRES.DialogCoolIgnore", { max: String(maxCool) }) ?? `Cool dice to ignore lowest (0–${maxCool})`;
-
-  const result = await foundry.applications.api.DialogV2.wait({
-    window: { title: i18n?.localize("INSPECTRES.StressRoll") ?? "Stress Roll" },
-    rejectClose: false,
-    render: stopDialogSubmitPropagation,
-    content: `
-      <div class="inspectres-roll-dialog">
-        <label>${stressDiceLabel}: <input type="number" name="stressDice" min="1" max="5" value="1"></label>
-        ${maxCool > 0 ? `<label>${coolIgnoreLabel}: <input type="number" name="coolIgnore" min="0" max="${maxCool}" value="0"></label>` : ""}
-      </div>
-    `,
-    buttons: [
-      {
-        action: "roll",
-        label: i18n?.localize("INSPECTRES.DialogRoll") ?? "Roll",
-        default: true,
-        callback: (_event: Event, _button: HTMLButtonElement, dialog: foundry.applications.api.DialogV2) => {
-          const form = dialog.element.querySelector("form") as HTMLFormElement | null;
-          if (!form) {
-            getDevLogger().error("agent-sheet", "buildStressRollDialog: form element not found in dialog");
-            return null;
-          }
-          const data = new FormData(form);
-          const stressDiceCount = Math.max(1, Math.min(5, Number(data.get("stressDice") ?? 1)));
-          const coolDiceUsed = Math.max(0, Math.min(maxCool, Number(data.get("coolIgnore") ?? 0)));
-          return {
-            stressDiceCount: Number.isNaN(stressDiceCount) ? 1 : stressDiceCount,
-            coolDiceUsed: Number.isNaN(coolDiceUsed) ? 0 : coolDiceUsed,
-          };
-        },
-      },
-      {
-        action: "cancel",
-        label: i18n?.localize("INSPECTRES.DialogCancel") ?? "Cancel",
-        callback: () => null,
-      },
-    ],
-  });
-
-  if (result === null || result === undefined) return;
-  const params = result as { stressDiceCount: number; coolDiceUsed: number };
-  const franchise = findFranchiseActor();
-  await executeStressRoll(agent, params, franchise);
-}
 
 // HandlebarsApplicationMixin provides _renderHTML/_replaceHTML required by ApplicationV2 for PARTS-based sheets
 export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.sheets.ActorSheetV2) {
