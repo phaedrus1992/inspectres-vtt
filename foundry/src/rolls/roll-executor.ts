@@ -400,6 +400,8 @@ async function buildSkillRollDialog(opts: SkillRollDialogOptions): Promise<Skill
     // #551: modal ensures the dialog renders above the sheet that opened it. Without
     // modal the skill-roll dialog can appear behind the franchise/agent window when
     // the originating window holds focus on action click.
+    // #584: position height constrains dialog to content size (prevents stretching to viewport height).
+    position: { height: 300 },
     modal: true,
     rejectClose: false,
     render: stopDialogSubmitPropagation,
