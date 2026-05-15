@@ -3,13 +3,13 @@ import { getActorSystem, type RollActor } from "../utils/system-cast.js";
 import {
   SKILL_ROLL_CHART,
   STRESS_ROLL_CHART,
-  BANK_ROLL_CHART,
   CLIENT_GENERATION_TABLE,
   DEATH_DISMEMBERMENT_CHART,
   type DeathDismembermentOutcome,
   type SkillRollOutcome,
   type StressRollOutcome,
 } from "./roll-charts.js";
+import { resolveBankDice } from "./bank-roll.js";
 import { type AgentData } from "../agent/agent-schema.js";
 import { agentSystemData } from "../agent/agent-system-data.js";
 import { type FranchiseData } from "../franchise/franchise-schema.js";
@@ -36,7 +36,7 @@ export {
   type BankResolutionSummary,
   type StressRollParams,
 } from "./roll-types.js";
-import { type SkillName, type BankDieResolution, type BankResolutionSummary, type StressRollParams, type DieFace, type D3Result } from "./roll-types.js";
+import { type SkillName, type BankResolutionSummary, type StressRollParams, type DieFace, type D3Result } from "./roll-types.js";
 
 
 // ---------------------------------------------------------------------------
@@ -113,36 +113,7 @@ async function getPlayerPenaltyChoice(
 }
 
 
-// ---------------------------------------------------------------------------
-// Pure: resolveBankDice
-// ---------------------------------------------------------------------------
-
-/** Pure function: evaluates bank die results against BANK_ROLL_CHART. */
-export function resolveBankDice(faces: number[], currentBank: number): BankResolutionSummary {
-  const resolutions: BankDieResolution[] = [];
-  let delta = 0;
-  let lostAll = false;
-
-  for (const face of faces) {
-    if (!isDieFace(face)) {
-      getDevLogger().error("roll-executor", `resolveBankDice: invalid die face ${face}, skipping`);
-      continue;
-    }
-    const entry = BANK_ROLL_CHART[face];
-    const loseAllBank = "loseAllBank" in entry && entry.loseAllBank === true;
-    // net per die: spent 1 to roll it; diceReturned gives back; diceAdded adds more
-    const bankDelta = entry.diceReturned - 1 + entry.diceAdded;
-    resolutions.push({ face, result: entry.result, narration: entry.narration, bankDelta, loseAllBank });
-    if (loseAllBank) {
-      lostAll = true;
-      break;
-    }
-    delta += bankDelta;
-  }
-
-  const finalBankTotal = lostAll ? 0 : Math.max(0, currentBank + delta);
-  return { resolutions, finalBankTotal };
-}
+export { resolveBankDice, executeBankRoll } from "./bank-roll.js";
 
 // ---------------------------------------------------------------------------
 // Card type mapping
@@ -556,36 +527,6 @@ async function buildSkillRollDialog(opts: SkillRollDialogOptions): Promise<Skill
   });
   if (result === null || result === undefined) return null;
   return result as SkillRollAugmentation;
-}
-
-// ---------------------------------------------------------------------------
-// executeBankRoll
-// ---------------------------------------------------------------------------
-
-export async function executeBankRoll(franchise: RollActor): Promise<void> {
-  // fvtt-types v13 + template.json: requires double-cast; see foundry-vite.md
-  const system = getActorSystem<FranchiseData>(franchise);
-  const currentBank = system.bank;
-
-  if (currentBank === 0) {
-    ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnNoBankDice") ?? "No bank dice to roll.");
-    return;
-  }
-
-  const { roll, faces } = await rollDice(currentBank);
-  const summary = resolveBankDice(faces, currentBank);
-
-  await actorUpdate(franchise, { "system.bank": summary.finalBankTotal });
-
-  // ChatMessage.getSpeaker requires the full Actor type; RollActor satisfies the needed fields at runtime
-  const speaker = ChatMessage.getSpeaker({ actor: franchise as Actor });
-  const content = await foundry.applications.handlebars.renderTemplate("systems/inspectres/templates/roll-card.hbs", {
-    rollType: "bank",
-    title: game.i18n?.localize("INSPECTRES.BankRoll") ?? "Bank Roll",
-    resolutions: summary.resolutions,
-    finalBankTotal: summary.finalBankTotal,
-  });
-  await postChatCard(content, speaker, [roll]);
 }
 
 // ---------------------------------------------------------------------------
