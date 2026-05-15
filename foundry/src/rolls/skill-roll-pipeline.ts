@@ -43,7 +43,8 @@ async function openRollDialog(skillName: string): Promise<DialogResult | null> {
         action: "roll",
         label: "Roll",
         callback: (_event: Event, _button: unknown, dialog: { element: HTMLElement }) => {
-          const form = dialog.element.querySelector("form") as HTMLFormElement;
+          const form = dialog.element.querySelector("form") as HTMLFormElement | null;
+          if (!form) return null;
           return Object.fromEntries(new FormData(form));
         },
       },

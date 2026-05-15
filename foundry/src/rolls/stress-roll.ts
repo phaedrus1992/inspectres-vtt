@@ -52,7 +52,6 @@ async function getPlayerPenaltyChoice(
 
   const result = await foundry.applications.api.DialogV2.wait({
     window: { title: game.i18n?.localize("INSPECTRES.PenaltyDialogTitle") ?? "Stress Penalty" },
-    classes: ["inspectres"],
     // #551: modal so the penalty dialog renders above the agent sheet that opened it.
     modal: true,
     rejectClose: false,

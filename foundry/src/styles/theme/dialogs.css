@@ -5,6 +5,17 @@
    Applies to DialogV2, ApplicationV2 modal windows, and file pickers
    ============================================================ */
 
+/* #587: Constrain all DialogV2 dialogs to viewport, sized by content.
+   Unscoped selector because DialogV2 doesn't always inherit .inspectres class.
+   Width/height auto-fit content; max-* prevents viewport stretch.
+   Replaces per-dialog hardcoded position constraints (code smell). */
+dialog.application {
+  width: fit-content;
+  height: fit-content;
+  max-width: 90vw;
+  max-height: 90vh;
+}
+
 /* Base dialog styling */
 .inspectres dialog.app {
   background: var(--inspectres-white);
