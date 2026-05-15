@@ -13,6 +13,7 @@ import { registerHandlebarsHelpers } from "./utils/handlebars-helpers.js";
 import { MissionTrackerApp } from "./mission/MissionTrackerApp.js";
 import { onMissionSocketEvent } from "./mission/socket.js";
 import { handleActionError } from "./utils/ui-errors.js";
+import { getDevLogger } from "./utils/dev-logger.js";
 import { autoClearRecoveredAgents } from "./agent/recovery-utils.js";
 import { validateAndFixCoolCap } from "./agent/agent-system-data.js";
 import "./forms/stress-meter.js";
@@ -80,7 +81,7 @@ Hooks.once("init", async function () {
     ]);
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
-    console.error("Failed to load templates:", message);
+    getDevLogger().error("init", "Failed to load templates", { errorMessage: message });
     ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorTemplateLoad") ?? `Template load failed: ${message}`);
   }
 
@@ -138,7 +139,7 @@ Hooks.once("init", async function () {
           rerenderDayDependentSheets("day change");
         } catch (err: unknown) {
           const message = err instanceof Error ? err.message : String(err);
-          console.error("[INSPECTRES] Auto-clear recovered agents failed:", { newDay, error: err, errorMessage: message });
+          getDevLogger().error("init", "Auto-clear recovered agents failed", { newDay, errorMessage: message });
           if (ui.notifications) {
             ui.notifications.error(game.i18n?.localize("INSPECTRES.ErrorAutoRecoverFailed") ?? "Auto-recovery update failed");
           }
