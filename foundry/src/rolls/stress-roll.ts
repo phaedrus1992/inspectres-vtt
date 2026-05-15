@@ -17,6 +17,10 @@ import { type SkillName, type StressRollParams, type DieFace, type D3Result } fr
 // If SkillName ever changes, this constant fails to compile until updated.
 export const SKILL_NAMES = ["academics", "athletics", "technology", "contact"] as const satisfies readonly SkillName[];
 
+function isSkillName(value: string): value is SkillName {
+  return (SKILL_NAMES as readonly string[]).includes(value);
+}
+
 function applySkillPenalty(
   updateData: Record<string, unknown>,
   system: AgentData,
@@ -62,9 +66,9 @@ async function getPlayerPenaltyChoice(
           if (!form) return null;
           const data = new FormData(form);
           const selectedSkill = data.get("selectedSkill");
-          if (!selectedSkill || typeof selectedSkill !== "string") return null;
-          if (!SKILL_NAMES.includes(selectedSkill as SkillName)) return null;
-          return selectedSkill as SkillName;
+          if (typeof selectedSkill !== "string") return null;
+          if (!isSkillName(selectedSkill)) return null;
+          return selectedSkill;
         },
       },
       {
