@@ -78,43 +78,43 @@ declare namespace foundry.applications.api {
     callback?: (event: Event, button: HTMLButtonElement, dialog: foundry.applications.api.DialogV2) => unknown;
   }
 
+  /**
+   * Shared config shape for DialogV2.wait() and DialogV2.prompt().
+   *
+   * Extracted as a named interface (not inlined) so the LSP and tsc agree on
+   * the type identity of the parameter — inlined object types caused LSP to
+   * synthesize a different structural type than tsc resolved (#577).
+   */
+  interface DialogV2WaitConfig {
+    content: string;
+    window?: { title?: string };
+    position?: ApplicationV2Options["position"];
+    classes?: string[];
+    rejectClose?: boolean;
+    modal?: boolean;
+    buttons?: DialogV2Button[];
+    /** Called each time the dialog renders. Use to attach extra listeners. */
+    render?: ((event: Event, dialog: foundry.applications.api.DialogV2) => void) | null;
+    /** Called when the dialog closes under any circumstances. */
+    close?: ((event: Event, dialog: foundry.applications.api.DialogV2) => unknown) | null;
+  }
+
+  /** Confirm uses a narrower shape (no buttons array; no position). */
+  interface DialogV2ConfirmConfig {
+    content: string;
+    window?: { title?: string };
+    classes?: string[];
+    rejectClose?: boolean;
+    modal?: boolean;
+    render?: ((event: Event, dialog: foundry.applications.api.DialogV2) => void) | null;
+    close?: ((event: Event, dialog: foundry.applications.api.DialogV2) => unknown) | null;
+  }
+
   /** Modal/modeless dialog built on ApplicationV2. */
   class DialogV2 extends ApplicationV2 {
-    static wait(config: {
-      content: string;
-      window?: { title?: string };
-      position?: ApplicationV2Options["position"];
-      classes?: string[];
-      rejectClose?: boolean;
-      modal?: boolean;
-      buttons?: DialogV2Button[];
-      /** Called each time the dialog renders. Use to attach extra listeners. */
-      render?: ((event: Event, dialog: foundry.applications.api.DialogV2) => void) | null;
-      /** Called when the dialog closes under any circumstances. */
-      close?: ((event: Event, dialog: foundry.applications.api.DialogV2) => unknown) | null;
-    }): Promise<unknown>;
-
-    static prompt(config: {
-      content: string;
-      window?: { title?: string };
-      position?: ApplicationV2Options["position"];
-      classes?: string[];
-      rejectClose?: boolean;
-      modal?: boolean;
-      buttons?: DialogV2Button[];
-      render?: ((event: Event, dialog: foundry.applications.api.DialogV2) => void) | null;
-      close?: ((event: Event, dialog: foundry.applications.api.DialogV2) => unknown) | null;
-    }): Promise<unknown>;
-
-    static confirm(config: {
-      content: string;
-      window?: { title?: string };
-      classes?: string[];
-      rejectClose?: boolean;
-      modal?: boolean;
-      render?: ((event: Event, dialog: foundry.applications.api.DialogV2) => void) | null;
-      close?: ((event: Event, dialog: foundry.applications.api.DialogV2) => unknown) | null;
-    }): Promise<boolean>;
+    static wait(config: DialogV2WaitConfig): Promise<unknown>;
+    static prompt(config: DialogV2WaitConfig): Promise<unknown>;
+    static confirm(config: DialogV2ConfirmConfig): Promise<boolean>;
   }
 
   /**
