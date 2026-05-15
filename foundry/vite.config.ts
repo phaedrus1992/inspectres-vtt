@@ -35,8 +35,7 @@ function walkDirectory(
   try {
     files = fs.readdirSync(dir);
   } catch (err: unknown) {
-    const message = extractErrorMessage(err);
-    throw new Error(`Failed to read directory ${dir}: ${message}`);
+    throw new Error(`Failed to read directory ${dir}: ${extractErrorMessage(err)}`, { cause: err });
   }
   for (const file of files) {
     const filePath = path.join(dir, file);
@@ -44,19 +43,16 @@ function walkDirectory(
     try {
       stat = fs.statSync(filePath);
     } catch (err: unknown) {
-      const message = extractErrorMessage(err);
-      throw new Error(`Failed to stat file ${filePath}: ${message}`);
+      throw new Error(`Failed to stat file ${filePath}: ${extractErrorMessage(err)}`, { cause: err });
     }
     if (stat.isDirectory()) {
       walkDirectory(filePath, callback, options, depth + 1);
     } else if (!filter || filter(file)) {
-      // Filter function tests the file name only (e.g., name.endsWith(".css")).
-      // If no filter provided, all files are processed. Otherwise, only matching files proceed.
+      // Filter tests file name only (e.g., name.endsWith(".css")).
       try {
         callback(filePath);
       } catch (err: unknown) {
-        const message = extractErrorMessage(err);
-        throw new Error(`Failed to process file ${filePath}: ${message}`);
+        throw new Error(`Failed to process file ${filePath}: ${extractErrorMessage(err)}`, { cause: err });
       }
     }
   }
@@ -100,8 +96,7 @@ export default defineConfig({
             source: systemJson,
           });
         } catch (err: unknown) {
-          const message = extractErrorMessage(err);
-          throw new Error(`Failed to read system.json: ${message}`);
+          throw new Error(`Failed to read system.json: ${extractErrorMessage(err)}`, { cause: err });
         }
 
         // Copy template.json (required)
@@ -117,8 +112,7 @@ export default defineConfig({
             source: templateJson,
           });
         } catch (err: unknown) {
-          const message = extractErrorMessage(err);
-          throw new Error(`Failed to read template.json: ${message}`);
+          throw new Error(`Failed to read template.json: ${extractErrorMessage(err)}`, { cause: err });
         }
 
         // Copy styles (including theme subdirectory)
@@ -134,60 +128,46 @@ export default defineConfig({
                   const content = fs.readFileSync(filePath, "utf-8");
                   this.emitFile({ type: "asset", fileName: outPath, source: content });
                 } catch (err: unknown) {
-                  throw new Error(`Failed to read CSS file ${filePath}: ${extractErrorMessage(err)}`);
+                  throw new Error(`Failed to read CSS file ${filePath}: ${extractErrorMessage(err)}`, { cause: err });
                 }
               },
               { filter: (name) => name.endsWith(".css") },
             );
           };
-          try {
-            emitStyleFiles(stylesDir);
-          } catch (err: unknown) {
-            const message = extractErrorMessage(err);
-            throw new Error(`Failed to copy styles: ${message}`);
-          }
+          // walkDirectory already wraps errors with file context; let them propagate.
+          emitStyleFiles(stylesDir);
         }
 
         // Copy lang
         const langDir = path.resolve(__dirname, "src/lang");
         if (fs.existsSync(langDir)) {
-          try {
-            walkDirectory(langDir, (filePath) => {
-              const file = path.basename(filePath);
-              try {
-                const content = fs.readFileSync(filePath, "utf-8");
-                this.emitFile({ type: "asset", fileName: `lang/${file}`, source: content });
-              } catch (err: unknown) {
-                throw new Error(`Failed to read lang file ${filePath}: ${extractErrorMessage(err)}`);
-              }
-            });
-          } catch (err: unknown) {
-            const message = extractErrorMessage(err);
-            throw new Error(`Failed to copy lang: ${message}`);
-          }
+          walkDirectory(langDir, (filePath) => {
+            const file = path.basename(filePath);
+            try {
+              const content = fs.readFileSync(filePath, "utf-8");
+              this.emitFile({ type: "asset", fileName: `lang/${file}`, source: content });
+            } catch (err: unknown) {
+              throw new Error(`Failed to read lang file ${filePath}: ${extractErrorMessage(err)}`, { cause: err });
+            }
+          });
         }
 
         // Copy Handlebars templates
         const templatesDir = path.resolve(__dirname, "src");
         if (fs.existsSync(templatesDir)) {
-          try {
-            walkDirectory(
-              templatesDir,
-              (filePath) => {
-                const fileName = path.basename(filePath);
-                try {
-                  const content = fs.readFileSync(filePath, "utf-8");
-                  this.emitFile({ type: "asset", fileName: `templates/${fileName}`, source: content });
-                } catch (err: unknown) {
-                  throw new Error(`Failed to read template file ${filePath}: ${extractErrorMessage(err)}`);
-                }
-              },
-              { filter: (name) => name.endsWith(".hbs") && name !== "styles" && name !== "lang" },
-            );
-          } catch (err: unknown) {
-            const message = extractErrorMessage(err);
-            throw new Error(`Template build failed: ${message}`);
-          }
+          walkDirectory(
+            templatesDir,
+            (filePath) => {
+              const fileName = path.basename(filePath);
+              try {
+                const content = fs.readFileSync(filePath, "utf-8");
+                this.emitFile({ type: "asset", fileName: `templates/${fileName}`, source: content });
+              } catch (err: unknown) {
+                throw new Error(`Failed to read template file ${filePath}: ${extractErrorMessage(err)}`, { cause: err });
+              }
+            },
+            { filter: (name) => name.endsWith(".hbs") && name !== "styles" && name !== "lang" },
+          );
         }
 
         // Copy compiled packs (LevelDB output from `npm run pack`)
