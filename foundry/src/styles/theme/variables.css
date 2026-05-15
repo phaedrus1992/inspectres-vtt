@@ -29,6 +29,14 @@
   --inspectres-orange-darker: #cc7000; /* die failure border, accent on orange surfaces */
   --inspectres-orange-darkest: #994c00; /* danger button :active state */
 
+  /* RGB components — for variable-alpha overlay construction via rgba().
+     Mirrors each base color above. Keep in sync with the hex value. */
+  --inspectres-white-rgb: 255, 255, 255;
+  --inspectres-black-rgb: 0, 0, 0;
+  --inspectres-green-dark-rgb: 56, 180, 74;
+  --inspectres-orange-bright-rgb: 255, 140, 0;   /* base for orange overlays */
+  --inspectres-warn-amber-rgb: 255, 193, 7;      /* base for warn/amber overlays */
+
   /* --- SEMANTIC TOKENS (Purpose-driven, map palette to use cases) --- */
 
   /* Backgrounds */
@@ -70,9 +78,9 @@
   --inspectres-status-error: var(--inspectres-orange);
 
   /* Shadows & Depth */
-  --inspectres-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --inspectres-shadow-md: 0 2px 4px rgba(0, 0, 0, 0.1);
-  --inspectres-shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.15);
+  --inspectres-shadow-sm: 0 1px 2px rgba(var(--inspectres-black-rgb), 0.05);
+  --inspectres-shadow-md: 0 2px 4px rgba(var(--inspectres-black-rgb), 0.1);
+  --inspectres-shadow-lg: 0 4px 8px rgba(var(--inspectres-black-rgb), 0.15);
 
   /* Spacing (optional, for consistency) */
   --inspectres-space-xs: 4px;
@@ -91,16 +99,16 @@
   );
 
   /* Focus ring (semi-transparent green for input focus states) */
-  --inspectres-focus-ring: rgba(56, 180, 74, 0.2);
+  --inspectres-focus-ring: rgba(var(--inspectres-green-dark-rgb), 0.2);
 
   /* Orange overlay (semi-transparent orange for death mode background) */
-  --inspectres-orange-overlay: rgba(255, 140, 0, 0.05);
+  --inspectres-orange-overlay: rgba(var(--inspectres-orange-bright-rgb), 0.05);
 
   /* Orange overlay darker (for death mode header background) */
-  --inspectres-orange-overlay-dark: rgba(255, 140, 0, 0.1);
+  --inspectres-orange-overlay-dark: rgba(var(--inspectres-orange-bright-rgb), 0.1);
 
   /* Warn (yellow) overlays for roll outcomes */
-  --inspectres-warn-overlay-light: rgba(255, 193, 7, 0.05);
+  --inspectres-warn-overlay-light: rgba(var(--inspectres-warn-amber-rgb), 0.05);
 
   /* --- V2 SHEET COMPATIBILITY (used in inspectres.css) --- */
 
@@ -135,7 +143,7 @@
   --inspectres-warn-bg: #fffacd;
   --inspectres-warn-border: #f0e68c;
   --inspectres-warn-text: #333333;
-  --inspectres-warn-overlay-medium: rgba(255, 193, 7, 0.15);
+  --inspectres-warn-overlay-medium: rgba(var(--inspectres-warn-amber-rgb), 0.15);
 
   /* Death/Status colors */
   --inspectres-dead-bg: #ffe8e8;
@@ -148,10 +156,29 @@
   --inspectres-inactive: #e8e8e8;
 
   /* Warn overlay variants */
-  --inspectres-warn-overlay-dark: rgba(255, 193, 7, 0.15);
+  --inspectres-warn-overlay-dark: rgba(var(--inspectres-warn-amber-rgb), 0.15);
 
   /* Green overlay light (for recovering status background) */
-  --inspectres-focus-ring-light: rgba(56, 180, 74, 0.1);
+  --inspectres-focus-ring-light: rgba(var(--inspectres-green-dark-rgb), 0.1);
+
+  /* Green overlays for inline roll cards and toast variants */
+  --inspectres-green-overlay-faint: rgba(var(--inspectres-green-dark-rgb), 0.05);   /* roll card gradients, toast info */
+  --inspectres-green-overlay-soft: rgba(var(--inspectres-green-dark-rgb), 0.08);    /* toast success */
+  --inspectres-green-overlay-medium: rgba(var(--inspectres-green-dark-rgb), 0.15);  /* inline-roll-card.good background */
+  --inspectres-green-overlay-strong: rgba(var(--inspectres-green-dark-rgb), 0.2);   /* positive roll modifier background */
+
+  /* Black overlays — neutral darkening/scrim */
+  --inspectres-black-overlay-faint: rgba(var(--inspectres-black-rgb), 0.05);    /* system message header */
+  --inspectres-black-overlay-soft: rgba(var(--inspectres-black-rgb), 0.1);      /* neutral roll modifier background */
+  --inspectres-black-overlay-medium: rgba(var(--inspectres-black-rgb), 0.15);   /* inset shadow on active buttons */
+
+  /* White header overlays — semi-transparent white for inputs against gradient header background */
+  --inspectres-header-input-bg: rgba(var(--inspectres-white-rgb), 0.12);
+  --inspectres-header-input-border: rgba(var(--inspectres-white-rgb), 0.25);
+  --inspectres-header-input-border-focus: rgba(var(--inspectres-white-rgb), 0.6);
+  --inspectres-header-portrait-border: rgba(var(--inspectres-white-rgb), 0.35);
+  --inspectres-header-placeholder: rgba(var(--inspectres-white-rgb), 0.5);
+  --inspectres-header-text-muted: rgba(var(--inspectres-white-rgb), 0.6);
 
   /* Select dropdown SVG icon (down chevron) */
   --inspectres-select-arrow: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3e%3cpath fill='%23000' d='M1 1l5 5 5-5'/%3e%3c/svg%3e");

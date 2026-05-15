@@ -391,7 +391,7 @@
 .inspectres textarea.success,
 .inspectres select.success {
   border-color: var(--inspectres-green-dark);
-  box-shadow: 0 0 0 2px rgba(56, 180, 74, 0.1);
+  box-shadow: 0 0 0 2px var(--inspectres-focus-ring-light);
 }
 
 /* Warning state */
