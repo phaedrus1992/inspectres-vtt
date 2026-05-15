@@ -470,7 +470,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
           label: i18n?.localize("INSPECTRES.DialogSet") ?? "Set",
           default: true,
           callback: (_event: Event, _button: HTMLButtonElement, dialog: foundry.applications.api.DialogV2) => {
-            const form = dialog.element.querySelector("form") as HTMLFormElement | null;
+            const form = dialog.element.querySelector("form");
             if (!form) return null;
             const days = Math.max(1, Math.min(10, Number(new FormData(form).get("days") ?? 2)));
             return { days: Number.isNaN(days) ? 2 : days };
@@ -560,7 +560,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
           label: i18n?.localize("INSPECTRES.DialogRestore") ?? "Restore",
           default: true,
           callback: (_event: Event, _button: HTMLButtonElement, dialog: foundry.applications.api.DialogV2) => {
-            const form = dialog.element.querySelector("form") as HTMLFormElement | null;
+            const form = dialog.element.querySelector("form");
             if (!form) return null;
             const cool = Math.max(1, Math.min(maxCool, Number(new FormData(form).get("cool") ?? 1)));
             return { cool: Number.isNaN(cool) ? 1 : cool };

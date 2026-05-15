@@ -88,7 +88,7 @@ export async function buildVacationDialog(options: VacationOptions): Promise<Vac
         label: game.i18n?.localize("INSPECTRES.ButtonSpendBank") ?? "Spend Bank & Recover",
         default: true,
         callback: (_event, _button, dialog) => {
-          const form = dialog.element.querySelector("form") as HTMLFormElement | null;
+          const form = dialog.element.querySelector("form");
           if (!form) return null;
           const data = new FormData(form);
           const bankSpendRaw = Number(data.get("bankSpend") ?? 0);
@@ -116,7 +116,7 @@ export async function buildVacationDialog(options: VacationOptions): Promise<Vac
       {
         action: "skip",
         label: game.i18n?.localize("INSPECTRES.ButtonSkipVacation") ?? "Skip Vacation",
-        callback: (): VacationResult | null => null,
+        callback: () => null,
       },
     ],
   });

@@ -60,7 +60,7 @@ export async function buildDistributionConfig(opts: DistributionDialogOptions): 
         label: game.i18n?.localize("INSPECTRES.DistributeDialogConfirm") ?? "Confirm",
         default: true,
         callback: (_event: Event, _button: HTMLButtonElement, dialog: foundry.applications.api.DialogV2) => {
-          const form = dialog.element.querySelector("form") as HTMLFormElement | null;
+          const form = dialog.element.querySelector("form");
           if (!form) return null;
           const data = new FormData(form);
           const distribution: Record<string, number> = {};

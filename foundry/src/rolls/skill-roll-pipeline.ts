@@ -1,14 +1,10 @@
 import { stopDialogSubmitPropagation } from "../utils/dialog-utils.js";
+import { createChatMessage } from "../utils/fvtt-boundary.js";
 import type { RollActor } from "./roll-executor.js";
 
 interface DialogResult {
   diceCount?: unknown;
   [key: string]: unknown;
-}
-
-interface Roll {
-  total: number;
-  evaluate(): Promise<Roll>;
 }
 
 type RollOutcome = "good" | "partial" | "bad";
@@ -22,19 +18,16 @@ export async function executeSkillRoll(
   if (!config) return;
 
   const diceCount = Number(config["diceCount"]) || 2;
-  const roll = await evaluateRoll(`${diceCount}d6`);
-  const outcome = determineOutcome(roll.total);
+  const roll = await new Roll(`${diceCount}d6`).evaluate();
+  const total = roll.total ?? 0;
+  const outcome = determineOutcome(total);
 
-  await postRollMessage(actor, skillName, outcome, roll.total);
+  await postRollMessage(actor, skillName, outcome, total);
 }
 
 /** Open a dialog to configure roll parameters (dice count). */
 async function openRollDialog(skillName: string): Promise<DialogResult | null> {
-  const g = globalThis as unknown as Record<string, unknown>;
-  const foundry = g["foundry"] as unknown as {
-    applications: { api: { DialogV2: { wait: Function } } };
-  };
-  const result = (await foundry.applications.api.DialogV2.wait({
+  const result = await foundry.applications.api.DialogV2.wait({
     window: { title: `Roll ${skillName}` },
     content: `<div><input type="number" name="diceCount" value="2"></div>`,
     render: stopDialogSubmitPropagation,
@@ -42,24 +35,15 @@ async function openRollDialog(skillName: string): Promise<DialogResult | null> {
       {
         action: "roll",
         label: "Roll",
-        callback: (_event: Event, _button: unknown, dialog: { element: HTMLElement }) => {
-          const form = dialog.element.querySelector("form") as HTMLFormElement | null;
+        callback: (_event, _button, dialog) => {
+          const form = dialog.element.querySelector("form");
           if (!form) return null;
           return Object.fromEntries(new FormData(form));
         },
       },
     ],
-  })) as unknown;
-  return (result as Record<string, unknown> | null) ?? null;
-}
-
-/** Evaluate a roll formula using Foundry's Roll class. */
-async function evaluateRoll(formula: string): Promise<Roll> {
-  const g = globalThis as unknown as { Roll: new (f: string) => Roll };
-  const roll = new g.Roll(formula);
-  const rollAny = roll as unknown as Record<string, unknown>;
-  const evaluated = await (rollAny["evaluate"] as () => Promise<unknown>)();
-  return evaluated as Roll;
+  });
+  return (result as DialogResult | null) ?? null;
 }
 
 /** Determine outcome (bad/partial/good) based on dice total. */
@@ -76,11 +60,7 @@ async function postRollMessage(
   outcome: RollOutcome,
   total: number,
 ): Promise<void> {
-  const g = globalThis as unknown as Record<string, unknown>;
-  const chatMessage = g["ChatMessage"] as unknown as {
-    create: (data: Record<string, unknown>) => Promise<unknown>;
-  };
-  await chatMessage.create({
+  await createChatMessage({
     content: `Rolled ${total}`,
     speaker: { actor: actor.id },
     flags: {

@@ -28,7 +28,7 @@ export async function buildStressRollDialog(agent: Actor): Promise<void> {
         label: i18n?.localize("INSPECTRES.DialogRoll") ?? "Roll",
         default: true,
         callback: (_event: Event, _button: HTMLButtonElement, dialog: foundry.applications.api.DialogV2) => {
-          const form = dialog.element.querySelector("form") as HTMLFormElement | null;
+          const form = dialog.element.querySelector("form");
           if (!form) {
             getDevLogger().error("agent-sheet", "buildStressRollDialog: form element not found in dialog");
             return null;
