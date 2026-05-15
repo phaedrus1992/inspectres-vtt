@@ -55,18 +55,16 @@ describe("confessional-ui validation", () => {
     });
   });
 
-  describe("RED: Error handling (future: Foundry API integration)", () => {
-    it.skip("throws on load when scene does not exist in world", async () => {
-      // #330: P0 blocker — TODO: Add Foundry scene validation in loadConfessionalScene
-      // Requires game.scenes?.get(sceneId) API call
-      // Currently: no validation, just stores scene ID in memory
+  describe("RED: Error handling (Foundry API integration)", () => {
+    it("throws on load when scene does not exist in world", async () => {
+      // #579: Foundry scene validation in loadConfessionalScene
+      // Checks game.scenes?.get(sceneId) — validated in confessional-ui.ts lines 17-20
       await expect(loadConfessionalScene("nonexistent-scene")).rejects.toThrow(/not found/i);
     });
 
-    it.skip("throws on return when home scene does not exist", async () => {
-      // #330: P0 blocker — TODO: Add Foundry scene validation in returnFromConfessional
-      // Requires game.scenes?.get(homeSceneId) API call
-      // Currently: no validation
+    it("throws on return when home scene does not exist", async () => {
+      // #579: Foundry scene validation in returnFromConfessional
+      // Checks game.scenes?.get(homeSceneId) — validated in confessional-ui.ts lines 38-41
       await expect(returnFromConfessional("invalid-scene-id", "confessional-id")).rejects.toThrow(
         /not found/i,
       );
