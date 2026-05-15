@@ -35,11 +35,22 @@ export interface RollToken {
 
 interface SceneRegistry {
   scenes?: { get(id: string): RollScene | null };
+  user?: { isGM: boolean };
 }
 
 function getScene(id: string): RollScene | null {
   const registry = globalThis as unknown as { game?: SceneRegistry };
   return registry.game?.scenes?.get(id) ?? null;
+}
+
+// Token moves require GM permission in Foundry. Asserting at the boundary
+// surfaces a clear error instead of letting Foundry's create/delete reject silently.
+function assertGm(operation: string): void {
+  const registry = globalThis as unknown as { game?: SceneRegistry };
+  const isGm = registry.game?.user?.isGM ?? true; // tests run without game.user; default-allow there
+  if (!isGm) {
+    throw new Error(`${operation} requires GM permission`);
+  }
 }
 
 async function moveToken(token: TokenDocument, targetScene: RollScene, x?: number, y?: number): Promise<void> {
@@ -56,6 +67,7 @@ export async function transitionToConfessionalScene(
   scene: RollScene,
   agents?: RollActor[],
 ): Promise<SceneTransitionResult> {
+  assertGm("transitionToConfessionalScene");
   await scene.activate();
 
   const agentsMoved: string[] = [];
@@ -80,6 +92,7 @@ export async function resetConfessionalScene(
   agent: RollActor,
   originalSceneId: string,
 ): Promise<AgentResetResult> {
+  assertGm("resetConfessionalScene");
   const originalScene = getScene(originalSceneId);
   if (!originalScene) {
     return {

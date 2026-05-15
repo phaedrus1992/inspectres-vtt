@@ -71,6 +71,7 @@ describe("Confessional Scene Transitions", () => {
     confessionalScene = makeFakeScene("scene-confessional", "Confessional", created);
 
     (globalThis as Record<string, unknown>)["game"] = {
+      user: { isGM: true },
       scenes: {
         get: (id: string) => {
           if (id === "scene-original") return originalScene;

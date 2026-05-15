@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { prepareSkillRollContext } from "../agent/skill-roll-dialog.js";
 import { checkTechnologyRollRequirements } from "../rolls/skill-roll-executor.js";
 import { transitionToConfessionalScene, resetConfessionalScene, type RollScene } from "./confessional-scene.js";
@@ -43,6 +43,15 @@ interface MissionContext {
 }
 
 describe("Collaboration Mechanics E2E", () => {
+  // Scene-token operations require GM permission; tests run in GM context.
+  let savedGame: unknown;
+  beforeEach(() => {
+    savedGame = (globalThis as Record<string, unknown>)["game"];
+  });
+  afterEach(() => {
+    (globalThis as Record<string, unknown>)["game"] = savedGame;
+  });
+
   describe("Private Life + Requirements + Confessional", () => {
     it("gates augmentations for private-life roll", () => {
       const context: MissionContext = {
@@ -84,6 +93,7 @@ describe("Collaboration Mechanics E2E", () => {
     });
 
     it("transitions agents to confessional scene", async () => {
+      (globalThis as Record<string, unknown>)["game"] = { user: { isGM: true } };
       // Create test token to track scene updates
       const testToken = new TestToken("token-1", "scene-original");
 
@@ -105,6 +115,7 @@ describe("Collaboration Mechanics E2E", () => {
       // Mock Foundry global
       const originalScene = makeFakeScene("scene-original", "Original");
       (globalThis as Record<string, unknown>)["game"] = {
+        user: { isGM: true },
         scenes: { get: (id: string) => (id === "scene-original" ? originalScene : null) },
       };
 
@@ -126,6 +137,7 @@ describe("Collaboration Mechanics E2E", () => {
       // Mock Foundry global for confessional reset
       const originalSceneForComplex = makeFakeScene("scene-original", "Original");
       (globalThis as Record<string, unknown>)["game"] = {
+        user: { isGM: true },
         scenes: { get: (id: string) => (id === "scene-original" ? originalSceneForComplex : null) },
       };
 
