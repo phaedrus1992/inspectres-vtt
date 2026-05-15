@@ -22,34 +22,14 @@ import { stopDialogSubmitPropagation } from "../utils/dialog-utils.js";
 import { updateDocument, createChatMessage } from "../utils/fvtt-boundary.js";
 import { getDevLogger } from "../utils/dev-logger.js";
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export type SkillName = "academics" | "athletics" | "technology" | "contact";
-
-export type RollType = "skill" | "bank" | "stress" | "client";
-type D3Result = 1 | 2 | 3;
-
-type DieFace = 1 | 2 | 3 | 4 | 5 | 6;
-
-export interface BankDieResolution {
-  face: DieFace;
-  result: string;
-  narration: string;
-  bankDelta: number;
-  loseAllBank: boolean;
-}
-
-export interface BankResolutionSummary {
-  resolutions: BankDieResolution[];
-  finalBankTotal: number;
-}
-
-export interface StressRollParams {
-  stressDiceCount: number;
-  coolDiceUsed: number;
-}
+export {
+  type SkillName,
+  type RollType,
+  type BankDieResolution,
+  type BankResolutionSummary,
+  type StressRollParams,
+} from "./roll-types.js";
+import { type SkillName, type BankDieResolution, type BankResolutionSummary, type StressRollParams, type DieFace, type D3Result } from "./roll-types.js";
 
 
 // ---------------------------------------------------------------------------
