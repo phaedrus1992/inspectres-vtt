@@ -82,7 +82,7 @@
     width: 52px;
     height: 52px;
     border-radius: var(--inspectres-radius-lg);
-    border: 2px solid rgba(255, 255, 255, 0.35);
+    border: 2px solid var(--inspectres-header-portrait-border);
     object-fit: cover;
     flex-shrink: 0;
   }
@@ -92,24 +92,29 @@
     min-width: 0;
   }
 
-  h1 {
+  /* Header h1/input rules need higher specificity than Foundry's default
+     window-content input styling. Compounding `&.inspectres-header` doubles
+     the header class in the selector chain, bumping us comfortably past
+     Foundry's `.window-content input` (0,2,1) so we can drop `!important`
+     from theming rules. See issue #560. */
+  &.inspectres-header h1 {
     margin: 0 0 0.2rem;
     font-size: 1rem;
     line-height: 1;
-    color: white;
+    color: var(--inspectres-white);
 
     input[type="text"] {
       width: 100%;
       font-size: 1.05rem;
       font-weight: 700;
       letter-spacing: 0.02em;
-      color: white !important;
-      background: rgba(255, 255, 255, 0.12) !important;
-      border-color: rgba(255, 255, 255, 0.25) !important;
+      color: var(--inspectres-white);
+      background: var(--inspectres-header-input-bg);
+      border-color: var(--inspectres-header-input-border);
       padding: 0.2rem 0.4rem;
 
-      &::placeholder { color: rgba(255, 255, 255, 0.5); }
-      &:focus { border-color: rgba(255, 255, 255, 0.6) !important; box-shadow: none; }
+      &::placeholder { color: var(--inspectres-header-placeholder); }
+      &:focus { border-color: var(--inspectres-header-input-border-focus); box-shadow: none; }
     }
   }
 
@@ -119,7 +124,7 @@
     font-weight: 600;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--inspectres-header-text-muted);
   }
 
   /* Franchise header has no portrait — h1 must stretch to fill available width */
@@ -861,6 +866,12 @@ details > summary {
 
 /* ─── DialogV2 create-document dialog ──────────────────────────────────── */
 
+/* Foundry V13's CreateDocumentDialog sizes itself by writing an explicit pixel
+   height to the .application element's inline style after first layout. The
+   resulting box is too short for our document-type selector (clips the form).
+   Inline styles can only be defeated by !important — this isn't a theming
+   override, it's a sizing reset against a Foundry-computed inline value. See
+   issue #562. */
 .application:has(form.dialog-form) {
   height: auto !important;
 }

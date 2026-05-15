@@ -22,7 +22,7 @@
   border-left-color: var(--inspectres-green-dark);
   background: linear-gradient(
     90deg,
-    rgba(56, 180, 74, 0.05) 0%,
+    var(--inspectres-green-overlay-faint) 0%,
     var(--inspectres-white) 20%
   );
 }
@@ -126,7 +126,7 @@
 }
 
 .inspectres .chat-message.system .message-header {
-  background: rgba(0, 0, 0, 0.05);
+  background: var(--inspectres-black-overlay-faint);
 }
 
 .inspectres .chat-message.system .message-sender {
@@ -221,7 +221,7 @@
   border-left-color: var(--inspectres-green-dark);
   background: linear-gradient(
     90deg,
-    rgba(56, 180, 74, 0.05) 0%,
+    var(--inspectres-green-overlay-faint) 0%,
     var(--inspectres-white) 20%
   );
 }
@@ -248,7 +248,7 @@
   border-left-color: var(--inspectres-green-dark);
   background: linear-gradient(
     90deg,
-    rgba(56, 180, 74, 0.08) 0%,
+    var(--inspectres-green-overlay-soft) 0%,
     var(--inspectres-white) 20%
   );
 }
@@ -329,7 +329,7 @@
 }
 
 .inspectres .inline-roll-card.good {
-  background: rgba(56, 180, 74, 0.15);
+  background: var(--inspectres-green-overlay-medium);
   border-color: var(--inspectres-green-dark);
   color: var(--inspectres-green-dark);
 }
@@ -420,7 +420,7 @@
 }
 
 .inspectres .roll-modifier.positive {
-  background: rgba(56, 180, 74, 0.2);
+  background: var(--inspectres-green-overlay-strong);
   color: var(--inspectres-green-dark);
 }
 
@@ -430,6 +430,6 @@
 }
 
 .inspectres .roll-modifier.neutral {
-  background: rgba(0, 0, 0, 0.1);
+  background: var(--inspectres-black-overlay-soft);
   color: var(--inspectres-text-primary);
 }
