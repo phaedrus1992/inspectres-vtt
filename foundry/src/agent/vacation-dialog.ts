@@ -80,7 +80,6 @@ export async function buildVacationDialog(options: VacationOptions): Promise<Vac
 
   const result = await foundry.applications.api.DialogV2.wait({
     window: { title: game.i18n?.localize("INSPECTRES.DialogVacationTitle") ?? "Vacation" },
-    position: { width: 450, height: 380 },
     render: stopDialogSubmitPropagation,
     content: formHtml,
     buttons: [

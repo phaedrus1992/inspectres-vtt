@@ -52,9 +52,6 @@ async function getPlayerPenaltyChoice(
 
   const result = await foundry.applications.api.DialogV2.wait({
     window: { title: game.i18n?.localize("INSPECTRES.PenaltyDialogTitle") ?? "Stress Penalty" },
-    // #587: Constrain penalty dialog to content height (prevents viewport stretch).
-    // 280px accommodates prompt + skill radio options + buttons + padding.
-    position: { height: 280 },
     // #551: modal so the penalty dialog renders above the agent sheet that opened it.
     modal: true,
     rejectClose: false,

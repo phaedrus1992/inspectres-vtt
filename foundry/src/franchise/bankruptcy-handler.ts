@@ -41,7 +41,6 @@ export async function enterDebtMode(franchiseActor: Actor, attemptedSpend: numbe
 
   const borrowResult = await foundry.applications.api.DialogV2.wait({
     window: { title: game.i18n?.localize("INSPECTRES.DialogBankruptcyTitle") ?? "Franchise Bankrupt" },
-    position: { width: 450, height: 380 },
     render: stopDialogSubmitPropagation,
     content: `
       <div>
