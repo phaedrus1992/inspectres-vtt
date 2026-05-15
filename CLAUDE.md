@@ -56,6 +56,7 @@ Patterns split by domain. Each file scoped to specific paths:
 | `enums-and-magic-strings.md` | `**/*.ts` `**/*.hbs` | Avoid magic strings; prefer enums, especially templates |
 | `temporary-work.md` | `.tmp/**` | Scratch files, logs, reports, build artifacts |
 | `changelog.md` | `CHANGELOG.md` | Semver & changelog format |
+| `no-bug-left-behind.md` | all | "Pre-existing" is not a deferral excuse — fix scanner findings in files the branch touches |
 
 Auto-loaded by Claude Code. Supplement main CLAUDE.md.
 
