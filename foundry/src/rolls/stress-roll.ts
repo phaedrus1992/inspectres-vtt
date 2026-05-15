@@ -53,14 +53,18 @@ async function getPlayerPenaltyChoice(
   const result = await foundry.applications.api.DialogV2.wait({
     window: { title: game.i18n?.localize("INSPECTRES.PenaltyDialogTitle") ?? "Stress Penalty" },
     classes: ["inspectres"],
+    // #551: modal so the penalty dialog renders above the agent sheet that opened it.
+    modal: true,
     rejectClose: false,
     render: stopDialogSubmitPropagation,
     content,
     buttons: [
       {
+        // #553: No `default: true` — V13 routes X-close through the default button's
+        // callback, which would read the pre-checked first radio and silently apply a
+        // penalty. Without a default, X-close resolves to null and the cancel branch runs.
         action: "select",
         label: game.i18n?.localize("INSPECTRES.DialogOK") ?? "OK",
-        default: true,
         callback: (_event: Event, _button: HTMLButtonElement, dialog: foundry.applications.api.DialogV2) => {
           const form = dialog.element.querySelector("form") as HTMLFormElement | null;
           if (!form) return null;
