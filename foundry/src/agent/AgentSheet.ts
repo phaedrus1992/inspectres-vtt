@@ -9,6 +9,7 @@ import { executeSkillRoll, executeStressRoll, SKILL_NAMES, type SkillName } from
 import { agentSystemData } from "./agent-system-data.js";
 import { findFranchiseActor, franchiseSystemData } from "../franchise/franchise-utils.js";
 import { handleActionError } from "../utils/ui-errors.js";
+import { getDevLogger } from "../utils/dev-logger.js";
 import { activateTabs } from "../utils/sheet-tabs.js";
 import { getOrCreateListenerController } from "../utils/listener-cleanup.js";
 import { computeRecoveryStatus, getCurrentDay } from "./recovery-utils.js";
@@ -71,7 +72,7 @@ async function buildStressRollDialog(agent: Actor): Promise<void> {
         callback: (_event: Event, _button: HTMLButtonElement, dialog: foundry.applications.api.DialogV2) => {
           const form = dialog.element.querySelector("form") as HTMLFormElement | null;
           if (!form) {
-            console.error("buildStressRollDialog: form element not found in dialog");
+            getDevLogger().error("agent-sheet", "buildStressRollDialog: form element not found in dialog");
             return null;
           }
           const data = new FormData(form);
@@ -190,13 +191,11 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
         //   Prevent >1 weird per group
         // }
         void updateDocument(this.actor, { "system.isWeird": target.checked }).catch((err: unknown) => {
-          const message = err instanceof Error ? err.message : String(err);
-          console.error("Failed to toggle weird status for agent", {
+          getDevLogger().error("agent-sheet", "Failed to toggle weird status for agent", {
             actorId: this.actor.id,
             actorName: this.actor.name,
             targetValue: target.checked,
-            error: err,
-            errorMessage: message,
+            error: err instanceof Error ? err.message : String(err),
           });
           handleActionError(err, "Failed to toggle weird status", "INSPECTRES.ErrorUpdateFailed", "Failed to update actor data");
         });
@@ -208,13 +207,11 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
       el.addEventListener("change", (event: Event) => {
         const target = event.target as HTMLInputElement;
         void AgentSheet.onOverrideRecoveryDay.call(this, event, target).catch((err: unknown) => {
-          const message = err instanceof Error ? err.message : String(err);
-          console.error("Failed to override recovery day for agent", {
+          getDevLogger().error("agent-sheet", "Failed to override recovery day for agent", {
             actorId: this.actor.id,
             actorName: this.actor.name,
             targetValue: target.value,
-            error: err,
-            errorMessage: message,
+            error: err instanceof Error ? err.message : String(err),
           });
           handleActionError(err, "Failed to override recovery day", "INSPECTRES.ErrorUpdateFailed", "Could not update recovery");
         });
@@ -227,13 +224,11 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
         const target = event.currentTarget as unknown as { value?: number };
         const value = Math.max(0, Math.min(6, target.value ?? 0));
         void updateDocument(this.actor, { "system.stress": value }).catch((err: unknown) => {
-          const message = err instanceof Error ? err.message : String(err);
-          console.error("Failed to update stress for agent", {
+          getDevLogger().error("agent-sheet", "Failed to update stress for agent", {
             actorId: this.actor.id,
             actorName: this.actor.name,
             stressValue: value,
-            error: err,
-            errorMessage: message,
+            error: err instanceof Error ? err.message : String(err),
           });
           handleActionError(err, "Failed to update stress", "INSPECTRES.ErrorUpdateFailed", "Could not update stress");
         });
@@ -244,7 +239,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
   static async onSkillRoll(this: AgentSheet, _event: Event, target: HTMLElement): Promise<void> {
     const skillAttr = target.dataset["skill"] ?? null;
     if (!isSkillName(skillAttr)) {
-      console.error("onSkillRoll: missing or invalid data-skill attribute", { skillAttr });
+      getDevLogger().error("agent-sheet", "onSkillRoll: missing or invalid data-skill attribute", { skillAttr });
       return;
     }
     const system = agentSystemData(this.actor);
@@ -294,7 +289,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     if (!this.isEditable) return;
     const skillAttr = target.dataset["skill"] ?? null;
     if (!isSkillName(skillAttr)) {
-      console.error("onSkillStep: missing or invalid data-skill attribute", { skillAttr });
+      getDevLogger().error("agent-sheet", "onSkillStep: missing or invalid data-skill attribute", { skillAttr });
       return;
     }
     const system = agentSystemData(this.actor);
@@ -305,7 +300,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     }
     const skillData = system.skills[skillAttr];
     if (!skillData) {
-      console.error("onSkillStep: skill data missing", { skillAttr, actorId: this.actor.id });
+      getDevLogger().error("agent-sheet", "onSkillStep: skill data missing", { skillAttr, actorId: this.actor.id });
       return;
     }
     const current = skillData.base;
@@ -321,12 +316,12 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     if (!this.isEditable) return;
     const valueStr = target.dataset["value"];
     if (valueStr == null) {
-      console.error("onToggleCool: missing data-value attribute");
+      getDevLogger().error("agent-sheet", "onToggleCool: missing data-value attribute");
       return;
     }
     const pipValue = Number(valueStr);
     if (Number.isNaN(pipValue) || pipValue < 1 || pipValue > 3) {
-      console.error("onToggleCool: invalid data-value", { valueStr });
+      getDevLogger().error("agent-sheet", "onToggleCool: invalid data-value", { valueStr });
       return;
     }
     const system = agentSystemData(this.actor);
@@ -360,12 +355,12 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     if (!this.isEditable) return;
     const idxStr = target.dataset["idx"] ?? null;
     if (idxStr == null) {
-      console.error("onRemoveCharacteristic: missing data-idx attribute");
+      getDevLogger().error("agent-sheet", "onRemoveCharacteristic: missing data-idx attribute");
       return;
     }
     const idx = Number(idxStr);
     if (Number.isNaN(idx) || idx < 0) {
-      console.error("onRemoveCharacteristic: invalid data-idx value", { idxStr });
+      getDevLogger().error("agent-sheet", "onRemoveCharacteristic: invalid data-idx value", { idxStr });
       return;
     }
     const currentSystem = agentSystemData(this.actor);
@@ -587,7 +582,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     if (!this.isEditable) return;
     const skillAttr = target.dataset["skill"] ?? null;
     if (!isSkillName(skillAttr)) {
-      console.error("onRestoreSkill: missing or invalid data-skill attribute", { skillAttr });
+      getDevLogger().error("agent-sheet", "onRestoreSkill: missing or invalid data-skill attribute", { skillAttr });
       return;
     }
     const system = agentSystemData(this.actor);
