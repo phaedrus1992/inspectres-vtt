@@ -223,6 +223,7 @@
 .inspectres input[type="radio"] {
   appearance: none;
   -webkit-appearance: none;
+  -moz-appearance: none;
   width: 1em;
   height: 1em;
   margin: 0;
@@ -236,6 +237,7 @@
   display: inline-grid;
   place-content: center;
   flex-shrink: 0;
+  /* #585: ensure no native control renders alongside custom ::before overlay */
 }
 
 .inspectres input[type="checkbox"] {
