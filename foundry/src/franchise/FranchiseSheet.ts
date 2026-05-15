@@ -12,6 +12,10 @@ import { applyEndOfSessionBonuses, initiateBankruptcyRestart } from "./vacation-
 import { stopDialogSubmitPropagation } from "../utils/dialog-utils.js";
 import { updateDocument, createChatMessage } from "../utils/fvtt-boundary.js";
 
+// #552: per-sheet pending focus name, kept in a WeakMap to avoid extending the
+// base class's instance surface (which would break action `this` parameter typing).
+const pendingFocusByInstance = new WeakMap<object, string>();
+
 // HandlebarsApplicationMixin provides _renderHTML/_replaceHTML required by ApplicationV2 for PARTS-based sheets
 export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicationMixin(foundry.applications.sheets.ActorSheetV2) {
   static override readonly DEFAULT_OPTIONS = {
@@ -48,6 +52,28 @@ export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicati
     if (!this.element.dataset["submitGuarded"]) {
       this.element.dataset["submitGuarded"] = "1";
       this.element.addEventListener("submit", (e: Event) => { e.preventDefault(); });
+    }
+    // #552: submitOnChange re-renders on every input change (including when tabbing out),
+    // destroying the upcoming tab target. On blur, FocusEvent.relatedTarget points to the
+    // element about to receive focus — record its name so we can restore focus after the
+    // re-render swaps the DOM.
+    const sheetElement = this.element;
+    for (const input of sheetElement.querySelectorAll<HTMLInputElement>("input[name]")) {
+      input.addEventListener("blur", (event: FocusEvent) => {
+        const next = event.relatedTarget;
+        if (next instanceof HTMLInputElement && sheetElement.contains(next) && next.name) {
+          pendingFocusByInstance.set(this, next.name);
+        }
+      });
+    }
+    const pendingName = pendingFocusByInstance.get(this);
+    if (pendingName) {
+      const restored = sheetElement.querySelector<HTMLInputElement>(`input[name="${pendingName}"]`);
+      if (restored) {
+        restored.focus();
+        restored.select();
+      }
+      pendingFocusByInstance.delete(this);
     }
   }
 

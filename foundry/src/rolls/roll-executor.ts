@@ -397,6 +397,10 @@ async function buildSkillRollDialog(opts: SkillRollDialogOptions): Promise<Skill
 
   const result = await foundry.applications.api.DialogV2.wait({
     window: { title: `${i18n?.localize("INSPECTRES.SkillRoll") ?? "Skill Roll"}: ${opts.skillName}` },
+    // #551: modal ensures the dialog renders above the sheet that opened it. Without
+    // modal the skill-roll dialog can appear behind the franchise/agent window when
+    // the originating window holds focus on action click.
+    modal: true,
     rejectClose: false,
     render: stopDialogSubmitPropagation,
     content,
