@@ -20,6 +20,7 @@ import { prepareSkillRollContext, type SkillRollContextInput } from "../agent/sk
 import { checkTechnologyRollRequirements } from "./skill-roll-executor.js";
 import { stopDialogSubmitPropagation } from "../utils/dialog-utils.js";
 import { updateDocument, createChatMessage } from "../utils/fvtt-boundary.js";
+import { getDevLogger } from "../utils/dev-logger.js";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -172,7 +173,7 @@ export function resolveBankDice(faces: number[], currentBank: number): BankResol
 
   for (const face of faces) {
     if (!isDieFace(face)) {
-      console.error(`resolveBankDice: invalid die face ${face}, skipping`);
+      getDevLogger().error("roll-executor", `resolveBankDice: invalid die face ${face}, skipping`);
       continue;
     }
     const entry = BANK_ROLL_CHART[face];
@@ -564,7 +565,7 @@ async function buildSkillRollDialog(opts: SkillRollDialogOptions): Promise<Skill
         callback: (_event: Event, _button: HTMLButtonElement, dialog: foundry.applications.api.DialogV2) => {
           const form = dialog.element.querySelector("form") as HTMLFormElement | null;
           if (!form) {
-            console.error("buildSkillRollDialog: form element not found in dialog");
+            getDevLogger().error("roll-executor", "buildSkillRollDialog: form element not found in dialog");
             return null;
           }
           const data = new FormData(form);
@@ -579,7 +580,8 @@ async function buildSkillRollDialog(opts: SkillRollDialogOptions): Promise<Skill
             ? requirementTierRaw
             : undefined;
           if (requirementTierRaw && !requirementTier) {
-            console.error(
+            getDevLogger().error(
+              "roll-executor",
               `buildSkillRollDialog: invalid requirementTier value "${requirementTierRaw}". Expected one of: common, rare, exotic. Treating as undefined.`,
             );
           }
@@ -827,10 +829,9 @@ export async function executeClientRoll(franchise: RollActor): Promise<void> {
     getActorSystem<FranchiseData>(franchise);
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
-    console.error("[INSPECTRES] Client roll validation failed:", {
+    getDevLogger().error("roll-executor", "Client roll validation failed", {
       franchiseId: franchise.id,
       franchiseName: franchise.name,
-      error: err,
       errorMessage: message,
     });
     ui.notifications?.error(game.i18n?.localize("INSPECTRES.ErrorClientRollFailed") ?? "Client roll requires valid franchise actor");
