@@ -64,8 +64,8 @@ async function getPlayerPenaltyChoice(
         // penalty. Without a default, X-close resolves to null and the cancel branch runs.
         action: "select",
         label: game.i18n?.localize("INSPECTRES.DialogOK") ?? "OK",
-        callback: (_event: Event, _button: HTMLButtonElement, dialog: foundry.applications.api.DialogV2) => {
-          const form = dialog.element.querySelector("form") as HTMLFormElement | null;
+        callback: (_event, _button, dialog) => {
+          const form = dialog.element.querySelector("form");
           if (!form) return null;
           const data = new FormData(form);
           const selectedSkill = data.get("selectedSkill");
@@ -87,7 +87,7 @@ async function getPlayerPenaltyChoice(
 }
 
 /** Compute effective face after cool dice removed. */
-function getStressOutcomeFace(faces: number[], coolDiceUsed: number): DieFace {
+export function getStressOutcomeFace(faces: number[], coolDiceUsed: number): DieFace {
   const sorted = [...faces].sort((a, b) => a - b);
   const active = sorted.slice(coolDiceUsed);
   const rawLowest = active.length > 0 ? (active[0] ?? 6) : 6;
@@ -139,7 +139,7 @@ async function getPenaltyChoices(
 }
 
 /** Build update data from stress roll outcome and choices. */
-function buildStressUpdateData(
+export function buildStressUpdateData(
   system: AgentData,
   effectiveFace: DieFace,
   outcome: StressRollOutcome,
