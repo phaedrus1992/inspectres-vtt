@@ -457,6 +457,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     const i18n = game.i18n;
     const result = await foundry.applications.api.DialogV2.wait({
       window: { title: i18n?.localize("INSPECTRES.EmergencyRecovery") ?? "Emergency Recovery" },
+      position: { width: 350, height: 280 },
       rejectClose: false,
       render: stopDialogSubmitPropagation,
       content: `
@@ -547,6 +548,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     const maxCool = system.cool;
     const result = await foundry.applications.api.DialogV2.wait({
       window: { title: i18n?.localize("INSPECTRES.RestoreSkill") ?? "Restore Skill" },
+      position: { width: 350, height: 280 },
       rejectClose: false,
       render: stopDialogSubmitPropagation,
       content: `

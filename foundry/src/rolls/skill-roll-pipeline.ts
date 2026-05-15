@@ -37,7 +37,8 @@ async function openRollDialog(skillName: string): Promise<DialogResult | null> {
   const result = (await foundry.applications.api.DialogV2.wait({
     window: { title: `Roll ${skillName}` },
     // #587: Constrain skill roll dialog to content height (prevents viewport stretch).
-    position: { height: 310 },
+    // 310px accommodates input field + two buttons + padding.
+    position: { width: 400, height: 310 },
     content: `<div><input type="number" name="diceCount" value="2"></div>`,
     render: stopDialogSubmitPropagation,
     buttons: [
@@ -45,7 +46,8 @@ async function openRollDialog(skillName: string): Promise<DialogResult | null> {
         action: "roll",
         label: "Roll",
         callback: (_event: Event, _button: unknown, dialog: { element: HTMLElement }) => {
-          const form = dialog.element.querySelector("form") as HTMLFormElement;
+          const form = dialog.element.querySelector("form") as HTMLFormElement | null;
+          if (!form) return null;
           return Object.fromEntries(new FormData(form));
         },
       },

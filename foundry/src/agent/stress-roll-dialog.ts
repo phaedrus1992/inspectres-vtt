@@ -14,6 +14,7 @@ export async function buildStressRollDialog(agent: Actor): Promise<void> {
 
   const result = await foundry.applications.api.DialogV2.wait({
     window: { title: i18n?.localize("INSPECTRES.StressRoll") ?? "Stress Roll" },
+    position: { width: 400, height: 320 },
     rejectClose: false,
     render: stopDialogSubmitPropagation,
     content: `

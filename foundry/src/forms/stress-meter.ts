@@ -104,8 +104,8 @@ export class StressMeter extends HTMLElement {
   #refresh(): void {
     const current = this.#internalValue;
     for (let i = 0; i < this.#pips.length; i++) {
-      const pip = this.#pips[i];
-      if (pip) pip.classList.toggle("filled", i < current);
+      const pip = this.#pips[i]!;
+      pip.classList.toggle("filled", i < current);
     }
   }
 
