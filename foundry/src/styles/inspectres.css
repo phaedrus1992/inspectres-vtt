@@ -509,14 +509,6 @@ details > summary {
 
     &:hover { background: color-mix(in srgb, var(--inspectres-success), black 15%); }
   }
-
-  /* Mission pool display */
-  .mission-pool-display {
-    margin: 0;
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--inspectres-text-muted);
-  }
 }
 
 /* ─── Franchise sheet ────────────────────────────────────────────────────── */
