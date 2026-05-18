@@ -110,7 +110,7 @@ export class FranchiseSheetPage {
    */
   async getDisplayedDay(): Promise<number> {
     return await this.page.evaluate((selector: string) => {
-      const el = document.querySelector(`${selector} .day-display`);
+      const el = document.querySelector(`${selector} .inspectres-day-display`);
       if (!el?.textContent) throw new Error("day-display not found in rendered sheet");
       const match = el.textContent.match(/(\d+)/);
       if (!match?.[1]) throw new Error(`day-display text malformed: ${el.textContent}`);

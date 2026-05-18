@@ -78,7 +78,7 @@
     gap: 0.875rem;
   }
 
-  .actor-portrait {
+  .inspectres-actor-portrait {
     width: 52px;
     height: 52px;
     border-radius: var(--inspectres-radius-lg);
@@ -87,7 +87,7 @@
     flex-shrink: 0;
   }
 
-  .actor-info {
+  .inspectres-actor-info {
     flex: 1;
     min-width: 0;
   }
@@ -118,7 +118,7 @@
     }
   }
 
-  .actor-type {
+  .inspectres-actor-type {
     margin: 0;
     font-size: 0.7rem;
     font-weight: 600;
@@ -128,7 +128,7 @@
   }
 
   /* Franchise header has no portrait — h1 must stretch to fill available width */
-  &:not(:has(.actor-portrait)) .sheet-header {
+  &:not(:has(.inspectres-actor-portrait)) .sheet-header {
     flex-direction: column;
     align-items: stretch;
     gap: 0.25rem;
@@ -230,7 +230,7 @@
 
 /* ─── Starting Interview guide ──────────────────────────────────────────────── */
 
-.inspectres .starting-interview-guide {
+.inspectres .inspectres-starting-interview-guide {
   background: color-mix(in srgb, var(--inspectres-section-bg), var(--color-border-highlight) 5%);
   border-left: 3px solid var(--color-border-highlight);
   padding: 0.75rem 1rem;
@@ -253,7 +253,7 @@
     li { margin: 0.4rem 0; line-height: 1.4; }
   }
 
-  .starting-interview-note {
+  .inspectres-starting-interview-note {
     font-size: 0.75rem;
     color: var(--inspectres-text-muted);
     font-style: italic;
@@ -278,32 +278,32 @@ details > summary {
 .inspectres.inspectres-agent-sheet {
 
   /* Talent */
-  .talent-input {
+  .inspectres-talent-input {
     width: 100%;
     padding: 0.35rem 0.5rem;
     font-size: 0.9rem;
   }
 
   /* Skills grid */
-  .skills-grid {
+  .inspectres-skills-grid {
     display: flex;
     flex-direction: column;
     gap: 0.3rem;
   }
 
-  .skill-row {
+  .inspectres-skill-row {
     display: flex;
     flex-direction: column;
     gap: 0.15rem;
   }
 
-  .skill-main-line {
+  .inspectres-skill-main-line {
     display: flex;
     align-items: center;
     gap: 0.5rem;
   }
 
-  .skill-name {
+  .inspectres-skill-name {
     width: 5.5rem;
     font-size: 0.82rem;
     font-weight: 600;
@@ -311,14 +311,14 @@ details > summary {
     flex-shrink: 0;
   }
 
-  .skill-stepper {
+  .inspectres-skill-stepper {
     display: flex;
     align-items: center;
     gap: 0.2rem;
     flex-shrink: 0;
   }
 
-  .skill-step {
+  .inspectres-skill-step {
     width: 1.35rem;
     height: 1.35rem;
     padding: 0;
@@ -339,7 +339,7 @@ details > summary {
     &:hover { background: var(--inspectres-secondary); }
   }
 
-  .skill-base-value {
+  .inspectres-skill-base-value {
     width: 1.4rem;
     text-align: center;
     font-weight: 700;
@@ -347,13 +347,13 @@ details > summary {
     flex-shrink: 0;
   }
 
-  .skill-effective-value {
+  .inspectres-skill-effective-value {
     font-size: 0.75rem;
     color: var(--inspectres-text-faint);
     flex: 1;
   }
 
-  .skill-roll-button {
+  .inspectres-skill-roll-button {
     width: 1.55rem;
     height: 1.55rem;
     padding: 0;
@@ -373,7 +373,7 @@ details > summary {
     &:hover { background: var(--inspectres-accent); }
   }
 
-  .skill-penalty-line {
+  .inspectres-skill-penalty-line {
     /* Indented to align under the skill value: name-width + stepper-gap + step-btn + gap + value-center */
     padding-left: calc(5.5rem + 0.5rem + 1.35rem + 0.2rem + 0.7rem);
     font-size: 0.72rem;
@@ -382,7 +382,7 @@ details > summary {
   }
 
   /* Cool/Weird */
-  .cool-toggle {
+  .inspectres-cool-toggle {
     margin-bottom: 0.5rem;
 
     label {
@@ -394,43 +394,43 @@ details > summary {
     }
   }
 
-  .cool-tracker {
+  .inspectres-cool-tracker {
     display: flex;
     align-items: center;
     gap: 0.75rem;
   }
 
-  .cool-counter {
+  .inspectres-cool-counter {
     display: flex;
     align-items: center;
     gap: 0.5rem;
   }
 
-  .cool-input {
+  .inspectres-cool-input {
     width: 3.5rem;
     text-align: center;
     padding: 0.25rem;
     font-size: 0.9rem;
   }
 
-  .cool-pips {
+  .inspectres-cool-pips {
     display: flex;
     align-items: center;
     gap: 0.5rem;
   }
 
-  .cool-label {
+  .inspectres-cool-label {
     font-size: 0.78rem;
     color: var(--inspectres-text-muted);
     flex-shrink: 0;
   }
 
-  .pip-container {
+  .inspectres-pip-container {
     display: flex;
     gap: 0.3rem;
   }
 
-  .cool-pip {
+  .inspectres-cool-pip {
     width: 1.6rem;
     height: 1.6rem;
     padding: 0;
@@ -460,26 +460,26 @@ details > summary {
   }
 
   /* Characteristics */
-  .characteristics-list {
+  .inspectres-characteristics-list {
     display: flex;
     flex-direction: column;
     gap: 0.3rem;
     margin-bottom: 0.5rem;
   }
 
-  .characteristic-row {
+  .inspectres-characteristic-row {
     display: flex;
     align-items: center;
     gap: 0.4rem;
   }
 
-  .characteristic-text {
+  .inspectres-characteristic-text {
     flex: 1;
     padding: 0.25rem 0.4rem;
     font-size: 0.82rem;
   }
 
-  .btn-remove {
+  .inspectres-btn-remove {
     background: transparent;
     color: var(--inspectres-text-faint);
     border: none;
@@ -493,7 +493,7 @@ details > summary {
     &:hover { color: var(--inspectres-accent); }
   }
 
-  .btn-add {
+  .inspectres-btn-add {
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
@@ -548,7 +548,7 @@ details > summary {
   }
 
   /* Recovery status banner */
-  .recovery-banner {
+  .inspectres-recovery-banner {
     display: flex;
     align-items: center;
     gap: 0.75rem;
@@ -575,7 +575,7 @@ details > summary {
   }
 
   /* Description */
-  .franchise-description {
+  .inspectres-franchise-description {
     width: 100%;
     min-height: 4rem;
     padding: 0.35rem 0.5rem;
@@ -589,13 +589,13 @@ details > summary {
   }
 
   /* Cards grid */
-  .cards-grid {
+  .inspectres-cards-grid {
     display: flex;
     flex-direction: column;
     gap: 0.3rem;
   }
 
-  .card-row {
+  .inspectres-card-row {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -608,20 +608,20 @@ details > summary {
     }
   }
 
-  .card-input {
+  .inspectres-card-input {
     width: 4rem;
     text-align: center;
     padding: 0.25rem;
   }
 
   /* Bank */
-  .bank-row {
+  .inspectres-bank-row {
     display: flex;
     align-items: center;
     gap: 0.6rem;
   }
 
-  .bank-input {
+  .inspectres-bank-input {
     width: 4rem;
     text-align: center;
     padding: 0.3rem;
@@ -629,7 +629,7 @@ details > summary {
   }
 
   /* Mission */
-  .mission-row {
+  .inspectres-mission-row {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -642,13 +642,13 @@ details > summary {
     }
   }
 
-  .mission-goal {
+  .inspectres-mission-goal {
     width: 4rem;
     text-align: center;
     padding: 0.25rem;
   }
 
-  .mission-progress {
+  .inspectres-mission-progress {
     margin-bottom: 0.6rem;
 
     span {
@@ -660,7 +660,7 @@ details > summary {
   }
 
   /* Debt toggle */
-  .debt-row {
+  .inspectres-debt-row {
     display: flex;
     flex-direction: column;
     gap: 0.4rem;
@@ -673,7 +673,7 @@ details > summary {
     }
   }
 
-  .loan-input {
+  .inspectres-loan-input {
     width: 4.5rem;
     text-align: center;
     padding: 0.25rem;
@@ -708,7 +708,7 @@ details > summary {
   color: var(--inspectres-text);
   background: var(--inspectres-sheet-bg);
 
-  .tracker-header {
+  .inspectres-tracker-header {
     font-size: 0.65rem;
     font-weight: 700;
     letter-spacing: 0.12em;
@@ -718,13 +718,13 @@ details > summary {
     padding-bottom: 0.4rem;
   }
 
-  .tracker-progress {
+  .inspectres-tracker-progress {
     display: flex;
     flex-direction: column;
     gap: 0.4rem;
   }
 
-  .tracker-stats {
+  .inspectres-tracker-stats {
     display: flex;
     justify-content: space-between;
     font-size: 0.82rem;
@@ -733,7 +733,7 @@ details > summary {
     span { color: var(--inspectres-text); }
   }
 
-  .tracker-actions {
+  .inspectres-tracker-actions {
     display: flex;
     gap: 0.5rem;
     flex-wrap: wrap;
@@ -763,7 +763,7 @@ details > summary {
   &--stress { border-left-color: var(--inspectres-accent);    background: color-mix(in srgb, var(--inspectres-accent), white 94%); }
   &--client { border-left-color: var(--inspectres-success);   background: color-mix(in srgb, var(--inspectres-success), white 94%); }
 
-  .roll-card-title {
+  .inspectres-roll-card-title {
     margin: 0 0 0.35rem;
     font-size: 0.85rem;
     font-weight: 700;
@@ -772,7 +772,7 @@ details > summary {
     padding-bottom: 0.25rem;
   }
 
-  .roll-card-outcome {
+  .inspectres-roll-card-outcome {
     display: flex;
     align-items: baseline;
     gap: 0.5rem;
@@ -780,34 +780,34 @@ details > summary {
     margin-bottom: 0.3rem;
   }
 
-  .roll-card-result {
+  .inspectres-roll-card-result {
     font-weight: 700;
     font-size: 0.9rem;
     color: var(--inspectres-primary);
     flex-shrink: 0;
   }
 
-  .roll-card-narration {
+  .inspectres-roll-card-narration {
     margin: 0;
     color: var(--inspectres-text-muted);
     font-style: italic;
     font-size: 0.8rem;
   }
 
-  .roll-card-note {
+  .inspectres-roll-card-note {
     margin: 0 0 0.3rem;
     font-size: 0.78rem;
     color: var(--inspectres-text-muted);
   }
 
-  .roll-card-franchise {
+  .inspectres-roll-card-franchise {
     margin: 0.3rem 0 0;
     font-size: 0.78rem;
     font-weight: 600;
     color: var(--inspectres-success-text);
   }
 
-  .roll-card-bank-resolutions {
+  .inspectres-roll-card-bank-resolutions {
     margin-top: 0.3rem;
 
     h4 {
@@ -820,7 +820,7 @@ details > summary {
     }
   }
 
-  .bank-die-result {
+  .inspectres-bank-die-result {
     margin: 0.15rem 0;
     font-size: 0.78rem;
 
@@ -830,20 +830,20 @@ details > summary {
     }
   }
 
-  .roll-card-bank-total {
+  .inspectres-roll-card-bank-total {
     margin: 0.35rem 0 0;
     font-weight: 700;
     font-size: 0.82rem;
   }
 
-  .roll-card-penalty-note {
+  .inspectres-roll-card-penalty-note {
     margin: 0.3rem 0 0;
     font-size: 0.78rem;
     font-weight: 600;
     color: var(--inspectres-accent);
   }
 
-  .roll-card-client {
+  .inspectres-roll-card-client {
     display: flex;
     flex-direction: column;
     gap: 0.2rem;
@@ -879,14 +879,14 @@ details > summary {
 /* ─── Franchise sheet day controls ──────────────────────────────────────── */
 
 .inspectres-franchise-sheet {
-  .day-row {
+  .inspectres-day-row {
     display: flex;
     align-items: center;
     gap: 0.5rem;
     margin-bottom: 0.5rem;
   }
 
-  .day-display {
+  .inspectres-day-display {
     font-size: 1.1rem;
     font-weight: 600;
     flex: 1;
@@ -896,12 +896,12 @@ details > summary {
     border-radius: var(--inspectres-radius);
   }
 
-  .day-controls {
+  .inspectres-day-controls {
     display: flex;
     gap: 0.25rem;
   }
 
-  .day-controls button {
+  .inspectres-day-controls button {
     width: 2rem;
     height: 2rem;
     padding: 0;
@@ -909,7 +909,7 @@ details > summary {
     font-weight: 700;
   }
 
-  .mission-controls {
+  .inspectres-mission-controls {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;

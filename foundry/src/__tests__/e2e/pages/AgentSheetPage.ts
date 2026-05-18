@@ -24,12 +24,12 @@ export class AgentSheetPage {
 
   /** Selector for all stress meter pips. */
   stressMeterPips(): string {
-    return `${this.stressMeterSelector()} .pip`;
+    return `${this.stressMeterSelector()} .inspectres-pip`;
   }
 
   /** Selector for filled stress meter pips. */
   filledPips(): string {
-    return `${this.stressMeterSelector()} .pip.filled`;
+    return `${this.stressMeterSelector()} .inspectres-pip.filled`;
   }
 
   /** Wait until the sheet is visible in the DOM. */

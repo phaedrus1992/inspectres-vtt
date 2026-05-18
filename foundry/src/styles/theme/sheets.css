@@ -109,7 +109,7 @@
   margin-bottom: var(--inspectres-space-lg);
 }
 
-.inspectres .agent-sheet .status-label {
+.inspectres .agent-sheet .inspectres-status-label {
   font-weight: 600;
   color: var(--inspectres-text-primary);
 }

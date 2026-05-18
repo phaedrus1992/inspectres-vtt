@@ -28,7 +28,7 @@ function flattenObject(obj: Record<string, unknown> | unknown, prefix = ""): Set
   for (const [k, v] of Object.entries(record)) {
     const fullKey = prefix ? `${prefix}.${k}` : k;
     if (typeof v === "object" && v !== null && !Array.isArray(v)) {
-      flattenObject(v, fullKey).forEach((k) => keys.add(k));
+      for (const nestedKey of flattenObject(v, fullKey)) keys.add(nestedKey);
     } else {
       keys.add(fullKey);
     }

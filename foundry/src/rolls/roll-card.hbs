@@ -1,34 +1,34 @@
 <div class="inspectres inspectres-roll-card inspectres-roll-card--{{rollType}}">
-  <h3 class="roll-card-title">{{title}}</h3>
+  <h3 class="inspectres-roll-card-title">{{title}}</h3>
 
   {{#if (eq rollType "skill")}}
     {{#if takesFour}}
-      <p class="roll-card-note">{{localize "INSPECTRES.RollCardTookFour"}}</p>
+      <p class="inspectres-roll-card-note">{{localize "INSPECTRES.RollCardTookFour"}}</p>
     {{/if}}
     {{#if requirementTier}}
-      <div class="roll-card-requirement">
+      <div class="inspectres-roll-card-requirement">
         <p><strong>{{localize "INSPECTRES.DialogRequirementTier"}}:</strong> {{localize (concat "INSPECTRES.Requirement." (inspectres-capitalize requirementTier))}}</p>
         {{#if requirementDefect}}
-          <p class="requirement-defect">⚠ {{localize "INSPECTRES.RequirementDefect"}}</p>
+          <p class="inspectres-requirement-defect">⚠ {{localize "INSPECTRES.RequirementDefect"}}</p>
         {{else if requirementCheckFailed}}
-          <p class="requirement-failed">✗ {{localize "INSPECTRES.RequirementCheckFail"}}</p>
+          <p class="inspectres-requirement-failed">✗ {{localize "INSPECTRES.RequirementCheckFail"}}</p>
         {{/if}}
       </div>
     {{/if}}
-    <div class="roll-card-outcome">
-      <span class="roll-card-result">{{localize result}}</span>
-      <p class="roll-card-narration">{{localize narration}}</p>
+    <div class="inspectres-roll-card-outcome">
+      <span class="inspectres-roll-card-result">{{localize result}}</span>
+      <p class="inspectres-roll-card-narration">{{localize narration}}</p>
     </div>
     {{#if franchiseDiceEarned}}
       {{#unless isWeird}}
-        <p class="roll-card-franchise">+{{franchiseDiceEarned}} {{inspectres-plural franchiseDiceEarned (localize "INSPECTRES.DieSingular") (localize "INSPECTRES.DiePlural")}} {{localize "INSPECTRES.RollCardAddedToPool"}}</p>
+        <p class="inspectres-roll-card-franchise">+{{franchiseDiceEarned}} {{inspectres-plural franchiseDiceEarned (localize "INSPECTRES.DieSingular") (localize "INSPECTRES.DiePlural")}} {{localize "INSPECTRES.RollCardAddedToPool"}}</p>
       {{/unless}}
     {{/if}}
     {{#if bankResolutions.length}}
-      <div class="roll-card-bank-resolutions">
+      <div class="inspectres-roll-card-bank-resolutions">
         <h4>{{localize "INSPECTRES.RollCardBankDiceResults"}}</h4>
         {{#each bankResolutions as |resolution|}}
-          <p class="bank-die-result {{#if resolution.loseAllBank}}lose-all{{/if}}">
+          <p class="inspectres-bank-die-result {{#if resolution.loseAllBank}}lose-all{{/if}}">
             {{resolution.face}}: {{localize resolution.result}} — {{localize resolution.narration}}
           </p>
         {{/each}}
@@ -37,28 +37,28 @@
   {{/if}}
 
   {{#if (eq rollType "bank")}}
-    <div class="roll-card-bank-resolutions">
+    <div class="inspectres-roll-card-bank-resolutions">
       {{#each resolutions as |resolution|}}
-        <p class="bank-die-result {{#if resolution.loseAllBank}}lose-all{{/if}}">
+        <p class="inspectres-bank-die-result {{#if resolution.loseAllBank}}lose-all{{/if}}">
           {{resolution.face}}: {{localize resolution.result}} — {{localize resolution.narration}}
         </p>
       {{/each}}
     </div>
-    <p class="roll-card-bank-total">{{localize "INSPECTRES.RollCardBankTotal"}}: {{finalBankTotal}}</p>
+    <p class="inspectres-roll-card-bank-total">{{localize "INSPECTRES.RollCardBankTotal"}}: {{finalBankTotal}}</p>
   {{/if}}
 
   {{#if (eq rollType "stress")}}
-    <div class="roll-card-outcome">
-      <span class="roll-card-result">{{localize result}}</span>
-      <p class="roll-card-narration">{{localize narration}}</p>
+    <div class="inspectres-roll-card-outcome">
+      <span class="inspectres-roll-card-result">{{localize result}}</span>
+      <p class="inspectres-roll-card-narration">{{localize narration}}</p>
     </div>
     {{#if penaltyNote}}
-      <p class="roll-card-penalty-note">⚠ {{localize penaltyNote}}</p>
+      <p class="inspectres-roll-card-penalty-note">⚠ {{localize penaltyNote}}</p>
     {{/if}}
   {{/if}}
 
   {{#if (eq rollType "client")}}
-    <div class="roll-card-client">
+    <div class="inspectres-roll-card-client">
       <p><strong>{{localize "INSPECTRES.RollCardPersonality"}}:</strong> {{localize client.personality}}</p>
       <p><strong>{{localize "INSPECTRES.RollCardClientType"}}:</strong> {{localize client.clientType}}</p>
       <p><strong>{{localize "INSPECTRES.RollCardOccurrence"}}:</strong> {{localize client.occurrence}}</p>

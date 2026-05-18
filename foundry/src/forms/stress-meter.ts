@@ -24,7 +24,7 @@ export class StressMeter extends HTMLElement {
         gap: 4px;
         align-items: center;
       }
-      stress-meter .pip {
+      stress-meter .inspectres-pip {
         width: 20px;
         height: 20px;
         border-radius: 50%;
@@ -33,11 +33,11 @@ export class StressMeter extends HTMLElement {
         cursor: pointer;
         transition: all 150ms ease;
       }
-      stress-meter .pip:hover {
+      stress-meter .inspectres-pip:hover {
         border-color: var(--color-border-primary);
         background: var(--color-background-highlight);
       }
-      stress-meter .pip.filled {
+      stress-meter .inspectres-pip.filled {
         background: var(--color-danger);
         border-color: var(--color-danger);
       }
@@ -87,10 +87,10 @@ export class StressMeter extends HTMLElement {
 
   #buildPips(): void {
     const container = document.createElement("div");
-    container.className = "pip-container";
+    container.className = "inspectres-pip-container";
     this.#pips = Array.from({ length: 6 }, (_, i) => {
       const pip = document.createElement("span");
-      pip.className = "pip";
+      pip.className = "inspectres-pip";
       pip.dataset["index"] = String(i);
       pip.setAttribute("role", "button");
       pip.setAttribute("tabindex", "0");

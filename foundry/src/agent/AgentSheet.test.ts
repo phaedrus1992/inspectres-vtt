@@ -238,7 +238,7 @@ describe("AgentSheet", () => {
       const sheet = makeAgentSheetTestInstance(mockSheet.actor, false);
 
       const checkbox = document.createElement("input");
-      checkbox.className = "weird-checkbox";
+      checkbox.className = "inspectres-weird-checkbox";
       checkbox.type = "checkbox";
 
       const querySelectorAllSpy = vi.fn(() => [checkbox]);
@@ -259,7 +259,7 @@ describe("AgentSheet", () => {
       const sheet = makeAgentSheetTestInstance(mockActor, true);
 
       const checkbox = document.createElement("input");
-      checkbox.className = "weird-checkbox";
+      checkbox.className = "inspectres-weird-checkbox";
       checkbox.type = "checkbox";
 
       Object.defineProperty(sheet, "element", {
@@ -283,7 +283,7 @@ describe("AgentSheet", () => {
       const sheet = makeAgentSheetTestInstance(mockActor, true);
 
       const checkbox = document.createElement("input");
-      checkbox.className = "weird-checkbox";
+      checkbox.className = "inspectres-weird-checkbox";
 
       Object.defineProperty(sheet, "element", {
         value: {
@@ -309,13 +309,13 @@ describe("AgentSheet", () => {
 
       const checkbox1 = document.createElement("input");
       const checkbox2 = document.createElement("input");
-      checkbox1.className = "weird-checkbox";
-      checkbox2.className = "weird-checkbox";
+      checkbox1.className = "inspectres-weird-checkbox";
+      checkbox2.className = "inspectres-weird-checkbox";
 
       Object.defineProperty(sheet, "element", {
         value: {
           querySelectorAll: vi.fn((selector: string) => {
-            if (selector === ".weird-checkbox") return [checkbox1, checkbox2];
+            if (selector === ".inspectres-weird-checkbox") return [checkbox1, checkbox2];
             return [];
           }),
           dataset: {},
@@ -338,7 +338,7 @@ describe("AgentSheet", () => {
       const sheet = makeAgentSheetTestInstance(mockActor, true);
 
       const checkbox = document.createElement("input");
-      checkbox.className = "weird-checkbox";
+      checkbox.className = "inspectres-weird-checkbox";
       checkbox.type = "checkbox";
 
       const mockDataset: Record<string, string> = {};
@@ -346,7 +346,7 @@ describe("AgentSheet", () => {
       Object.defineProperty(sheet, "element", {
         value: {
           querySelectorAll: vi.fn((selector: string) => {
-            if (selector === ".weird-checkbox") return [checkbox];
+            if (selector === ".inspectres-weird-checkbox") return [checkbox];
             return [];
           }),
           dataset: mockDataset,

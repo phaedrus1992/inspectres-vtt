@@ -122,7 +122,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     const controller = getOrCreateListenerController(checkboxControllers, this);
 
     // weird-checkbox: change event not covered by DEFAULT_OPTIONS.actions
-    for (const el of this.element.querySelectorAll<HTMLInputElement>(".weird-checkbox")) {
+    for (const el of this.element.querySelectorAll<HTMLInputElement>(".inspectres-weird-checkbox")) {
       el.addEventListener("change", (event: Event) => {
         const target = event.target as HTMLInputElement;
         const system = agentSystemData(this.actor);
@@ -151,7 +151,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     }
 
     // recovery-day-input: change event for overrideRecoveryDay (not automatic like form inputs with name="...")
-    for (const el of this.element.querySelectorAll<HTMLInputElement>(".recovery-day-input")) {
+    for (const el of this.element.querySelectorAll<HTMLInputElement>(".inspectres-recovery-day-input")) {
       el.addEventListener("change", (event: Event) => {
         const target = event.target as HTMLInputElement;
         void AgentSheet.onOverrideRecoveryDay.call(this, event, target).catch((err: unknown) => {
