@@ -1,10 +1,28 @@
+/// <reference path="../../node_modules/fvtt-types/src/foundry/client/client.d.mts" />
+
 /**
- * Ambient type declarations for Foundry VTT ApplicationV2 APIs not yet covered by fvtt-types.
+ * Project-local Foundry VTT type augmentations.
  *
- * Keep this file in sync with the running Foundry version. When fvtt-types gains full V2
- * coverage, delete this file and remove the corresponding tsconfig path overrides.
+ * fvtt-types provides ApplicationV2/DialogV2/FilePicker/handlebars/etc. in its
+ * `client.d.mts` file, which declares `global.foundry.*` namespaces. The
+ * package's `exports` map omits that file from the auto-loaded type roots,
+ * so we pull it in via the triple-slash reference above. The reference must
+ * stay at the top of the file and the file must remain an ambient script
+ * (no `import`/`export` statements) — otherwise the global declarations from
+ * client.d.mts are not exposed to consumers.
  *
- * Reference: https://foundryvtt.com/api/v12/classes/foundry.applications.api.ApplicationV2.html
+ * What stays here:
+ *   - `FormDataExtended` (not modeled upstream)
+ *   - Project-scoped helper aliases for the V2 render-option/context types
+ *     (`ApplicationV2RenderOptions`, `ApplicationV2RenderContext`)
+ *   - `DataConfig` module augmentation registering agent/franchise types
+ *
+ * Why we don't extend `foundry.applications.api` here: upstream uses
+ * `export import applications = _applications` to alias a module-style
+ * namespace into the global `foundry` namespace. Adding a project-local
+ * `declare namespace foundry.applications.api { ... }` block breaks that
+ * alias merge — TypeScript stops seeing the upstream re-exports inside the
+ * namespace. Project-local helpers therefore live at the top level instead.
  */
 
 /** Foundry's extended FormData class — available as a global in V13+. */
@@ -14,172 +32,42 @@ declare class FormDataExtended extends FormData {
 }
 
 /**
- * Foundry V13 Handlebars utilities — namespaced under foundry.applications.handlebars.
- * The global loadTemplates is deprecated in V13; this is the replacement.
+ * Project-local alias for the options passed into `_prepareContext` / `_onRender`.
+ *
+ * Re-exports the upstream `ApplicationV2.RenderOptions` shape so call sites
+ * can keep using a short, project-scoped name without recomputing the deeply
+ * nested generic at every override site.
  */
-declare namespace foundry.applications.handlebars {
-  function loadTemplates(paths: string[] | Record<string, string>): Promise<HandlebarsTemplateDelegate[]>;
-  function renderTemplate(path: string, data?: Record<string, unknown>): Promise<string>;
-}
+declare type ApplicationV2RenderOptions = foundry.applications.api.ApplicationV2.RenderOptions;
 
-declare namespace foundry.applications.api {
-  interface ApplicationV2Options {
-    id?: string;
-    classes?: string[];
-    tag?: string;
-    window?: {
-      title?: string;
-      icon?: string;
-      resizable?: boolean;
-    };
-    position?: {
-      width?: number | "auto";
-      height?: number | "auto";
-      top?: number;
-      left?: number;
-    };
-    actions?: Record<string, (event: Event, target: HTMLElement) => void | Promise<void>>;
-    form?: {
-      handler?: (event: Event, form: HTMLFormElement, formData: FormDataExtended) => void | Promise<void>;
-      submitOnChange?: boolean;
-      closeOnSubmit?: boolean;
-    };
-  }
+/**
+ * Project-local alias for the context returned from `_prepareContext`.
+ *
+ * Used by plain ApplicationV2 subclasses (e.g. MissionTrackerApp) that build
+ * a freeform context object. Upstream `ApplicationV2.RenderContext` has only
+ * optional fields, so a wide `Record<string, unknown>` is compatible.
+ */
+declare type ApplicationV2RenderContext = foundry.applications.api.ApplicationV2.RenderContext;
 
-  interface ApplicationV2Part {
-    template: string;
-    scrollable?: string[];
-  }
-
-  /** Base class for all V2 applications. */
-  class ApplicationV2 {
-    /** Logical application identifier — set in DEFAULT_OPTIONS.id, not the DOM element id. */
-    readonly id: string;
-    readonly options: ApplicationV2Options;
-    /** The outermost DOM element rendered by this application. */
-    readonly element: HTMLElement;
-
-    static DEFAULT_OPTIONS: ApplicationV2Options;
-    static PARTS: Record<string, ApplicationV2Part>;
-
-    render(options?: { force?: boolean; position?: ApplicationV2Options["position"] }): Promise<ApplicationV2>;
-    close(options?: { animate?: boolean }): Promise<ApplicationV2>;
-    setPosition(position: ApplicationV2Options["position"]): ApplicationV2Options["position"];
-
-    _prepareContext(options: ApplicationV2Options): Promise<Record<string, unknown>>;
-    _onRender(context: Record<string, unknown>, options: ApplicationV2Options): Promise<void>;
-  }
-
-  interface DialogV2Button {
-    action: string;
-    label: string;
-    icon?: string;
-    default?: boolean;
-    callback?: (event: Event, button: HTMLButtonElement, dialog: foundry.applications.api.DialogV2) => unknown;
-  }
-
-  /**
-   * Shared config shape for DialogV2.wait() and DialogV2.prompt().
-   *
-   * Extracted as a named interface (not inlined) so the LSP and tsc agree on
-   * the type identity of the parameter — inlined object types caused LSP to
-   * synthesize a different structural type than tsc resolved (#577).
-   */
-  interface DialogV2WaitConfig {
-    content: string;
-    window?: { title?: string };
-    position?: ApplicationV2Options["position"];
-    classes?: string[];
-    rejectClose?: boolean;
-    modal?: boolean;
-    buttons?: DialogV2Button[];
-    /** Called each time the dialog renders. Use to attach extra listeners. */
-    render?: ((event: Event, dialog: foundry.applications.api.DialogV2) => void) | null;
-    /** Called when the dialog closes under any circumstances. */
-    close?: ((event: Event, dialog: foundry.applications.api.DialogV2) => unknown) | null;
-  }
-
-  /** Confirm uses a narrower shape (no buttons array; no position). */
-  interface DialogV2ConfirmConfig {
-    content: string;
-    window?: { title?: string };
-    classes?: string[];
-    rejectClose?: boolean;
-    modal?: boolean;
-    render?: ((event: Event, dialog: foundry.applications.api.DialogV2) => void) | null;
-    close?: ((event: Event, dialog: foundry.applications.api.DialogV2) => unknown) | null;
-  }
-
-  /** Modal/modeless dialog built on ApplicationV2. */
-  class DialogV2 extends ApplicationV2 {
-    static wait(config: DialogV2WaitConfig): Promise<unknown>;
-    static prompt(config: DialogV2WaitConfig): Promise<unknown>;
-    static confirm(config: DialogV2ConfirmConfig): Promise<boolean>;
-  }
-
-  /**
-   * Mixin that provides Handlebars template rendering to an ApplicationV2 subclass.
-   * Required for any ApplicationV2-based sheet that uses PARTS.
-   *
-   * Usage: `class MySheet extends HandlebarsApplicationMixin(foundry.applications.sheets.ActorSheetV2)`
-   *
-   * fvtt-types v13 does not yet declare this mixin — declared here until the library catches up.
-   *
-   * LIMITATION: TypeScript's mixin typing cannot express the type-level addition of _renderHTML
-   * and _replaceHTML. At runtime, the mixin's prototype augmentation adds these methods safely,
-   * but TypeScript sees only the return type TBase. In practice, these methods are only called
-   * by ApplicationV2 internals, so user code rarely needs them directly.
-   */
-  function HandlebarsApplicationMixin<TBase extends abstract new (...args: never[]) => ApplicationV2>(
-    Base: TBase,
-  ): TBase;
-}
-
-declare namespace foundry.applications.sheets {
-  interface ActorSheetV2Options extends foundry.applications.api.ApplicationV2Options {
-    document?: Actor;
-  }
-
-  /** Base class for V2 actor sheets. */
-  class ActorSheetV2 extends foundry.applications.api.ApplicationV2 {
-    readonly actor: Actor;
-    readonly isEditable: boolean;
-
-    static DEFAULT_OPTIONS: foundry.applications.api.ApplicationV2Options & {
-      actions?: Record<string, (this: ActorSheetV2, event: Event, target: HTMLElement) => void | Promise<void>>;
-    };
-
-    static PARTS: Record<string, { template: string; scrollable?: string[] }>;
-
-    _prepareContext(options: foundry.applications.api.ApplicationV2Options): Promise<Record<string, unknown>>;
-    _onRender(context: Record<string, unknown>, options: foundry.applications.api.ApplicationV2Options): Promise<void>;
-  }
-}
-
-declare namespace foundry.applications.api {
-  /** FilePicker — browse the server filesystem and select files. */
-  class FilePicker {
-    constructor(options: {
-      current?: string | undefined;
-      type?: string;
-      callback?: ((path: string) => void) | undefined;
-    });
-    browse(): void;
-  }
-}
+/**
+ * Project-local alias for the context returned from sheet `_prepareContext`.
+ *
+ * Extends upstream's narrower `DocumentSheetV2.RenderContext` (which requires
+ * document/source/fields/editable/rootId from `super._prepareContext()`) with
+ * an open-ended bag for the additional fields each sheet adds (system,
+ * actor, computed display data, etc.).
+ */
+declare type ActorSheetV2RenderContext =
+  foundry.applications.sheets.ActorSheetV2.RenderContext & Record<string, unknown>;
 
 /**
  * Convenience type alias for the renderDialogV2 callback.
- * fvtt-types types the app parameter as `Any` — use this alias with a cast when you
- * need the app parameter typed as ApplicationV2.
  *
- * Usage:
- *   Hooks.on("renderDialogV2", ((app: ApplicationV2, html: HTMLElement) => {
- *     ...
- *   }) as RenderDialogV2Callback);
+ * Use when registering a renderDialogV2 hook; the app parameter is typed as
+ * `DialogV2.Any` matching upstream's variance constraint.
  */
-type RenderDialogV2Callback = (
-  app: foundry.applications.api.ApplicationV2,
+declare type RenderDialogV2Callback = (
+  app: foundry.applications.api.DialogV2.Any,
   html: HTMLElement,
 ) => void;
 

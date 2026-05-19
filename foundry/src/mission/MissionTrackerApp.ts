@@ -21,14 +21,14 @@ export class MissionTrackerApp extends foundry.applications.api.HandlebarsApplic
     });
   }
 
-  static override readonly DEFAULT_OPTIONS: foundry.applications.api.ApplicationV2Options = {
+  static override readonly DEFAULT_OPTIONS = {
     id: "inspectres-mission-tracker",
     classes: ["inspectres", "inspectres-mission-tracker-window"],
     window: {
       title: "INSPECTRES.MissionTrackerTitle",
       resizable: false,
     },
-    position: { width: 360, height: "auto" },
+    position: { width: 360, height: "auto" as const },
     actions: {
       beginCleanUp: MissionTrackerApp.onBeginCleanUp,
       endEarly: MissionTrackerApp.onEndEarly,
@@ -39,7 +39,7 @@ export class MissionTrackerApp extends foundry.applications.api.HandlebarsApplic
     sheet: { template: "systems/inspectres/templates/mission-tracker.hbs" },
   };
 
-  override async _prepareContext(_options: foundry.applications.api.ApplicationV2Options): Promise<Record<string, unknown>> {
+  override async _prepareContext(_options: ApplicationV2RenderOptions): Promise<Record<string, unknown>> {
     const franchise = findFranchiseActor();
     if (!franchise) {
       return { missionPool: 0, missionGoal: 0, progressPercent: 0, missionComplete: false, isGm: game.user?.isGM ?? false, elapsedDays: 0 };
@@ -171,8 +171,9 @@ export class MissionTrackerApp extends foundry.applications.api.HandlebarsApplic
     }
   }
 
-  override async close(options?: { animate?: boolean }): Promise<foundry.applications.api.ApplicationV2> {
+  override async close(options?: Partial<foundry.applications.api.ApplicationV2.ClosingOptions>): Promise<this> {
     MissionTrackerApp.instance = null;
-    return super.close(options);
+    await super.close(options);
+    return this;
   }
 }
