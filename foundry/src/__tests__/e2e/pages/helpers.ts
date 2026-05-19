@@ -124,7 +124,9 @@ export async function waitForSheetStable(page: Page, actorId: string): Promise<v
   await page.waitForFunction(
     (id: string) => {
       const el = document.querySelector(`.inspectres[id*="${id}"]`);
-      return el && el.getBoundingClientRect().height > 0;
+      if (!el) return false;
+      const rect = el.getBoundingClientRect();
+      return rect.width > 0 && rect.height > 0;
     },
     actorId,
     { timeout: SHEET_WAIT_TIMEOUT },
