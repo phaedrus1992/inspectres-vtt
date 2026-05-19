@@ -108,6 +108,29 @@ export async function waitForSheet(page: Page, actorId: string): Promise<void> {
   );
 }
 
+/** Render an actor's sheet and wait for it to be visible. */
+export async function renderActorSheet(page: Page, actorId: string): Promise<void> {
+  await page.evaluate(async (id: string) => {
+    // @ts-expect-error - Foundry runtime global
+    const actor = globalThis.game?.actors?.get(id);
+    if (actor) await actor.sheet.render(true);
+  }, actorId);
+
+  await new AgentSheetPage(page, actorId).waitForVisible();
+}
+
+/** Wait for sheet DOM to stabilize (visible and rendered). */
+export async function waitForSheetStable(page: Page, actorId: string): Promise<void> {
+  await page.waitForFunction(
+    (id: string) => {
+      const el = document.querySelector(`.inspectres[id*="${id}"]`);
+      return el && el.getBoundingClientRect().height > 0;
+    },
+    actorId,
+    { timeout: SHEET_WAIT_TIMEOUT },
+  );
+}
+
 /** Count chat messages in the Foundry runtime. */
 export async function getChatMessageCount(page: Page): Promise<number> {
   return await page.evaluate(() => {
