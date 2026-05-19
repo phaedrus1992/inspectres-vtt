@@ -38,7 +38,9 @@ describe("system-cast consolidation (#363)", () => {
 
     if (lines.length > 0) {
       console.log("Found manual system casts that should use getActorSystem():");
-      lines.forEach((line) => console.log(line));
+      for (const line of lines) {
+        console.log(line);
+      }
     }
 
     // After #363 consolidation completes, should have 0 manual casts

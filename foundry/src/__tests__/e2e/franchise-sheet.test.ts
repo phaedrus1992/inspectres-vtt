@@ -143,7 +143,7 @@ test.describe("FranchiseSheet — day controls", () => {
     await sheet.clickAdvanceDay();
     await page.waitForFunction(
       (prev: number) => {
-        const el = document.querySelector('.application.sheet.inspectres.franchise .day-display');
+        const el = document.querySelector('.application.sheet.inspectres.franchise .inspectres-day-display');
         const match = el?.textContent?.match(/(\d+)/);
         return match?.[1] !== undefined && Number(match[1]) !== prev;
       },
@@ -159,7 +159,7 @@ test.describe("FranchiseSheet — day controls", () => {
     await sheet.clickRegressDay();
     await page.waitForFunction(
       (prev: number) => {
-        const el = document.querySelector('.application.sheet.inspectres.franchise .day-display');
+        const el = document.querySelector('.application.sheet.inspectres.franchise .inspectres-day-display');
         const match = el?.textContent?.match(/(\d+)/);
         return match?.[1] !== undefined && Number(match[1]) !== prev;
       },

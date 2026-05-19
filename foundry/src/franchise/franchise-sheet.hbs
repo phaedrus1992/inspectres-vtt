@@ -3,7 +3,7 @@
   <header class="inspectres-header">
     <div class="sheet-header">
       <h1><input type="text" name="name" value="{{actor.name}}" placeholder="Franchise Name" /></h1>
-      <p class="actor-type">{{localize "INSPECTRES.ActorTypeFranchise"}}</p>
+      <p class="inspectres-actor-type">{{localize "INSPECTRES.ActorTypeFranchise"}}</p>
     </div>
   </header>
 
@@ -29,35 +29,35 @@
       <!-- Cards Section -->
       <section class="inspectres-section">
         <h2>{{localize "INSPECTRES.Cards"}}</h2>
-        <div class="cards-grid">
-          <div class="card-row">
+        <div class="inspectres-cards-grid">
+          <div class="inspectres-card-row">
             <label>{{localize "INSPECTRES.Library"}}</label>
             <input
               type="number"
               name="system.cards.library"
               value="{{system.cards.library}}"
               min="0"
-              class="card-input"
+              class="inspectres-card-input"
             />
           </div>
-          <div class="card-row">
+          <div class="inspectres-card-row">
             <label>{{localize "INSPECTRES.Gym"}}</label>
             <input
               type="number"
               name="system.cards.gym"
               value="{{system.cards.gym}}"
               min="0"
-              class="card-input"
+              class="inspectres-card-input"
             />
           </div>
-          <div class="card-row">
+          <div class="inspectres-card-row">
             <label>{{localize "INSPECTRES.Credit"}}</label>
             <input
               type="number"
               name="system.cards.credit"
               value="{{system.cards.credit}}"
               min="0"
-              class="card-input"
+              class="inspectres-card-input"
             />
           </div>
         </div>
@@ -66,13 +66,13 @@
       <!-- Bank Section -->
       <section class="inspectres-section">
         <h2>{{localize "INSPECTRES.Bank"}}</h2>
-        <div class="bank-row">
+        <div class="inspectres-bank-row">
           <input
             type="number"
             name="system.bank"
             value="{{system.bank}}"
             min="0"
-            class="bank-input"
+            class="inspectres-bank-input"
           />
           <button
             type="button"
@@ -90,9 +90,9 @@
       {{#if isGm}}
         <section class="inspectres-section">
           <h2>{{localize "INSPECTRES.InGameDay"}}</h2>
-          <div class="day-row">
-            <span class="day-display">Day {{currentDay}}</span>
-            <div class="day-controls">
+          <div class="inspectres-day-row">
+            <span class="inspectres-day-display">Day {{currentDay}}</span>
+            <div class="inspectres-day-controls">
               <button type="button" class="inspectres-button" data-action="regressDay" title="Previous day" aria-label="{{localize "INSPECTRES.AriaLabel.PreviousDay"}}">−</button>
               <button type="button" class="inspectres-button" data-action="advanceDay" title="Next day" aria-label="{{localize "INSPECTRES.AriaLabel.NextDay"}}">+</button>
             </div>
@@ -103,23 +103,23 @@
       <!-- Mission Section -->
       <section class="inspectres-section">
         <h2>{{localize "INSPECTRES.Mission"}}</h2>
-        <div class="mission-row">
+        <div class="inspectres-mission-row">
           <label>{{localize "INSPECTRES.MissionGoal"}}</label>
           <input
             type="number"
             name="system.missionGoal"
             value="{{system.missionGoal}}"
             min="0"
-            class="mission-goal"
+            class="inspectres-mission-goal"
           />
         </div>
-        <div class="mission-progress">
+        <div class="inspectres-mission-progress">
           <span>{{localize "INSPECTRES.MissionEarned"}}: {{system.missionPool}} / {{system.missionGoal}}</span>
           <div class="inspectres-progress-bar">
             <div class="inspectres-progress-fill" style="width: {{inspectres-multiply (inspectres-divide system.missionPool (inspectres-max system.missionGoal 1)) 100}}%"></div>
           </div>
         </div>
-        <div class="mission-controls">
+        <div class="inspectres-mission-controls">
           <button type="button" class="inspectres-roll-button" data-action="openMissionTracker">
             {{localize "INSPECTRES.OpenMissionTracker"}}
           </button>
@@ -154,7 +154,7 @@
         <textarea
           name="system.description"
           placeholder="Franchise description"
-          class="franchise-description"
+          class="inspectres-franchise-description"
         >{{system.description}}</textarea>
       </section>
 
@@ -163,7 +163,7 @@
         <h2>{{localize "INSPECTRES.StartingInterview"}}</h2>
         <details role="region" aria-labelledby="starting-interview-summary">
           <summary id="starting-interview-summary">{{localize "INSPECTRES.StartingInterviewGuide"}}</summary>
-          <div class="starting-interview-guide">
+          <div class="inspectres-starting-interview-guide">
             <p>{{localize "INSPECTRES.StartingInterviewDescription"}}</p>
             <h3>{{localize "INSPECTRES.StartingInterviewStyles"}}</h3>
             <ul>
@@ -171,7 +171,7 @@
               <li><strong>{{localize "INSPECTRES.StartingInterviewInvestor"}}:</strong> {{localize "INSPECTRES.StartingInterviewInvestorDesc"}}</li>
               <li><strong>{{localize "INSPECTRES.StartingInterviewMedia"}}:</strong> {{localize "INSPECTRES.StartingInterviewMediaDesc"}}</li>
             </ul>
-            <p class="starting-interview-note">{{localize "INSPECTRES.StartingInterviewReference"}}</p>
+            <p class="inspectres-starting-interview-note">{{localize "INSPECTRES.StartingInterviewReference"}}</p>
           </div>
         </details>
       </section>
@@ -179,7 +179,7 @@
       <!-- Debt Mode Section -->
       <section class="inspectres-section">
         <h2>{{localize "INSPECTRES.DebtMode"}}</h2>
-        <div class="debt-row">
+        <div class="inspectres-debt-row">
           <label>
             <input
               type="checkbox"
@@ -196,14 +196,14 @@
                 name="system.loanAmount"
                 value="{{system.loanAmount}}"
                 min="0"
-                class="loan-input"
+                class="inspectres-loan-input"
               />
             </label>
           {{/if}}
         </div>
         {{#if isGm}}
-          <div class="debt-controls">
-            <p class="debt-controls-label">{{localize "INSPECTRES.GMDebtOverride"}}</p>
+          <div class="inspectres-debt-controls">
+            <p class="inspectres-debt-controls-label">{{localize "INSPECTRES.GMDebtOverride"}}</p>
             <button
               type="button"
               class="inspectres-button"

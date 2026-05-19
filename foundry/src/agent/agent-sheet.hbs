@@ -1,7 +1,7 @@
 <div class="inspectres inspectres-sheet inspectres-agent-sheet">
   {{!-- Recovery Status Banner --}}
   {{#if bannerText}}
-    <div class="recovery-banner {{recoveryStatus.status}}">
+    <div class="inspectres-recovery-banner {{recoveryStatus.status}}">
       <i class="fas {{#if (eq recoveryStatus.status "dead")}}fa-skull{{else}}fa-bed{{/if}}"></i>
       <span>{{bannerText}}</span>
     </div>
@@ -10,10 +10,10 @@
   <!-- Header -->
   <header class="inspectres-header">
     <div class="sheet-header">
-      <img src="{{actor.img}}" alt="{{actor.name}}" class="actor-portrait" data-action="editPortrait" title="{{localize "INSPECTRES.AriaLabel.EditPortrait"}}" />
-      <div class="actor-info">
+      <img src="{{actor.img}}" alt="{{actor.name}}" class="inspectres-actor-portrait" data-action="editPortrait" title="{{localize "INSPECTRES.AriaLabel.EditPortrait"}}" />
+      <div class="inspectres-actor-info">
         <h1><input type="text" name="name" value="{{actor.name}}" placeholder="Agent Name" /></h1>
-        <p class="actor-type">{{localize "INSPECTRES.ActorTypeAgent"}}</p>
+        <p class="inspectres-actor-type">{{localize "INSPECTRES.ActorTypeAgent"}}</p>
       </div>
     </div>
   </header>
@@ -38,27 +38,27 @@
           name="system.talent"
           value="{{system.talent}}"
           placeholder="e.g., Theatre Major"
-          class="talent-input"
+          class="inspectres-talent-input"
         />
       </section>
 
       <!-- Skills Section -->
       <section class="inspectres-section">
         <h2>{{localize "INSPECTRES.Skills"}}</h2>
-        <div class="skills-grid">
+        <div class="inspectres-skills-grid">
           {{#each system.skills as |skill skillName|}}
-            <div class="skill-row">
-              <div class="skill-main-line">
-                <label class="skill-name">{{localize (inspectres-concat "INSPECTRES." (inspectres-capitalize skillName))}}</label>
-                <div class="skill-stepper">
-                  <button type="button" class="skill-step" data-action="skillDecrease" data-skill="{{skillName}}" aria-label="{{inspectres-format "INSPECTRES.AriaLabel.SkillAdjust" skill=skillName}} decrease">−</button>
-                  <span class="skill-base-value">{{skill.base}}</span>
-                  <button type="button" class="skill-step" data-action="skillIncrease" data-skill="{{skillName}}" aria-label="{{inspectres-format "INSPECTRES.AriaLabel.SkillAdjust" skill=skillName}} increase">+</button>
+            <div class="inspectres-skill-row">
+              <div class="inspectres-skill-main-line">
+                <label class="inspectres-skill-name">{{localize (inspectres-concat "INSPECTRES." (inspectres-capitalize skillName))}}</label>
+                <div class="inspectres-skill-stepper">
+                  <button type="button" class="inspectres-skill-step" data-action="skillDecrease" data-skill="{{skillName}}" aria-label="{{inspectres-format "INSPECTRES.AriaLabel.SkillAdjust" skill=skillName}} decrease">−</button>
+                  <span class="inspectres-skill-base-value">{{skill.base}}</span>
+                  <button type="button" class="inspectres-skill-step" data-action="skillIncrease" data-skill="{{skillName}}" aria-label="{{inspectres-format "INSPECTRES.AriaLabel.SkillAdjust" skill=skillName}} increase">+</button>
                 </div>
-                <span class="skill-effective-value">({{inspectres-subtract skill.base skill.penalty}} {{localize "INSPECTRES.SkillEffective"}})</span>
+                <span class="inspectres-skill-effective-value">({{inspectres-subtract skill.base skill.penalty}} {{localize "INSPECTRES.SkillEffective"}})</span>
                 <button
                   type="button"
-                  class="skill-roll-button"
+                  class="inspectres-skill-roll-button"
                   data-action="skillRoll"
                   data-skill="{{skillName}}"
                   title="{{localize (inspectres-concat "INSPECTRES.TooltipSkill" (inspectres-capitalize skillName))}}"
@@ -66,12 +66,12 @@
                 ><i class="fas fa-dice"></i></button>
               </div>
               {{#if skill.penalty}}
-                <div class="skill-penalty-line">
+                <div class="inspectres-skill-penalty-line">
                   −{{skill.penalty}} {{localize "INSPECTRES.PenaltyFromStress"}}
                   {{#if (gt system.cool 0)}}
                     <button
                       type="button"
-                      class="restore-skill-button"
+                      class="inspectres-restore-skill-button"
                       data-action="restoreSkill"
                       data-skill="{{skillName}}"
                       title="{{localize "INSPECTRES.TooltipRestoreSkill"}}"
@@ -88,38 +88,38 @@
       <!-- Cool & Weird Section -->
       <section class="inspectres-section">
         <h2>{{localize "INSPECTRES.Cool"}}</h2>
-        <div class="cool-toggle">
+        <div class="inspectres-cool-toggle">
           <label>
             <input
               type="checkbox"
               name="system.isWeird"
               {{#if system.isWeird}}checked{{/if}}
-              class="weird-checkbox"
+              class="inspectres-weird-checkbox"
             />
             {{localize "INSPECTRES.WeirdAgent"}}
           </label>
         </div>
 
-        <div class="cool-tracker">
+        <div class="inspectres-cool-tracker">
           {{#if system.isWeird}}
-            <div class="cool-counter">
-              <span class="cool-label">{{localize "INSPECTRES.CoolUnlimited"}}</span>
+            <div class="inspectres-cool-counter">
+              <span class="inspectres-cool-label">{{localize "INSPECTRES.CoolUnlimited"}}</span>
               <input
                 type="number"
                 name="system.cool"
                 value="{{system.cool}}"
                 min="0"
-                class="cool-input"
+                class="inspectres-cool-input"
               />
             </div>
           {{else}}
-            <div class="cool-pips">
-              <span class="cool-label">{{inspectres-format "INSPECTRES.CoolDiceLabel" max=3}}</span>
-              <div class="pip-container">
+            <div class="inspectres-cool-pips">
+              <span class="inspectres-cool-label">{{inspectres-format "INSPECTRES.CoolDiceLabel" max=3}}</span>
+              <div class="inspectres-pip-container">
                 {{#each (inspectres-range 0 2) as |pip|}}
                   <button
                     type="button"
-                    class="cool-pip {{#if (inspectres-gte ../system.cool (inspectres-add pip 1))}}filled{{/if}}"
+                    class="inspectres-cool-pip {{#if (inspectres-gte ../system.cool (inspectres-add pip 1))}}filled{{/if}}"
                     data-action="toggleCool"
                     data-value="{{inspectres-add pip 1}}"
                     aria-label="{{inspectres-format "INSPECTRES.AriaLabel.CoolToggle" index=(inspectres-add pip 1)}}"
@@ -138,16 +138,16 @@
         <section class="inspectres-section inspectres-powers">
           <h2>{{localize "INSPECTRES.WeirdPower"}}</h2>
           {{#if system.power}}
-            <div class="power-display">
-              <h3 class="power-name">{{system.power.name}}</h3>
-              <p class="power-description">{{system.power.description}}</p>
-              <div class="power-meta">
-                <span class="power-skill">{{localize (inspectres-concat "INSPECTRES." (inspectres-capitalize system.power.baseSkill))}}</span>
-                <span class="power-cost">{{localize "INSPECTRES.CoolCost"}}: {{system.power.coolCost}}</span>
+            <div class="inspectres-power-display">
+              <h3 class="inspectres-power-name">{{system.power.name}}</h3>
+              <p class="inspectres-power-description">{{system.power.description}}</p>
+              <div class="inspectres-power-meta">
+                <span class="inspectres-power-skill">{{localize (inspectres-concat "INSPECTRES." (inspectres-capitalize system.power.baseSkill))}}</span>
+                <span class="inspectres-power-cost">{{localize "INSPECTRES.CoolCost"}}: {{system.power.coolCost}}</span>
               </div>
               <button
                 type="button"
-                class="inspectres-button power-activate-button"
+                class="inspectres-button inspectres-power-activate-button"
                 data-action="activatePower"
                 {{#unless (gte system.cool system.power.coolCost)}}disabled{{/unless}}
                 aria-label="{{localize "INSPECTRES.AriaLabel.ActivatePower"}}"
@@ -160,7 +160,7 @@
               </button>
             </div>
           {{else}}
-            <p class="power-placeholder">{{localize "INSPECTRES.NoPowerSelected"}}</p>
+            <p class="inspectres-power-placeholder">{{localize "INSPECTRES.NoPowerSelected"}}</p>
           {{/if}}
         </section>
       {{/if}}
@@ -168,7 +168,7 @@
       <!-- Stress Section -->
       <section class="inspectres-section">
         <h2>{{localize "INSPECTRES.Stress"}}</h2>
-        <div class="stress-control">
+        <div class="inspectres-stress-control">
           <stress-meter name="system.stress" value="{{system.stress}}" max="6"></stress-meter>
         </div>
         <button type="button" class="inspectres-roll-button" data-action="stressRoll">
@@ -180,10 +180,10 @@
       <section class="inspectres-section inspectres-recovery">
         <h2>{{localize "INSPECTRES.RecoveryStatus"}}</h2>
 
-        <div class="recovery-info">
-          <div class="status-display">
-            <span class="status-label">{{localize "INSPECTRES.Status"}}:</span>
-            <span class="status-value {{recoveryStatus.status}}">
+        <div class="inspectres-recovery-info">
+          <div class="inspectres-status-display">
+            <span class="inspectres-status-label">{{localize "INSPECTRES.Status"}}:</span>
+            <span class="inspectres-status-value {{recoveryStatus.status}}">
               {{#if (eq recoveryStatus.status "dead")}}
                 {{localize "INSPECTRES.RecoveryStatusDead"}}
               {{else if (eq recoveryStatus.status "recovering")}}
@@ -197,13 +197,13 @@
           </div>
 
           {{#if (or system.isDead (gt system.daysOutOfAction 0))}}
-            <div class="recovery-details">
+            <div class="inspectres-recovery-details">
               {{#if system.isDead}}
-                <p class="recovery-note">{{localize "INSPECTRES.RecoveryNoteDead"}}</p>
+                <p class="inspectres-recovery-note">{{localize "INSPECTRES.RecoveryNoteDead"}}</p>
               {{else}}
-                <p class="recovery-note">
+                <p class="inspectres-recovery-note">
                   {{localize "INSPECTRES.RecoveryNoteRecovering"}}:
-                  <span class="recovery-day">Day {{inspectres-add system.recoveryStartedAt system.daysOutOfAction}}</span>
+                  <span class="inspectres-recovery-day">Day {{inspectres-add system.recoveryStartedAt system.daysOutOfAction}}</span>
                 </p>
               {{/if}}
             </div>
@@ -211,18 +211,18 @@
         </div>
 
         {{#if isEditable}}
-          <div class="recovery-controls">
+          <div class="inspectres-recovery-controls">
             {{#if system.isDead}}
               <button type="button" class="inspectres-button inspectres-recovery-button" data-action="reviveAgent">
                 {{localize "INSPECTRES.ReviveAgent"}}
               </button>
             {{else if (gt system.daysOutOfAction 0)}}
-              <div class="recovery-override">
+              <div class="inspectres-recovery-override">
                 <label>
                   {{localize "INSPECTRES.OverrideRecoveryDay"}}:
                   <input
                     type="number"
-                    class="recovery-day-input"
+                    class="inspectres-recovery-day-input"
                     data-action="overrideRecoveryDay"
                     min="1"
                     max="365"
@@ -247,30 +247,30 @@
       <!-- Characteristics Section -->
       <section class="inspectres-section">
         <h2>{{localize "INSPECTRES.Characteristics"}}</h2>
-        <div class="characteristics-list">
+        <div class="inspectres-characteristics-list">
           {{#each system.characteristics as |characteristic idx|}}
-            <div class="characteristic-row">
+            <div class="inspectres-characteristic-row">
               <input
                 type="checkbox"
                 name="system.characteristics.{{idx}}.used"
                 title="{{localize "INSPECTRES.TooltipCharacteristicUsed"}}"
                 {{#if characteristic.used}}checked{{/if}}
-                class="characteristic-used"
+                class="inspectres-characteristic-used"
               />
               <input
                 type="text"
                 name="system.characteristics.{{idx}}.text"
                 value="{{characteristic.text}}"
                 placeholder="Characteristic text"
-                class="characteristic-text"
+                class="inspectres-characteristic-text"
               />
-              <button type="button" class="btn-remove" data-action="removeCharacteristic" data-idx="{{idx}}" aria-label="{{localize "INSPECTRES.AriaLabel.RemoveCharacteristic"}}">
+              <button type="button" class="inspectres-btn-remove" data-action="removeCharacteristic" data-idx="{{idx}}" aria-label="{{localize "INSPECTRES.AriaLabel.RemoveCharacteristic"}}">
                 ✕
               </button>
             </div>
           {{/each}}
         </div>
-        <button type="button" class="btn-add" data-action="addCharacteristic">{{localize "INSPECTRES.AddCharacteristic"}}</button>
+        <button type="button" class="inspectres-btn-add" data-action="addCharacteristic">{{localize "INSPECTRES.AddCharacteristic"}}</button>
       </section>
 
     </div><!-- /notes tab -->

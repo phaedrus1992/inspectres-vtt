@@ -19,13 +19,13 @@ describe("StressMeter", () => {
   });
 
   it("renders 6 pips", () => {
-    const pips = element.querySelectorAll(".pip");
+    const pips = element.querySelectorAll(".inspectres-pip");
     expect(pips).toHaveLength(6);
   });
 
   it("reflects value as filled pips", () => {
     element.value = 3;
-    const filled = element.querySelectorAll(".pip.filled");
+    const filled = element.querySelectorAll(".inspectres-pip.filled");
     expect(filled).toHaveLength(3);
   });
 
@@ -38,7 +38,7 @@ describe("StressMeter", () => {
   });
 
   it("updates value on pip click", () => {
-    const pips = Array.from(element.querySelectorAll(".pip")) as HTMLElement[];
+    const pips = Array.from(element.querySelectorAll(".inspectres-pip")) as HTMLElement[];
     pips[2]?.click();
     expect(element.value).toBe(3);
   });
@@ -46,7 +46,7 @@ describe("StressMeter", () => {
   it("dispatches change event on value change", () => {
     const handler = vi.fn();
     element.addEventListener("change", handler);
-    const pip = element.querySelector(".pip") as HTMLElement;
+    const pip = element.querySelector(".inspectres-pip") as HTMLElement;
     pip?.click();
     expect(handler).toHaveBeenCalled();
   });

@@ -186,14 +186,14 @@ test.describe("AgentSheet — conditional UI paths", () => {
     // --- recovery banner ---
     await waitForElementVisible(
       page,
-      `.inspectres[id*="${agentId}"] .recovery-banner`,
+      `.inspectres[id*="${agentId}"] .inspectres-recovery-banner`,
       ELEMENT_WAIT_TIMEOUT,
     );
 
     // --- skill penalty line ---
     await waitForElementVisible(
       page,
-      `.inspectres[id*="${agentId}"] .skill-penalty-line`,
+      `.inspectres[id*="${agentId}"] .inspectres-skill-penalty-line`,
       ELEMENT_WAIT_TIMEOUT,
     );
   });

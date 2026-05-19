@@ -110,7 +110,7 @@
 }
 
 /* Speaker avatar in chat */
-.inspectres .chat-message .actor-portrait {
+.inspectres .chat-message .inspectres-actor-portrait {
   width: 32px;
   height: 32px;
   border-radius: var(--inspectres-radius);
