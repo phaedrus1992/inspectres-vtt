@@ -16,8 +16,7 @@ import {
   getActorSystemField,
   assertSheetAccessibility,
 } from "./pages/index.js";
-
-const SKILL_NAMES = ["academics", "athletics", "technology", "contact"] as const;
+import { SKILL_NAMES } from "../../rolls/roll-types.js";
 
 // Conditional UI paths need specific pre-state that conflicts with the default
 // actor setup (isDead, daysOutOfAction, stress+penalty), so they use their own

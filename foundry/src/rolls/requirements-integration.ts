@@ -1,3 +1,5 @@
+import { assertNever } from "../utils/type-utils.js";
+
 export interface MissionState {
   itemRarity: "common" | "rare" | "exotic";
   requirementsMet: boolean;
@@ -50,6 +52,6 @@ export function getRequirementBlockReason(mission: MissionState | null): string 
     case "exotic":
       return "INSPECTRES.Requirement.Exotic";
     default:
-      return "";
+      return assertNever(mission.itemRarity);
   }
 }

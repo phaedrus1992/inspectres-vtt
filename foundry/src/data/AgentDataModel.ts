@@ -1,3 +1,5 @@
+import { SKILL_NAMES } from "../rolls/roll-types.js";
+
 const { StringField, NumberField, BooleanField, ArrayField, SchemaField } = foundry.data.fields;
 
 // TypeDataModel base class cast: Foundry's abstract class requires unknown intermediate
@@ -66,11 +68,10 @@ export class AgentDataModel extends TypeDataModelBase {
     // Enforce skill range based on weird agent status
     const isWeird = (this as unknown as { isWeird: boolean }).isWeird;
     const maxSkill = isWeird ? 10 : 4;
-    const skillKeys = ["academics", "athletics", "technology", "contact"] as const;
     const skills = (this as unknown as { skills: Record<string, { base: number; penalty: number }> }).skills;
 
     if (skills) {
-      for (const skillKey of skillKeys) {
+      for (const skillKey of SKILL_NAMES) {
         if (skills[skillKey] && skills[skillKey].base > maxSkill) {
           const actorName = (this as unknown as { name?: string }).name ?? "unknown";
           console.warn(

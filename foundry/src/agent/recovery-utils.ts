@@ -6,18 +6,14 @@
 import { type AgentData } from "./agent-schema.js";
 import { agentSystemData } from "./agent-system-data.js";
 import { getDevLogger } from "../utils/dev-logger.js";
+import { settingsApi } from "../utils/fvtt-boundary.js";
 
 // Default in-game day when the setting is unavailable (matches setting's initial value)
 const DEFAULT_IN_GAME_DAY = 1;
 
 export function getCurrentDay(): number {
   try {
-    return (
-      (game.settings as unknown as { get: (namespace: string, key: string) => unknown })?.get(
-        "inspectres",
-        "currentDay",
-      ) as number
-    ) ?? DEFAULT_IN_GAME_DAY;
+    return (settingsApi().get("inspectres", "currentDay") as number) ?? DEFAULT_IN_GAME_DAY;
   } catch (err: unknown) {
     if (game.ready) {
       const message = err instanceof Error ? err.message : String(err);
