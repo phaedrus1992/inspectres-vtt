@@ -9,7 +9,7 @@
  * Usage:
  *   await DialogV2.wait({ ..., render: stopDialogSubmitPropagation });
  */
-export function stopDialogSubmitPropagation(_event: Event, dialog: foundry.applications.api.DialogV2): void {
+export function stopDialogSubmitPropagation(_event: Event, dialog: foundry.applications.api.DialogV2.Any): void {
   const el = dialog.element as HTMLElement;
   // Force the inner form's method to "dialog" — browser closes <dialog> on submit
   // instead of navigating. Re-applied on every render in case DialogV2 rebuilds the form.

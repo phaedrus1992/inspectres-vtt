@@ -409,7 +409,7 @@ async function buildSkillRollDialog(opts: SkillRollDialogOptions): Promise<Skill
         action: "roll",
         label: i18n?.localize("INSPECTRES.DialogRoll") ?? "Roll",
         default: true,
-        callback: (_event: Event, _button: HTMLButtonElement, dialog: foundry.applications.api.DialogV2) => {
+        callback: (_event: Event, _button: HTMLButtonElement, dialog: foundry.applications.api.DialogV2.Any) => {
           const form = dialog.element.querySelector("form");
           if (!form) {
             getDevLogger().error("roll-executor", "buildSkillRollDialog: form element not found in dialog");

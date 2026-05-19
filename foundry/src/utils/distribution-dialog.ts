@@ -13,14 +13,14 @@ export interface DistributionDialogOptions {
 interface DialogConfig {
   content: string;
   window?: { title: string };
-  buttons?: Array<{
+  buttons: Array<{
     action: string;
     label: string;
     default?: boolean;
     callback?: (
       event: Event,
       button: HTMLButtonElement,
-      dialog: foundry.applications.api.DialogV2,
+      dialog: foundry.applications.api.DialogV2.Any,
     ) => Record<string, number> | null;
   }>;
   rejectClose?: boolean;
@@ -59,7 +59,7 @@ export async function buildDistributionConfig(opts: DistributionDialogOptions): 
         action: "confirm",
         label: game.i18n?.localize("INSPECTRES.DistributeDialogConfirm") ?? "Confirm",
         default: true,
-        callback: (_event: Event, _button: HTMLButtonElement, dialog: foundry.applications.api.DialogV2) => {
+        callback: (_event: Event, _button: HTMLButtonElement, dialog: foundry.applications.api.DialogV2.Any) => {
           const form = dialog.element.querySelector("form");
           if (!form) return null;
           const data = new FormData(form);

@@ -75,7 +75,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     sheet: { template: "systems/inspectres/templates/agent-sheet.hbs" },
   };
 
-  override async _prepareContext(_options: foundry.applications.api.ApplicationV2Options): Promise<Record<string, unknown>> {
+  override async _prepareContext(_options: ApplicationV2RenderOptions): Promise<ActorSheetV2RenderContext> {
     const base = await super._prepareContext(_options);
     const system = agentSystemData(this.actor);
     const currentDay = getCurrentDay();
@@ -89,7 +89,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
     return { ...base, actor: this.actor, system: systemPlain, recoveryStatus, bannerText };
   }
 
-  override async _onRender(context: Record<string, unknown>, options: foundry.applications.api.ApplicationV2Options): Promise<void> {
+  override async _onRender(context: Record<string, unknown>, options: ApplicationV2RenderOptions): Promise<void> {
     await super._onRender(context, options);
 
     activateTabs(this.element, "stats");
@@ -331,11 +331,10 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
       ui.notifications?.warn(game.i18n?.localize("INSPECTRES.WarnActionBlockedRecovery") ?? "Cannot act while recovering");
       return;
     }
-    const type = target.dataset["type"] ?? "image";
-    const current = this.actor.img ?? undefined;
-    const FilePicker = foundry.applications.api.FilePicker;
+    const type = (target.dataset["type"] ?? "image") as foundry.applications.apps.FilePicker.Type;
+    const FilePicker = foundry.applications.apps.FilePicker;
     const picker = new FilePicker({
-      current,
+      ...(this.actor.img ? { current: this.actor.img } : {}),
       type,
       callback: (path: string) => {
         void updateDocument(this.actor, { img: path }).catch((err: unknown) => {
@@ -469,7 +468,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
           action: "set",
           label: i18n?.localize("INSPECTRES.DialogSet") ?? "Set",
           default: true,
-          callback: (_event: Event, _button: HTMLButtonElement, dialog: foundry.applications.api.DialogV2) => {
+          callback: (_event: Event, _button: HTMLButtonElement, dialog: foundry.applications.api.DialogV2.Any) => {
             const form = dialog.element.querySelector("form");
             if (!form) return null;
             const days = Math.max(1, Math.min(10, Number(new FormData(form).get("days") ?? 2)));
@@ -559,7 +558,7 @@ export class AgentSheet extends foundry.applications.api.HandlebarsApplicationMi
           action: "restore",
           label: i18n?.localize("INSPECTRES.DialogRestore") ?? "Restore",
           default: true,
-          callback: (_event: Event, _button: HTMLButtonElement, dialog: foundry.applications.api.DialogV2) => {
+          callback: (_event: Event, _button: HTMLButtonElement, dialog: foundry.applications.api.DialogV2.Any) => {
             const form = dialog.element.querySelector("form");
             if (!form) return null;
             const cool = Math.max(1, Math.min(maxCool, Number(new FormData(form).get("cool") ?? 1)));

@@ -42,7 +42,7 @@ export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicati
     sheet: { template: "systems/inspectres/templates/franchise-sheet.hbs" },
   };
 
-  override async _onRender(context: Record<string, unknown>, options: foundry.applications.api.ApplicationV2Options): Promise<void> {
+  override async _onRender(context: Record<string, unknown>, options: ApplicationV2RenderOptions): Promise<void> {
     await super._onRender(context, options);
     activateTabs(this.element, "stats");
     // Foundry v14 bug: ApplicationV2 form submit events are not preventDefault'd by the
@@ -77,7 +77,7 @@ export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicati
     }
   }
 
-  override async _prepareContext(_options: foundry.applications.api.ApplicationV2Options): Promise<Record<string, unknown>> {
+  override async _prepareContext(_options: ApplicationV2RenderOptions): Promise<ActorSheetV2RenderContext> {
     const base = await super._prepareContext(_options);
     const system = getActorSystem<FranchiseData>(this.actor);
     const isGm = game.user?.isGM ?? false;

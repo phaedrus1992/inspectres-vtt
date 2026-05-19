@@ -100,7 +100,7 @@ describe("AgentSheet", () => {
 
     it("activates the stats tab by default on first render", async () => {
       const { sheet, statsTab, notesTab, statsBtn, notesBtn } = makeSheetWithTabs();
-      await sheet._onRender({}, {});
+      await sheet._onRender({}, {} as ApplicationV2RenderOptions);
 
       expect(statsTab.classList.contains("active")).toBe(true);
       expect(notesTab.classList.contains("active")).toBe(false);
@@ -110,7 +110,7 @@ describe("AgentSheet", () => {
 
     it("activates the notes tab when stored as active", async () => {
       const { sheet, statsTab, notesTab, statsBtn, notesBtn } = makeSheetWithTabs("notes");
-      await sheet._onRender({}, {});
+      await sheet._onRender({}, {} as ApplicationV2RenderOptions);
 
       expect(notesTab.classList.contains("active")).toBe(true);
       expect(statsTab.classList.contains("active")).toBe(false);
@@ -120,7 +120,7 @@ describe("AgentSheet", () => {
 
     it("switches to notes tab when a tab button is clicked", async () => {
       const { sheet, statsTab, notesTab, notesBtn } = makeSheetWithTabs();
-      await sheet._onRender({}, {});
+      await sheet._onRender({}, {} as ApplicationV2RenderOptions);
 
       notesBtn.dispatchEvent(new MouseEvent("click", { bubbles: true }));
 
@@ -130,12 +130,12 @@ describe("AgentSheet", () => {
 
     it("remembers tab state across re-renders", async () => {
       const { sheet, notesBtn, notesTab } = makeSheetWithTabs();
-      await sheet._onRender({}, {});
+      await sheet._onRender({}, {} as ApplicationV2RenderOptions);
 
       notesBtn.dispatchEvent(new MouseEvent("click", { bubbles: true }));
       expect(sheet.element.dataset["activeTab"]).toBe("notes");
 
-      await sheet._onRender({}, {});
+      await sheet._onRender({}, {} as ApplicationV2RenderOptions);
       expect(notesTab.classList.contains("active")).toBe(true);
     });
   });
@@ -163,7 +163,7 @@ describe("AgentSheet", () => {
       }
       global.foundry = {
         applications: {
-          api: {
+          apps: {
             FilePicker: MockFilePicker,
           },
         },
@@ -196,7 +196,7 @@ describe("AgentSheet", () => {
       }
       global.foundry = {
         applications: {
-          api: {
+          apps: {
             FilePicker: MockFilePicker,
           },
         },
@@ -220,7 +220,7 @@ describe("AgentSheet", () => {
       }
       global.foundry = {
         applications: {
-          api: {
+          apps: {
             FilePicker: TrackingFilePicker,
           },
         },
@@ -248,7 +248,7 @@ describe("AgentSheet", () => {
 
       const updateSpy = vi.spyOn(sheet.actor, "update").mockResolvedValue(sheet.actor);
 
-      await sheet._onRender({}, {});
+      await sheet._onRender({}, {} as ApplicationV2RenderOptions);
 
       checkbox.dispatchEvent(new Event("change"));
       expect(updateSpy).not.toHaveBeenCalled();
@@ -272,7 +272,7 @@ describe("AgentSheet", () => {
 
       const updateSpy = vi.spyOn(sheet.actor, "update").mockResolvedValue(sheet.actor);
 
-      await sheet._onRender({}, {});
+      await sheet._onRender({}, {} as ApplicationV2RenderOptions);
 
       checkbox.dispatchEvent(new Event("change"));
       expect(updateSpy).toHaveBeenCalled();
@@ -296,7 +296,7 @@ describe("AgentSheet", () => {
       const updateError = new Error("Update failed");
       vi.spyOn(sheet.actor, "update").mockRejectedValueOnce(updateError);
 
-      await sheet._onRender({}, {});
+      await sheet._onRender({}, {} as ApplicationV2RenderOptions);
       checkbox.dispatchEvent(new Event("change"));
 
       await new Promise((resolve) => setTimeout(resolve, 10));
@@ -325,7 +325,7 @@ describe("AgentSheet", () => {
 
       const updateSpy = vi.spyOn(sheet.actor, "update").mockResolvedValue(sheet.actor);
 
-      await sheet._onRender({}, {});
+      await sheet._onRender({}, {} as ApplicationV2RenderOptions);
 
       checkbox1.dispatchEvent(new Event("change"));
       checkbox2.dispatchEvent(new Event("change"));
@@ -356,9 +356,9 @@ describe("AgentSheet", () => {
 
       const updateSpy = vi.spyOn(sheet.actor, "update").mockResolvedValue(sheet.actor);
 
-      await sheet._onRender({}, {});
-      await sheet._onRender({}, {});
-      await sheet._onRender({}, {});
+      await sheet._onRender({}, {} as ApplicationV2RenderOptions);
+      await sheet._onRender({}, {} as ApplicationV2RenderOptions);
+      await sheet._onRender({}, {} as ApplicationV2RenderOptions);
 
       checkbox.dispatchEvent(new Event("change"));
       expect(updateSpy).toHaveBeenCalledTimes(1);
