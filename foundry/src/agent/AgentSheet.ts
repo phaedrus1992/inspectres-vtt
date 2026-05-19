@@ -18,6 +18,7 @@ import { buildVacationDialog } from "./vacation-dialog.js";
 import { executeSkillRecovery } from "./skill-recovery.js";
 import { type FranchiseData } from "../franchise/franchise-schema.js";
 import { stopDialogSubmitPropagation } from "../utils/dialog-utils.js";
+import { assertNever } from "../utils/type-utils.js";
 
 function isSkillName(value: string | null): value is SkillName {
   return SKILL_NAMES.includes(value as SkillName);
@@ -39,7 +40,7 @@ function getRecoveryBannerText(recoveryStatus: ReturnType<typeof computeRecovery
     case "active":
       return null;
     default:
-      return null;
+      return assertNever(recoveryStatus.status);
   }
 }
 

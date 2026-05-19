@@ -11,11 +11,9 @@ import { getCurrentDay } from "../agent/recovery-utils.js";
 import { stopDialogSubmitPropagation } from "../utils/dialog-utils.js";
 import { getActorSystem, type RollActor } from "../utils/system-cast.js";
 import { isDieFace, actorUpdate, rollDice, postChatCard } from "./roll-helpers.js";
-import { type SkillName, type StressRollParams, type DieFace, type D3Result } from "./roll-types.js";
+import { SKILL_NAMES, type SkillName, type StressRollParams, type DieFace, type D3Result } from "./roll-types.js";
 
-// All valid skills for penalty selection — drives dialog rendering and validation.
-// If SkillName ever changes, this constant fails to compile until updated.
-export const SKILL_NAMES = ["academics", "athletics", "technology", "contact"] as const satisfies readonly SkillName[];
+export { SKILL_NAMES };
 
 function isSkillName(value: string): value is SkillName {
   return (SKILL_NAMES as readonly string[]).includes(value);

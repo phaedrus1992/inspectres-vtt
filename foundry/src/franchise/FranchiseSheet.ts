@@ -1,5 +1,6 @@
 import { getActorSystem } from "../utils/system-cast.js";
 import { type FranchiseData } from "./franchise-schema.js";
+import { type AgentData } from "../agent/agent-schema.js";
 import { executeBankRoll, executeClientRoll } from "../rolls/roll-executor.js";
 import { MissionTrackerApp } from "../mission/MissionTrackerApp.js";
 import { handleActionError } from "../utils/ui-errors.js";
@@ -253,10 +254,10 @@ export class FranchiseSheet extends foundry.applications.api.HandlebarsApplicati
     const agentActors: Actor[] = [];
     const nonWeirdAgents: Actor[] = [];
     for (const actor of allActors) {
-      if ((actor as unknown as Record<string, unknown>)["type"] === "agent") {
+      if ((actor.type as string) === "agent") {
         agentActors.push(actor);
-        const sys = actor.system as unknown as Record<string, unknown>;
-        if (!(sys["isWeird"] ?? false)) {
+        const sys = getActorSystem<AgentData>(actor);
+        if (!sys.isWeird) {
           nonWeirdAgents.push(actor);
         }
       }
