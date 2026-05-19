@@ -173,6 +173,7 @@ export class MissionTrackerApp extends foundry.applications.api.HandlebarsApplic
 
   override async close(options?: Partial<foundry.applications.api.ApplicationV2.ClosingOptions>): Promise<this> {
     MissionTrackerApp.instance = null;
-    return super.close(options) as Promise<this>;
+    await super.close(options);
+    return this;
   }
 }
