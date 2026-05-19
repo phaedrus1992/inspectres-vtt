@@ -3,6 +3,8 @@
  * Records mission sync events, multiplayer coordination, and state changes
  */
 
+import { settingsApi } from "./fvtt-boundary.js";
+
 interface LogEntry {
   timestamp: number;
   level: "info" | "warn" | "error";
@@ -21,8 +23,13 @@ class DevLogger {
     message: string,
     data: Record<string, unknown> | undefined = undefined,
   ): void {
-    const settingsApi = game.settings as unknown as { get: (namespace: string, key: string) => unknown };
-    const devModeEnabled = (settingsApi?.get("inspectres", "devMode") as boolean | undefined) ?? false;
+    let devModeEnabled = false;
+    try {
+      const settings = settingsApi();
+      devModeEnabled = (settings.get("inspectres", "devMode") as boolean | undefined) ?? false;
+    } catch {
+      // settingsApi() fails if game is undefined (e.g., in tests without Foundry globals)
+    }
     if (!devModeEnabled) return;
 
     const entry: LogEntry = {

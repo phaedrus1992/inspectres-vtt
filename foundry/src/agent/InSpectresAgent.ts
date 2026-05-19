@@ -4,6 +4,7 @@
  */
 
 import { agentSystemData } from "./agent-system-data.js";
+import { type SkillName } from "../rolls/roll-types.js";
 
 const ERROR_RECOVERY_STATE_GM_ONLY = "Recovery state can only be modified by the GM";
 const ERROR_SKILL_VALUE_EXCEEDS_MAX = (skillValue: number, max: number, agentType: string) =>
@@ -20,7 +21,7 @@ export class InSpectresAgent extends Actor {
   /**
    * Get effective skill value (base - penalty, min 0)
    */
-  getEffectiveSkill(skill: "academics" | "athletics" | "technology" | "contact"): number {
+  getEffectiveSkill(skill: SkillName): number {
     const system = agentSystemData(this as Actor);
     const skillData = system.skills?.[skill];
     if (!skillData) return 0;
