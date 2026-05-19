@@ -6,6 +6,7 @@
 import { getActorSystem } from "../utils/system-cast.js";
 import { calculateHazardPay } from "./end-of-session-bonuses.js";
 import { type FranchiseData } from "./franchise-schema.js";
+import { type AgentData } from "../agent/agent-schema.js";
 import { stopDialogSubmitPropagation } from "../utils/dialog-utils.js";
 import { updateDocument } from "../utils/fvtt-boundary.js";
 
@@ -38,9 +39,9 @@ export async function applyEndOfSessionBonuses(context: EndOfSessionContext): Pr
   const actors = game.actors ?? [];
   const agentActors: Array<{ isWeird: boolean }> = [];
   for (const actor of actors) {
-    if ((actor as unknown as Record<string, unknown>)["type"] === "agent") {
-      const system = actor.system as Record<string, unknown>;
-      agentActors.push({ isWeird: (system["isWeird"] ?? false) as boolean });
+    if ((actor.type as string) === "agent") {
+      const agentSystem = getActorSystem<AgentData>(actor);
+      agentActors.push({ isWeird: agentSystem.isWeird });
     }
   }
   const hazardPay = calculateHazardPay(agentActors, context.deathMode);
@@ -106,16 +107,13 @@ export async function initiateBankruptcyRestart(franchiseActor: Actor): Promise<
   // Wipe Cool from all agents in the world
   const actors = game.actors ?? [];
   for (const actor of actors) {
-    if ((actor as unknown as Record<string, unknown>)["type"] === "agent") {
-      const systemData = actor.system as Record<string, unknown>;
-      if (systemData["cool"] !== undefined) {
-        try {
-          await updateDocument(actor, { "system.cool": 0 });
-        } catch (err: unknown) {
-          const message = extractErrorMessage(err);
-          ui.notifications?.error(`Failed to wipe Cool from ${actor.name}: ${message}`);
-          throw err;
-        }
+    if ((actor.type as string) === "agent") {
+      try {
+        await updateDocument(actor, { "system.cool": 0 });
+      } catch (err: unknown) {
+        const message = extractErrorMessage(err);
+        ui.notifications?.error(`Failed to wipe Cool from ${actor.name}: ${message}`);
+        throw err;
       }
     }
   }
