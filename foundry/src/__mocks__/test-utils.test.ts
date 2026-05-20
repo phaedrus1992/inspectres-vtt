@@ -35,8 +35,8 @@ describe("setupMockGame() helper", () => {
   it("i18n.localize returns key when no localization provided", () => {
     game = setupMockGame();
 
-    const result = game.i18n.localize("INSPECTRES.TestKey");
-    expect(result).toBe("INSPECTRES.TestKey");
+    const result = game.i18n.localize("TEST.MockKey");
+    expect(result).toBe("TEST.MockKey");
   });
 
   it("accepts options to override defaults", () => {
