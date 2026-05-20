@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { autoClearRecoveredAgents } from "./recovery-utils.js";
 import { type AgentData } from "./agent-schema.js";
+import { createDayNumber } from "../types/brands.js";
 
 function makeAgent(overrides: Partial<AgentData> = {}): AgentData {
   return {
@@ -18,8 +19,8 @@ function makeAgent(overrides: Partial<AgentData> = {}): AgentData {
     characteristics: [],
     stress: 0,
     isDead: false,
-    daysOutOfAction: 0,
-    recoveryStartedAt: 0,
+    daysOutOfAction: createDayNumber(0),
+    recoveryStartedAt: createDayNumber(0),
     ...overrides,
   };
 }
@@ -59,7 +60,10 @@ describe("autoClearRecoveredAgents", () => {
   }
 
   it("calls actor.update for agents with expired recovery", async () => {
-    const agent = makeTestActor("agent-1", { daysOutOfAction: 3, recoveryStartedAt: 5 });
+    const agent = makeTestActor("agent-1", {
+      daysOutOfAction: createDayNumber(3),
+      recoveryStartedAt: createDayNumber(5),
+    });
     setupGameMock([agent], true);
 
     await autoClearRecoveredAgents(8);
@@ -71,7 +75,10 @@ describe("autoClearRecoveredAgents", () => {
   });
 
   it("skips agents that are still recovering", async () => {
-    const agent = makeTestActor("agent-1", { daysOutOfAction: 3, recoveryStartedAt: 5 });
+    const agent = makeTestActor("agent-1", {
+      daysOutOfAction: createDayNumber(3),
+      recoveryStartedAt: createDayNumber(5),
+    });
     setupGameMock([agent], true);
 
     await autoClearRecoveredAgents(7);
@@ -80,7 +87,11 @@ describe("autoClearRecoveredAgents", () => {
   });
 
   it("skips dead agents", async () => {
-    const agent = makeTestActor("agent-1", { isDead: true, daysOutOfAction: 3, recoveryStartedAt: 5 });
+    const agent = makeTestActor("agent-1", {
+      isDead: true,
+      daysOutOfAction: createDayNumber(3),
+      recoveryStartedAt: createDayNumber(5),
+    });
     setupGameMock([agent], true);
 
     await autoClearRecoveredAgents(8);
@@ -89,7 +100,10 @@ describe("autoClearRecoveredAgents", () => {
   });
 
   it("skips uninjured agents", async () => {
-    const agent = makeTestActor("agent-1", { daysOutOfAction: 0, recoveryStartedAt: 0 });
+    const agent = makeTestActor("agent-1", {
+      daysOutOfAction: createDayNumber(0),
+      recoveryStartedAt: createDayNumber(0),
+    });
     setupGameMock([agent], true);
 
     await autoClearRecoveredAgents(8);
@@ -98,7 +112,10 @@ describe("autoClearRecoveredAgents", () => {
   });
 
   it("returns early if current user is not GM", async () => {
-    const agent = makeTestActor("agent-1", { daysOutOfAction: 3, recoveryStartedAt: 5 });
+    const agent = makeTestActor("agent-1", {
+      daysOutOfAction: createDayNumber(3),
+      recoveryStartedAt: createDayNumber(5),
+    });
     setupGameMock([agent], false);
 
     await autoClearRecoveredAgents(8);
@@ -107,9 +124,18 @@ describe("autoClearRecoveredAgents", () => {
   });
 
   it("handles multiple agents and clears all that are ready", async () => {
-    const agent1 = makeTestActor("agent-1", { daysOutOfAction: 3, recoveryStartedAt: 5 });
-    const agent2 = makeTestActor("agent-2", { daysOutOfAction: 2, recoveryStartedAt: 6 });
-    const agent3 = makeTestActor("agent-3", { daysOutOfAction: 0, recoveryStartedAt: 0 });
+    const agent1 = makeTestActor("agent-1", {
+      daysOutOfAction: createDayNumber(3),
+      recoveryStartedAt: createDayNumber(5),
+    });
+    const agent2 = makeTestActor("agent-2", {
+      daysOutOfAction: createDayNumber(2),
+      recoveryStartedAt: createDayNumber(6),
+    });
+    const agent3 = makeTestActor("agent-3", {
+      daysOutOfAction: createDayNumber(0),
+      recoveryStartedAt: createDayNumber(0),
+    });
 
     setupGameMock([agent1, agent2, agent3], true);
 

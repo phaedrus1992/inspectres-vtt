@@ -10,6 +10,7 @@ import { describe, it, expect } from "vitest";
 import { type AgentData } from "../agent/agent-schema.js";
 import { computeRecoveryStatus } from "../agent/recovery-utils.js";
 import { type RollActor } from "./roll-executor.js";
+import { createDayNumber } from "../types/brands.js";
 
 // Test fixture for minimal RollActor
 function makeAgent(overrides: Record<string, unknown> = {}): RollActor {
@@ -21,8 +22,8 @@ function makeAgent(overrides: Record<string, unknown> = {}): RollActor {
     isDead: false,
     isWeird: false,
     power: null,
-    daysOutOfAction: 0,
-    recoveryStartedAt: 0,
+    daysOutOfAction: createDayNumber(0),
+    recoveryStartedAt: createDayNumber(0),
     characteristics: [],
     skills: {
       academics: { base: 0, penalty: 0 },

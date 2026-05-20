@@ -13,6 +13,7 @@ import {
   recoveringAgentData,
   dayNumber,
 } from "../__mocks__/arbitraries.js";
+import { createDayNumber } from "../types/brands.js";
 
 const VALID_STATUSES: RecoveryStatus[] = ["active", "dead", "recovering", "returned"];
 
@@ -55,12 +56,12 @@ describe("recovery state machine invariants", () => {
         recoveringAgentData(),
         fc.integer({ min: 0, max: 5 }),
         (system, offsetWithinRecovery) => {
-          const startDay = system.recoveryStartedAt === 0 ? 1 : system.recoveryStartedAt;
-          const completionDay = startDay + system.daysOutOfAction;
+          const startDay = system.recoveryStartedAt === 0 ? 1 : (system.recoveryStartedAt as unknown as number);
+          const completionDay = startDay + (system.daysOutOfAction as unknown as number);
           const currentDay = completionDay - offsetWithinRecovery - 1;
           fc.pre(currentDay >= startDay && currentDay < completionDay);
           const info = computeRecoveryStatus(
-            { ...system, recoveryStartedAt: startDay },
+            { ...system, recoveryStartedAt: createDayNumber(startDay) },
             currentDay,
           );
           expect(info.status).toBe("recovering");
@@ -89,12 +90,12 @@ describe("recovery state machine invariants", () => {
         recoveringAgentData(),
         fc.integer({ min: 0, max: 5 }),
         (system, startOffset) => {
-          const startDay = Math.max(1, system.recoveryStartedAt);
+          const startDay = Math.max(1, system.recoveryStartedAt as unknown as number);
           const currentDay = startDay + startOffset;
-          const farFutureDay = startDay + system.daysOutOfAction + 100;
+          const farFutureDay = startDay + (system.daysOutOfAction as unknown as number) + 100;
 
-          const now = computeRecoveryStatus({ ...system, recoveryStartedAt: startDay }, currentDay);
-          const later = computeRecoveryStatus({ ...system, recoveryStartedAt: startDay }, farFutureDay);
+          const now = computeRecoveryStatus({ ...system, recoveryStartedAt: createDayNumber(startDay) }, currentDay);
+          const later = computeRecoveryStatus({ ...system, recoveryStartedAt: createDayNumber(startDay) }, farFutureDay);
 
           // After enough time: returned (never goes back to recovering from returned)
           expect(later.status).toBe("returned");

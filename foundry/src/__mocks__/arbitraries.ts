@@ -5,6 +5,7 @@
 import * as fc from "fast-check";
 import { type AgentData, type AgentSkill } from "../agent/agent-schema.js";
 import { type FranchiseData } from "../franchise/franchise-schema.js";
+import { createDayNumber } from "../types/brands.js";
 
 // ─── Primitive arbitraries ────────────────────────────────────────────────────
 
@@ -68,8 +69,8 @@ export const agentData = (): fc.Arbitrary<AgentData> =>
     power: fc.constant(null),
     characteristics: fc.constant([]),
     isDead: fc.boolean(),
-    daysOutOfAction: fc.integer({ min: 0, max: 30 }),
-    recoveryStartedAt: dayNumber(),
+    daysOutOfAction: dayNumber().map(createDayNumber),
+    recoveryStartedAt: dayNumber().map(createDayNumber),
     stress: stressValue(),
   });
 
@@ -97,7 +98,7 @@ export const recoveringAgentData = (): fc.Arbitrary<AgentData> =>
   agentData().map((a) => ({
     ...a,
     isDead: false,
-    daysOutOfAction: Math.max(1, a.daysOutOfAction),
+    daysOutOfAction: createDayNumber(Math.max(1, (a.daysOutOfAction as unknown as number))),
     recoveryStartedAt: a.recoveryStartedAt,
   }));
 
@@ -113,6 +114,6 @@ export const activeAgentData = (): fc.Arbitrary<AgentData> =>
   agentData().map((a) => ({
     ...a,
     isDead: false,
-    daysOutOfAction: 0,
-    recoveryStartedAt: 0,
+    daysOutOfAction: createDayNumber(0),
+    recoveryStartedAt: createDayNumber(0),
   }));

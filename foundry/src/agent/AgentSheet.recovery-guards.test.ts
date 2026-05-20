@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { MockActorSheetV2, Hooks } from "../__mocks__/setup.js";
 import { AgentSheet } from "./AgentSheet.js";
 import type { AgentData } from "./agent-schema.js";
+import { createDayNumber } from "../types/brands.js";
 
 function makeAgentSheetWithRecovery(
   recoveryStatus: "active" | "recovering" | "returned" | "dead",
@@ -25,8 +26,8 @@ function makeAgentSheetWithRecovery(
     power: null,
     characteristics: [],
     isDead: recoveryStatus === "dead",
-    daysOutOfAction: recoveryStatus === "recovering" ? 20 : 0,
-    recoveryStartedAt: recoveryStatus === "recovering" ? 10 : 0,
+    daysOutOfAction: createDayNumber(recoveryStatus === "recovering" ? 20 : 0),
+    recoveryStartedAt: createDayNumber(recoveryStatus === "recovering" ? 10 : 0),
     stress: 0,
   };
 

@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { computeRecoveryStatus } from "../agent/recovery-utils.js";
 import { type AgentData } from "../agent/agent-schema.js";
+import { createDayNumber } from "../types/brands.js";
 
 function makeAgent(overrides: Partial<AgentData> = {}): AgentData {
   return {
@@ -18,8 +19,8 @@ function makeAgent(overrides: Partial<AgentData> = {}): AgentData {
     characteristics: [],
     stress: 0,
     isDead: false,
-    daysOutOfAction: 0,
-    recoveryStartedAt: 0,
+    daysOutOfAction: createDayNumber(0),
+    recoveryStartedAt: createDayNumber(0),
     ...overrides,
   };
 }
@@ -27,26 +28,26 @@ function makeAgent(overrides: Partial<AgentData> = {}): AgentData {
 describe("Recovery Blocking for Rolls", () => {
   describe("computeRecoveryStatus state machine", () => {
     it("returns active status for agent with no recovery", () => {
-      const system = makeAgent({ daysOutOfAction: 0, recoveryStartedAt: 0 });
+      const system = makeAgent({ daysOutOfAction: createDayNumber(0), recoveryStartedAt: createDayNumber(0) });
       const status = computeRecoveryStatus(system, 5);
       expect(status.status).toBe("active");
     });
 
     it("returns recovering status when in recovery window", () => {
-      const system = makeAgent({ daysOutOfAction: 3, recoveryStartedAt: 5 });
+      const system = makeAgent({ daysOutOfAction: createDayNumber(3), recoveryStartedAt: createDayNumber(5) });
       const status = computeRecoveryStatus(system, 6); // 1 day into 3-day recovery
       expect(status.status).toBe("recovering");
       expect(status.daysRemaining).toBe(2);
     });
 
     it("returns returned status when recovery deadline reached", () => {
-      const system = makeAgent({ daysOutOfAction: 3, recoveryStartedAt: 5 });
+      const system = makeAgent({ daysOutOfAction: createDayNumber(3), recoveryStartedAt: createDayNumber(5) });
       const status = computeRecoveryStatus(system, 8); // exactly at deadline
       expect(status.status).toBe("returned");
     });
 
     it("returns active status after recovery is cleared", () => {
-      const system = makeAgent({ daysOutOfAction: 0, recoveryStartedAt: 5 });
+      const system = makeAgent({ daysOutOfAction: createDayNumber(0), recoveryStartedAt: createDayNumber(5) });
       const status = computeRecoveryStatus(system, 10);
       expect(status.status).toBe("active");
     });
@@ -60,14 +61,14 @@ describe("Recovery Blocking for Rolls", () => {
 
   describe("Recovery blocking in rolls", () => {
     it("shows days remaining when agent is recovering", () => {
-      const system = makeAgent({ daysOutOfAction: 3, recoveryStartedAt: 5 });
+      const system = makeAgent({ daysOutOfAction: createDayNumber(3), recoveryStartedAt: createDayNumber(5) });
       const status = computeRecoveryStatus(system, 6);
       expect(status.daysRemaining).toBe(2);
       expect(status.status).toBe("recovering");
     });
 
     it("blocks both recovering and dead agents from rolling", () => {
-      const recovering = makeAgent({ daysOutOfAction: 2, recoveryStartedAt: 3 });
+      const recovering = makeAgent({ daysOutOfAction: createDayNumber(2), recoveryStartedAt: createDayNumber(3) });
       const dead = makeAgent({ isDead: true });
 
       const recoveringStatus = computeRecoveryStatus(recovering, 4);
@@ -83,22 +84,22 @@ describe("Recovery Blocking for Rolls", () => {
 
   describe("Auto-clear behavior", () => {
     it("identifies agents ready to clear when recovery expires", () => {
-      const agent = makeAgent({ daysOutOfAction: 3, recoveryStartedAt: 5 });
+      const agent = makeAgent({ daysOutOfAction: createDayNumber(3), recoveryStartedAt: createDayNumber(5) });
 
       const statusBefore = computeRecoveryStatus(agent, 8);
       expect(statusBefore.status).toBe("returned");
 
       // After clearing recovery fields (simulating auto-clear hook):
-      agent.daysOutOfAction = 0;
-      agent.recoveryStartedAt = 0;
+      agent.daysOutOfAction = createDayNumber(0);
+      agent.recoveryStartedAt = createDayNumber(0);
 
       const statusAfter = computeRecoveryStatus(agent, 8);
       expect(statusAfter.status).toBe("active");
     });
 
     it("recognizes multiple agents expiring on same day", () => {
-      const agent1 = makeAgent({ daysOutOfAction: 3, recoveryStartedAt: 5 });
-      const agent2 = makeAgent({ daysOutOfAction: 2, recoveryStartedAt: 6 });
+      const agent1 = makeAgent({ daysOutOfAction: createDayNumber(3), recoveryStartedAt: createDayNumber(5) });
+      const agent2 = makeAgent({ daysOutOfAction: createDayNumber(2), recoveryStartedAt: createDayNumber(6) });
 
       const status1 = computeRecoveryStatus(agent1, 8);
       const status2 = computeRecoveryStatus(agent2, 8);
