@@ -41,17 +41,20 @@ export function computeRecoveryStatus(
     };
   }
 
-  if (system.daysOutOfAction === 0) {
+  // Unwrap DayNumber branded type for arithmetic
+  const daysOut = system.daysOutOfAction as unknown as number;
+  if (daysOut === 0) {
     return {
       status: "active",
       daysRemaining: 0,
     };
   }
 
-  const startDay = system.recoveryStartedAt === 0 ? currentDay : system.recoveryStartedAt;
+  const recoveryStart = system.recoveryStartedAt as unknown as number;
+  const startDay = recoveryStart === 0 ? currentDay : recoveryStart;
 
   const daysElapsed = currentDay - startDay;
-  const daysRemaining = Math.max(0, system.daysOutOfAction - daysElapsed);
+  const daysRemaining = Math.max(0, daysOut - daysElapsed);
 
   if (daysRemaining > 0) {
     return {
@@ -85,10 +88,13 @@ export async function autoClearRecoveredAgents(currentDay: number): Promise<Auto
     const system = agentSystemData(actor);
 
     // Skip dead agents (stay dead) and uninjured agents (nothing to clear)
-    if (system.isDead || system.daysOutOfAction === 0) continue;
+    // Unwrap DayNumber branded type for arithmetic comparison
+    const daysOut = system.daysOutOfAction as unknown as number;
+    if (system.isDead || daysOut === 0) continue;
 
-    const daysElapsed = currentDay - system.recoveryStartedAt;
-    if (daysElapsed >= system.daysOutOfAction) {
+    const recoveryStart = system.recoveryStartedAt as unknown as number;
+    const daysElapsed = currentDay - recoveryStart;
+    if (daysElapsed >= daysOut) {
       updates.push({
         id: actor.id ?? "",
         name: actor.name ?? "Unknown",
