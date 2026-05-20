@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import type { AgentData } from "./agent-schema";
+import { createDayNumber } from "../types/brands.js";
 
 /**
  * Test suite for weird agent powers system (#19, #20)
@@ -71,8 +72,8 @@ describe("Weird Agent Powers", () => {
         power: null,
         characteristics: [],
         isDead: false,
-        daysOutOfAction: 0,
-        recoveryStartedAt: 0,
+        daysOutOfAction: createDayNumber(0),
+        recoveryStartedAt: createDayNumber(0),
         stress: 0,
       };
 
@@ -95,8 +96,8 @@ describe("Weird Agent Powers", () => {
         isWeird: true,
         characteristics: [],
         isDead: false,
-        daysOutOfAction: 0,
-        recoveryStartedAt: 0,
+        daysOutOfAction: createDayNumber(0),
+        recoveryStartedAt: createDayNumber(0),
         stress: 0,
         power: {
           name: "Shapeshifter",
@@ -125,8 +126,8 @@ describe("Weird Agent Powers", () => {
         isWeird: true,
         characteristics: [],
         isDead: false,
-        daysOutOfAction: 0,
-        recoveryStartedAt: 0,
+        daysOutOfAction: createDayNumber(0),
+        recoveryStartedAt: createDayNumber(0),
         stress: 0,
         power: {
           name: "Mind Control",
@@ -157,8 +158,8 @@ describe("Weird Agent Powers", () => {
         power: null,
         characteristics: [],
         isDead: false,
-        daysOutOfAction: 0,
-        recoveryStartedAt: 0,
+        daysOutOfAction: createDayNumber(0),
+        recoveryStartedAt: createDayNumber(0),
         stress: 2,
       };
 
@@ -183,8 +184,8 @@ describe("Weird Agent Powers", () => {
         power: null,
         characteristics: [],
         isDead: false,
-        daysOutOfAction: 0,
-        recoveryStartedAt: 0,
+        daysOutOfAction: createDayNumber(0),
+        recoveryStartedAt: createDayNumber(0),
         stress: 5,
       };
 
@@ -208,8 +209,8 @@ describe("Weird Agent Powers", () => {
         isWeird: true,
         characteristics: [],
         isDead: false,
-        daysOutOfAction: 0,
-        recoveryStartedAt: 0,
+        daysOutOfAction: createDayNumber(0),
+        recoveryStartedAt: createDayNumber(0),
         stress: 0,
         power: {
           name: "Fire Breath",
@@ -244,8 +245,8 @@ describe("Weird Agent Powers", () => {
         power: null,
         characteristics: [],
         isDead: false,
-        daysOutOfAction: 0,
-        recoveryStartedAt: 0,
+        daysOutOfAction: createDayNumber(0),
+        recoveryStartedAt: createDayNumber(0),
         stress: 0,
       };
 
@@ -268,8 +269,8 @@ describe("Weird Agent Powers", () => {
         power: null,
         characteristics: [],
         isDead: false,
-        daysOutOfAction: 0,
-        recoveryStartedAt: 0,
+        daysOutOfAction: createDayNumber(0),
+        recoveryStartedAt: createDayNumber(0),
         stress: 0,
       };
 

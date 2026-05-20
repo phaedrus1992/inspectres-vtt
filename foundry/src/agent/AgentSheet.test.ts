@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { MockActorSheetV2, Hooks } from "../__mocks__/setup.js";
 import { AgentSheet } from "./AgentSheet.js";
 import type { AgentData } from "./agent-schema.js";
+import { createDayNumber } from "../types/brands.js";
 
 function makeAgentSheetTestInstance(actor: unknown, isEditable = true) {
   const sheet = Object.create(AgentSheet.prototype) as unknown as AgentSheet;
@@ -390,8 +391,8 @@ describe("AgentSheet", () => {
         power: { name: "Test Power", description: "Test", baseSkill: "athletics", coolCost: 1 },
         characteristics: [],
         isDead: false,
-        daysOutOfAction: 2,
-        recoveryStartedAt: 5,
+        daysOutOfAction: createDayNumber(2),
+        recoveryStartedAt: createDayNumber(5),
         stress: 0,
       };
 
@@ -417,8 +418,8 @@ describe("AgentSheet", () => {
         power: { name: "Test Power", description: "Test", baseSkill: "athletics", coolCost: 1 },
         characteristics: [],
         isDead: false,
-        daysOutOfAction: 0,
-        recoveryStartedAt: 0,
+        daysOutOfAction: createDayNumber(0),
+        recoveryStartedAt: createDayNumber(0),
         stress: 0,
       };
 
@@ -446,8 +447,8 @@ describe("AgentSheet", () => {
         power: { name: "Test Power", description: "Test", baseSkill: "athletics", coolCost: 1 },
         characteristics: [],
         isDead: false,
-        daysOutOfAction: 0,
-        recoveryStartedAt: 0,
+        daysOutOfAction: createDayNumber(0),
+        recoveryStartedAt: createDayNumber(0),
         stress: 0,
       };
 
@@ -518,8 +519,8 @@ describe("AgentSheet", () => {
         power: null,
         characteristics: [],
         isDead: false,
-        daysOutOfAction: 3,
-        recoveryStartedAt: 5,
+        daysOutOfAction: createDayNumber(3),
+        recoveryStartedAt: createDayNumber(5),
         stress: 0,
       };
       Object.defineProperty(sheet.actor, "system", { value: agentData });

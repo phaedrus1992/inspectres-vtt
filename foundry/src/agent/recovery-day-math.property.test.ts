@@ -11,6 +11,7 @@ import {
   recoveringAgentData,
   dayNumber,
 } from "../__mocks__/arbitraries.js";
+import { createDayNumber } from "../types/brands.js";
 
 describe("recovery day math invariants", () => {
   it("dead agent always returns status=dead regardless of day", () => {
@@ -56,10 +57,10 @@ describe("recovery day math invariants", () => {
         dayNumber(),
         (system, extraDays) => {
           const startDay = system.recoveryStartedAt === 0 ? 1 : system.recoveryStartedAt;
-          const completionDay = startDay + system.daysOutOfAction;
+          const completionDay = (startDay as unknown as number) + (system.daysOutOfAction as unknown as number);
           const currentDay = completionDay + extraDays;
           const info = computeRecoveryStatus(
-            { ...system, recoveryStartedAt: startDay },
+            { ...system, recoveryStartedAt: createDayNumber(startDay as unknown as number) },
             currentDay,
           );
           expect(info.status).toBe("returned");
@@ -82,8 +83,8 @@ describe("recovery day math invariants", () => {
           fc.pre(currentDay < completionDay);
           const system = {
             isDead: false,
-            daysOutOfAction: duration,
-            recoveryStartedAt: startDay,
+            daysOutOfAction: createDayNumber(duration),
+            recoveryStartedAt: createDayNumber(startDay),
             // Other fields not used by computeRecoveryStatus
             description: "",
             skills: {
@@ -120,8 +121,8 @@ describe("recovery day math invariants", () => {
           fc.pre(currentDay + 2 < startDay + duration);
           const system = {
             isDead: false,
-            daysOutOfAction: duration,
-            recoveryStartedAt: startDay,
+            daysOutOfAction: createDayNumber(duration),
+            recoveryStartedAt: createDayNumber(startDay),
             description: "",
             skills: {
               academics: { base: 2, penalty: 0 },

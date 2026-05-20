@@ -2,6 +2,8 @@
  * Type definitions for Agent actor system data
  */
 
+import type { DayNumber } from "../types/brands.js";
+
 export interface AgentSkill {
   base: number;
   penalty: number;
@@ -55,7 +57,7 @@ export interface AgentData {
    * @see isDead
    * @see recoveryStartedAt
    */
-  daysOutOfAction: number;
+  daysOutOfAction: DayNumber;
   /**
    * Wall-clock day when recovery started (Foundry setting currentDay).
    *
@@ -67,7 +69,7 @@ export interface AgentData {
    * @see isDead
    * @see daysOutOfAction
    */
-  recoveryStartedAt: number;
+  recoveryStartedAt: DayNumber;
   /**
    * Accumulated stress points (0–6 scale).
    * Rules define stress as the sum of all skill penalties, but the VTT uses a single counter

@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { getStressOutcomeFace, buildStressUpdateData, SKILL_NAMES } from "./stress-roll.js";
 import { STRESS_ROLL_CHART, DEATH_DISMEMBERMENT_CHART } from "./roll-charts.js";
 import type { AgentData } from "../agent/agent-schema.js";
+import { createDayNumber } from "../types/brands.js";
 
 function makeAgentSystem(overrides: Partial<AgentData> = {}): AgentData {
   return {
@@ -18,8 +19,8 @@ function makeAgentSystem(overrides: Partial<AgentData> = {}): AgentData {
     power: null,
     characteristics: [],
     isDead: false,
-    daysOutOfAction: 0,
-    recoveryStartedAt: 0,
+    daysOutOfAction: createDayNumber(0),
+    recoveryStartedAt: createDayNumber(0),
     stress: 0,
     ...overrides,
   };

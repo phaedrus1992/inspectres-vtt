@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { computeRecoveryStatus, type RecoveryStatus } from "./recovery-utils.js";
 import { type AgentData } from "./agent-schema.js";
+import { createDayNumber } from "../types/brands.js";
 
 function makeAgent(overrides: Partial<AgentData> = {}): AgentData {
   return {
@@ -18,8 +19,8 @@ function makeAgent(overrides: Partial<AgentData> = {}): AgentData {
     characteristics: [],
     stress: 0,
     isDead: false,
-    daysOutOfAction: 0,
-    recoveryStartedAt: 0,
+    daysOutOfAction: createDayNumber(0),
+    recoveryStartedAt: createDayNumber(0),
     ...overrides,
   };
 }
@@ -35,7 +36,11 @@ describe("computeRecoveryStatus", () => {
     });
 
     it("returns dead regardless of daysOutOfAction", () => {
-      const system = makeAgent({ isDead: true, daysOutOfAction: 3, recoveryStartedAt: 2 });
+      const system = makeAgent({
+        isDead: true,
+        daysOutOfAction: createDayNumber(3),
+        recoveryStartedAt: createDayNumber(2),
+      });
       const result = computeRecoveryStatus(system, 5);
 
       expect(result.status).toBe("dead");
@@ -44,7 +49,10 @@ describe("computeRecoveryStatus", () => {
 
   describe("active status", () => {
     it("returns active when never injured (daysOutOfAction === 0)", () => {
-      const system = makeAgent({ daysOutOfAction: 0, recoveryStartedAt: 0 });
+      const system = makeAgent({
+        daysOutOfAction: createDayNumber(0),
+        recoveryStartedAt: createDayNumber(0),
+      });
       const result = computeRecoveryStatus(system, 1);
 
       expect(result.status).toBe("active");
@@ -52,7 +60,7 @@ describe("computeRecoveryStatus", () => {
     });
 
     it("returns active with recoveryStartedAt === 0 (fresh agent)", () => {
-      const system = makeAgent({ daysOutOfAction: 0 });
+      const system = makeAgent({ daysOutOfAction: createDayNumber(0) });
       const result = computeRecoveryStatus(system, 10);
 
       expect(result.status).toBe("active");
@@ -61,7 +69,10 @@ describe("computeRecoveryStatus", () => {
 
   describe("recovering status", () => {
     it("returns recovering when daysRemaining > 0", () => {
-      const system = makeAgent({ daysOutOfAction: 3, recoveryStartedAt: 5 });
+      const system = makeAgent({
+        daysOutOfAction: createDayNumber(3),
+        recoveryStartedAt: createDayNumber(5),
+      });
       const result = computeRecoveryStatus(system, 6); // day 5 + 1 elapsed = 1 remaining
 
       expect(result.status).toBe("recovering");
@@ -69,7 +80,10 @@ describe("computeRecoveryStatus", () => {
     });
 
     it("shows singular day count when daysRemaining === 1", () => {
-      const system = makeAgent({ daysOutOfAction: 3, recoveryStartedAt: 5 });
+      const system = makeAgent({
+        daysOutOfAction: createDayNumber(3),
+        recoveryStartedAt: createDayNumber(5),
+      });
       const result = computeRecoveryStatus(system, 7); // day 5 + 2 elapsed = 1 remaining
 
       expect(result.daysRemaining).toBe(1);
@@ -77,7 +91,10 @@ describe("computeRecoveryStatus", () => {
     });
 
     it("shows plural day count when daysRemaining > 1", () => {
-      const system = makeAgent({ daysOutOfAction: 3, recoveryStartedAt: 5 });
+      const system = makeAgent({
+        daysOutOfAction: createDayNumber(3),
+        recoveryStartedAt: createDayNumber(5),
+      });
       const result = computeRecoveryStatus(system, 6); // 2 remaining
 
       expect(result.daysRemaining).toBe(2);
@@ -85,7 +102,10 @@ describe("computeRecoveryStatus", () => {
     });
 
     it("blocks rolls when exactly at recovery deadline", () => {
-      const system = makeAgent({ daysOutOfAction: 3, recoveryStartedAt: 5 });
+      const system = makeAgent({
+        daysOutOfAction: createDayNumber(3),
+        recoveryStartedAt: createDayNumber(5),
+      });
       const result = computeRecoveryStatus(system, 8); // day 5 + 3 elapsed = exactly done
 
       // At exactly daysOutOfAction, should transition to "returned", not still recovering
@@ -95,7 +115,10 @@ describe("computeRecoveryStatus", () => {
 
   describe("returned status", () => {
     it("returns returned when daysRemaining === 0 but fields set", () => {
-      const system = makeAgent({ daysOutOfAction: 3, recoveryStartedAt: 5 });
+      const system = makeAgent({
+        daysOutOfAction: createDayNumber(3),
+        recoveryStartedAt: createDayNumber(5),
+      });
       const result = computeRecoveryStatus(system, 8); // exactly 3 days elapsed
 
       expect(result.status).toBe("returned");
@@ -103,7 +126,10 @@ describe("computeRecoveryStatus", () => {
     });
 
     it("allows rolls after recovery expires (status !== recovering)", () => {
-      const system = makeAgent({ daysOutOfAction: 3, recoveryStartedAt: 5 });
+      const system = makeAgent({
+        daysOutOfAction: createDayNumber(3),
+        recoveryStartedAt: createDayNumber(5),
+      });
       const result = computeRecoveryStatus(system, 8);
 
       // "returned" is not "recovering", so roll-blocker in AgentSheet won't trigger
@@ -111,7 +137,10 @@ describe("computeRecoveryStatus", () => {
     });
 
     it("transitions to returned when recovery expires", () => {
-      const system = makeAgent({ daysOutOfAction: 3, recoveryStartedAt: 5 });
+      const system = makeAgent({
+        daysOutOfAction: createDayNumber(3),
+        recoveryStartedAt: createDayNumber(5),
+      });
       const result = computeRecoveryStatus(system, 8);
 
       expect(result.status).toBe("returned");
@@ -123,7 +152,10 @@ describe("computeRecoveryStatus", () => {
     it("self-heals when daysOutOfAction > 0 but recoveryStartedAt === 0", () => {
       // Unmigrated agent or invariant violation: recovery window never started
       // Per fix: treat startDay as currentDay, so recovery clock starts now
-      const system = makeAgent({ daysOutOfAction: 2, recoveryStartedAt: 0 });
+      const system = makeAgent({
+        daysOutOfAction: createDayNumber(2),
+        recoveryStartedAt: createDayNumber(0),
+      });
       const result = computeRecoveryStatus(system, 5);
 
       // Should compute recovery from today (day 5) for 2 days: daysRemaining = 2 - (5-5) = 2
@@ -136,7 +168,10 @@ describe("computeRecoveryStatus", () => {
       // This means recovery is pinned to a 2-day window from the present moment.
       // The agent never auto-recovers unless they manually set recoveryStartedAt
       // (which happens on the next roll, or a GM resets the field).
-      const agent = makeAgent({ daysOutOfAction: 2, recoveryStartedAt: 0 });
+      const agent = makeAgent({
+        daysOutOfAction: createDayNumber(2),
+        recoveryStartedAt: createDayNumber(0),
+      });
 
       // Day 5: seeded to day 5, 2-day window → recovered on day 7
       expect(computeRecoveryStatus(agent, 5).status).toBe("recovering");
@@ -151,7 +186,10 @@ describe("computeRecoveryStatus", () => {
 
   describe("off-by-one boundary", () => {
     it("handles daysElapsed === daysOutOfAction correctly", () => {
-      const system = makeAgent({ daysOutOfAction: 3, recoveryStartedAt: 10 });
+      const system = makeAgent({
+        daysOutOfAction: createDayNumber(3),
+        recoveryStartedAt: createDayNumber(10),
+      });
 
       // Day 12: 2 elapsed, 1 remaining
       const day12 = computeRecoveryStatus(system, 12);
@@ -168,7 +206,10 @@ describe("computeRecoveryStatus", () => {
   describe("time rewound edge case", () => {
     it("handles negative daysElapsed (currentDay < startDay) gracefully", () => {
       // Should not happen in normal play, but if GM rewinds time or data corrupts
-      const system = makeAgent({ daysOutOfAction: 3, recoveryStartedAt: 10 });
+      const system = makeAgent({
+        daysOutOfAction: createDayNumber(3),
+        recoveryStartedAt: createDayNumber(10),
+      });
       const result = computeRecoveryStatus(system, 5); // currentDay < startDay
 
       // daysElapsed = 5 - 10 = -5; Math.max(0, 3 - (-5)) = 8
@@ -190,7 +231,11 @@ describe("computeRecoveryStatus", () => {
       ];
 
       for (const [isDead, daysOutOfAction, recoveryStartedAt, currentDay, expected] of testCases) {
-        const system = makeAgent({ isDead, daysOutOfAction, recoveryStartedAt });
+        const system = makeAgent({
+          isDead,
+          daysOutOfAction: createDayNumber(daysOutOfAction),
+          recoveryStartedAt: createDayNumber(recoveryStartedAt),
+        });
         const result = computeRecoveryStatus(system, currentDay);
         expect(result.status).toBe(expected);
       }
@@ -200,9 +245,15 @@ describe("computeRecoveryStatus", () => {
   describe("autoClearRecoveredAgents", () => {
     it("identifies agents ready to clear", () => {
       // Agent #1: recovered on day 8
-      const agent1System = makeAgent({ daysOutOfAction: 3, recoveryStartedAt: 5 });
+      const agent1System = makeAgent({
+        daysOutOfAction: createDayNumber(3),
+        recoveryStartedAt: createDayNumber(5),
+      });
       // Agent #2: still recovering
-      const agent2System = makeAgent({ daysOutOfAction: 3, recoveryStartedAt: 6 });
+      const agent2System = makeAgent({
+        daysOutOfAction: createDayNumber(3),
+        recoveryStartedAt: createDayNumber(6),
+      });
 
       // On day 8
       const status1 = computeRecoveryStatus(agent1System, 8);
