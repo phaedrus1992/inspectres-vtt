@@ -2,6 +2,12 @@ import { SKILL_NAMES } from "../rolls/roll-types.js";
 
 const { StringField, NumberField, BooleanField, ArrayField, SchemaField } = foundry.data.fields;
 
+const SKILL_BASE_MAX_NORMAL = 4;
+const SKILL_BASE_MAX_WEIRD = 10;
+const SKILL_BASE_DEFAULT = 2;
+const STRESS_MAX = 6;
+const COOL_COST_MIN = 1;
+
 // TypeDataModel base class cast: Foundry's abstract class requires unknown intermediate
 // to satisfy TypeScript's type constraints until TypeDataModel v14+ fully types the class.
 // This is a boundary cast (justified by Foundry V2 API structure) not a workaround.
@@ -14,19 +20,19 @@ export class AgentDataModel extends TypeDataModelBase {
       description: new StringField({ required: true, initial: "" }),
       skills: new SchemaField({
         academics: new SchemaField({
-          base: new NumberField({ required: true, integer: true, min: 0, max: 10, initial: 2 }),
+          base: new NumberField({ required: true, integer: true, min: 0, max: SKILL_BASE_MAX_WEIRD, initial: SKILL_BASE_DEFAULT }),
           penalty: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
         }),
         athletics: new SchemaField({
-          base: new NumberField({ required: true, integer: true, min: 0, max: 10, initial: 2 }),
+          base: new NumberField({ required: true, integer: true, min: 0, max: SKILL_BASE_MAX_WEIRD, initial: SKILL_BASE_DEFAULT }),
           penalty: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
         }),
         technology: new SchemaField({
-          base: new NumberField({ required: true, integer: true, min: 0, max: 10, initial: 2 }),
+          base: new NumberField({ required: true, integer: true, min: 0, max: SKILL_BASE_MAX_WEIRD, initial: SKILL_BASE_DEFAULT }),
           penalty: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
         }),
         contact: new SchemaField({
-          base: new NumberField({ required: true, integer: true, min: 0, max: 10, initial: 2 }),
+          base: new NumberField({ required: true, integer: true, min: 0, max: SKILL_BASE_MAX_WEIRD, initial: SKILL_BASE_DEFAULT }),
           penalty: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
         }),
       }),
@@ -36,14 +42,14 @@ export class AgentDataModel extends TypeDataModelBase {
       power: new SchemaField({
         name: new StringField({ required: true, initial: "" }),
         description: new StringField({ required: true, initial: "" }),
-        baseSkill: new StringField({ required: true, choices: ["athletics", "contact"], initial: "athletics" }),
-        coolCost: new NumberField({ required: true, integer: true, min: 1, initial: 1 }),
+        baseSkill: new StringField({ required: true, choices: SKILL_NAMES, initial: "athletics" }),
+        coolCost: new NumberField({ required: true, integer: true, min: COOL_COST_MIN, initial: COOL_COST_MIN }),
       }, { required: false, nullable: true, initial: null }),
       characteristics: new ArrayField(new SchemaField({
         text: new StringField({ required: true, initial: "" }),
         used: new BooleanField({ required: true, initial: false }),
       })),
-      stress: new NumberField({ required: true, integer: true, min: 0, max: 6, initial: 0 }),
+      stress: new NumberField({ required: true, integer: true, min: 0, max: STRESS_MAX, initial: 0 }),
       isDead: new BooleanField({ required: true, initial: false }),
       daysOutOfAction: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
       recoveryStartedAt: new NumberField({ required: true, integer: true, min: 0, initial: 0 }),
@@ -67,7 +73,7 @@ export class AgentDataModel extends TypeDataModelBase {
     (parent.prepareBaseData as ((this: this) => void) | undefined)?.call(this);
     // Enforce skill range based on weird agent status
     const isWeird = (this as unknown as { isWeird: boolean }).isWeird;
-    const maxSkill = isWeird ? 10 : 4;
+    const maxSkill = isWeird ? SKILL_BASE_MAX_WEIRD : SKILL_BASE_MAX_NORMAL;
     const skills = (this as unknown as { skills: Record<string, { base: number; penalty: number }> }).skills;
 
     if (skills) {
