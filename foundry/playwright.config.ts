@@ -12,7 +12,9 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: WORKER_COUNT,
-  reporter: process.env["CI"] ? [["list"], ["html"]] : "html",
+  reporter: process.env["CI"]
+    ? [["list"], ["html"], ["json", { outputFile: "./test-results/test-results.json" }]]
+    : [["html"], ["json", { outputFile: "./test-results/test-results.json" }]],
   // 6 min per test: Foundry fixture setup (join + game.ready + sheet render) is ~30-60s
   // in CI. Tests with multiple action clicks may trigger /join redirects mid-test
   // (session expiry), each requiring a ~30s rejoin + re-render cycle. The consolidated
