@@ -4,39 +4,10 @@
  */
 
 import { test, expect } from "./fixtures";
-import type { Page } from "@playwright/test";
 import { AgentSheetPage } from "./pages/AgentSheetPage.js";
 import { createActor, deleteActor } from "./pages/index.js";
 import { safeScreenshot } from "./helpers.js";
-
-/**
- * Open actor sheet and wait for render.
- * Eliminates boilerplate: page.evaluate + sheet.render + wait cycle.
- */
-async function renderActorSheet(page: Page, actorId: string): Promise<void> {
-  await page.evaluate(async (id: string) => {
-    // @ts-expect-error - Foundry runtime global
-    const actor = globalThis.game?.actors?.get(id);
-    if (actor) await actor.sheet.render(true);
-  }, actorId);
-
-  await new AgentSheetPage(page, actorId).waitForVisible();
-}
-
-/**
- * Wait for sheet DOM to stabilize (visible and rendered).
- * Avoids repeated waitForFunction + getBoundingClientRect pattern.
- */
-async function waitForSheetStable(page: Page, actorId: string): Promise<void> {
-  await page.waitForFunction(
-    (id: string) => {
-      const el = document.querySelector(`.inspectres[id*="${id}"]`);
-      return el && el.getBoundingClientRect().height > 0;
-    },
-    actorId,
-    { timeout: 10_000 },
-  );
-}
+import { renderActorSheet, waitForSheetStable } from "./pages/helpers.js";
 
 test.describe("Validation errors and field constraints (Issue #503)", () => {
   test("required field empty: sheet does not crash, state reflects submission", async ({

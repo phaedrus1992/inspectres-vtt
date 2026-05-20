@@ -1,5 +1,56 @@
 import { vi } from "vitest";
 
+export interface MockGameInstance {
+  user: {
+    id: string;
+    isGM: boolean;
+  };
+  i18n: {
+    localize: (key: string) => string;
+  };
+  actors: {
+    get: (id: string) => unknown;
+    contents: unknown[];
+  };
+  users: {
+    size: number;
+  };
+}
+
+export interface SetupMockGameOptions {
+  userIsGM?: boolean;
+  userId?: string;
+}
+
+/**
+ * Create a configured mock of Foundry's global game object.
+ * Handles: game.user, game.i18n, game.actors, game.users.
+ * Use in beforeEach to avoid duplicating mock setup across 6+ test files.
+ *
+ * @param options - Optional overrides for user properties
+ * @returns Configured mock game instance
+ */
+export function setupMockGame(options: SetupMockGameOptions = {}): MockGameInstance {
+  const { userIsGM = true, userId = "test-user-id" } = options;
+
+  return {
+    user: {
+      id: userId,
+      isGM: userIsGM,
+    },
+    i18n: {
+      localize: (key: string) => key, // Return key as-is when no translations provided
+    },
+    actors: {
+      get: (_id: string) => null,
+      contents: [],
+    },
+    users: {
+      size: 1,
+    },
+  };
+}
+
 /**
  * Extract the first argument from a mocked function.
  * @param mock — A vitest mock function
